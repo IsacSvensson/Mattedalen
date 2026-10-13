@@ -34,6 +34,8 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   await openParent(page);
 
   await expect(page.locator('.heat-cell')).toHaveCount(100);
+  await expect(page.getByRole('heading', { name: 'Integritet' })).toBeVisible();
+  await expect(page.locator('.privacy')).toContainText('inga cookies');
   await expect(page.locator('.heat-cell.heat-learning-0').first()).toBeVisible();
   await expect(page.locator('.confusions li')).toHaveCount(1);
   await expect(page.locator('.confusions li')).toContainText('svarade');

@@ -457,6 +457,16 @@ async function deviceSection(ctx: AppContext): Promise<HTMLElement> {
       'All data finns bara på den här enheten. Webbläsare städar ibland bort data från webbplatser – Safari på iPhone och iPad kan radera den efter sju dagar utan besök. ',
       'En app som är tillagd på hemskärmen räknas som installerad och behandlas inte så. Spara också en säkerhetskopia då och då.',
     ),
+    h('h3', null, 'Integritet'),
+    h(
+      'ul',
+      { class: 'privacy' },
+      h('li', null, 'Appen använder inga cookies och har ingen spårning, analys eller reklam.'),
+      h('li', null, 'Barnens namn och framsteg sparas bara här på enheten. Inget skickas iväg – utom när du själv exporterar med QR-kod eller fil.'),
+      h('li', null, 'Appen sparar sina egna filer på enheten så att den fungerar utan internet.'),
+      h('li', null, 'Sidan ligger på GitHub Pages. Som alla webbservrar loggar GitHub besökares IP-adresser, enligt GitHubs integritetspolicy.'),
+      h('li', null, 'Vill du radera allt? Ta bort barnen här ovanför, eller rensa webbplatsdata för sidan i webbläsarens inställningar.'),
+    ),
     h('h3', null, 'Vuxenkod'),
     h('button', { class: 'soft-button', type: 'button', onclick: () => choosePin(ctx, async () => (toast('Ny kod sparad'), showParent(ctx))) }, 'Byt vuxenkod'),
   );

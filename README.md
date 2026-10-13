@@ -313,10 +313,19 @@ Spelen sparas som pass med `mode: 'challenge'` respektive `'duel'`.
   kontrollerar att varje svar kom från service workern och att inget anrop gick
   till någon annan värd.
 
+### Integritet
+
+Appen sätter inga cookies och har ingen spårning, analys eller reklam. All data
+(IndexedDB) och appens egna filer (Cache API) lagras bara på enheten och behövs
+för att tjänsten ska fungera. Därför krävs inget samtyckesformulär enligt lagen
+om elektronisk kommunikation (9 kap. 28 §). Ingen data lämnar enheten om inte
+föräldern själv exporterar den. Föräldravyn har en kort integritetstext.
+Värden, GitHub Pages, loggar IP-adresser enligt GitHubs integritetspolicy.
+
 ### Publicering på GitHub Pages
 
-`.github/workflows/deploy.yml` bygger och publicerar repots **standardgren** vid
-varje push. Det kan också startas manuellt under *Actions → Publicera på GitHub
+`.github/workflows/deploy.yml` bygger och publicerar repots **standardgren**
+(`main`) vid varje push. Det kan också startas manuellt under *Actions → Publicera på GitHub
 Pages → Run workflow*. Enhetstesterna körs först. Engångsinställning: välj
 **Settings → Pages → Build and deployment → Source: GitHub Actions** i repot.
 Appen hamnar då på `https://<användare>.github.io/<repo>/`.
