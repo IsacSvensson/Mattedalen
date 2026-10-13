@@ -253,3 +253,61 @@ describe('summary', () => {
     expect(fb.state.confusions).toEqual({ cat: 1 });
   });
 });
+
+describe('focus sessions', () => {
+  const COLOURS = ['röd', 'blå', 'grön', 'gul', 'vit', 'svart'];
+
+  it('introduces a few new items from the focus set, even in a locked unit', () => {
+    const { engine, clock } = setup({ session: { durationMs: 5 * 60_000 } });
+    const meta = engine.initialMeta();
+    expect(engine.unlockedUnits(knownAnimals(engine, 'learning'), meta)).toEqual(['animals']);
+    const s = engine.startSession({ states: knownAnimals(engine, 'learning'), meta, mode: 'focus', focusItemIds: COLOURS });
+    const asked = run(s, clock);
+    const introduced = asked.filter((q) => q.kind === 'new').map((q) => q.item.id);
+    expect(introduced.length).toBeGreaterThan(0);
+    expect(introduced.length).toBeLessThanOrEqual(engine.config.focus.maxNew);
+    for (const id of introduced) expect(COLOURS).toContain(id);
+    // Introduced colours are practised, but the unit itself is not unlocked by it.
+    expect(asked.filter((q) => COLOURS.includes(q.item.id) && q.kind !== 'new').length).toBeGreaterThan(introduced.length);
+    expect(s.summary().meta.unlockedUnitIds).toEqual(['animals']);
+  });
+
+  it('asks mostly, but not only, items from the focus set', () => {
+    const focus = ['hund', 'katt', 'häst'];
+    const { engine, clock } = setup({ session: { durationMs: 5 * 60_000 } }, 7);
+    const s = engine.startSession({ states: knownAnimals(engine), meta: engine.initialMeta(), mode: 'focus', focusItemIds: focus });
+    const asked = run(s, clock).filter((q) => q.kind !== 'new' && q.kind !== 'rehearse');
+    const share = asked.filter((q) => focus.includes(q.item.id)).length / asked.length;
+    expect(asked.length).toBeGreaterThan(40);
+    expect(share).toBeGreaterThan(0.55);
+    expect(share).toBeLessThan(0.9);
+  });
+
+  it('never asks the same item twice in a row when there is a choice', () => {
+    const { engine, clock } = setup({ session: { durationMs: 5 * 60_000 } }, 3);
+    const s = engine.startSession({ states: knownAnimals(engine), meta: engine.initialMeta(), mode: 'focus', focusItemIds: ['hund'] });
+    const asked = run(s, clock);
+    for (let i = 1; i < asked.length; i++) expect(asked[i]!.item.id).not.toBe(asked[i - 1]!.item.id);
+  });
+
+  it('does not count as the daily session and needs a focus set', () => {
+    const { engine, clock } = setup({ session: { durationMs: 60_000 } });
+    const meta = engine.initialMeta();
+    const s = engine.startSession({ states: knownAnimals(engine), meta, mode: 'focus', focusItemIds: ['hund', 'katt'] });
+    run(s, clock);
+    const summary = s.summary();
+    expect(summary.mode).toBe('focus');
+    expect(summary.completed).toBe(true);
+    expect(summary.meta.sessionsCompleted).toBe(0);
+    expect(summary.meta.lastSessionDay).toBeNull();
+    expect(() => engine.startSession({ states: knownAnimals(engine), meta, mode: 'focus' })).toThrow();
+  });
+
+  it('works for a learner who knows nothing yet', () => {
+    const { engine, clock } = setup({ session: { durationMs: 60_000 } });
+    const s = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta(), mode: 'focus', focusItemIds: COLOURS });
+    const asked = run(s, clock);
+    expect(asked[0]?.kind).toBe('new');
+    for (const q of asked) expect(COLOURS).toContain(q.item.id);
+  });
+});

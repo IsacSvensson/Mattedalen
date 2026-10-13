@@ -1,4 +1,4 @@
-import { buildChoices, mathRandomRng, systemClock } from '../../engine';
+import { buildChoices, mathRandomRng, systemClock, type FocusSet } from '../../engine';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { numPad } from '../components/numPad';
@@ -12,25 +12,25 @@ import { showGarden } from './garden';
  * "Slå ditt rekord": optional, short and timed, only with facts the child
  * already knows. The only comparison is with the child's own best score.
  */
-export async function showChallenge(ctx: AppContext, profile: Profile): Promise<void> {
-  const record = bestChallengeScore(await ctx.store.listSessions(profile.id));
+export async function showChallenge(ctx: AppContext, profile: Profile, focus?: FocusSet): Promise<void> {
+  const record = bestChallengeScore(await ctx.store.listSessions(profile.id), focus?.id);
   const view = h(
     'main',
     { class: 'screen challenge' },
     h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka till trädgården', onclick: () => void showGarden(ctx, profile) }, '🏡')),
     h('p', { class: 'end-icon', 'aria-hidden': 'true' }, '⚡'),
-    h('h1', null, 'Slå ditt rekord'),
+    h('h1', null, focus ? `Slå ditt rekord på ${focus.title}` : 'Slå ditt rekord'),
     h('p', { class: 'end-text' }, `Svara på så många du kan på ${CHALLENGE_SECONDS} sekunder. Bara sådant du redan kan!`),
     h('p', { class: 'record' }, record === null ? 'Första gången – sätt ett rekord!' : `Ditt rekord: ${record}`),
-    h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runChallenge(ctx, profile, record) }, 'Kör! ▶'),
+    h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runChallenge(ctx, profile, record, focus) }, 'Kör! ▶'),
   );
   show(ctx, view);
 }
 
-async function runChallenge(ctx: AppContext, profile: Profile, record: number | null): Promise<void> {
+async function runChallenge(ctx: AppContext, profile: Profile, record: number | null, focus?: FocusSet): Promise<void> {
   const engine = engineFor(profile, ctx.deps);
   const { states } = await loadProgress(profile, ctx.deps, engine);
-  const pool = challengePool(states);
+  const pool = challengePool(states, focus?.itemIds);
   const next = challengeDeck(pool, mathRandomRng);
   const free = profile.settings.allowFree;
   const voice = profile.settings.readAloud && speechSupported();
@@ -87,10 +87,11 @@ async function runChallenge(ctx: AppContext, profile: Profile, record: number | 
         answered,
         correct: score,
         introduced: [],
+        ...(focus ? { focusId: focus.id } : {}),
         extra: { score },
       });
     }
-    showChallengeResult(ctx, profile, score, record);
+    showChallengeResult(ctx, profile, score, record, focus);
   }
 
   while (!over) {
@@ -136,7 +137,7 @@ async function runChallenge(ctx: AppContext, profile: Profile, record: number | 
   }
 }
 
-function showChallengeResult(ctx: AppContext, profile: Profile, score: number, record: number | null): void {
+function showChallengeResult(ctx: AppContext, profile: Profile, score: number, record: number | null, focus?: FocusSet): void {
   const newRecord = score > 0 && (record === null || score > record);
   const view = h(
     'main',
@@ -151,7 +152,7 @@ function showChallengeResult(ctx: AppContext, profile: Profile, score: number, r
     h(
       'div',
       { class: 'garden-actions' },
-      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showChallenge(ctx, profile) }, 'Igen'),
+      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showChallenge(ctx, profile, focus) }, 'Igen'),
       h('button', { class: 'soft-button', type: 'button', onclick: () => void showGarden(ctx, profile) }, 'Till trädgården'),
     ),
   );

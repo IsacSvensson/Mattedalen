@@ -5,11 +5,19 @@ import type { SessionRecord } from '../storage';
 export const CHALLENGE_SECONDS = 90;
 /** The challenge opens once this many facts are at least fluent. */
 export const CHALLENGE_MIN_FACTS = 5;
+/** A challenge for one table opens once this many of its facts are at least fluent. */
+export const CHALLENGE_MIN_FOCUS_FACTS = 4;
 
-export function challengePool(states: Record<ItemId, ItemState>): ItemId[] {
+/** Facts the child knows well, optionally only those in one focus set (e.g. ×7). */
+export function challengePool(states: Record<ItemId, ItemState>, focusItemIds?: readonly ItemId[]): ItemId[] {
+  const only = focusItemIds ? new Set(focusItemIds) : null;
   return Object.values(states)
-    .filter((s) => atLeast(s.status, 'fluent'))
+    .filter((s) => atLeast(s.status, 'fluent') && (!only || only.has(s.itemId)))
     .map((s) => s.itemId);
+}
+
+export function canChallenge(states: Record<ItemId, ItemState>, focusItemIds?: readonly ItemId[]): boolean {
+  return challengePool(states, focusItemIds).length >= (focusItemIds ? CHALLENGE_MIN_FOCUS_FACTS : CHALLENGE_MIN_FACTS);
 }
 
 /** Endless sequence of facts from the pool without repeating any of the last few. */
@@ -25,9 +33,14 @@ export function challengeDeck(pool: readonly ItemId[], rng: Rng): () => ItemId {
   };
 }
 
-/** Best earlier challenge score of a child (only compared with themselves). */
-export function bestChallengeScore(sessions: readonly SessionRecord[]): number | null {
-  const scores = sessions.filter((s) => s.mode === 'challenge').map((s) => s.extra?.score ?? s.correct);
+/**
+ * Best earlier challenge score of a child (only compared with themselves).
+ * Each focus set has its own record, separate from the all-facts one.
+ */
+export function bestChallengeScore(sessions: readonly SessionRecord[], focusId?: string): number | null {
+  const scores = sessions
+    .filter((s) => s.mode === 'challenge' && s.focusId === focusId)
+    .map((s) => s.extra?.score ?? s.correct);
   return scores.length ? Math.max(...scores) : null;
 }
 

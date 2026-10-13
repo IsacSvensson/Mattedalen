@@ -56,6 +56,17 @@ export interface Unit {
   unlockRule: UnlockRule;
 }
 
+/**
+ * A named group of items that can be practised on purpose (e.g. one table in
+ * an arithmetic pack). It may cut across units: an item belongs to one unit but can be in
+ * several focus sets.
+ */
+export interface FocusSet {
+  id: string;
+  title: string;
+  itemIds: ItemId[];
+}
+
 export interface DistractorCandidate {
   value: string;
   /** Relative plausibility; higher is picked more often. */
@@ -71,6 +82,8 @@ export interface ContentPack {
   normalizeAnswer(raw: string): string;
   /** Plausible wrong answers for multiple choice. Must not include the correct answer. */
   distractorCandidates(item: Item): DistractorCandidate[];
+  /** Groups the learner can choose to practise extra (optional). */
+  focusSets?: FocusSet[];
 }
 
 /** Best correct response time (ms) per answer format on one day. */
@@ -166,6 +179,12 @@ export interface EngineConfig {
     knownPerNew: number;
     /** Unlock fraction used instead of the unit rule while the learner is above `targetHigh`. */
     easyUnlockFraction: number;
+  };
+  focus: {
+    /** Share of questions taken from the chosen focus set (the rest keeps practice mixed). */
+    share: number;
+    /** New items a focus session may introduce from the set. */
+    maxNew: number;
   };
   format: {
     allowFree: boolean;

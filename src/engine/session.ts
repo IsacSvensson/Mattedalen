@@ -17,13 +17,18 @@ import type {
   Status,
 } from './types';
 
-export type SessionMode = 'daily' | 'extra';
+export type SessionMode = 'daily' | 'extra' | 'focus';
 
 export interface SessionOptions {
   states: Record<ItemId, ItemState>;
   meta: LearnerMeta;
-  /** `daily` is the regular session; `extra` is optional practice afterwards (no new items). */
+  /**
+   * `daily` is the regular session; `extra` is optional practice afterwards
+   * (no new items); `focus` is optional practice aimed at `focusItemIds`.
+   */
   mode?: SessionMode;
+  /** Items to concentrate on in a `focus` session (e.g. one table). */
+  focusItemIds?: ItemId[];
   durationMs?: number;
   sessionId?: string;
 }
@@ -87,6 +92,10 @@ interface Deps {
  * 3. a new item whenever `pacingGap` known items have been asked since the last one
  * 4. items due for spaced review (Leitner)
  * 5. weighted mixed practice over all unlocked units
+ *
+ * A focus session takes about `config.focus.share` of steps 4–5 from the
+ * focus set and the rest from everything else known, and may introduce a few
+ * new items from the set even if their unit is not unlocked yet.
  */
 export class Session {
   readonly id: string;
@@ -97,6 +106,7 @@ export class Session {
   private readonly states: Map<ItemId, ItemState>;
   private readonly pacing: PacingController;
   private readonly maxNew: number;
+  private readonly focus: Set<ItemId> | null;
   private unlocked: string[];
   private pending: Pending[] = [];
   private warmup: ItemId[];
@@ -130,13 +140,26 @@ export class Session {
     this.states = new Map(pack.items.map((it) => [it.id, opts.states[it.id] ?? emptyState(it.id)]));
     this.pacing = new PacingController(config.pacing, meta.pacingGap);
     this.unlocked = computeUnlocked(pack.units, this.stateRecord(), meta.unlockedUnitIds, this.relaxedUnlock());
+    if (this.mode === 'focus') {
+      const ids = (opts.focusItemIds ?? []).filter((id) => this.states.has(id));
+      if (ids.length === 0) throw new Error('A focus session needs focusItemIds');
+      this.focus = new Set(ids);
+    } else {
+      this.focus = null;
+    }
 
     const known = [...this.states.values()].filter((s) => s.status !== 'new');
     const p = config.pacing;
     this.maxNew =
-      this.mode === 'extra' ? 0 : Math.min(p.maxNewPerSession, p.bootstrapNew + Math.floor(known.length / p.knownPerNew));
-    // Let the first new item come right after the warm-up.
-    this.sinceNew = this.pacing.gap;
+      this.mode === 'extra'
+        ? 0
+        : this.mode === 'focus'
+          ? config.focus.maxNew
+          : Math.min(p.maxNewPerSession, p.bootstrapNew + Math.floor(known.length / p.knownPerNew));
+    // Let the first new item come right after the warm-up (a focus session
+    // has none, so it starts with a couple of known items when there are some).
+    const focusKnown = this.focus ? known.filter((s) => this.focus?.has(s.itemId)).length : 0;
+    this.sinceNew = focusKnown >= 2 ? Math.max(0, this.pacing.gap - 2) : this.pacing.gap;
     this.askCap = config.session.maxAsksPerItem;
 
     this.warmup = this.mode === 'daily' ? this.pickWarmup(known) : [];
@@ -313,10 +336,14 @@ export class Session {
     const knownPool = this.knownPool();
     const canIntroduce =
       this.introduced.length < this.maxNew && this.sinceNew >= this.pacing.gap && this.pacing.allowNew();
-    if (canIntroduce || (knownPool.length === 0 && this.mode === 'daily')) {
+    if (canIntroduce || (knownPool.length === 0 && this.mode !== 'extra')) {
       const candidate = this.nextNewCandidate();
       if (candidate) return { itemId: candidate, kind: 'new' };
     }
+
+    // In a focus session, steps 4–5 draw from the focus set or the rest.
+    const scope = this.scope(knownPool, last);
+    const inScope = new Set(scope);
 
     // 4. Spaced review of due items.
     const avoid = new Set(this.recent.slice(-this.deps.config.session.avoidRecent));
@@ -327,27 +354,28 @@ export class Session {
         this.due.splice(i--, 1);
         continue;
       }
-      if (avoid.has(id)) continue;
+      if (avoid.has(id) || !inScope.has(id)) continue;
       this.due.splice(i, 1);
       return { itemId: id, kind: 'due' };
     }
 
     // 5. Mixed practice, weighted towards weaker items.
-    let pool = knownPool.filter((id) => (this.askedCount.get(id) ?? 0) < this.askCap);
+    let pool = scope.filter((id) => (this.askedCount.get(id) ?? 0) < this.askCap);
     if (pool.length < 2) {
       // Everything known has been practised enough today. If the learner is
       // doing well, an extra new item is better than drilling the same few.
       const p = this.deps.config.pacing;
       // Repeating the very same item is the one thing worse than a quick new item.
-      const stuck = knownPool.every((id) => id === last);
-      const room = this.introduced.length < p.maxNewPerSession && (this.sinceNew >= p.minGap || stuck);
-      if (this.mode === 'daily' && room && this.pacing.allowNew()) {
+      const stuck = scope.every((id) => id === last);
+      const limit = this.mode === 'focus' ? this.maxNew : p.maxNewPerSession;
+      const room = this.introduced.length < limit && (this.sinceNew >= p.minGap || stuck);
+      if (this.mode !== 'extra' && room && this.pacing.allowNew()) {
         const candidate = this.nextNewCandidate();
         if (candidate) return { itemId: candidate, kind: 'new' };
       }
-      while (pool.length < 2 && pool.length < knownPool.length) {
+      while (pool.length < 2 && pool.length < scope.length) {
         this.askCap += 2;
-        pool = knownPool.filter((id) => (this.askedCount.get(id) ?? 0) < this.askCap);
+        pool = scope.filter((id) => (this.askedCount.get(id) ?? 0) < this.askCap);
       }
     }
     const mixed = this.pickMixed(pool, last);
@@ -355,11 +383,30 @@ export class Session {
     return null;
   }
 
-  /** Every introduced item (they are all in unlocked units, since units never relock). */
+  /** Every introduced item (normally in unlocked units; focus practice may open a few early). */
   private knownPool(): ItemId[] {
     const out: ItemId[] = [];
     for (const s of this.states.values()) if (s.status !== 'new') out.push(s.itemId);
     return out;
+  }
+
+  /**
+   * Known items to draw from in steps 4–5. Outside focus sessions that is
+   * everything known; in a focus session it is the focus set with probability
+   * `config.focus.share`, otherwise the rest (falling back to the other group
+   * when the chosen one has nothing but the item just asked).
+   */
+  private scope(knownPool: ItemId[], last: ItemId | undefined): ItemId[] {
+    const focus = this.focus;
+    if (!focus) return knownPool;
+    const inside = knownPool.filter((id) => focus.has(id));
+    const outside = knownPool.filter((id) => !focus.has(id));
+    const wantInside = this.deps.rng.next() < this.deps.config.focus.share;
+    const [first, second] = wantInside ? [inside, outside] : [outside, inside];
+    const usable = (g: ItemId[]) => g.some((id) => id !== last);
+    if (usable(first)) return first;
+    if (usable(second)) return second;
+    return knownPool;
   }
 
   private pickMixed(pool: ItemId[], last: ItemId | undefined): ItemId | undefined {
@@ -408,8 +455,10 @@ export class Session {
   private nextNewCandidate(): ItemId | undefined {
     let best: { id: ItemId; score: number } | undefined;
     for (const unit of sortedUnits(this.deps.pack.units)) {
-      if (!this.unlocked.includes(unit.id)) continue;
+      // Focus practice may open items of a unit that is not unlocked yet.
+      if (!this.focus && !this.unlocked.includes(unit.id)) continue;
       for (const id of unit.itemIds) {
+        if (this.focus && !this.focus.has(id)) continue;
         if (this.state(id).status !== 'new') continue;
         const item = this.item(id);
         // Prefer items whose mirrored twin is already known: an easy, meaningful step.

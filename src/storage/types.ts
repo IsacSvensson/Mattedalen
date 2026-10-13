@@ -45,13 +45,15 @@ export interface SessionRecord {
   id: string;
   profileId: string;
   packId: string;
-  mode: 'daily' | 'extra' | 'challenge' | 'duel' | 'placement';
+  mode: 'daily' | 'extra' | 'focus' | 'challenge' | 'duel' | 'placement';
   day: DayKey;
   startedAt: number;
   endedAt: number;
   answered: number;
   correct: number;
   introduced: ItemId[];
+  /** Focus set practised (focus sessions, and challenges limited to one set). */
+  focusId?: string;
   /** Free-form result data, e.g. a challenge score. */
   extra?: Record<string, number>;
 }

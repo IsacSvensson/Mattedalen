@@ -1,4 +1,4 @@
-import type { Feedback, Question } from '../../engine';
+import type { Feedback, FocusSet, Question, SessionMode } from '../../engine';
 import { confusionNote, parseFactId } from '../../content/multiplication';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
@@ -17,8 +17,8 @@ const CORRECT_PAUSE_MS = 650;
 /** Read questions aloud in this session (profile setting, if the device can speak). */
 let voiceOn = false;
 
-export async function showSession(ctx: AppContext, profile: Profile, mode: 'daily' | 'extra'): Promise<void> {
-  const play = await PlayController.start(profile, ctx.deps, mode);
+export async function showSession(ctx: AppContext, profile: Profile, mode: SessionMode, focus?: FocusSet): Promise<void> {
+  const play = await PlayController.start(profile, ctx.deps, mode, focus);
   voiceOn = profile.settings.readAloud && speechSupported();
   const stage = h('section', { class: 'play-stage', 'aria-live': 'polite' });
   let keyHandler: ((e: KeyboardEvent) => void) | undefined;
@@ -29,7 +29,7 @@ export async function showSession(ctx: AppContext, profile: Profile, mode: 'dail
     finished = true;
     const summary = await play.finish();
     if (early || summary.answered === 0) await showGarden(ctx, profile, new Set(summary.promoted));
-    else showSessionEnd(ctx, profile, summary);
+    else showSessionEnd(ctx, profile, summary, play.focus);
   };
 
   const view = h(
@@ -39,6 +39,7 @@ export async function showSession(ctx: AppContext, profile: Profile, mode: 'dail
       'header',
       { class: 'top-bar' },
       h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka till trädgården', onclick: () => void finish(true) }, '🏡'),
+      play.focus ? h('p', { class: 'focus-tag' }, `🎯 ${play.focus.title}`) : null,
     ),
     stage,
   );

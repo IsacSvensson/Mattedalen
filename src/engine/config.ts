@@ -34,6 +34,12 @@ export const DEFAULT_CONFIG: EngineConfig = {
     knownPerNew: 4,
     easyUnlockFraction: 0.6,
   },
+  // Focus practice: mostly the chosen set, but interleaved with other known
+  // items (blocked practice feels effective but is retained worse).
+  focus: {
+    share: 0.7,
+    maxNew: 3,
+  },
   format: {
     allowFree: true,
     freeFromStatus: 'fluent',
@@ -50,6 +56,7 @@ export function makeConfig(overrides: ConfigOverrides = {}): EngineConfig {
     leitner: { ...DEFAULT_CONFIG.leitner, ...overrides.leitner },
     session: { ...DEFAULT_CONFIG.session, ...overrides.session },
     pacing: { ...DEFAULT_CONFIG.pacing, ...overrides.pacing },
+    focus: { ...DEFAULT_CONFIG.focus, ...overrides.focus },
     format: { ...DEFAULT_CONFIG.format, ...overrides.format },
   } as EngineConfig;
 }

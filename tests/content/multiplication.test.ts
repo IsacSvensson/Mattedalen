@@ -189,3 +189,22 @@ describe('answers', () => {
     expect(normalizeNumberAnswer('abc')).toBe('abc');
   });
 });
+
+describe('focus sets', () => {
+  it('has one set per table with every fact of that table, in both orders', () => {
+    const pack = createMultiplicationPack();
+    const sets = pack.focusSets!;
+    expect(sets.map((s) => s.title)).toEqual(['×1', '×2', '×3', '×4', '×5', '×6', '×7', '×8', '×9', '×10']);
+    for (const set of sets) expect(set.itemIds).toHaveLength(19);
+    const seven = sets.find((s) => s.id === 't7')!;
+    expect(seven.itemIds).toEqual(expect.arrayContaining(['7x1', '1x7', '7x7', '7x8', '8x7', '10x7']));
+    // A table cuts across units (×7 includes facts from ×1, ×2, ×5 …).
+    expect(new Set(seven.itemIds.map((id) => pack.items.find((i) => i.id === id)!.unitId)).size).toBeGreaterThan(5);
+  });
+
+  it('only includes released facts', () => {
+    const pack = createMultiplicationPack({ maxUnits: 2 });
+    const ids = new Set(pack.items.map((i) => i.id));
+    for (const set of pack.focusSets!) for (const id of set.itemIds) expect(ids.has(id)).toBe(true);
+  });
+});

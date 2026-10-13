@@ -1,6 +1,6 @@
-import type { ContentPack, Unit } from '../../engine';
+import type { ContentPack, FocusSet, Item, Unit } from '../../engine';
 import { multiplicationDistractors } from './distractors';
-import { buildFacts, parseFactId, UNIT_DEFS } from './facts';
+import { buildFacts, MAX_FACTOR, MIN_FACTOR, parseFactId, UNIT_DEFS } from './facts';
 
 export * from './facts';
 export { multiplicationDistractors } from './distractors';
@@ -11,6 +11,29 @@ export const UNLOCK_FRACTION = 0.8;
 export function normalizeNumberAnswer(raw: string): string {
   const s = raw.trim().replace(/\s+/g, '');
   return /^\d+$/.test(s) ? String(Number.parseInt(s, 10)) : s;
+}
+
+/** Id of the focus set for one table, e.g. `t7` for ×7. */
+export function tableFocusId(table: number): string {
+  return `t${table}`;
+}
+
+/**
+ * One focus set per table: every fact with that factor, in both orders
+ * (×7 is 1 × 7 … 10 × 7 and 7 × 1 … 7 × 10), across units.
+ */
+export function tableFocusSets(items: readonly Item[]): FocusSet[] {
+  const sets: FocusSet[] = [];
+  for (let t = MIN_FACTOR; t <= MAX_FACTOR; t++) {
+    const itemIds = items
+      .filter((it) => {
+        const { a, b } = parseFactId(it.id);
+        return a === t || b === t;
+      })
+      .map((it) => it.id);
+    if (itemIds.length) sets.push({ id: tableFocusId(t), title: `×${t}`, itemIds });
+  }
+  return sets;
 }
 
 export interface PackOptions {
@@ -44,5 +67,6 @@ export function createMultiplicationPack({ maxUnits = UNIT_DEFS.length }: PackOp
       const { a, b } = parseFactId(item.id);
       return multiplicationDistractors(a, b);
     },
+    focusSets: tableFocusSets(items),
   };
 }

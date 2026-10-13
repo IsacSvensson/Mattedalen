@@ -1329,3 +1329,89 @@ h1:focus {
     transition: none !important;
   }
 }
+
+/* --- focus practice: one table ---------------------------------------- */
+
+.focus-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  width: min(100%, 520px);
+}
+
+.focus-tile {
+  min-height: 76px;
+  padding: 8px 6px;
+  border-radius: 16px;
+  border: 3px solid var(--line);
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 8px;
+}
+
+.focus-tile[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.focus-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.focus-meter {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.focus-known {
+  background: var(--leaf);
+}
+
+.focus-growing {
+  background: var(--leaf-light);
+  opacity: 0.6;
+}
+
+.focus-panel {
+  min-height: 160px;
+}
+
+.focus-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.focus-choice h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.focus-panel .soft-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.focus-tag {
+  margin: 0;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+@media (max-width: 380px) {
+  .focus-title {
+    font-size: 1.2rem;
+  }
+}

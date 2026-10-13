@@ -8,12 +8,14 @@ import {
   type ContentPack,
   type Engine,
   type Feedback,
+  type FocusSet,
   type ItemState,
   type LearnerMeta,
   type PlacementResult,
   type Question,
   type Rng,
   type Session,
+  type SessionMode,
   type SessionSummary,
 } from '../engine';
 import { DEFAULT_LOG_KEEP, LOG_COMPACT_SLACK, maybeCompactLog, type Profile, type ProgressStore } from '../storage';
@@ -66,18 +68,22 @@ export class PlayController {
     readonly session: Session,
     private readonly deps: GameDeps,
     private readonly metaBefore: LearnerMeta,
+    readonly focus?: FocusSet,
   ) {}
 
-  static async start(profile: Profile, deps: GameDeps, mode: 'daily' | 'extra' = 'daily'): Promise<PlayController> {
+  /** `focus` is required for (and only used by) a focus session, e.g. one table. */
+  static async start(profile: Profile, deps: GameDeps, mode: SessionMode = 'daily', focus?: FocusSet): Promise<PlayController> {
+    if (mode === 'focus' && !focus) throw new Error('A focus session needs a focus set');
     const engine = engineFor(profile, deps);
     const { states, meta } = await loadProgress(profile, deps, engine);
     const session = engine.startSession({
       states,
       meta,
       mode,
-      durationMs: mode === 'extra' ? EXTRA_PRACTICE_MINUTES * 60_000 : undefined,
+      focusItemIds: mode === 'focus' ? focus?.itemIds : undefined,
+      durationMs: mode === 'daily' ? undefined : EXTRA_PRACTICE_MINUTES * 60_000,
     });
-    return new PlayController(profile, engine, session, deps, meta);
+    return new PlayController(profile, engine, session, deps, meta, mode === 'focus' ? focus : undefined);
   }
 
   question(): Question | null {
@@ -115,6 +121,7 @@ export class PlayController {
       answered: summary.answered,
       correct: summary.correct,
       introduced: summary.introduced,
+      ...(this.focus ? { focusId: this.focus.id } : {}),
     });
     await maybeCompactLog(store, this.profile.id, DEFAULT_LOG_KEEP, LOG_COMPACT_SLACK);
     return summary;

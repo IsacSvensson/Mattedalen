@@ -54,7 +54,7 @@ Motorn är ren och deterministisk:
 
 ```ts
 const engine = createEngine({ pack, clock, rng });
-const session = engine.startSession({ states, meta });   // mode: 'daily' | 'extra'
+const session = engine.startSession({ states, meta });   // mode: 'daily' | 'extra' | 'focus'
 for (let q = session.next(); q; q = session.next()) {
   // q.kind: warmup | new | rehearse | retry | due | mixed
   // q.format: 'choice' (med q.choices) eller 'free'
@@ -109,6 +109,16 @@ enheten är flytande. Antalet avrundas nedåt, så små enheter blir inte strän
 3 av 4 räcker. En upplåst enhet låses aldrig igen. Ligger barnet över målbandet
 räcker 60 % (`easyUnlockFraction`), annars tar det slut på nytt material att öva
 på. Sätt värdet till 0,8 för att stänga av lättnaden.
+
+**Fokuspass** (`mode: 'focus'`, `focusItemIds`). Ett frivilligt pass riktat mot
+en vald grupp fakta, till exempel en tabell. Cirka 70 % av frågorna i steg 4–5
+tas ur gruppen (`config.focus.share`) och resten ur allt annat barnet kan. Att
+öva en tabell helt för sig känns effektivt men fastnar sämre än blandad övning,
+och barnet kan då svara på mönstret i stället för faktan. Passet får plantera
+högst 3 nya fakta ur gruppen (`config.focus.maxNew`) med samma takt som vanligt,
+även om faktans enhet inte är upplåst än. Enheten låses inte upp av det, så
+dagens pass fortsätter i ordning. Ett fokuspass räknas aldrig som dagens pass.
+Innehållspaketet beskriver valbara grupper med `focusSets` (`FocusSet`).
 
 **Svarsformat.** Nya fakta och fakta under inlärning frågas med flerval
 (4 alternativ). Flytande fakta frågas med fritt svar. Distraktorerna kommer från
@@ -296,6 +306,14 @@ göras om från föräldravyn.
 Extralägena är frivilliga och tydligt valbara under huvudknappen i trädgården.
 De påverkar inte schemaläggningen.
 
+- **🎯 Öva på en tabell** (`screens/focus.ts`). Barnet väljer ×1–×10. Varje
+  tabell visar en liten stapel över hur mycket som är buskar och plantor. En
+  runda är 5 minuter och körs som ett fokuspass (se motorn ovan). Tabellen
+  omfattar båda ordningarna (×7 är 1 × 7 … 10 × 7 och 7 × 1 … 7 × 10, 19 fakta)
+  och går därför över flera enheter. Barnet får själv välja en tabell som inte
+  är upplåst än, eftersom passet ändå bara planterar några få nya fakta åt gången.
+  Från samma vy finns **rekordjakt på en tabell**. Den öppnas när 4 av tabellens
+  fakta är buskar och har ett eget rekord per tabell (`focusId` på passet).
 - **⚡ Slå ditt rekord** (`screens/challenge.ts`). Barnet har 90 sekunder och
   får bara fakta som redan är minst ”flytande”. Läget öppnas när 5 fakta är
   buskar. Här, och bara här, syns en tidsstapel. Ett fel svar ger inget straff:
@@ -313,7 +331,8 @@ De påverkar inte schemaläggningen.
   svarstid längre. Saknas en svensk röst på enheten står det i föräldravyn.
 
 Logiken för båda spelen (`challenge.ts`) är rena funktioner med egna tester.
-Spelen sparas som pass med `mode: 'challenge'` respektive `'duel'`.
+Spelen sparas som pass med `mode: 'challenge'` respektive `'duel'`, och
+tabellövning som `mode: 'focus'`.
 
 ### PWA och offline
 
@@ -372,6 +391,7 @@ const glosor: ContentPack = {
   units: [{ id: 'djur', title: 'Djur', order: 0, itemIds: ['hund' /* … */], unlockRule: { kind: 'always' } }],
   normalizeAnswer: (s) => s.trim().toLowerCase(),
   distractorCandidates: (item) => /* andra svar i samma enhet */ [],
+  focusSets: [{ id: 'djur', title: 'Djur', itemIds: ['hund' /* … */] }], // valfritt
 };
 const engine = createEngine({ pack: glosor });
 ```

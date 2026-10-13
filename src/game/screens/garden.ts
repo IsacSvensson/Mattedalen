@@ -8,9 +8,10 @@ import { h } from '../dom';
 import { engineFor, loadProgress } from '../play';
 import { showProfiles } from './profiles';
 import { showSession } from './session';
-import { CHALLENGE_MIN_FACTS, challengePool } from '../challenge';
+import { CHALLENGE_MIN_FACTS, canChallenge as challengeOpen } from '../challenge';
 import { showChallenge } from './challenge';
 import { showDuel } from './duel';
+import { showFocusPicker } from './focus';
 
 const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
   seed: 'frön',
@@ -58,10 +59,13 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
       );
 
   // Optional extras, clearly separate from the daily session.
-  const canChallenge = challengePool(states).length >= CHALLENGE_MIN_FACTS;
+  const canChallenge = challengeOpen(states);
   const extras = h(
     'div',
     { class: 'garden-extras' },
+    ctx.pack.focusSets?.length
+      ? h('button', { class: 'soft-button small', type: 'button', onclick: () => void showFocusPicker(ctx, profile) }, '🎯 Öva på en tabell')
+      : null,
     h(
       'button',
       { class: 'soft-button small', type: 'button', disabled: !canChallenge, onclick: () => void showChallenge(ctx, profile) },

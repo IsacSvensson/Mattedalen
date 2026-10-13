@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyState, seededRng, type ItemState } from '../../src/engine';
 import {
   bestChallengeScore,
+  canChallenge,
   challengeDeck,
   challengePool,
   drawRound,
@@ -36,6 +37,22 @@ describe('challenge', () => {
     const rec = (mode: SessionRecord['mode'], score: number) => ({ mode, correct: score, extra: { score } }) as unknown as SessionRecord;
     expect(bestChallengeScore([])).toBeNull();
     expect(bestChallengeScore([rec('challenge', 12), rec('daily', 90), rec('challenge', 17)])).toBe(17);
+  });
+
+  it('keeps a separate record and pool per table', () => {
+    const rec = (score: number, focusId?: string) => ({ mode: 'challenge', correct: score, focusId, extra: { score } }) as unknown as SessionRecord;
+    const sessions = [rec(30), rec(9, 't7'), rec(12, 't7'), rec(20, 't2')];
+    expect(bestChallengeScore(sessions)).toBe(30);
+    expect(bestChallengeScore(sessions, 't7')).toBe(12);
+    expect(bestChallengeScore(sessions, 't9')).toBeNull();
+
+    const ids = ['7x1', '7x2', '7x5', '7x10', '1x7', '2x2'];
+    const states = Object.fromEntries(ids.map((id) => [id, st(id, 'fluent')]));
+    const seven = ['7x1', '7x2', '7x5', '7x10', '1x7', '7x8'];
+    expect(challengePool(states, seven).sort()).toEqual(['1x7', '7x1', '7x10', '7x2', '7x5']);
+    expect(canChallenge(states, seven)).toBe(true);
+    expect(canChallenge(states, ['7x1', '7x2', '7x3'])).toBe(false);
+    expect(canChallenge(states)).toBe(true);
   });
 });
 

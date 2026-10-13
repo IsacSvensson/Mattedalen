@@ -77,6 +77,21 @@ describe('PlayController', () => {
     expect(summary.answered).toBe((EXTRA_PRACTICE_MINUTES * 60) / 6);
   });
 
+  it('runs a focus session on one table and remembers which table', async () => {
+    const { clock, store, deps } = setup();
+    const seven = deps.pack.focusSets!.find((f) => f.id === 't7')!;
+    const play = await PlayController.start(profile, deps, 'focus', seven);
+    const summary = await playAll(play, clock);
+    expect(summary.mode).toBe('focus');
+    expect(summary.introduced.length).toBeGreaterThan(0);
+    for (const id of summary.introduced) expect(seven.itemIds).toContain(id);
+    const [record] = await store.listSessions(profile.id);
+    expect(record).toMatchObject({ mode: 'focus', focusId: 't7' });
+    const { meta } = await loadProgress(profile, deps);
+    expect(meta.lastSessionDay).toBeNull();
+    await expect(PlayController.start(profile, deps, 'focus')).rejects.toThrow();
+  });
+
   it('ignores stored items that are not in the released pack', async () => {
     const { store, deps } = setup();
     await store.save({
