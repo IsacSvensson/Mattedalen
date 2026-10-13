@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { validatePack } from '../../src/engine';
 import {
+  confusionNote,
   createMultiplicationPack,
   factId,
   multiplicationDistractors,
@@ -115,6 +116,46 @@ describe('strategies', () => {
     const hints = byId.get('3x7')!.hints;
     expect(hints.find((h) => h.kind === 'array')!.data).toEqual({ rows: 3, cols: 7 });
     expect(hints.find((h) => h.kind === 'swap')!.text).toBe('3 × 7 är lika mycket som 7 × 3');
+  });
+});
+
+describe('array parts', () => {
+  const parts = (id: string) => {
+    const { a, b } = parseFactId(id);
+    return strategyFor(a, b).parts;
+  };
+
+  it('split the side of the table factor', () => {
+    expect(parts('8x7')).toEqual({ axis: 'rows', sizes: [4, 4] });
+    expect(parts('7x8')).toEqual({ axis: 'cols', sizes: [4, 4] });
+    expect(parts('3x7')).toEqual({ axis: 'rows', sizes: [2, 1] });
+    expect(parts('6x7')).toEqual({ axis: 'rows', sizes: [5, 1] });
+    expect(parts('7x7')).toEqual({ axis: 'rows', sizes: [5, 2] });
+    expect(parts('9x6')).toEqual({ axis: 'rows', sizes: [9, 1], removeLast: true });
+    expect(parts('5x7')).toEqual({ axis: 'rows', sizes: [5, 5], removeLast: true });
+    expect(parts('10x7')).toBeUndefined();
+  });
+
+  it('always add up to the fact (taking away the removed part)', () => {
+    for (const item of pack.items) {
+      const { a, b } = parseFactId(item.id);
+      const p = strategyFor(a, b).parts;
+      if (!p) continue;
+      const kept = p.removeLast ? p.sizes.slice(0, -1) : p.sizes;
+      const side = kept.reduce((x, y) => x + y, 0);
+      expect(p.axis === 'rows' ? side : a, item.id).toBe(a);
+      expect(p.axis === 'cols' ? side : b, item.id).toBe(b);
+    }
+  });
+});
+
+describe('confusion notes', () => {
+  it('names the neighbouring fact behind a typical mistake', () => {
+    expect(confusionNote(7, 8, '48')).toBe('48 är 6 × 8 – nära!');
+    expect(confusionNote(7, 8, '63')).toBe('63 är 7 × 9 – nära!');
+    expect(confusionNote(3, 4, '7')).toBe('7 är 3 + 4. Här ska det vara 3 gånger 4.');
+    expect(confusionNote(7, 8, '57')).toBeUndefined();
+    expect(confusionNote(7, 8, '56')).toBeUndefined();
   });
 });
 

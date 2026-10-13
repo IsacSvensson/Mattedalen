@@ -5,15 +5,12 @@ import type { AppContext } from './app';
 import { plantSprite } from './components/plant';
 import { showProfiles } from './screens/profiles';
 
-/** Units released in this build phase: ×10, ×2, ×5, ×1, ×4, ×3. */
-const RELEASED_UNITS = 6;
-
 async function start(): Promise<void> {
   const root = document.getElementById('app');
   if (!root) return;
   document.body.prepend(plantSprite());
 
-  const pack = createMultiplicationPack({ maxUnits: RELEASED_UNITS });
+  const pack = createMultiplicationPack();
   const { store, kind } = await createProgressStore();
   const persist = await requestPersistence();
   const ctx: AppContext = {
@@ -22,7 +19,7 @@ async function start(): Promise<void> {
     pack,
     storageKind: kind,
     persist,
-    deps: { store, pack, allowFree: false },
+    deps: { store, pack },
   };
   await showProfiles(ctx);
 }

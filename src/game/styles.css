@@ -521,6 +521,8 @@ h1:focus {
 
 .array-dot {
   fill: var(--leaf);
+  transform-box: fill-box;
+  transform-origin: center;
   animation: dot-in 0.3s ease-out both;
   animation-delay: calc(var(--i) * 70ms);
 }
@@ -530,6 +532,184 @@ h1:focus {
     opacity: 0;
     transform: scale(0.4);
   }
+}
+
+/* Strategy parts: known pieces in two colours, the taken-away part hollow. */
+.array-dot.part-1 {
+  fill: var(--warm);
+}
+
+.array-dot.part-2 {
+  fill: var(--berry);
+}
+
+.array-dot.part-removed {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 0.9;
+  stroke-dasharray: 2 1.5;
+}
+
+/* --- array builder (introduction) ------------------------------------ */
+
+.array-builder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.builder-instruction {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  min-height: 1.5em;
+}
+
+.builder-wrap {
+  display: grid;
+  place-items: center;
+  min-height: min(76vw, 40dvh, 360px);
+}
+
+.builder-wrap.done {
+  min-height: 0;
+}
+
+.builder-board {
+  width: min(76vw, 40dvh, 360px);
+  height: min(76vw, 40dvh, 360px);
+  touch-action: none;
+  user-select: none;
+  cursor: crosshair;
+}
+
+.builder-board.turning {
+  animation: turn 0.45s ease-in-out;
+}
+
+@keyframes turn {
+  from {
+    transform: rotate(-90deg) scale(0.9);
+  }
+}
+
+.builder-dot {
+  fill: #e6dfcd;
+  transition: fill 0.08s;
+}
+
+.builder-dot.on {
+  fill: var(--leaf);
+}
+
+.builder-size {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  min-height: 1.3em;
+  font-variant-numeric: tabular-nums;
+}
+
+.builder-buttons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.intro-after {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.intro-after[hidden] {
+  display: none;
+}
+
+.confusion-note {
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 12px;
+  background: var(--warm-soft);
+  font-size: 1.15rem;
+}
+
+/* --- number pad ------------------------------------------------------ */
+
+.numpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 360px);
+}
+
+.numpad-display {
+  min-width: 5ch;
+  min-height: 1.3em;
+  padding: 0 18px;
+  border-radius: var(--radius);
+  border: 3px solid var(--line);
+  background: var(--card);
+  font-size: clamp(2.6rem, 11vw, 3.6rem);
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.numpad-display.correct {
+  border-color: var(--good);
+  background: var(--accent-soft);
+}
+
+.numpad-display.wrong {
+  border-color: var(--warm);
+  background: var(--warm-soft);
+}
+
+.numpad-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.numpad-key {
+  min-height: min(76px, 9dvh);
+  border-radius: 18px;
+  border: 3px solid var(--line);
+  background: var(--card);
+  font-size: 2rem;
+  font-weight: 700;
+  box-shadow: 0 4px 0 var(--line);
+}
+
+.numpad-key:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.numpad-key.ok {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 0 var(--accent-dark);
+}
+
+.numpad-key:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.question.free {
+  gap: 16px;
+}
+
+.question.free .prompt {
+  font-size: clamp(2.6rem, 12vw, 4.5rem);
 }
 
 /* --- end of session ------------------------------------------------- */

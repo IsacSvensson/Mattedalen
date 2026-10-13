@@ -12,9 +12,9 @@ test('a first daily session: new profile, intro, questions, soft ending', async 
   await expect(page.locator('.grid-cell')).toHaveCount(100);
   await page.getByRole('button', { name: 'Vattna trädgården ▶' }).click();
 
-  // The very first question introduces a new fact with its rectangle.
+  // The very first question introduces a new fact: the child builds its rectangle.
   await expect(page.getByText('Ett nytt frö')).toBeVisible();
-  await expect(page.locator('.intro-card .array-view')).toBeVisible();
+  await expect(page.locator('.intro-card .builder-board')).toBeVisible();
   for (let i = 0; i < 8; i++) {
     await answer(page);
     await expect(page.locator('.choice.correct')).toBeVisible();

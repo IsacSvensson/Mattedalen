@@ -3,10 +3,9 @@
 Ett forskningsbaserat webbspel som lär barn 6–9 år multiplikationstabellen 1–10.
 Spelet är en offline-PWA utan backend. All data stannar i webbläsaren.
 
-> **Status:** Fas 1–3 är klara: motor och innehåll, lagring och ett minimalt spel
-> (profiler, pass med flerval, trädgårdskartan) med enheterna ×10, ×2, ×5, ×1, ×4
-> och ×3. Återkoppling med rektanglar, fritt svar, föräldravy, PWA och publicering
-> på GitHub Pages kommer i fas 4–7.
+> **Status:** Fas 1–4 är klara: motor och innehåll, lagring, spelet med hela
+> tabellen, interaktiv introduktion med rektanglar, strategiåterkoppling och fritt
+> svar. Föräldravy, PWA och publicering på GitHub Pages kommer i fas 5–7.
 
 ## Kom igång
 
@@ -198,20 +197,27 @@ All grafik är inbäddad SVG, och det finns inga externa resurser.
 - **Kartan** är 10×10-rutnätet som trädgårdsland. Raden *a* och kolumnen *b* visar
   *a × b*, så 3×7 och 7×3 speglas över diagonalen. Varje ruta visar faktans
   status: jord → frö → planta → buske → träd. Fakta som just har vuxit animeras.
-- **Passet.** Nya fakta introduceras med ett rektangelmönster och strategin, och
-  sedan svarar barnet själv. Frågorna är flerval med stora knappar, och
-  siffertangenterna 1–4 fungerar också. Svarstiden mäts men visas aldrig, och
-  ingen klocka syns. Vid rätt svar kommer en kort glädjeanimation. Vid fel visas
-  rätt svar, strategin och rektangeln i stället för svarsknapparna, aldrig bara
-  ”fel”.
+- **Introduktion av nya fakta.** Barnet drar ut rektangeln på en bräda med
+  10 × 10 prickar och ser storleken medan det drar, till exempel ”3 × 6”. En
+  speglad rektangel kan vridas 90° med ”Vrid 🔄”. Kan barnet redan tvillingen
+  (7 × 3) börjar brädet från den, och barnet vrider den till 3 × 7. ”Visa mig”
+  bygger rektangeln åt barnet. När den är rätt visas strategin som färgade delar,
+  till exempel 8 × 7 som två 4 × 7-halvor eller 9 × 6 som 10 × 6 där sista raden
+  är struken. Sedan svarar barnet själv (”Nu du!”).
+- **Svarsformat.** Fakta under inlärning frågas med flerval: fyra stora knappar,
+  och tangenterna 1–4 fungerar. Flytande fakta frågas med fritt svar på en stor
+  sifferknappsats (siffror, ⌫ och ✓, eller tangentbordet). Fritt svar krävs för
+  statusen ”automatiserad”. Svarstiden mäts men visas aldrig, och ingen klocka
+  syns.
+- **Återkoppling.** Vid rätt svar kommer en kort glädjeanimation. Vid fel ersätts
+  svarsytan av ett hjälpkort med rätt svar, strategin och den färgade rektangeln,
+  aldrig bara ”fel”. Är felsvaret en typisk förväxling får barnet en vänlig
+  förklaring (”48 är 8 × 6 – nära!”, ”7 är 3 + 4. Här ska det vara 3 gånger 4.”).
+  Felsvaret loggas som förväxling.
 - **Avslutningen.** När tiden är slut (12 minuter som standard) får barnet svara
   klart på frågan och ser sedan ”Trädgården behöver sova nu” med vad som växte.
   Under resten av dagen sover trädgården. Extra övning är frivillig, märkt som
   frivillig, varar 5 minuter och ger inga nya fakta.
-
-Den här byggfasen släpper de sex första enheterna
-(`createMultiplicationPack({ maxUnits: 6 })`), och fritt svar är avstängt tills
-fas 4.
 
 ### Återanvända motorn för annat innehåll
 

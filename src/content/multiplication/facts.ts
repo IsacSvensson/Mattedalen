@@ -62,10 +62,22 @@ export function tableAndOther(a: number, b: number): { table: number; other: num
   return { table, other: tableFirst ? b : a, tableFirst };
 }
 
-interface Strategy {
+/**
+ * How the strategy splits the rectangle, along the side of the table factor:
+ * 8 × 7 = dubbla 4 × 7 is rows [4, 4]; 9 × 6 = 10 × 6 − 6 is rows [9, 1]
+ * drawn as 10 rows where the last part is taken away (`removeLast`).
+ */
+export interface ArrayParts {
+  axis: 'rows' | 'cols';
+  sizes: number[];
+  removeLast?: boolean;
+}
+
+export interface Strategy {
   kind: string;
   text: string;
   from: ItemId[];
+  parts?: ArrayParts;
 }
 
 /**
@@ -79,17 +91,19 @@ export function strategyFor(a: number, b: number): Strategy {
   const e = (t: number) => (tableFirst ? formatFact(t, o) : formatFact(o, t));
   const id = (t: number) => (tableFirst ? factId(t, o) : factId(o, t));
   const self = formatFact(a, b);
+  const axis = tableFirst ? 'rows' : 'cols';
+  const parts = (sizes: number[], removeLast?: boolean): ArrayParts => (removeLast ? { axis, sizes, removeLast } : { axis, sizes });
 
   if (unitFor(a, b).table === 'square') {
     switch (a) {
       case 6:
-        return { kind: 'plusGroup', text: `6 × 6 = 5 × 6 + 6 = 30 + 6 = 36`, from: [factId(5, 6)] };
+        return { kind: 'plusGroup', text: `6 × 6 = 5 × 6 + 6 = 30 + 6 = 36`, from: [factId(5, 6)], parts: parts([5, 1]) };
       case 7:
-        return { kind: 'split', text: `7 × 7 = 5 × 7 + 2 × 7 = 35 + 14 = 49`, from: [factId(5, 7), factId(2, 7)] };
+        return { kind: 'split', text: `7 × 7 = 5 × 7 + 2 × 7 = 35 + 14 = 49`, from: [factId(5, 7), factId(2, 7)], parts: parts([5, 2]) };
       case 8:
-        return { kind: 'doubleOf', text: `8 × 8 = dubbla 4 × 8 = 32 + 32 = 64`, from: [factId(4, 8)] };
+        return { kind: 'doubleOf', text: `8 × 8 = dubbla 4 × 8 = 32 + 32 = 64`, from: [factId(4, 8)], parts: parts([4, 4]) };
       default:
-        return { kind: 'minusGroup', text: `9 × 9 = 10 × 9 − 9 = 90 − 9 = 81`, from: [factId(10, 9)] };
+        return { kind: 'minusGroup', text: `9 × 9 = 10 × 9 − 9 = 90 − 9 = 81`, from: [factId(10, 9)], parts: parts([9, 1], true) };
     }
   }
 
@@ -103,19 +117,19 @@ export function strategyFor(a: number, b: number): Strategy {
         from: [],
       };
     case 2:
-      return { kind: 'double', text: `${self} = ${o} + ${o} = ${ans}`, from: [] };
+      return { kind: 'double', text: `${self} = ${o} + ${o} = ${ans}`, from: [], parts: parts([1, 1]) };
     case 5:
-      return { kind: 'halfOfTen', text: `${self} = hälften av ${e(10)} = hälften av ${10 * o} = ${ans}`, from: [id(10)] };
+      return { kind: 'halfOfTen', text: `${self} = hälften av ${e(10)} = hälften av ${10 * o} = ${ans}`, from: [id(10)], parts: parts([5, 5], true) };
     case 4:
-      return { kind: 'doubleOf', text: `${self} = dubbla ${e(2)} = ${2 * o} + ${2 * o} = ${ans}`, from: [id(2)] };
+      return { kind: 'doubleOf', text: `${self} = dubbla ${e(2)} = ${2 * o} + ${2 * o} = ${ans}`, from: [id(2)], parts: parts([2, 2]) };
     case 3:
-      return { kind: 'plusGroup', text: `${self} = ${e(2)} + ${o} = ${2 * o} + ${o} = ${ans}`, from: [id(2)] };
+      return { kind: 'plusGroup', text: `${self} = ${e(2)} + ${o} = ${2 * o} + ${o} = ${ans}`, from: [id(2)], parts: parts([2, 1]) };
     case 9:
-      return { kind: 'minusGroup', text: `${self} = ${e(10)} − ${o} = ${10 * o} − ${o} = ${ans}`, from: [id(10)] };
+      return { kind: 'minusGroup', text: `${self} = ${e(10)} − ${o} = ${10 * o} − ${o} = ${ans}`, from: [id(10)], parts: parts([9, 1], true) };
     case 6:
-      return { kind: 'plusGroup', text: `${self} = ${e(5)} + ${o} = ${5 * o} + ${o} = ${ans}`, from: [id(5)] };
+      return { kind: 'plusGroup', text: `${self} = ${e(5)} + ${o} = ${5 * o} + ${o} = ${ans}`, from: [id(5)], parts: parts([5, 1]) };
     case 8:
-      return { kind: 'doubleOf', text: `${self} = dubbla ${e(4)} = ${4 * o} + ${4 * o} = ${ans}`, from: [id(4)] };
+      return { kind: 'doubleOf', text: `${self} = dubbla ${e(4)} = ${4 * o} + ${4 * o} = ${ans}`, from: [id(4)], parts: parts([4, 4]) };
     default:
       throw new Error(`No strategy for ${self}`);
   }
@@ -124,7 +138,7 @@ export function strategyFor(a: number, b: number): Strategy {
 export function hintsFor(a: number, b: number): Hint[] {
   const strategy = strategyFor(a, b);
   const hints: Hint[] = [
-    { kind: 'strategy', text: strategy.text, data: { strategy: strategy.kind, from: strategy.from } },
+    { kind: 'strategy', text: strategy.text, data: { strategy: strategy.kind, from: strategy.from, parts: strategy.parts } },
     { kind: 'array', data: { rows: a, cols: b } },
   ];
   if (a !== b) {
@@ -162,4 +176,25 @@ export function buildFacts(): Item[] {
     }
   }
   return items;
+}
+
+/**
+ * A short, kind note when a wrong answer is a typical confusion: the product
+ * of a neighbouring fact ("48 är 6 × 8 – nära!") or the sum instead of the
+ * product. Returns undefined for other wrong answers.
+ */
+export function confusionNote(a: number, b: number, given: string): string | undefined {
+  const g = Number(given);
+  if (!Number.isInteger(g) || g === a * b) return undefined;
+  const neighbours: [number, number][] = [
+    [a - 1, b],
+    [a + 1, b],
+    [a, b - 1],
+    [a, b + 1],
+  ];
+  for (const [x, y] of neighbours) {
+    if (x >= 1 && y >= 1 && x <= MAX_FACTOR && y <= MAX_FACTOR && x * y === g) return `${g} är ${formatFact(x, y)} – nära!`;
+  }
+  if (g === a + b) return `${g} är ${a} + ${b}. Här ska det vara ${a} gånger ${b}.`;
+  return undefined;
 }
