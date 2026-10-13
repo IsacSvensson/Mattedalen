@@ -3,9 +3,10 @@
 Ett forskningsbaserat webbspel som lär barn 6–9 år multiplikationstabellen 1–10.
 Spelet är en offline-PWA utan backend. All data stannar i webbläsaren.
 
-> **Status:** Fas 1–4 är klara: motor och innehåll, lagring, spelet med hela
-> tabellen, interaktiv introduktion med rektanglar, strategiåterkoppling och fritt
-> svar. Föräldravy, PWA och publicering på GitHub Pages kommer i fas 5–7.
+> **Status:** Fas 1–5 är klara: motor och innehåll, lagring, spelet med hela
+> tabellen, interaktiv introduktion, strategiåterkoppling, fritt svar, föräldravy
+> och flytt mellan enheter (QR och JSON). PWA, publicering på GitHub Pages och
+> extralägen kommer i fas 6–7.
 
 ## Kom igång
 
@@ -218,6 +219,47 @@ All grafik är inbäddad SVG, och det finns inga externa resurser.
   klart på frågan och ser sedan ”Trädgården behöver sova nu” med vad som växte.
   Under resten av dagen sover trädgården. Extra övning är frivillig, märkt som
   frivillig, varar 5 minuter och ger inga nya fakta.
+
+### Föräldravy (`src/game/screens/parent`)
+
+Föräldravyn nås via ”🔒 För vuxna” på startsidan. Den skyddas av en fyrsiffrig
+vuxenkod som väljs första gången. Koden är ingen säkerhetsfunktion, eftersom
+datan ändå finns på enheten. Den finns bara för att barn inte ska hamna där av
+misstag. Den som glömt koden besvarar en additionsfråga för vuxna och väljer
+sedan en ny.
+
+För varje barn visar vyn:
+
+- antal fakta per status, antal fullständiga pass, senaste speldag och
+  upplåsta enheter
+- en **värmekarta** över 10×10-rutnätet. En tryckning på en ruta visar status,
+  antal försök, andel rätt, genomsnittlig svarstid och vanligaste felsvar.
+- de **vanligaste förväxlingarna**, till exempel ”7 × 8 – svarade 48 (3 gånger)”
+- **övade minuter per dag** under de senaste 14 dagarna
+- inställningar: namn, djur, passlängd 10–15 minuter, fritt svar av/på
+- att flytta barnet till en annan enhet, eller ta bort profilen
+
+Vyn visar också enhetens lagringsstatus: om beständig lagring är beviljad, med en
+knapp för att be om den, och hur mycket utrymme som används. Där förklaras också
+varför det minskar risken att data raderas om appen läggs på hemskärmen.
+
+### Flytta mellan enheter
+
+- **QR-kod** (`storage/qrCodec.ts`). Koden innehåller status per fakta i 3 bitar
+  (status plus ungefärlig Leitner-låda), namn, djur och passlängd, skyddat med
+  CRC-8. Datan base45-kodas, så att QR-kodens kompakta alfanumeriska läge kan
+  användas. Hela barnet ryms i cirka 90 tecken, vilket ger en QR-kod av version
+  5–6 som är lätt att skanna. På mottagande enhet väljer man ”Skanna QR-kod” och
+  använder kameran. Det går också att fotografera koden och välja bilden.
+  Avläsningen använder `BarcodeDetector` där den finns, annars `jsqr`, som bara
+  laddas när den behövs. Status, repetitionsschema och upplåsta enheter
+  återskapas. Finns redan ett barn med samma namn väljer man om det ska ersättas.
+- **JSON-säkerhetskopia** med allt, även hela loggen. Den sparas som fil och
+  öppnas på den andra enheten. Finns profilen redan väljer man mellan ”Ersätt”
+  och ”Lägg till som kopia”.
+
+Båda vägarna testas i e2e mellan två separata webbläsarkontexter. QR-koden testas
+också i enhetstester genom att den ritas till pixlar och läses av med jsQR.
 
 ### Återanvända motorn för annat innehåll
 

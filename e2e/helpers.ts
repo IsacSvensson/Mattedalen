@@ -94,3 +94,16 @@ export async function seedStates(page: Page, states: Record<string, { status: st
   }, states);
   await page.reload();
 }
+
+/** Opens the parent view, choosing the PIN on first use. */
+export async function openParent(page: Page, pin = '2580', link: RegExp = /🔒/): Promise<void> {
+  await page.getByRole('button', { name: link }).click();
+  const choosing = page.getByRole('heading', { name: /Välj en vuxenkod/ });
+  await expect(choosing.or(page.getByRole('heading', { name: /Vuxenkod/ }))).toBeVisible();
+  if (await choosing.isVisible()) {
+    await page.keyboard.type(pin);
+    await expect(page.getByRole('heading', { name: /Skriv koden igen/ })).toBeVisible();
+  }
+  await page.keyboard.type(pin);
+  await expect(page.getByRole('heading', { name: 'Föräldravy' })).toBeVisible();
+}

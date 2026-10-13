@@ -2,6 +2,7 @@ import { DEFAULT_SETTINGS, type Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { h } from '../dom';
 import { showGarden } from './garden';
+import { showPinGate } from './parent/pinGate';
 
 export const AVATARS = ['🦊', '🐢', '🐸', '🐰', '🐻', '🦉', '🐝', '🦋', '🐞', '🐱', '🐶', '🦁'];
 
@@ -32,8 +33,13 @@ export async function showProfiles(ctx: AppContext): Promise<void> {
       ),
     ),
     storageNotice(ctx),
+    parentLink(ctx),
   );
   show(ctx, view);
+}
+
+function parentLink(ctx: AppContext, text = '🔒 För vuxna'): HTMLElement {
+  return h('button', { class: 'link-button parent-link', type: 'button', onclick: () => void showPinGate(ctx) }, text);
 }
 
 async function openProfile(ctx: AppContext, profile: Profile): Promise<void> {
@@ -110,7 +116,9 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
       h('div', { class: 'avatar-grid', role: 'group', 'aria-label': 'Välj djur' }, avatarButtons),
       done,
     ),
-    first ? null : h('button', { class: 'link-button', type: 'button', onclick: () => void showProfiles(ctx) }, 'Tillbaka'),
+    first
+      ? parentLink(ctx, '🔒 Har barnet spelat på en annan enhet? Hämta i föräldravyn')
+      : h('button', { class: 'link-button', type: 'button', onclick: () => void showProfiles(ctx) }, 'Tillbaka'),
   );
   show(ctx, view);
 }

@@ -25,3 +25,4 @@ export async function createProgressStore(): Promise<OpenedStore> {
     return { store: new MemoryProgressStore(), kind: 'memory' };
   }
 }
+export * from './qrCodec';
