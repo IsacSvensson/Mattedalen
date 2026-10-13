@@ -8,6 +8,9 @@ import { h } from '../dom';
 import { engineFor, loadProgress } from '../play';
 import { showProfiles } from './profiles';
 import { showSession } from './session';
+import { CHALLENGE_MIN_FACTS, challengePool } from '../challenge';
+import { showChallenge } from './challenge';
+import { showDuel } from './duel';
 
 const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
   seed: 'frön',
@@ -54,6 +57,20 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
         h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showSession(ctx, profile, 'daily') }, 'Vattna trädgården ▶'),
       );
 
+  // Optional extras, clearly separate from the daily session.
+  const canChallenge = challengePool(states).length >= CHALLENGE_MIN_FACTS;
+  const extras = h(
+    'div',
+    { class: 'garden-extras' },
+    h(
+      'button',
+      { class: 'soft-button small', type: 'button', disabled: !canChallenge, onclick: () => void showChallenge(ctx, profile) },
+      '⚡ Slå ditt rekord',
+    ),
+    h('button', { class: 'soft-button small', type: 'button', onclick: () => void showDuel(ctx, profile) }, '🃏 Spela mot en vuxen'),
+    canChallenge ? null : h('p', { class: 'extras-note' }, `Rekordjakten öppnar när ${CHALLENGE_MIN_FACTS} plantor blivit buskar.`),
+  );
+
   const view = h(
     'main',
     { class: `screen garden${asleep ? ' asleep' : ''}` },
@@ -73,6 +90,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
       ),
     ),
     actions,
+    extras,
   );
   show(ctx, view);
 }

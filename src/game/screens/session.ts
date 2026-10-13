@@ -7,14 +7,19 @@ import { arrayView, partsOf } from '../components/arrayView';
 import { numPad } from '../components/numPad';
 import { h, prefersReducedMotion, wait } from '../dom';
 import { PlayController } from '../play';
+import { speak, speechSupported, stopSpeaking } from '../speech';
 import { showGarden } from './garden';
 import { showSessionEnd } from './sessionEnd';
 
 /** Pause after a correct answer before the next question. */
 const CORRECT_PAUSE_MS = 650;
 
+/** Read questions aloud in this session (profile setting, if the device can speak). */
+let voiceOn = false;
+
 export async function showSession(ctx: AppContext, profile: Profile, mode: 'daily' | 'extra'): Promise<void> {
   const play = await PlayController.start(profile, ctx.deps, mode);
+  voiceOn = profile.settings.readAloud && speechSupported();
   const stage = h('section', { class: 'play-stage', 'aria-live': 'polite' });
   let keyHandler: ((e: KeyboardEvent) => void) | undefined;
   let finished = false;
@@ -39,6 +44,7 @@ export async function showSession(ctx: AppContext, profile: Profile, mode: 'dail
   );
   show(ctx, view, () => {
     if (keyHandler) document.removeEventListener('keydown', keyHandler);
+    stopSpeaking();
   });
 
   const setKeys = (handler?: (e: KeyboardEvent) => void) => {
@@ -91,6 +97,7 @@ function introduce(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<v
         });
       },
     });
+    if (voiceOn) void speak(`Ett nytt frö. ${q.item.prompt}`);
     stage.replaceChildren(
       h('div', { class: 'intro-card' }, h('p', { class: 'intro-label' }, '🌱 Ett nytt frö'), h('p', { class: 'prompt' }, q.item.prompt), builder, after),
     );
@@ -102,14 +109,25 @@ function introduce(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<v
 function ask(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<{ given: string; rtMs: number }> {
   return new Promise((resolve) => {
     let answered = false;
-    const shownAt = performance.now();
+    let shownAt = performance.now();
+    if (voiceOn) {
+      // Time the answer from when the question has been heard, not while it is read.
+      void speak(q.item.prompt).then(() => {
+        if (!answered) shownAt = performance.now();
+      });
+    }
     const done = (value: string) => {
       if (answered) return false;
       answered = true;
       resolve({ given: value, rtMs: Math.round(performance.now() - shownAt) });
       return true;
     };
-    const prompt = h('p', { class: 'prompt', 'aria-label': `${q.item.prompt.replace('×', 'gånger')} är lika med?` }, q.item.prompt, ' = ?');
+    const prompt = h(
+      'div',
+      { class: 'prompt-row' },
+      h('p', { class: 'prompt', 'aria-label': `${q.item.prompt.replace('×', 'gånger')} är lika med?` }, q.item.prompt, ' = ?'),
+      voiceOn ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp igen', onclick: () => void speak(q.item.prompt) }, '🔊') : null,
+    );
 
     if (q.format === 'free') {
       const pad = numPad((value) => {
@@ -165,6 +183,7 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, setKe
   const { a, b } = parseFactId(q.item.id);
   const strategy = q.item.hints.find((x) => x.kind === 'strategy')?.text;
   const note = confusionNote(a, b, fb.given);
+  if (voiceOn) void speak(`${q.item.prompt} = ${fb.expected}`);
   await new Promise<void>((resolve) => {
     const next = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Fortsätt ▶');
     // The help card takes the place of the answer area so it fits on one screen.

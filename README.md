@@ -3,10 +3,12 @@
 Ett forskningsbaserat webbspel som lär barn 6–9 år multiplikationstabellen 1–10.
 Spelet är en offline-PWA utan backend. All data stannar i webbläsaren.
 
-> **Status:** Fas 1–6 är klara: motor och innehåll, lagring, spelet med hela
+> **Status:** Alla sju faser är klara: motor och innehåll, lagring, spelet med hela
 > tabellen, interaktiv introduktion, strategiåterkoppling, fritt svar, föräldravy,
-> flytt mellan enheter (QR och JSON), offline-PWA och publicering på GitHub Pages.
-> Extralägen (utmaning, tvåspelarläge, uppläsning) kommer i fas 7.
+> flytt mellan enheter (QR och JSON), offline-PWA på GitHub Pages samt utmaning,
+> tvåspelarläge och uppläsning.
+>
+> **Spela:** https://isacsvensson.github.io/Multiplikation/
 
 ## Kom igång
 
@@ -260,6 +262,30 @@ varför det minskar risken att data raderas om appen läggs på hemskärmen.
 
 Båda vägarna testas i e2e mellan två separata webbläsarkontexter. QR-koden testas
 också i enhetstester genom att den ritas till pixlar och läses av med jsQR.
+
+### Extralägen
+
+Extralägena är frivilliga och tydligt valbara under huvudknappen i trädgården.
+De påverkar inte schemaläggningen.
+
+- **⚡ Slå ditt rekord** (`screens/challenge.ts`). Barnet har 90 sekunder och
+  får bara fakta som redan är minst ”flytande”. Läget öppnas när 5 fakta är
+  buskar. Här, och bara här, syns en tidsstapel. Ett fel svar ger inget straff:
+  rätt svar visas en kort stund och spelet fortsätter. Poängen jämförs bara med
+  barnets eget bästa resultat (”Nytt rekord!”), aldrig med andra barn.
+- **🃏 Gångerkrig – barn mot vuxen** (`screens/duel.ts`). Två spelare på samma
+  enhet, inspirerat av multiplikationskrig med kortlek. Båda drar ett kort ur
+  barnets kända fakta, så att den vuxna inte får lättare kort. Barnet svarar med
+  flerval och den vuxna på sifferknappsatsen. Störst rätt svar tar rundan. Blir
+  det lika är det ”krig”, och nästa runda är värd dubbelt. Ett spel är 7 rundor.
+- **Uppläsning** (`speech.ts`). Uppläsningen slås på per barn i föräldravyn och
+  använder Web Speech API med en svensk röst (`sv-SE`). Frågan läses upp så som
+  barn säger den (”3 gånger 7”), och en 🔊-knapp läser upp den igen. Svarstiden
+  börjar mätas först när frågan är uppläst, så uppläsningen gör inte barnets
+  svarstid längre. Saknas en svensk röst på enheten står det i föräldravyn.
+
+Logiken för båda spelen (`challenge.ts`) är rena funktioner med egna tester.
+Spelen sparas som pass med `mode: 'challenge'` respektive `'duel'`.
 
 ### PWA och offline
 

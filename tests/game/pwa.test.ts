@@ -12,3 +12,13 @@ describe('platform detection for the install guide', () => {
     expect(detectPlatform('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126', 0)).toBe('other');
   });
 });
+
+import { spokenText } from '../../src/game/speech';
+
+describe('read-aloud text', () => {
+  it('says facts the way children say them', () => {
+    expect(spokenText('3 × 7 = ?')).toBe('3 gånger 7');
+    expect(spokenText('3 × 7 = 21')).toBe('3 gånger 7 är 21');
+    expect(spokenText('9 × 6 = 10 × 6 − 6')).toBe('9 gånger 6 är 10 gånger 6 minus 6');
+  });
+});

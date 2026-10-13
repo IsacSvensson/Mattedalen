@@ -1101,6 +1101,160 @@ h1:focus {
   border-radius: 16px;
 }
 
+.prompt-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.speak-button {
+  flex: none;
+}
+
+/* --- extras: challenge & duel ----------------------------------------- */
+
+.garden-extras {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.garden-extras .soft-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.extras-note {
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.record {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.time-track {
+  flex: 1;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.time-bar {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--warm);
+}
+
+.challenge-score {
+  min-width: 2.5ch;
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.challenge-score.bump {
+  animation: cheer 0.3s ease-out;
+}
+
+.challenge-correction {
+  color: var(--ink-soft);
+}
+
+.duel-rules {
+  max-width: 30em;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+.duel-score {
+  flex: 1;
+  margin: 0;
+  text-align: right;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.duel-turn {
+  margin: 0;
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.duel-turn.child {
+  background: var(--accent-soft);
+}
+
+.duel-turn.adult {
+  background: var(--warm-soft);
+}
+
+.duel-card {
+  padding: 18px 28px;
+  border-radius: 18px;
+  border: 3px solid var(--line);
+  background: var(--card);
+  box-shadow: 0 6px 0 var(--line);
+  font-size: clamp(2.4rem, 11vw, 4rem);
+  font-weight: 800;
+}
+
+.duel-result-round {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.duel-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: min(100%, 560px);
+}
+
+.duel-reveal {
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 3px solid var(--line);
+  background: var(--card);
+  text-align: center;
+}
+
+.duel-reveal.winner {
+  border-color: var(--good);
+  background: var(--accent-soft);
+}
+
+.duel-reveal p {
+  margin: 4px 0;
+}
+
+.duel-product {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.duel-message {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 /* --- install & update ------------------------------------------------- */
 
 .install-banner,

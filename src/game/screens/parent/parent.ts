@@ -20,6 +20,7 @@ import { engineFor, loadProgress } from '../../play';
 import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, snapshotOf } from '../../transfer';
 import { AVATARS, showProfiles } from '../profiles';
 import { installGuide } from '../../pwa';
+import { hasSwedishVoice, speechSupported } from '../../speech';
 import { choosePin } from './pinGate';
 
 export async function showParent(ctx: AppContext, selectedId?: string): Promise<void> {
@@ -204,6 +205,12 @@ function settingsForm(ctx: AppContext, profile: Profile): HTMLElement {
     if (change.name !== undefined || change.avatar !== undefined) await showParent(ctx, profile.id);
   };
   const name = h('input', { type: 'text', value: profile.name, maxlength: 20, 'aria-label': 'Namn' });
+  const voiceNote = h('p', { class: 'muted voice-note' });
+  if (!speechSupported()) voiceNote.textContent = 'Den här webbläsaren kan inte läsa upp text.';
+  else
+    void hasSwedishVoice().then((ok) => {
+      if (!ok) voiceNote.textContent = 'Ingen svensk röst hittades på enheten. Lägg till en i enhetens inställningar för tal/uppläsning.';
+    });
   return h(
     'div',
     { class: 'settings' },
@@ -244,6 +251,18 @@ function settingsForm(ctx: AppContext, profile: Profile): HTMLElement {
       }),
       ' Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)',
     ),
+    h(
+      'label',
+      { class: 'check' },
+      h('input', {
+        type: 'checkbox',
+        checked: profile.settings.readAloud,
+        disabled: !speechSupported(),
+        onchange: (e: Event) => void save({ settings: { readAloud: (e.target as HTMLInputElement).checked } }),
+      }),
+      ' Läs upp frågorna (svenska)',
+    ),
+    voiceNote,
   );
 }
 
