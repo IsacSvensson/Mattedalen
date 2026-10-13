@@ -3,8 +3,8 @@
 Ett forskningsbaserat webbspel som lär barn 6–9 år multiplikationstabellen 1–10.
 Spelet är en offline-PWA utan backend. All data stannar i webbläsaren.
 
-> **Status:** Fas 1 (motor och innehåll) är klar. Lagring, spelskal, föräldravy,
-> PWA och publicering på GitHub Pages kommer i fas 2–7.
+> **Status:** Fas 1 (motor och innehåll) och fas 2 (lagring) är klara. Spelskal,
+> föräldravy, PWA och publicering på GitHub Pages kommer i fas 3–7.
 
 ## Kom igång
 
@@ -24,12 +24,13 @@ Kräver Node 20 eller senare.
 src/
   engine/                   innehållsneutral inlärningsmotor (ren logik)
   content/multiplication/   innehållspaketet: fakta, enheter, strategier, distraktorer
-  storage/                  ProgressStore + IndexedDB            (fas 2)
+  storage/                  ProgressStore, IndexedDB, säkerhetskopior
   game/                     spelskal, UI och föräldravy          (fas 3–7)
 tests/
   engine/                   enhetstester för motorn (med ett glosor-paket)
   content/                  tester för multiplikationspaketet
   simulation/               simulerade elever över 26 veckor
+  storage/                  samma kontraktstester för minne och IndexedDB
 ```
 
 ### Motorn (`src/engine`)
@@ -135,6 +136,47 @@ fakta har tre ledtrådar:
 
 Distraktorerna är grannprodukter i samma tabell (6×8 mot 7×8), addition i stället
 för multiplikation, omvända siffror (54/45) samt ±1- och ±10-fel.
+
+### Lagring (`src/storage`)
+
+Spelet pratar bara med gränssnittet `ProgressStore`, så lagringen kan bytas mot en
+backend senare utan att motorn eller spelet ändras. Gränssnittet har:
+
+- profiler
+- framsteg per profil och innehållspaket (`load`, `save`)
+- svarslogg (`appendAttempt`)
+- pass
+- säkerhetskopior (`export`, `import`)
+- små appinställningar, till exempel föräldra-PIN
+
+Det finns två implementationer. **`IndexedDbProgressStore`** bygger på `idb`.
+**`MemoryProgressStore`** används i tester och som reserv när IndexedDB är
+blockerat, till exempel i vissa privata lägen. Båda körs mot samma kontraktstester.
+
+| Objektlager | Nyckel | Innehåll |
+|---|---|---|
+| `profiles` | `id` | namn, avatar, inställningar (passlängd, uppläsning, fritt svar) |
+| `progress` | `[profileId, packId]` | alla `ItemState` + `LearnerMeta` |
+| `attempts` | autoinkrement, index `[profileId, ts]` | svarsloggen |
+| `sessions` | `[profileId, id]` | ett litet kvitto per pass (minuter per dag, resultat) |
+| `daySummaries` | `[profileId, packId, dag, itemId]` | sammanfattning av äldre loggposter |
+| `settings` | nyckel | appinställningar |
+
+- **Migrationer.** `MIGRATIONS` är en lista där index *n* uppgraderar till version
+  *n + 1*. Databasversionen är listans längd. Nya migrationer läggs till sist och
+  släppta migrationer ändras aldrig. Exportformatet har en egen versionskedja i
+  `backup.ts`.
+- **Loggens storlek.** `maybeCompactLog` behåller de senaste 3 000 försöken per
+  profil när loggen har vuxit 500 poster förbi det. Äldre försök slås ihop till
+  antal, antal rätt och total svarstid per dag och fakta. Förväxlingarna finns
+  kvar i `ItemState.confusions`.
+- **Beständig lagring.** `requestPersistence()` anropas när appen startar och
+  anropar `navigator.storage.persist()`. Svaret (`persisted`, `not-persisted` eller
+  `unsupported`) visas i föräldravyn i fas 5.
+- **Säkerhetskopia (JSON).** `export` ger en fullständig kopia av en profil,
+  inklusive loggen. `import` validerar och reparerar trasiga poster och skriver
+  allt i en enda transaktion. Om profilen redan finns importeras den som en kopia,
+  om man inte väljer `onConflict: 'replace'`.
 
 ### Återanvända motorn för annat innehåll
 
