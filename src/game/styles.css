@@ -1261,6 +1261,17 @@ h1:focus {
   text-align: center;
 }
 
+.placement-bar {
+  background: var(--leaf);
+  transition: width 0.3s;
+}
+
+.placement-summary .plant {
+  width: 34px;
+  height: 34px;
+  vertical-align: -10px;
+}
+
 /* --- install & update ------------------------------------------------- */
 
 .install-banner,

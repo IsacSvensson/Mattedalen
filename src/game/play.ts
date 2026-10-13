@@ -1,4 +1,5 @@
 import {
+  applyPlacement,
   createEngine,
   makeConfig,
   mathRandomRng,
@@ -9,6 +10,7 @@ import {
   type Feedback,
   type ItemState,
   type LearnerMeta,
+  type PlacementResult,
   type Question,
   type Rng,
   type Session,
@@ -129,4 +131,52 @@ export class PlayController {
       updatedAt: clock.now(),
     });
   }
+}
+
+/**
+ * Stores the outcome of a placement check: passed units become fluent (never
+ * lowering earlier progress), the answers go into the log and the check is
+ * kept as a session record.
+ */
+export async function savePlacement(
+  profile: Profile,
+  deps: GameDeps,
+  result: PlacementResult,
+  startedAt: number,
+): Promise<{ states: Record<string, ItemState>; meta: LearnerMeta }> {
+  const clock = deps.clock ?? systemClock;
+  const engine = engineFor(profile, deps);
+  const loaded = await loadProgress(profile, deps, engine);
+  const placed = applyPlacement(deps.pack, engine.config, result, loaded.states, loaded.meta, clock.today());
+  const now = clock.now();
+  const sessionId = `placement-${now}`;
+  for (const a of result.answers) {
+    await deps.store.appendAttempt({
+      itemId: a.itemId,
+      ts: now,
+      sessionId,
+      format: 'free',
+      kind: 'placement',
+      given: a.given,
+      correct: a.correct,
+      rtMs: a.rtMs,
+      profileId: profile.id,
+      packId: deps.pack.id,
+    });
+  }
+  await deps.store.save({ profileId: profile.id, packId: deps.pack.id, packVersion: deps.pack.version, ...placed, updatedAt: now });
+  await deps.store.saveSession({
+    id: sessionId,
+    profileId: profile.id,
+    packId: deps.pack.id,
+    mode: 'placement',
+    day: clock.today(),
+    startedAt,
+    endedAt: now,
+    answered: result.answers.length,
+    correct: result.answers.filter((a) => a.correct).length,
+    introduced: [],
+    extra: { passedUnits: result.passedUnitIds.length },
+  });
+  return placed;
 }

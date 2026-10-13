@@ -45,7 +45,7 @@ export interface SessionRecord {
   id: string;
   profileId: string;
   packId: string;
-  mode: 'daily' | 'extra' | 'challenge' | 'duel';
+  mode: 'daily' | 'extra' | 'challenge' | 'duel' | 'placement';
   day: DayKey;
   startedAt: number;
   endedAt: number;

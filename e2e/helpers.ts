@@ -4,6 +4,8 @@ export async function createProfile(page: Page, name: string): Promise<void> {
   await page.getByRole('textbox', { name: 'Namn' }).fill(name);
   await page.getByRole('button', { name: 'Välj 🐢' }).click();
   await page.getByRole('button', { name: 'Klar' }).click();
+  // New players are offered a placement check; most tests start from scratch.
+  await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: new RegExp(`${name}s? trädgård`) })).toBeVisible();
 }
 

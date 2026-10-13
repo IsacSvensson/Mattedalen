@@ -99,7 +99,7 @@ export interface ItemState {
   confusions: Record<string, number>;
 }
 
-export type QuestionKind = 'warmup' | 'new' | 'rehearse' | 'retry' | 'due' | 'mixed';
+export type QuestionKind = 'warmup' | 'new' | 'rehearse' | 'retry' | 'due' | 'mixed' | 'placement';
 
 export interface Attempt {
   itemId: ItemId;

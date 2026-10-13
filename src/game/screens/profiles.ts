@@ -5,6 +5,7 @@ import { showGarden } from './garden';
 import { choose } from '../components/modal';
 import { applyUpdate, installGuide, isStandalone, onUpdateReady, updateReady } from '../pwa';
 import { showPinGate } from './parent/pinGate';
+import { showPlacementOffer } from './placement';
 
 export const AVATARS = ['🦊', '🐢', '🐸', '🐰', '🐻', '🦉', '🐝', '🦋', '🐞', '🐱', '🐶', '🦁'];
 
@@ -139,7 +140,8 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
       settings: { ...DEFAULT_SETTINGS },
     };
     await ctx.store.saveProfile(profile);
-    await openProfile(ctx, profile);
+    await ctx.store.setSetting('lastProfileId', profile.id);
+    showPlacementOffer(ctx, profile);
   }
 
   const view = h(

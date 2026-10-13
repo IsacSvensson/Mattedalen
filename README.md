@@ -263,6 +263,34 @@ varför det minskar risken att data raderas om appen läggs på hemskärmen.
 Båda vägarna testas i e2e mellan två separata webbläsarkontexter. QR-koden testas
 också i enhetstester genom att den ritas till pixlar och läses av med jsQR.
 
+### Startkoll (placering)
+
+Ett barn som redan kan ×10, ×2, ×5 och ×1 ska inte behöva gå igenom dem igen.
+Därför erbjuds en frivillig **startkoll** när en ny spelare skapas, och den kan
+göras om från föräldravyn.
+
+- **Motorn** (`engine/placement.ts`) är innehållsneutral. Den går igenom
+  enheterna i ordning och frågar 4 slumpade fakta ur varje.
+- **Godkänd enhet:** minst 3 av 4 rätt, och varje rätt svar ska komma inom 5 s.
+  Den som räknar på fingrarna får alltså inte enheten godkänd.
+- **Andra chans:** med exakt två fel i en enhet kommer 2 extra frågor som båda
+  måste vara rätt, alltså 4 av 6. Ett enstaka felslag stoppar då inte ett barn
+  som kan enheten.
+- **Slut:** kollen stannar vid den första enhet som inte klaras.
+- **Svaren** ges på sifferknappsatsen, eftersom flerval ger för mycket
+  gissning. Ingen rätt- eller fel-markering visas och ingen klocka syns.
+- **Resultat** (`applyPlacement`): fakta i godkända enheter blir *flytande*
+  (buskar), inte automatiserade, och enheterna låses upp fram till den första
+  som inte klarades. De placerade fakta läggs in för repetition utspritt över
+  den första veckan. En för generös placering rättas därför av den vanliga
+  repetitionen, eftersom ett fel svar sänker faktan ett steg. Startkollen kan
+  bara flytta fram ett barn, aldrig bakåt.
+- **Simulering:** genomsnittliga elever som redan övat de fyra lätta tabellerna
+  placeras vid ×4 (7 av 8 frön) efter cirka 19 frågor. Den åttonde placeras
+  lite lägre, vid ×2, vilket är den säkra sidan. Efter placeringen ligger
+  andelen rätt på 80–93 %, och efter sex veckor är minst 8 av 10 enheter
+  upplåsta.
+
 ### Extralägen
 
 Extralägena är frivilliga och tydligt valbara under huvudknappen i trädgården.

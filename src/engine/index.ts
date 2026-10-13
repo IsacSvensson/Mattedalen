@@ -8,3 +8,4 @@ export * from './unlock';
 export * from './distractors';
 export * from './session';
 export * from './engine';
+export * from './placement';

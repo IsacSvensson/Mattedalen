@@ -21,6 +21,7 @@ import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, snapshotOf } fr
 import { AVATARS, showProfiles } from '../profiles';
 import { installGuide } from '../../pwa';
 import { hasSwedishVoice, speechSupported } from '../../speech';
+import { showPlacementOffer } from '../placement';
 import { choosePin } from './pinGate';
 
 export async function showParent(ctx: AppContext, selectedId?: string): Promise<void> {
@@ -109,6 +110,9 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
       h('button', { class: 'soft-button', type: 'button', onclick: () => showQr(ctx, profile, states) }, 'Visa QR-kod'),
       h('button', { class: 'soft-button', type: 'button', onclick: () => void downloadBackup(ctx, profile) }, 'Spara säkerhetskopia (JSON)'),
     ),
+    h('h3', null, 'Startkoll'),
+    h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
+    h('button', { class: 'soft-button', type: 'button', onclick: () => showPlacementOffer(ctx, profile) }, 'Gör om startkollen'),
     h(
       'button',
       { class: 'link-button danger', type: 'button', onclick: () => void deleteProfile(ctx, profile) },

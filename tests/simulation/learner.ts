@@ -140,6 +140,22 @@ export class SimulatedLearner {
     this.traces.set(id, list);
   }
 
+  /**
+   * Prior knowledge: the learner practised these items before using the app,
+   * `reviews` times spread over the past weeks.
+   */
+  prime(ids: ItemId[], reviews = 100): void {
+    const now = this.psych;
+    const dayPsych = 86_400 * this.profile.h;
+    for (const id of ids) {
+      for (let i = reviews; i >= 1; i--) {
+        this.psych = now - i * 3 * dayPsych;
+        this.study(id);
+      }
+    }
+    this.psych = now;
+  }
+
   answer(q: Question, nowMs: number): { given: string; rtMs: number } {
     this.tick(nowMs);
     const p = this.profile;
@@ -205,6 +221,8 @@ export interface SimulationOptions {
   overheadMs?: number;
   wrongOverheadMs?: number;
   startMs?: number;
+  /** Start from existing progress (e.g. after a placement check). */
+  initial?: { states: Record<ItemId, ItemState>; meta: LearnerMeta };
 }
 
 const DAY_MS = 86_400_000;
@@ -217,8 +235,8 @@ export function simulate(
   clock: ManualClock,
 ): SimulationResult {
   const start = opts.startMs ?? Date.UTC(2026, 0, 5, 15, 0, 0);
-  let states = engine.initialStates();
-  let meta = engine.initialMeta();
+  let states = opts.initial?.states ?? engine.initialStates();
+  let meta = opts.initial?.meta ?? engine.initialMeta();
   const days: DayLog[] = [];
   let questionsTotal = 0;
   let correctTotal = 0;
