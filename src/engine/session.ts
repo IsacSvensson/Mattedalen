@@ -57,6 +57,8 @@ export interface SessionSummary {
   answered: number;
   correct: number;
   accuracy: number | null;
+  /** Ran the full configured time. */
+  completed: boolean;
   introduced: ItemId[];
   promoted: ItemId[];
   meta: LearnerMeta;
@@ -241,16 +243,23 @@ export class Session {
     return Object.fromEntries(this.states);
   }
 
+  /** True when the session ran its full time (ending early does not count as the day's session). */
+  completed(): boolean {
+    const end = this.endedAt ?? this.deps.clock.now();
+    return end - this.startedAt >= this.durationMs;
+  }
+
   summary(): SessionSummary {
     const accuracy = this.answered ? this.correctCount / this.answered : null;
     const prevEma = this.meta.accuracyEma;
+    const countsAsDaily = this.mode === 'daily' && this.answered > 0 && this.completed();
     const meta: LearnerMeta = {
       ...this.meta,
       pacingGap: this.pacing.gap,
       unlockedUnitIds: this.unlocked,
       accuracyEma: accuracy === null ? prevEma : prevEma === null ? accuracy : prevEma * 0.7 + accuracy * 0.3,
-      sessionsCompleted: this.meta.sessionsCompleted + (this.mode === 'daily' && this.answered > 0 ? 1 : 0),
-      lastSessionDay: this.mode === 'daily' && this.answered > 0 ? this.today : this.meta.lastSessionDay,
+      sessionsCompleted: this.meta.sessionsCompleted + (countsAsDaily ? 1 : 0),
+      lastSessionDay: countsAsDaily ? this.today : this.meta.lastSessionDay,
     };
     return {
       sessionId: this.id,
@@ -260,6 +269,7 @@ export class Session {
       answered: this.answered,
       correct: this.correctCount,
       accuracy,
+      completed: this.completed(),
       introduced: this.introduced.slice(),
       promoted: [...this.promoted],
       meta,

@@ -13,9 +13,16 @@ export function normalizeNumberAnswer(raw: string): string {
   return /^\d+$/.test(s) ? String(Number.parseInt(s, 10)) : s;
 }
 
-export function createMultiplicationPack(): ContentPack {
-  const items = buildFacts();
-  const units: Unit[] = UNIT_DEFS.map((def, i) => ({
+export interface PackOptions {
+  /** Only include the first N units (the game can release units gradually). */
+  maxUnits?: number;
+}
+
+export function createMultiplicationPack({ maxUnits = UNIT_DEFS.length }: PackOptions = {}): ContentPack {
+  const defs = UNIT_DEFS.slice(0, maxUnits);
+  const unitIds = new Set<string>(defs.map((d) => d.id));
+  const items = buildFacts().filter((it) => unitIds.has(it.unitId));
+  const units: Unit[] = defs.map((def, i) => ({
     id: def.id,
     title: def.title,
     order: i,

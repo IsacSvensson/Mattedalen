@@ -52,6 +52,13 @@ describe('unit progression', () => {
     expect(byId.get('8x7')!.unitId).toBe('u78');
   });
 
+  it('can be limited to the first units', () => {
+    const small = createMultiplicationPack({ maxUnits: 6 });
+    expect(small.units.map((u) => u.title)).toEqual(['×10', '×2', '×5', '×1', '×4', '×3']);
+    expect(small.items).toHaveLength(84);
+    expect(() => validatePack(small)).not.toThrow();
+  });
+
   it('only the first unit is open from the start; later ones need ~80 % fluent', () => {
     expect(pack.units[0]!.unlockRule).toEqual({ kind: 'always' });
     for (const u of pack.units.slice(1)) expect(u.unlockRule).toEqual({ kind: 'previous', fraction: 0.8, minStatus: 'fluent' });

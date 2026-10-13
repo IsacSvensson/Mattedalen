@@ -229,6 +229,20 @@ describe('summary', () => {
     expect(sum.introduced.length).toBeGreaterThan(0);
   });
 
+  it('a session ended early does not count as the day\'s session', () => {
+    const { engine, clock } = setup();
+    const s = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta() });
+    const q = s.next()!;
+    clock.advance(60_000);
+    s.submit(q.item.answer, 2000);
+    s.end();
+    const sum = s.summary();
+    expect(sum.completed).toBe(false);
+    expect(sum.meta.sessionsCompleted).toBe(0);
+    expect(engine.dailyDone(sum.meta)).toBe(false);
+    expect(sum.answered).toBe(1);
+  });
+
   it('records attempts with time, format and the given answer', () => {
     const { engine } = setup();
     const s = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta(), sessionId: 'abc' });

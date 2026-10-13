@@ -3,8 +3,10 @@
 Ett forskningsbaserat webbspel som lär barn 6–9 år multiplikationstabellen 1–10.
 Spelet är en offline-PWA utan backend. All data stannar i webbläsaren.
 
-> **Status:** Fas 1 (motor och innehåll) och fas 2 (lagring) är klara. Spelskal,
-> föräldravy, PWA och publicering på GitHub Pages kommer i fas 3–7.
+> **Status:** Fas 1–3 är klara: motor och innehåll, lagring och ett minimalt spel
+> (profiler, pass med flerval, trädgårdskartan) med enheterna ×10, ×2, ×5, ×1, ×4
+> och ×3. Återkoppling med rektanglar, fritt svar, föräldravy, PWA och publicering
+> på GitHub Pages kommer i fas 4–7.
 
 ## Kom igång
 
@@ -14,6 +16,7 @@ npm test            # alla tester, inklusive simulerade elever (~20 s)
 npm run typecheck   # app, motor (utan DOM-typer) och tester
 npm run dev         # utvecklingsserver
 npm run build       # typkontroll + statiskt bygge till dist/
+npm run e2e         # webbläsartester (Playwright, surfplatta + mobil)
 ```
 
 Kräver Node 20 eller senare.
@@ -25,12 +28,14 @@ src/
   engine/                   innehållsneutral inlärningsmotor (ren logik)
   content/multiplication/   innehållspaketet: fakta, enheter, strategier, distraktorer
   storage/                  ProgressStore, IndexedDB, säkerhetskopior
-  game/                     spelskal, UI och föräldravy          (fas 3–7)
+  game/                     spelskal och UI (vanilla TS + liten h()-hjälpare)
 tests/
   engine/                   enhetstester för motorn (med ett glosor-paket)
   content/                  tester för multiplikationspaketet
   simulation/               simulerade elever över 26 veckor
   storage/                  samma kontraktstester för minne och IndexedDB
+  game/                     spelets styrlogik (utan DOM)
+e2e/                        Playwright: hela flöden i riktig webbläsare
 ```
 
 ### Motorn (`src/engine`)
@@ -177,6 +182,36 @@ blockerat, till exempel i vissa privata lägen. Båda körs mot samma kontraktst
   inklusive loggen. `import` validerar och reparerar trasiga poster och skriver
   allt i en enda transaktion. Om profilen redan finns importeras den som en kopia,
   om man inte väljer `onConflict: 'replace'`.
+
+### Spelet (`src/game`)
+
+Spelet är skrivet i vanilla TypeScript med en liten `h()`-hjälpare (`dom.ts`). Det
+har få skärmar och lite delat tillstånd, så ett UI-ramverk skulle bara ge vikt.
+All grafik är inbäddad SVG, och det finns inga externa resurser.
+
+- **`play.ts`** (`PlayController`) kopplar ihop motorn och lagringen utan DOM.
+  Efter varje svar sparas försöket och faktans tillstånd. När passet är slut sparas
+  passets kvitto och elevens meta. Avbryter barnet passet tidigt finns framstegen
+  kvar, men dagen räknas inte som klar. Allt detta testas med minneslagringen.
+- **Profiler.** Flera barn kan använda samma enhet, och varje barn har namn och ett
+  djur.
+- **Kartan** är 10×10-rutnätet som trädgårdsland. Raden *a* och kolumnen *b* visar
+  *a × b*, så 3×7 och 7×3 speglas över diagonalen. Varje ruta visar faktans
+  status: jord → frö → planta → buske → träd. Fakta som just har vuxit animeras.
+- **Passet.** Nya fakta introduceras med ett rektangelmönster och strategin, och
+  sedan svarar barnet själv. Frågorna är flerval med stora knappar, och
+  siffertangenterna 1–4 fungerar också. Svarstiden mäts men visas aldrig, och
+  ingen klocka syns. Vid rätt svar kommer en kort glädjeanimation. Vid fel visas
+  rätt svar, strategin och rektangeln i stället för svarsknapparna, aldrig bara
+  ”fel”.
+- **Avslutningen.** När tiden är slut (12 minuter som standard) får barnet svara
+  klart på frågan och ser sedan ”Trädgården behöver sova nu” med vad som växte.
+  Under resten av dagen sover trädgården. Extra övning är frivillig, märkt som
+  frivillig, varar 5 minuter och ger inga nya fakta.
+
+Den här byggfasen släpper de sex första enheterna
+(`createMultiplicationPack({ maxUnits: 6 })`), och fritt svar är avstängt tills
+fas 4.
 
 ### Återanvända motorn för annat innehåll
 
