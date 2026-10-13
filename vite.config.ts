@@ -1,8 +1,48 @@
+import { createHash } from 'node:crypto';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
+
+/** All files below `dir`, as paths relative to it. */
+function listFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((name) => {
+    const full = join(dir, name);
+    return statSync(full).isDirectory() ? listFiles(full).map((f) => relative(dir, join(full, f))) : [name];
+  });
+}
+
+/**
+ * Emits sw.js with the list of every built file to precache. Its version is a
+ * hash of the precached files, so any change to the app installs a new worker.
+ */
+function swPlugin(): Plugin {
+  let outDir = 'dist';
+  return {
+    name: 'gangertradgarden-sw',
+    apply: 'build',
+    configResolved(config) {
+      outDir = config.build.outDir;
+    },
+    // After everything (including index.html) is written.
+    writeBundle() {
+      const files = listFiles(outDir).filter((f) => f !== 'sw.js' && !f.endsWith('.map')).sort();
+      const hash = createHash('sha256');
+      for (const f of files) hash.update(f).update(readFileSync(join(outDir, f)));
+      const version = hash.digest('hex').slice(0, 12);
+      const precache = ['./', ...files.map((f) => `./${f}`)];
+      const source = readFileSync('src/sw/sw-template.js', 'utf8')
+        .replace('const PRECACHE = __PRECACHE__;', `const PRECACHE = ${JSON.stringify(precache)};`)
+        .replace('const VERSION = __VERSION__;', `const VERSION = ${JSON.stringify(version)};`);
+      writeFileSync(join(outDir, 'sw.js'), source);
+    },
+  };
+}
 
 export default defineConfig({
   // Relative base so the static build works under any path (e.g. GitHub Pages /Multiplikation/).
   base: './',
+  plugins: [swPlugin()],
   build: {
     target: 'es2022',
     outDir: 'dist',

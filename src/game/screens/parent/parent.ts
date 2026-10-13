@@ -19,6 +19,7 @@ import { formatDay, factStats, minutesPerDay, STATUS_TEXT, topConfusions, type F
 import { engineFor, loadProgress } from '../../play';
 import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, snapshotOf } from '../../transfer';
 import { AVATARS, showProfiles } from '../profiles';
+import { installGuide } from '../../pwa';
 import { choosePin } from './pinGate';
 
 export async function showParent(ctx: AppContext, selectedId?: string): Promise<void> {
@@ -428,6 +429,8 @@ async function deviceSection(ctx: AppContext): Promise<HTMLElement> {
           'Be om beständig lagring',
         )
       : null,
+    h('h3', null, 'Lägg till på hemskärmen'),
+    installGuide(),
     h('h3', null, 'Varför lägga till på hemskärmen?'),
     h(
       'p',

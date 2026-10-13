@@ -2,6 +2,8 @@ import { DEFAULT_SETTINGS, type Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { h } from '../dom';
 import { showGarden } from './garden';
+import { choose } from '../components/modal';
+import { applyUpdate, installGuide, isStandalone, onUpdateReady, updateReady } from '../pwa';
 import { showPinGate } from './parent/pinGate';
 
 export const AVATARS = ['🦊', '🐢', '🐸', '🐰', '🐻', '🦉', '🐝', '🦋', '🐞', '🐱', '🐶', '🦁'];
@@ -33,9 +35,51 @@ export async function showProfiles(ctx: AppContext): Promise<void> {
       ),
     ),
     storageNotice(ctx),
+    updateBanner(),
+    await installBanner(ctx),
     parentLink(ctx),
   );
   show(ctx, view);
+}
+
+const INSTALL_DISMISSED = 'installBannerDismissed';
+
+/** A gentle hint for grown-ups to add the app to the home screen (once dismissed, gone). */
+async function installBanner(ctx: AppContext): Promise<HTMLElement | null> {
+  if (isStandalone() || (await ctx.store.getSetting<boolean>(INSTALL_DISMISSED))) return null;
+  const banner: HTMLElement = h(
+    'div',
+    { class: 'install-banner' },
+    h('p', null, '📲 Lägg till appen på hemskärmen – då fungerar den utan internet och framstegen sparas säkrare.'),
+    h(
+      'div',
+      { class: 'button-row' },
+      h('button', { class: 'soft-button small', type: 'button', onclick: () => void choose('Lägg till på hemskärmen', installGuide(), [{ value: 'ok', label: 'Klar', primary: true }], { cancel: false }) }, 'Visa hur'),
+      h(
+        'button',
+        {
+          class: 'link-button',
+          type: 'button',
+          onclick: async () => {
+            await ctx.store.setSetting(INSTALL_DISMISSED, true);
+            banner.remove();
+          },
+        },
+        'Inte nu',
+      ),
+    ),
+  );
+  return banner;
+}
+
+/** Offered here, between sessions, rather than swapping the app mid-game. */
+function updateBanner(): HTMLElement {
+  const banner = h('div', { class: 'update-banner', hidden: !updateReady() }, h('button', { class: 'soft-button small', type: 'button', onclick: () => applyUpdate() }, '🔄 Ny version finns – uppdatera'));
+  const stop = onUpdateReady(() => {
+    if (!banner.isConnected) return stop();
+    banner.hidden = false;
+  });
+  return banner;
 }
 
 function parentLink(ctx: AppContext, text = '🔒 För vuxna'): HTMLElement {

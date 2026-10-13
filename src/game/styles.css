@@ -1101,6 +1101,55 @@ h1:focus {
   border-radius: 16px;
 }
 
+/* --- install & update ------------------------------------------------- */
+
+.install-banner,
+.update-banner {
+  width: min(100%, 520px);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  text-align: center;
+}
+
+.install-banner p {
+  margin: 0 0 8px;
+}
+
+.install-banner .button-row,
+.update-banner {
+  justify-content: center;
+  display: flex;
+}
+
+.update-banner[hidden] {
+  display: none;
+}
+
+.install-guide {
+  text-align: left;
+}
+
+.install-guide .big-button {
+  display: block;
+  margin: 0 auto 12px;
+}
+
+.install-steps {
+  margin: 0 0 8px;
+  padding-left: 1.4em;
+  line-height: 1.6;
+}
+
+.ios-share {
+  vertical-align: -4px;
+  color: #1a73e8;
+}
+
+.install-done {
+  font-weight: 600;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

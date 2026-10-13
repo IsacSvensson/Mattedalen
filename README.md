@@ -3,10 +3,10 @@
 Ett forskningsbaserat webbspel som lär barn 6–9 år multiplikationstabellen 1–10.
 Spelet är en offline-PWA utan backend. All data stannar i webbläsaren.
 
-> **Status:** Fas 1–5 är klara: motor och innehåll, lagring, spelet med hela
-> tabellen, interaktiv introduktion, strategiåterkoppling, fritt svar, föräldravy
-> och flytt mellan enheter (QR och JSON). PWA, publicering på GitHub Pages och
-> extralägen kommer i fas 6–7.
+> **Status:** Fas 1–6 är klara: motor och innehåll, lagring, spelet med hela
+> tabellen, interaktiv introduktion, strategiåterkoppling, fritt svar, föräldravy,
+> flytt mellan enheter (QR och JSON), offline-PWA och publicering på GitHub Pages.
+> Extralägen (utmaning, tvåspelarläge, uppläsning) kommer i fas 7.
 
 ## Kom igång
 
@@ -260,6 +260,42 @@ varför det minskar risken att data raderas om appen läggs på hemskärmen.
 
 Båda vägarna testas i e2e mellan två separata webbläsarkontexter. QR-koden testas
 också i enhetstester genom att den ritas till pixlar och läses av med jsQR.
+
+### PWA och offline
+
+- **Manifest** (`public/manifest.webmanifest`): svenskt namn, `display: standalone`
+  och relativa sökvägar, så att appen fungerar under vilken undersökväg som helst.
+  Ikonerna (192, 512, maskable och Apple) renderas från `public/icons/icon.svg`
+  med `node scripts/make-icons.mjs`.
+- **Service worker** (`src/sw/sw-template.js`). Ett litet Vite-plugin
+  (`swPlugin` i `vite.config.ts`) skriver `dist/sw.js` efter bygget. Det
+  innehåller listan över alla byggda filer och en version som är en hash av
+  filerna. Workern cachar bara appens egna statiska filer och svarar
+  cache-first. Navigering får den cachade `index.html`. Allt annat lämnas
+  orört, och ingen data går över nätet.
+- **Uppdateringar.** En ny version installeras i bakgrunden och väntar.
+  Startsidan visar då ”🔄 Ny version finns – uppdatera”. Appen byts aldrig ut
+  mitt i ett pass.
+- **Installation.** En vänlig banderoll på startsidan och en guide i
+  föräldravyn visar hur man lägger till appen på hemskärmen. Guiden har steg för
+  iPhone och iPad (Safari → Dela → Lägg till på hemskärmen), för Android och för
+  dator. Där webbläsaren erbjuder det, som Chrome och Edge, finns också en egen
+  installationsknapp. Installerad körs appen i helskärm, och webbläsaren raderar
+  inte datan lika lätt.
+- **Tester.** E2e-testet laddar appen en gång, stänger av nätet, spelar, öppnar
+  föräldravyn och läser en QR-bild, där läsarbiblioteket laddas först då. Testet
+  kontrollerar att varje svar kom från service workern och att inget anrop gick
+  till någon annan värd.
+
+### Publicering på GitHub Pages
+
+`.github/workflows/deploy.yml` bygger och publicerar repots **standardgren** vid
+varje push. Det kan också startas manuellt under *Actions → Publicera på GitHub
+Pages → Run workflow*. Enhetstesterna körs först. Engångsinställning: välj
+**Settings → Pages → Build and deployment → Source: GitHub Actions** i repot.
+Appen hamnar då på `https://<användare>.github.io/<repo>/`.
+`.github/workflows/ci.yml` kör typkontroll, enhetstester, bygge och
+Playwright-tester vid varje push och pull request.
 
 ### Återanvända motorn för annat innehåll
 
