@@ -80,7 +80,8 @@ function moodIcon(mood: PlaceMood): Element {
 /** The brook and the path, stretched to the ground's shape (the outlines keep their width). */
 function valleyLand(): SVGSVGElement {
   const svg = s('svg', { class: 'valley-land', viewBox: '0 0 100 100', preserveAspectRatio: 'none', 'aria-hidden': 'true' });
-  const brook = 'M20 -2 C14 18 30 30 24 48 S10 76 22 102';
+  // In from the left edge and out at the bottom: the brook runs on beyond the frame.
+  const brook = 'M-6 16 C10 18 30 28 26 48 S10 76 22 104';
   svg.innerHTML =
     `<path d="M24 64 C40 74 52 70 60 60" class="valley-path"/>` +
     `<path d="M60 60 C70 70 80 82 92 102" class="valley-path"/>` +
