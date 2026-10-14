@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { createProfile, openParent } from './helpers';
+import { createProfile, openParent, switchPlayer } from './helpers';
 
 /*
  * Publishing a new version is simulated by changing the version in the served
@@ -82,7 +82,7 @@ test('grown-ups can look for an update and see the version', async ({ page }) =>
   await page.reload();
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
   await createProfile(page, 'Bo');
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await openParent(page);
   await expect(page.getByText(/^Appen: \d{4}-\d{2}-\d{2}/)).toBeVisible();
 

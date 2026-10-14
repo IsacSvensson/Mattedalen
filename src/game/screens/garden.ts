@@ -9,7 +9,7 @@ import { icon } from '../components/icons';
 import { scene } from '../components/scene';
 import { h } from '../dom';
 import { engineFor, loadProgress } from '../play';
-import { showProfiles } from './profiles';
+import { showValley } from './valley';
 import { showSession } from './session';
 import { CHALLENGE_MIN_FACTS, canChallenge as challengeOpen } from '../challenge';
 import { showChallenge } from './challenge';
@@ -90,7 +90,8 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
       h(
         'div',
         { class: 'scene-title' },
-        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Byt spelare', onclick: () => void showProfiles(ctx) }, avatarIcon(profile.avatar)),
+        // The child's animal walks back to the valley; players are switched there.
+        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile) }, avatarIcon(profile.avatar)),
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} trädgård`),
       ),
     ),

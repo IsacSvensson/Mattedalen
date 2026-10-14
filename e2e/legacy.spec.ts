@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { openParent } from './helpers';
+import { enterGarden, openParent, switchPlayer } from './helpers';
 
 /*
  * Gångerträdgården ran on the same origin before Mattedalen. Its children,
@@ -97,14 +97,14 @@ test('children from Gångerträdgården come along, and the old app keeps its da
   const before = await readGangertradgarden(page);
 
   await page.goto('/');
-  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await enterGarden(page, 'Alva');
   await expect(page.getByRole('heading', { name: 'Alvas trädgård' })).toBeVisible();
   await expect(page.locator('.grid-cell.stage-bush')).toHaveCount(1);
   await expect(page.locator('.grid-cell.stage-tree')).toHaveCount(1);
   await expect(page.locator('.grid-cell.stage-sprout')).toHaveCount(1);
 
   // The grown-ups' code came along: it is asked for, not chosen anew.
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await page.getByRole('button', { name: 'För vuxna' }).click();
   await expect(page.getByRole('heading', { name: 'Vuxenkod' })).toBeVisible();
   await openParentWithCode(page);
@@ -155,7 +155,7 @@ test('a backup file saved in Gångerträdgården can be restored', async ({ page
     .setInputFiles({ name: 'gangertradgarden-alva-2026-10-01.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
   await expect(page.getByText('Alva är återställd')).toBeVisible();
   await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
-  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await enterGarden(page, 'Alva');
   await expect(page.locator('.grid-cell.stage-tree')).toHaveCount(1);
 });
 

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openParent } from './helpers';
+import { openParent, switchPlayer } from './helpers';
 
 /** Answers the check: right (and fast) for facts with a factor in `known`, otherwise "0". */
 async function answerCheck(page: import('@playwright/test').Page, known: number[], thinkMs = 0) {
@@ -79,7 +79,7 @@ test('the check can be redone from the parent view and never moves a child back'
   await page.getByRole('button', { name: 'Till trädgården' }).click();
   await expect(page.locator('.grid-cell.stage-bush')).toHaveCount(36);
 
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await openParent(page);
   await page.getByRole('button', { name: 'Gör om startkollen' }).click();
   await page.getByRole('button', { name: 'Gör startkollen' }).click();

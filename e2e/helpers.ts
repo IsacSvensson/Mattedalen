@@ -9,6 +9,20 @@ export async function createProfile(page: Page, name: string): Promise<void> {
   await expect(page.getByRole('heading', { name: new RegExp(`${name}s? trädgård`) })).toBeVisible();
 }
 
+/** From the valley (or the list of players) into the garden. */
+export async function enterGarden(page: Page, name?: string): Promise<void> {
+  if (name) await page.locator('.profile-tile', { hasText: name }).click();
+  await page.getByRole('button', { name: 'Gå till trädgården' }).click();
+  await expect(page.getByRole('heading', { name: /s? trädgård$/ })).toBeVisible();
+}
+
+/** From the garden, through the valley, to the list of players. */
+export async function switchPlayer(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await expect(page.getByRole('heading', { name: 'Vem spelar?' })).toBeVisible();
+}
+
 /** The next step of a session is visible: a question or the intro of a new fact. */
 export function nextStep(page: Page) {
   return page

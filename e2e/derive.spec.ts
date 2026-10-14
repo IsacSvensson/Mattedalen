@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, answerDerive, createProfile, nextStep, openParent, seedStates, type SeedState } from './helpers';
+import { answer, answerDerive, createProfile, enterGarden, nextStep, openParent, seedStates, type SeedState } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -20,7 +20,7 @@ test('a hard fact is reached in steps from known facts, then asked again from me
     // Wrong on two different days: hard.
     '6x7': { status: 'learning', box: 1, dueDay: '2026-02-02', wrongDays: 2, introducedDay: '2026-01-28' },
   });
-  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await enterGarden(page, 'Alva');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
 
   const asked: string[] = [];
@@ -76,7 +76,7 @@ test('the helper walks any derivation path', async ({ page }) => {
     '10x6': fluent,
     '9x6': { status: 'learning', box: 1, dueDay: '2026-02-02', drops: 2, introducedDay: '2026-01-25' },
   });
-  await page.locator('.profile-tile', { hasText: 'Mira' }).click();
+  await enterGarden(page, 'Mira');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   for (let i = 0; i < 25 && !(await page.locator('.question.derive').isVisible()); i++) {
     await expect(nextStep(page)).toBeVisible();

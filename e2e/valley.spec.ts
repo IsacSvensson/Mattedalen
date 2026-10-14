@@ -1,0 +1,117 @@
+import { expect, test } from '@playwright/test';
+import { answer, createProfile, enterGarden, nextStep, openParent, seedStates, switchPlayer } from './helpers';
+
+/** The valley is the child's start page; the garden is its only place so far. */
+
+test('a child chooses their name and lands in the valley, and walks to the garden and back', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Alva');
+  // A new child goes straight on from the start check into the garden, as before.
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await expect(page.getByRole('heading', { name: 'Mattedalen' })).toBeVisible();
+  await expect(page.locator('.place')).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Trädgården. Här väntar nya frön.' })).toBeVisible();
+  await expect(page.locator('.mini-cell .plant')).toHaveCount(0);
+
+  // The place itself leads to the garden …
+  await page.getByRole('button', { name: /^Trädgården\./ }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas trädgård' })).toBeVisible();
+  // … and so does the main button.
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Gå till trädgården' }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas trädgård' })).toBeVisible();
+
+  // Opening the app again: choose the player, and the valley is the start page.
+  await page.reload();
+  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await expect(page.getByRole('heading', { name: 'Mattedalen' })).toBeVisible();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await expect(page.getByRole('heading', { name: 'Vem spelar?' })).toBeVisible();
+});
+
+test('the valley shows what the child knows: plants in the bed and a sunflower per table', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
+  await page.goto('/');
+  await createProfile(page, 'Bo');
+  const fluent = { status: 'fluent', box: 3 };
+  const states: Record<string, typeof fluent> = { '3x3': { status: 'automatic', box: 5 }, '2x2': { status: 'learning', box: 0 } };
+  for (let n = 1; n <= 10; n++) Object.assign(states, { [`10x${n}`]: fluent, [`${n}x10`]: fluent });
+  await seedStates(page, states);
+  await page.locator('.profile-tile', { hasText: 'Bo' }).click();
+
+  const thirsty = page.getByRole('button', { name: 'Trädgården. Trädgården är törstig.' });
+  await expect(thirsty).toBeVisible();
+  await expect(page.locator('.place-status')).toHaveText('Trädgården är törstig.');
+  // The furthest grown plants first: one tree, then bushes.
+  await expect(page.locator('.mini-cell .plant')).toHaveCount(8);
+  await expect(page.locator('.mini-cell').first().locator('.plant-tree')).toHaveCount(1);
+  await expect(page.locator('.mini-cell .plant-bush')).toHaveCount(7);
+  // ×10 is known: one sunflower on the hill, said in words as well.
+  await expect(page.locator('.valley-map .scene-sunflower')).toHaveCount(1);
+  await expect(page.getByText('Solrosor på kullen: 1, en för varje tabell du kan.')).toBeAttached();
+
+  // After the day's session the garden sleeps, but can still be visited.
+  await enterGarden(page);
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  await answer(page);
+  await page.clock.fastForward('12:00');
+  // The time is up: the question on screen is answered first, if there is one.
+  const end = page.getByRole('button', { name: 'Till trädgården' });
+  await expect(nextStep(page).or(end)).toBeVisible();
+  if (!(await end.isVisible())) await answer(page);
+  await end.click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await expect(page.getByRole('button', { name: 'Trädgården. Trädgården sover. Kom tillbaka i morgon!' })).toBeVisible();
+  await expect(page.locator('.place-name .icon')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Gå till trädgården' }).click();
+  await expect(page.getByText('Trädgården sover. Kom tillbaka i morgon!')).toBeVisible();
+});
+
+test('the valley can be read aloud', async ({ page }) => {
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    (window as unknown as { spoken: string[] }).spoken = spoken;
+    class FakeUtterance {
+      lang = '';
+      rate = 1;
+      voice: unknown = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(public text: string) {}
+    }
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: FakeUtterance });
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: {
+        getVoices: () => [{ lang: 'sv-SE', name: 'Alva' }],
+        speak: (u: FakeUtterance) => {
+          spoken.push(`${u.lang}: ${u.text}`);
+          setTimeout(() => u.onend?.(), 10);
+        },
+        cancel: () => undefined,
+        addEventListener: () => undefined,
+      },
+    });
+  });
+  await page.goto('/');
+  await createProfile(page, 'Alva');
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  // Without read-aloud there is no speaker button.
+  await expect(page.getByRole('button', { name: 'Läs upp' })).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await openParent(page);
+  await page.getByRole('checkbox', { name: /Läs upp frågorna/ }).check();
+  await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await page.getByRole('button', { name: 'Läs upp' }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual([
+    'sv-SE: Trädgården. Här väntar nya frön.',
+  ]);
+});
+
+test('switching player from the garden goes through the valley', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Alva');
+  await switchPlayer(page);
+  await expect(page.locator('.profile-tile', { hasText: 'Alva' })).toBeVisible();
+});

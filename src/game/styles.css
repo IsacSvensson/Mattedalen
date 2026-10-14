@@ -75,6 +75,8 @@
   --night-soft: #34466a;
   --night-hill-back: #3f5f4a;
   --night-hill-front: #2f4b3a;
+  --water: #7cc4e4;
+  --path: #f6e3bd;
 
   /* plants */
   --seed: #f6dca8;
@@ -911,6 +913,236 @@ h1:focus {
 
 .asleep .extras-note {
   color: #f6efe0;
+}
+
+/* --- valley: the map of the places ----------------------------------- */
+/*
+ * The same three channels as in the garden:
+ * - availability: a place is drawn only when it exists (no locked places)
+ * - knowledge: what grows in the place (the small bed shows the child's plants)
+ * - whole areas: the landscape (one sunflower on the hill per known table)
+ */
+
+.screen.valley {
+  gap: 14px;
+}
+
+.valley-head {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.valley-head h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 7vw, 2.2rem);
+}
+
+.valley-map {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: var(--outline);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: var(--hill-front);
+}
+
+/* The landscape band, here inside the map's frame instead of edge to edge. */
+.valley-map .scene {
+  width: 100%;
+  margin-left: 0;
+  padding-top: 0;
+  border-bottom: none;
+}
+
+.valley-map .scene-sky {
+  top: 6px;
+  right: 8px;
+}
+
+/* The hills' outline runs down their sides; keep those ends outside the frame. */
+.valley-map .scene-hills {
+  left: -4px;
+  width: calc(100% + 8px);
+}
+
+.valley-ground {
+  --mini-cell: clamp(26px, 8vw, 48px);
+  position: relative;
+  height: clamp(240px, 66vw, max(340px, calc(100dvh - 560px)));
+  background: var(--hill-front);
+}
+
+.valley-land {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.valley-land path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+}
+
+.brook-bank {
+  stroke: var(--ink);
+  stroke-width: 27px;
+}
+
+.brook-water {
+  stroke: var(--water);
+  stroke-width: 22px;
+}
+
+.valley-path {
+  stroke: var(--path);
+  stroke-width: 10px;
+  stroke-dasharray: 2 16;
+}
+
+/* A place: what grows there, and its name on a pill you can press. */
+.place {
+  position: absolute;
+  left: 62%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.place:focus-visible {
+  outline: none;
+}
+
+.place:focus-visible .place-name {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.mini-bed {
+  display: grid;
+  grid-template-columns: repeat(4, var(--mini-cell));
+  gap: 4px;
+  padding: 6px;
+  border: var(--outline);
+  border-radius: 16px;
+  background: var(--wood);
+}
+
+.mini-cell {
+  width: var(--mini-cell);
+  height: var(--mini-cell);
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--earth);
+}
+
+.mini-cell .plant {
+  width: 100%;
+  height: 100%;
+}
+
+.mood-asleep .mini-bed {
+  filter: saturate(0.75) brightness(0.92);
+}
+
+.place-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 18px 6px;
+  border: var(--outline);
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--press);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.place-name .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.place:active .place-name {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.valley-walker {
+  position: absolute;
+  left: 30%;
+  top: 82%;
+  transform: translate(-50%, -50%);
+  width: clamp(44px, 12vw, 56px);
+  height: clamp(44px, 12vw, 56px);
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  border: var(--outline);
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.valley-walker svg {
+  width: 100%;
+  height: 100%;
+}
+
+.valley-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.place-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.place-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1.2;
+}
+
+.place-status .icon,
+.place-status .plant {
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+
+/* The plant pictures have air around them; drawn a little larger to match the icons. */
+.place-status .plant {
+  width: 46px;
+  height: 46px;
+  margin: -6px -4px;
 }
 
 /* --- session: the top band ------------------------------------------- */
@@ -2487,5 +2719,63 @@ h1:focus {
   .help-wrap {
     flex-direction: row;
     justify-content: center;
+  }
+}
+
+/* Valley on wide landscape screens (tablets on their side): the map with the controls beside it. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .screen.valley {
+    display: grid;
+    grid-template-columns: minmax(0, 700px) minmax(300px, 380px);
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    column-gap: 40px;
+    max-width: 1180px;
+  }
+
+  .valley-head {
+    grid-column: 1 / -1;
+  }
+
+  .valley-ground {
+    --mini-cell: 46px;
+    height: min(400px, calc(100dvh - 300px));
+  }
+}
+
+/* Valley on phones on their side: a lower map, the controls beside it. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .screen.valley {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+    align-items: center;
+    column-gap: 24px;
+    row-gap: 8px;
+    max-width: 900px;
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+
+  .valley-head {
+    grid-column: 1 / -1;
+  }
+
+  .valley-head h1 {
+    font-size: 1.4rem;
+  }
+
+  .valley-ground {
+    --mini-cell: clamp(20px, 6.5dvh, 30px);
+    height: calc(100dvh - 64px - 44px - 50px);
+    min-height: 150px;
+  }
+
+  .valley-walker {
+    width: 40px;
+    height: 40px;
+  }
+
+  .place-name {
+    font-size: 1.1rem;
   }
 }

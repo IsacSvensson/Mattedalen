@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, nextStep, seedStates } from './helpers';
+import { answer, createProfile, enterGarden, nextStep, seedStates } from './helpers';
 
 const fluent = (ids: string[]) => Object.fromEntries(ids.map((id) => [id, { status: 'fluent', box: 3 }]));
 const tens = () => {
@@ -16,7 +16,7 @@ test('practise one chosen table: new facts from it, mixed with others', async ({
   await page.goto('/');
   await createProfile(page, 'Alva');
   await seedStates(page, fluent(tens()));
-  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await enterGarden(page, 'Alva');
 
   await page.getByRole('button', { name: 'Öva en tabell' }).click();
   await expect(page.getByRole('heading', { name: 'Vilken tabell vill du öva på?' })).toBeVisible();
@@ -53,7 +53,7 @@ test('a record challenge on one table keeps its own record', async ({ page }) =>
   await page.goto('/');
   await createProfile(page, 'Bo');
   await seedStates(page, fluent([...tens(), '7x2', '2x7', '7x5', '5x7']));
-  await page.locator('.profile-tile', { hasText: 'Bo' }).click();
+  await enterGarden(page, 'Bo');
 
   await page.getByRole('button', { name: 'Öva en tabell' }).click();
   await page.getByRole('button', { name: /^×7,/ }).click();

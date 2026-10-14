@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, createProfile, nextStep, seedStates } from './helpers';
+import { answer, createProfile, enterGarden, nextStep, seedStates } from './helpers';
 
 /** A phone on its side: very little height. */
 test.use({ viewport: { width: 800, height: 360 } });
@@ -16,6 +16,16 @@ test('the garden fits beside its buttons, with readable squares', async ({ page 
   for (const t of [1, 2, 3]) for (let n = 1; n <= 10; n++) Object.assign(s, { [`${t}x${n}`]: f, [`${n}x${t}`]: f });
   await seedStates(page, s);
   await page.locator('.profile-tile').first().click();
+
+  // The valley: the whole map beside the main button, without scrolling.
+  const map = (await page.locator('.valley-map').boundingBox())!;
+  expect(map.y + map.height).toBeLessThanOrEqual(360);
+  const go = (await page.getByRole('button', { name: 'Gå till trädgården' }).boundingBox())!;
+  expect(go.y + go.height).toBeLessThanOrEqual(360);
+  expect(go.x).toBeGreaterThan(map.x + map.width);
+  await expectWithin(page, '.place', '.valley-ground');
+
+  await enterGarden(page);
   await expect(page.locator('.garden-grid')).toBeVisible();
   expect(await cellSize(page)).toBeGreaterThanOrEqual(20);
   // The whole bed and the main button are on screen without scrolling.
@@ -41,3 +51,13 @@ test('a question fits beside its answers', async ({ page }) => {
     await answer(page);
   }
 });
+
+/** The element lies entirely inside the other one. */
+async function expectWithin(page: Page, inner: string, outer: string): Promise<void> {
+  const a = (await page.locator(inner).first().boundingBox())!;
+  const b = (await page.locator(outer).first().boundingBox())!;
+  expect(a.x).toBeGreaterThanOrEqual(b.x);
+  expect(a.y).toBeGreaterThanOrEqual(b.y);
+  expect(a.x + a.width).toBeLessThanOrEqual(b.x + b.width + 0.5);
+  expect(a.y + a.height).toBeLessThanOrEqual(b.y + b.height + 0.5);
+}

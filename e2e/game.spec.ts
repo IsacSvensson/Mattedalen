@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, nextStep } from './helpers';
+import { answer, createProfile, enterGarden, nextStep, switchPlayer } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -37,6 +37,8 @@ test('a first daily session: new profile, intro, questions, soft ending', async 
   // Everything survives a reload.
   await page.reload();
   await page.getByRole('button', { name: /Alva/ }).click();
+  await expect(page.getByRole('button', { name: 'Trädgården. Trädgården sover. Kom tillbaka i morgon!' })).toBeVisible();
+  await enterGarden(page);
   await expect(page.getByText('Trädgården sover.', { exact: false })).toBeVisible();
 });
 
@@ -64,10 +66,10 @@ test('leaving early keeps progress but does not end the day', async ({ page }) =
 
 test('several children on one device', async ({ page }) => {
   await createProfile(page, 'Alva');
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await page.getByRole('button', { name: 'Ny spelare' }).click();
   await createProfile(page, 'Bo');
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await expect(page.locator('.profile-tile:not(.add)')).toHaveCount(2);
 });
 

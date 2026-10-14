@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, openParent } from './helpers';
+import { answer, createProfile, openParent, switchPlayer } from './helpers';
 
 test('works fully offline after the first visit, without any outside traffic', async ({ page, context, baseURL }) => {
   const origin = new URL(baseURL!).origin;
@@ -29,7 +29,7 @@ test('works fully offline after the first visit, without any outside traffic', a
 
   // The lazily loaded QR reader also works offline.
   await page.getByRole('button', { name: 'Tillbaka till trädgården' }).click();
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await openParent(page);
   await page.getByRole('button', { name: 'Visa QR-kod' }).click();
   const qr = await page.locator('.qr-code svg').screenshot();
@@ -64,7 +64,7 @@ test('is installable: manifest, icons and service worker are in place', async ({
 test('shows how to add the app to the home screen', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Alva');
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await page.getByRole('button', { name: 'Visa hur' }).click();
   await expect(page.getByRole('dialog')).toContainText('Lägg till på hemskärmen');
   await page.getByRole('button', { name: 'Klar' }).click();

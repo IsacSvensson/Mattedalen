@@ -1,7 +1,6 @@
 import { DEFAULT_SETTINGS, type Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { h } from '../dom';
-import { showGarden } from './garden';
 import { choose } from '../components/modal';
 import { installGuide, isStandalone } from '../pwa';
 import { showPinGate } from './parent/pinGate';
@@ -10,6 +9,7 @@ import { AVATAR_KEYS, avatarIcon, avatarName } from '../components/avatars';
 import { icon } from '../components/icons';
 import { plantIcon } from '../components/plant';
 import { scene } from '../components/scene';
+import { showValley } from './valley';
 
 /** The animals a player can be (stored as emoji, drawn as pictures). */
 export const AVATARS = AVATAR_KEYS;
@@ -84,7 +84,7 @@ function parentLink(ctx: AppContext, text = 'För vuxna'): HTMLElement {
 
 async function openProfile(ctx: AppContext, profile: Profile): Promise<void> {
   await ctx.store.setSetting('lastProfileId', profile.id);
-  await showGarden(ctx, profile);
+  await showValley(ctx, profile);
 }
 
 function showNewProfile(ctx: AppContext, first: boolean): void {

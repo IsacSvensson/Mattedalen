@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, nextStep, openParent, seedStates } from './helpers';
+import { answer, createProfile, enterGarden, nextStep, openParent, seedStates, switchPlayer } from './helpers';
 
 const fluentTens = () => {
   const s: Record<string, { status: string; box: number }> = {};
@@ -17,7 +17,7 @@ test('the record challenge opens once facts are fluent and only compares with yo
   await expect(page.getByRole('button', { name: 'Slå rekord' })).toBeDisabled();
 
   await seedStates(page, fluentTens());
-  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await enterGarden(page, 'Alva');
   await page.getByRole('button', { name: 'Slå rekord' }).click();
   await expect(page.getByText('Första gången – sätt ett rekord!')).toBeVisible();
   await page.getByRole('button', { name: 'Kör!' }).click();
@@ -86,12 +86,12 @@ test('questions can be read aloud in Swedish', async ({ page }) => {
   });
   await page.goto('/');
   await createProfile(page, 'Alva');
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await openParent(page);
   await page.getByRole('checkbox', { name: /Läs upp frågorna/ }).check();
   await expect(page.locator('.voice-note')).toHaveText('');
   await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
-  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await enterGarden(page, 'Alva');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   await expect(nextStep(page)).toBeVisible();
   await answer(page);

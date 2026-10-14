@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, openParent, seedStates } from './helpers';
+import { answer, createProfile, enterGarden, openParent, seedStates, switchPlayer } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 
 test('the parent view is behind a PIN', async ({ page }) => {
   await createProfile(page, 'Alva');
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await openParent(page, '1357');
   await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
 
@@ -30,7 +30,7 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   await page.clock.fastForward('12:00');
   await answer(page);
   await page.getByRole('button', { name: 'Till trädgården' }).click();
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await openParent(page);
 
   await expect(page.locator('.heat-cell')).toHaveCount(100);
@@ -64,7 +64,7 @@ test('a JSON backup restores everything on another device', async ({ page, brows
   await other.locator('input[type=file][accept*=json]').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: await readFile(file) });
   await expect(other.getByText('Alva är återställd')).toBeVisible();
   await other.getByRole('button', { name: 'Stäng föräldravyn' }).click();
-  await other.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await enterGarden(other, 'Alva');
   await expect(other.locator('.grid-cell.stage-bush')).toHaveCount(1);
   await expect(other.locator('.grid-cell.stage-tree')).toHaveCount(1);
   await other.close();
@@ -92,7 +92,7 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
   await expect(other.getByText('Alva är hämtad')).toBeVisible();
 
   await other.getByRole('button', { name: 'Stäng föräldravyn' }).click();
-  await other.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await enterGarden(other, 'Alva');
   await expect(other.locator('.grid-cell.stage-tree')).toHaveCount(10);
   await expect(other.locator('.grid-cell.stage-bush')).toHaveCount(9);
   await expect(other.locator('.grid-cell.stage-sprout')).toHaveCount(1);
@@ -101,10 +101,10 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
 
 test('a profile can be deleted', async ({ page }) => {
   await createProfile(page, 'Alva');
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await page.getByRole('button', { name: 'Ny spelare' }).click();
   await createProfile(page, 'Bo');
-  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await switchPlayer(page);
   await openParent(page);
   await page.getByRole('button', { name: 'Ta bort Alva…' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Ta bort' }).click();

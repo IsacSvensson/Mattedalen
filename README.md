@@ -9,11 +9,36 @@ bruk.
 > ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation)),
 > som blir dalens första plats, Trädgården. Arbetet följer ordningen i
 > [docs/OVERLAMNING-MATTEDALEN.md](docs/OVERLAMNING-MATTEDALEN.md). Steg 1 (eget
-> repo, egen databas och import från Gångerträdgården) är klart. Härnäst kommer
-> skalet med dalens karta. Dokumentationen nedan beskriver tills vidare
-> Trädgården och skrivs om när skalet är på plats.
+> repo, egen databas och import från Gångerträdgården) och skalet med dalens
+> karta är klara. Dokumentationen efter avsnittet om dalen beskriver tills vidare
+> Trädgården och skrivs om i nästa fas.
 >
 > **Spela:** https://isacsvensson.github.io/Mattedalen/ (när Pages är påslaget)
+
+## Dalen (`src/game/screens/valley.ts`)
+
+Dalen är barnets startsida. Barnet väljer sig själv under ”Vem spelar?” och
+kommer då till dalens karta. Därifrån går barnet till platserna.
+
+- **Bara platser som finns ritas.** Trädgården är den enda platsen än så länge.
+  Resten av dalen är landskap med en bäck och en stig. Det finns inga stängda
+  platser som väntar på att låsas upp, för innehåll öppnas när det finns och när
+  barnet har förkunskaperna, aldrig som belöning.
+- **Kartan visar vad barnet kan.** Trädgården ritas som en liten odlingslåda med
+  barnets mest utvecklade plantor (`miniBed` i `src/game/valley.ts`). Solrosorna
+  på kullen är samma som i trädgården: en per tabell barnet kan.
+- **Dagens läge står i text och bild**, aldrig bara i färg. Platsen kan vänta på
+  sina första frön, vara törstig när dagens pass inte är gjort, eller sova när
+  passet är klart. Inget vissnar, och inga dagar räknas.
+- **Uppläsning.** Har barnet uppläsning påslagen finns en knapp som läser upp
+  platsens namn och läge.
+- **Navigering.** Platsen och den orangea knappen ”Gå till trädgården” leder
+  båda till trädgården. Djuret i trädgårdens sidhuvud leder tillbaka till dalen
+  (”Till dalen”), och spelare byts i dalen. En ny spelare går som förut direkt
+  från startkollen in i trädgården. Inget annat i trädgården har ändrats.
+
+Dalen testas i `e2e/valley.spec.ts` och i testerna för smala telefoner och
+liggande telefon. Logiken utan DOM testas i `tests/game/valley.test.ts`.
 
 ## Flytt från Gångerträdgården
 

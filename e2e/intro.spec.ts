@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, createProfile, nextStep, seedStates } from './helpers';
+import { answer, createProfile, enterGarden, nextStep, seedStates } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -47,7 +47,7 @@ test('a new fact is built by dragging out its rectangle', async ({ page }) => {
 
 test('a fact whose twin is known starts from the twin and is turned around', async ({ page }) => {
   await seedStates(page, { '1x10': { status: 'fluent', box: 2, dueDay: '2026-02-09' } });
-  await page.getByRole('button', { name: /Alva/ }).click();
+  await enterGarden(page, 'Alva');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   // Warm-up first, then the twin 10 × 1 is the preferred new fact.
   for (let i = 0; i < 6; i++) {
@@ -68,7 +68,7 @@ test('fluent facts are answered freely on a number pad', async ({ page }) => {
     fluent[`${n}x10`] = { status: 'fluent', box: 2 };
   }
   await seedStates(page, fluent);
-  await page.getByRole('button', { name: /Alva/ }).click();
+  await enterGarden(page, 'Alva');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   await expect(page.locator('.numpad')).toBeVisible();
   const text = (await page.locator('.question .prompt').textContent())!;
