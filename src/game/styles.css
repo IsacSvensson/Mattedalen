@@ -1,5 +1,5 @@
 /*
- * Mattedalen – visual rules (see README, "Designregler"):
+ * Mattedalen – visual rules (see README, "Principer", and docs/TRADGARDEN.md, "Designregler"):
  * - One outline for every surface: var(--outline).
  * - Only things you can tap have the "press" shadow, always the same depth.
  *   Passive surfaces (cards, the garden bed, chips) have no shadow.
@@ -1815,6 +1815,43 @@ h1:focus {
 .parent h3 {
   margin: 20px 0 8px;
   font-size: 1.05rem;
+}
+
+.parent h4 {
+  margin: 18px 0 8px;
+  font-size: 1rem;
+}
+
+/* One part per place in the valley, below what is shared by every place. */
+.place-section {
+  margin-top: 24px;
+  padding-top: 4px;
+  border-top: var(--outline);
+}
+
+.place-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.3rem !important;
+}
+
+.place-heading .plant {
+  width: 40px;
+  height: 40px;
+  margin: -6px 0;
+}
+
+.place-about {
+  margin: 0 0 10px;
+}
+
+.legacy-note {
+  margin-top: 8px;
+}
+
+.legacy-note p {
+  margin: 0 0 8px;
 }
 
 .muted {

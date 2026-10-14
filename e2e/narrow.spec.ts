@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { createProfile } from './helpers';
+import { createProfile, openParent, switchPlayer } from './helpers';
 
 /** Small phones: nothing may stick out of its container or make the page scroll sideways. */
 for (const width of [320, 360]) {
@@ -48,6 +48,15 @@ for (const width of [320, 360]) {
       await expectNoSidewaysScroll(page);
     });
 
+    test('the parent view never scrolls sideways', async ({ page }) => {
+      await page.goto('/');
+      await createProfile(page, 'Alexandra-Charlotte');
+      await switchPlayer(page);
+      await openParent(page);
+      await expect(page.locator('#place-garden-heading')).toBeVisible();
+      await expectNoSidewaysScroll(page);
+    });
+
     test('a focus session fits the table label and the drops', async ({ page }) => {
       await page.goto('/');
       await createProfile(page, 'Bo');
@@ -78,7 +87,13 @@ async function expectWithin(page: Page, inner: string, outer: string): Promise<v
   expect(a.y + a.height).toBeLessThanOrEqual(b.y + b.height + 0.5);
 }
 
+/**
+ * Measured against the configured width: phones and tablets are emulated as
+ * mobile, where too wide content widens the window (zooms out) instead of
+ * scrolling, so `innerWidth` would grow along with it.
+ */
 async function expectNoSidewaysScroll(page: Page): Promise<void> {
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(overflow).toBeLessThanOrEqual(0);
+  const width = page.viewportSize()!.width;
+  const content = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(content).toBeLessThanOrEqual(width);
 }

@@ -1,4 +1,4 @@
-import { isStruggling, systemClock, type EngineConfig, type ItemState } from '../../../engine';
+import { formatDay as toDayKey, isStruggling, systemClock, type EngineConfig, type ItemState } from '../../../engine';
 import { factId, formatFact, MAX_FACTOR, MIN_FACTOR, parseFactId, strategyFor } from '../../../content/multiplication';
 import {
   decodeSnapshot,
@@ -9,6 +9,8 @@ import {
   persistenceStatus,
   requestPersistence,
   storageEstimate,
+  LEGACY_IMPORT_KEY,
+  type LegacyImportRecord,
   type Profile,
 } from '../../../storage';
 import { show, type AppContext } from '../../app';
@@ -21,6 +23,7 @@ import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, snapshotOf } fr
 import { showProfiles } from '../profiles';
 import { AVATAR_KEYS, avatarIcon, avatarName } from '../../components/avatars';
 import { icon } from '../../components/icons';
+import { plantIcon } from '../../components/plant';
 import { APP_BUILD, checkForUpdate, installGuide } from '../../pwa';
 import { hasSwedishVoice, speechSupported } from '../../speech';
 import { showPlacementOffer } from '../placement';
@@ -54,7 +57,7 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
         )
       : h('p', null, 'Inga barn ännu. Skapa en spelare på startsidan, eller importera nedan.'),
     selected ? await childSection(ctx, selected) : null,
-    importSection(ctx),
+    importSection(ctx, await legacyNote(ctx)),
     await deviceSection(ctx),
   );
   show(ctx, view);
@@ -75,10 +78,14 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
   const today = systemClock.today();
   const lastPlayed = sessions.length ? sessions[sessions.length - 1]!.day : null;
 
-  return h(
+  const save = profileSaver(ctx, profile);
+
+  // The child (shared by every place), then one part per place in the valley.
+  const garden = h(
     'section',
-    { class: 'parent-section', 'aria-labelledby': 'child-heading' },
-    h('h2', { id: 'child-heading', class: 'child-heading' }, h('span', { class: 'avatar-badge small' }, avatarIcon(profile.avatar)), profile.name),
+    { class: 'place-section', 'aria-labelledby': 'place-garden-heading' },
+    h('h3', { id: 'place-garden-heading', class: 'place-heading' }, plantIcon('tree'), 'Trädgården'),
+    h('p', { class: 'muted place-about' }, `${ctx.pack.title} 1–10.`),
     h(
       'ul',
       { class: 'status-summary' },
@@ -93,16 +100,41 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
       lastPlayed ? ` · senast ${formatDay(lastPlayed)}` : '',
       ` · ${meta.unlockedUnitIds.length} av ${ctx.pack.units.length} enheter upplåsta`,
     ),
-    h('h3', null, 'Värmekarta'),
+    h('h4', null, 'Värmekarta'),
     heatmap(states, stats),
-    h('h3', null, 'Svåra just nu'),
+    h('h4', null, 'Svåra just nu'),
     hardList(states, engine.config, today),
-    h('h3', null, 'Vanligaste förväxlingarna'),
+    h('h4', null, 'Vanligaste förväxlingarna'),
     confusionList(states),
+    h('h4', null, 'Inställning'),
+    h(
+      'div',
+      { class: 'settings' },
+      h(
+        'label',
+        { class: 'check' },
+        h('input', {
+          type: 'checkbox',
+          checked: profile.settings.allowFree,
+          onchange: (e: Event) => void save({ settings: { allowFree: (e.target as HTMLInputElement).checked } }),
+        }),
+        ' Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)',
+      ),
+    ),
+    h('h4', null, 'Startkoll'),
+    h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
+    h('button', { class: 'soft-button', type: 'button', onclick: () => showPlacementOffer(ctx, profile) }, 'Gör om startkollen'),
+  );
+
+  return h(
+    'section',
+    { class: 'parent-section', 'aria-labelledby': 'child-heading' },
+    h('h2', { id: 'child-heading', class: 'child-heading' }, h('span', { class: 'avatar-badge small' }, avatarIcon(profile.avatar)), profile.name),
     h('h3', null, 'Övade minuter per dag'),
     minutesChart(minutesPerDay(sessions, today, 14)),
     h('h3', null, 'Inställningar'),
-    settingsForm(ctx, profile),
+    settingsForm(profile, save),
+    garden,
     h('h3', null, 'Flytta till en annan enhet'),
     h(
       'p',
@@ -115,9 +147,6 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
       h('button', { class: 'soft-button', type: 'button', onclick: () => showQr(ctx, profile, states) }, 'Visa QR-kod'),
       h('button', { class: 'soft-button', type: 'button', onclick: () => void downloadBackup(ctx, profile) }, 'Spara säkerhetskopia (JSON)'),
     ),
-    h('h3', null, 'Startkoll'),
-    h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
-    h('button', { class: 'soft-button', type: 'button', onclick: () => showPlacementOffer(ctx, profile) }, 'Gör om startkollen'),
     h(
       'button',
       { class: 'link-button danger', type: 'button', onclick: () => void deleteProfile(ctx, profile) },
@@ -230,15 +259,23 @@ function minutesChart(days: { day: string; minutes: number }[]): HTMLElement {
   );
 }
 
-function settingsForm(ctx: AppContext, profile: Profile): HTMLElement {
+type ProfileChange = Partial<Omit<Profile, 'settings'>> & { settings?: Partial<Profile['settings']> };
+type SaveProfile = (change: ProfileChange) => Promise<void>;
+
+/** Saves changes to a child; every setting on the page goes through the same one. */
+function profileSaver(ctx: AppContext, profile: Profile): SaveProfile {
   // Always merge into the latest saved version; only name/avatar changes need a redraw.
   let current = profile;
-  const save = async (change: Partial<Omit<Profile, 'settings'>> & { settings?: Partial<Profile['settings']> }) => {
+  return async (change) => {
     current = { ...current, ...change, settings: { ...current.settings, ...change.settings } };
     await ctx.store.saveProfile(current);
     toast('Sparat');
     if (change.name !== undefined || change.avatar !== undefined) await showParent(ctx, profile.id);
   };
+}
+
+/** Settings for the child in every place. */
+function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
   const name = h('input', { type: 'text', value: profile.name, maxlength: 20, 'aria-label': 'Namn' });
   const voiceNote = h('p', { class: 'muted voice-note' });
   if (!speechSupported()) voiceNote.textContent = 'Den här webbläsaren kan inte läsa upp text.';
@@ -281,21 +318,11 @@ function settingsForm(ctx: AppContext, profile: Profile): HTMLElement {
       { class: 'check' },
       h('input', {
         type: 'checkbox',
-        checked: profile.settings.allowFree,
-        onchange: (e: Event) => void save({ settings: { allowFree: (e.target as HTMLInputElement).checked } }),
-      }),
-      ' Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)',
-    ),
-    h(
-      'label',
-      { class: 'check' },
-      h('input', {
-        type: 'checkbox',
         checked: profile.settings.readAloud,
         disabled: !speechSupported(),
         onchange: (e: Event) => void save({ settings: { readAloud: (e.target as HTMLInputElement).checked } }),
       }),
-      ' Läs upp frågorna (svenska)',
+      ' Läs upp frågorna och dalens platser (svenska)',
     ),
     voiceNote,
   );
@@ -338,7 +365,33 @@ async function deleteProfile(ctx: AppContext, profile: Profile): Promise<void> {
 
 // --- import -------------------------------------------------------------
 
-function importSection(ctx: AppContext): HTMLElement {
+/** How children come along from Gångerträdgården, and whether some already did. */
+async function legacyNote(ctx: AppContext): Promise<HTMLElement> {
+  const record = await ctx.store.getSetting<LegacyImportRecord>(LEGACY_IMPORT_KEY);
+  const done = record?.done && record.profiles > 0;
+  return h(
+    'div',
+    { class: 'legacy-note' },
+    h('h3', null, 'Från Gångerträdgården'),
+    done
+      ? h(
+          'p',
+          null,
+          `${record.profiles === 1 ? 'Ett barn' : `${record.profiles} barn`} hämtades från Gångerträdgården ${formatDay(dayOfTime(record.at))}. `,
+          'Gångerträdgården finns kvar som förut, men det som övas där syns inte här.',
+        )
+      : null,
+    h(
+      'p',
+      { class: 'muted' },
+      done ? 'Saknas ett barn? ' : '',
+      'Barn som spelat Gångerträdgården i den här webbläsaren följer med av sig själva första gången Mattedalen startar. ',
+      'Har barnet spelat på en annan enhet, eller som app på hemskärmen på iPhone eller iPad (den har egen lagring), öppnar du Gångerträdgårdens föräldravy och väljer ”Visa QR-kod” eller ”Spara säkerhetskopia”. Hämta sedan barnet här.',
+    ),
+  );
+}
+
+function importSection(ctx: AppContext, legacy: HTMLElement): HTMLElement {
   const scanArea = h('div', { class: 'scan-area' });
   const imageInput = h('input', {
     type: 'file',
@@ -392,6 +445,7 @@ function importSection(ctx: AppContext): HTMLElement {
     imageInput,
     jsonInput,
     scanArea,
+    legacy,
   );
 }
 
@@ -537,5 +591,10 @@ async function deviceSection(ctx: AppContext): Promise<HTMLElement> {
     h('button', { class: 'soft-button', type: 'button', onclick: () => choosePin(ctx, async () => (toast('Ny kod sparad'), showParent(ctx))) }, 'Byt vuxenkod'),
   );
 }
+
+const dayOfTime = (ms: number) => {
+  const d = new Date(ms);
+  return toDayKey(d.getFullYear(), d.getMonth() + 1, d.getDate());
+};
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);

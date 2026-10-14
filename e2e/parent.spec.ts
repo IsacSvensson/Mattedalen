@@ -33,7 +33,16 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   await switchPlayer(page);
   await openParent(page);
 
-  await expect(page.locator('.heat-cell')).toHaveCount(100);
+  // What is shared by every place, then one part per place: the garden's statistics are in its own part.
+  const garden = page.getByRole('region', { name: /^Trädgården/ });
+  await expect(garden.getByRole('heading', { name: /^Trädgården/ })).toBeVisible();
+  await expect(garden.locator('.heat-cell')).toHaveCount(100);
+  await expect(garden.getByRole('checkbox', { name: /Fritt svar/ })).toBeChecked();
+  await expect(garden.getByRole('button', { name: 'Gör om startkollen' })).toBeVisible();
+  await expect(garden.getByRole('combobox', { name: 'Passlängd' })).toHaveCount(0);
+  // How to bring a child from Gångerträdgården; nothing came along on this device.
+  await expect(page.getByRole('heading', { name: 'Från Gångerträdgården' })).toBeVisible();
+  await expect(page.getByText(/hämtades från Gångerträdgården/)).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Integritet' })).toBeVisible();
   await expect(page.locator('.privacy')).toContainText('inga cookies');
   await expect(page.locator('.heat-cell.heat-learning-0').first()).toBeVisible();

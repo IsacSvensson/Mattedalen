@@ -108,6 +108,7 @@ test('children from Gångerträdgården come along, and the old app keeps its da
   await page.getByRole('button', { name: 'För vuxna' }).click();
   await expect(page.getByRole('heading', { name: 'Vuxenkod' })).toBeVisible();
   await openParentWithCode(page);
+  await expect(page.getByText(/^Ett barn hämtades från Gångerträdgården \d+ \w+\./)).toBeVisible();
 
   expect(await readGangertradgarden(page)).toEqual(before);
   expect(await databaseNames(page)).toEqual(expect.arrayContaining(['gangertradgarden', 'mattedalen']));
