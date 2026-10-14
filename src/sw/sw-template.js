@@ -1,4 +1,4 @@
-/* Service worker for Gångerträdgården.
+/* Service worker for Mattedalen.
  *
  * Caches only the app's own static files (the build output) so the app works
  * fully offline after the first visit. Nothing else is fetched or cached:
@@ -9,7 +9,10 @@
  */
 const PRECACHE = __PRECACHE__;
 const VERSION = __VERSION__;
-const CACHE = `gangertradgarden-${VERSION}`;
+// Gångerträdgården lives on the same origin and deletes every cache named
+// `gangertradgarden-*` but its own, so this prefix must stay different.
+const CACHE_PREFIX = 'mattedalen-';
+const CACHE = `${CACHE_PREFIX}${VERSION}`;
 const SHELL = './index.html';
 
 self.addEventListener('install', (event) => {
@@ -22,7 +25,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       for (const key of await caches.keys()) {
-        if (key.startsWith('gangertradgarden-') && key !== CACHE) await caches.delete(key);
+        if (key.startsWith(CACHE_PREFIX) && key !== CACHE) await caches.delete(key);
       }
       await self.clients.claim();
     })(),

@@ -74,7 +74,7 @@ export function encodeSnapshot(snap: QrSnapshot): string {
 }
 
 export function decodeSnapshot(text: string): QrSnapshot {
-  const fail = () => new ImportError('QR-koden kommer inte från Gångerträdgården eller kunde inte läsas.');
+  const fail = () => new ImportError('QR-koden gick inte att läsa. Den ska komma från Mattedalen eller Gångerträdgården.');
   const trimmed = text.trim();
   if (!trimmed.startsWith(QR_PREFIX)) throw fail();
   let bytes: Uint8Array;

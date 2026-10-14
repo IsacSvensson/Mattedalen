@@ -55,7 +55,7 @@ test('a JSON backup restores everything on another device', async ({ page, brows
   await seedStates(page, { '2x3': { status: 'fluent', box: 3 }, '10x4': { status: 'automatic', box: 5 } });
   await openParent(page);
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Spara säkerhetskopia (JSON)' }).click()]);
-  expect(download.suggestedFilename()).toBe('gangertradgarden-alva-2026-02-02.json');
+  expect(download.suggestedFilename()).toBe('mattedalen-alva-2026-02-02.json');
   const file = await download.path();
 
   const other = await browser.newPage();

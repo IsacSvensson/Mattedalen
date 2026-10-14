@@ -86,7 +86,7 @@ export type SeedState = { status: string; box: number; dueDay?: string } & Recor
 export async function seedStates(page: Page, states: Record<string, SeedState>): Promise<void> {
   await page.evaluate(async (seed) => {
     const db: IDBDatabase = await new Promise((r) => {
-      const q = indexedDB.open('gangertradgarden');
+      const q = indexedDB.open('mattedalen');
       q.onsuccess = () => r(q.result);
     });
     const profiles: { id: string }[] = await new Promise((r) => {

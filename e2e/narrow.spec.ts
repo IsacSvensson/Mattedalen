@@ -19,7 +19,7 @@ for (const width of [320, 360]) {
     test('the garden title is never cut off, even for a long name', async ({ page }) => {
       for (const name of ['Isac', 'Alexandra-Charlotte']) {
         await page.goto('/');
-        await page.evaluate(() => indexedDB.deleteDatabase('gangertradgarden'));
+        await page.evaluate(() => indexedDB.deleteDatabase('mattedalen'));
         await page.reload();
         await createProfile(page, name);
         const title = page.locator('.scene-title h1');

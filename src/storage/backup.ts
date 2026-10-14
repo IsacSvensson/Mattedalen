@@ -2,7 +2,9 @@ import { emptyState, type ItemState, type LearnerMeta } from '../engine';
 import type { AttemptDaySummary, Profile, Progress, SessionRecord, StoredAttempt } from './types';
 import { DEFAULT_SETTINGS } from './types';
 
-export const EXPORT_FORMAT = 'gangertradgarden-profil';
+export const EXPORT_FORMAT = 'mattedalen-profil';
+/** Backups from Gångerträdgården: the same content, read as version 1. */
+export const LEGACY_EXPORT_FORMAT = 'gangertradgarden-profil';
 export const EXPORT_VERSION = 1;
 
 /** Full JSON backup of one profile. */
@@ -102,7 +104,9 @@ export function parseExport(input: unknown): ProfileExport {
       throw new ImportError('Filen är inte en giltig JSON-fil.');
     }
   }
-  if (!isObject(data) || data.format !== EXPORT_FORMAT) throw new ImportError('Filen är inte en export från Gångerträdgården.');
+  if (!isObject(data) || (data.format !== EXPORT_FORMAT && data.format !== LEGACY_EXPORT_FORMAT)) {
+    throw new ImportError('Filen är inte en säkerhetskopia från Mattedalen eller Gångerträdgården.');
+  }
   let version = num(data.version, 0);
   if (version > EXPORT_VERSION) throw new ImportError('Filen kommer från en nyare version av appen. Uppdatera appen och försök igen.');
   let d: Record<string, unknown> = data;
@@ -165,5 +169,5 @@ export function exportFileName(profile: Profile, now = new Date()): string {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '') || 'profil';
   const day = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  return `gangertradgarden-${slug}-${day}.json`;
+  return `mattedalen-${slug}-${day}.json`;
 }

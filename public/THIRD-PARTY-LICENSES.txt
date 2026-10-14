@@ -1,4 +1,4 @@
-Gångerträdgården – licenser för ingående delar
+Mattedalen – licenser för ingående delar
 
 Appen själv: PolyForm Noncommercial License 1.0.0 (se LICENSE.md i källkoden).
 Den innehåller också följande delar, som har sina egna licenser:

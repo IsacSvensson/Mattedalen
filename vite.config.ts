@@ -19,7 +19,7 @@ function listFiles(dir: string): string[] {
 function swPlugin(): Plugin {
   let outDir = 'dist';
   return {
-    name: 'gangertradgarden-sw',
+    name: 'mattedalen-sw',
     apply: 'build',
     configResolved(config) {
       outDir = config.build.outDir;
@@ -44,7 +44,7 @@ const APP_BUILD = [new Date().toISOString().slice(0, 10), process.env.GITHUB_SHA
 
 export default defineConfig({
   define: { __APP_BUILD__: JSON.stringify(APP_BUILD) },
-  // Relative base so the static build works under any path (e.g. GitHub Pages /Multiplikation/).
+  // Relative base so the static build works under any path (e.g. GitHub Pages /Mattedalen/).
   base: './',
   plugins: [swPlugin()],
   build: {

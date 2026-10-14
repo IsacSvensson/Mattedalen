@@ -1,9 +1,9 @@
 {
-  "name": "multiplikation",
+  "name": "mattedalen",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Forskningsbaserat multiplikationsspel för barn 6–9 år (offline-PWA)",
+  "description": "Ideell matteplattform för barn 7–9 år (offline-PWA)",
   "license": "PolyForm-Noncommercial-1.0.0",
   "scripts": {
     "dev": "vite",

@@ -4,7 +4,9 @@ import { createEngine, ManualClock, seededRng } from '../../src/engine';
 import { createMultiplicationPack } from '../../src/content/multiplication';
 import {
   DEFAULT_SETTINGS,
+  EXPORT_FORMAT,
   exportFileName,
+  ImportError,
   IndexedDbProgressStore,
   MIGRATIONS,
   openProgressDb,
@@ -138,8 +140,15 @@ describe('backup files', () => {
     expect(data.sessions).toEqual([]);
   });
 
+  it('reads backups from Mattedalen and from Gångerträdgården', () => {
+    const backup = { version: 1, profile: { id: 'a', name: 'Alva' } };
+    expect(parseExport({ ...backup, format: 'mattedalen-profil' }).format).toBe(EXPORT_FORMAT);
+    expect(parseExport({ ...backup, format: 'gangertradgarden-profil' }).format).toBe(EXPORT_FORMAT);
+    expect(() => parseExport({ ...backup, format: 'annan-app' })).toThrow(ImportError);
+  });
+
   it('names files after the child and the date', () => {
-    expect(exportFileName({ ...alva, name: 'Åsa Öberg' }, new Date(2026, 9, 13))).toBe('gangertradgarden-asa-oberg-2026-10-13.json');
-    expect(exportFileName({ ...alva, name: '🦊' }, new Date(2026, 0, 1))).toBe('gangertradgarden-profil-2026-01-01.json');
+    expect(exportFileName({ ...alva, name: 'Åsa Öberg' }, new Date(2026, 9, 13))).toBe('mattedalen-asa-oberg-2026-10-13.json');
+    expect(exportFileName({ ...alva, name: '🦊' }, new Date(2026, 0, 1))).toBe('mattedalen-profil-2026-01-01.json');
   });
 });

@@ -144,7 +144,7 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
     'main',
     { class: 'screen new-profile has-scene' },
     scene({ height: 96 }),
-    first ? h('p', { class: 'welcome' }, plantIcon('sprout'), 'Välkommen till Gångerträdgården!') : null,
+    first ? h('p', { class: 'welcome' }, plantIcon('sprout'), 'Välkommen till Mattedalen!') : null,
     h('h1', null, 'Vad heter du?'),
     h(
       'form',

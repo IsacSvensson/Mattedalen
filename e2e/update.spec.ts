@@ -55,7 +55,7 @@ test('a new version is offered on any screen except during a game, and taken int
   const update = page.getByRole('button', { name: 'Ny version finns – uppdatera' });
   await expect(update).toBeVisible();
   await update.click();
-  await expect.poll(async () => (await cacheNames(page)).join()).toContain('gangertradgarden-aaaaaaaaaaaa');
+  await expect.poll(async () => (await cacheNames(page)).join()).toContain('mattedalen-aaaaaaaaaaaa');
   await expect(page.getByRole('heading', { name: 'Vem spelar?' })).toBeVisible();
   await expect(page.locator('#update-bar')).toHaveCount(0);
 });
@@ -72,7 +72,7 @@ test('a version downloaded earlier is started when the app opens again', async (
 
   // Opening the app again (the installed app is often never fully closed) starts it.
   await page.reload();
-  await expect.poll(async () => (await cacheNames(page)).join()).toBe('gangertradgarden-bbbbbbbbbbbb');
+  await expect.poll(async () => (await cacheNames(page)).join()).toBe('mattedalen-bbbbbbbbbbbb');
   await expect(page.locator('#update-bar')).toHaveCount(0);
 });
 
@@ -92,5 +92,5 @@ test('grown-ups can look for an update and see the version', async ({ page }) =>
 
   publish('cccccccccccc');
   await look.click();
-  await expect.poll(async () => (await cacheNames(page)).join()).toBe('gangertradgarden-cccccccccccc');
+  await expect.poll(async () => (await cacheNames(page)).join()).toBe('mattedalen-cccccccccccc');
 });

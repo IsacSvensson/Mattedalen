@@ -5,7 +5,7 @@ import type { AttemptQuery, ImportOptions, ProgressStore } from './ProgressStore
 import { exportProfile, prepareImport } from './shared';
 import type { AttemptDaySummary, Profile, Progress, SessionRecord, StoredAttempt } from './types';
 
-export const DB_NAME = 'gangertradgarden';
+export const DB_NAME = 'mattedalen';
 
 export interface ProgressDB extends DBSchema {
   profiles: { key: string; value: Profile };

@@ -1,5 +1,5 @@
 /*
- * Gångerträdgården – visual rules (see README, "Designregler"):
+ * Mattedalen – visual rules (see README, "Designregler"):
  * - One outline for every surface: var(--outline).
  * - Only things you can tap have the "press" shadow, always the same depth.
  *   Passive surfaces (cards, the garden bed, chips) have no shadow.

@@ -228,7 +228,7 @@ export function installGuide(platform = detectPlatform()): HTMLElement {
             h('li', null, 'Välj ', h('strong', null, 'Installera app'), ' eller ', h('strong', null, 'Lägg till på startskärmen'), '.'),
           ]
         : [
-            h('li', null, 'I Chrome eller Edge: klicka på installationsikonen i adressfältet, eller välj ', h('strong', null, 'Installera Gångerträdgården'), ' i menyn.'),
+            h('li', null, 'I Chrome eller Edge: klicka på installationsikonen i adressfältet, eller välj ', h('strong', null, 'Installera Mattedalen'), ' i menyn.'),
             h('li', null, 'I Safari på Mac: välj ', h('strong', null, 'Arkiv → Lägg till i Dock'), '.'),
           ];
 

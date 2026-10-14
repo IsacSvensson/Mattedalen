@@ -1,7 +1,7 @@
 {
-  "name": "Gångerträdgården",
-  "short_name": "Gånger",
-  "description": "Lär dig multiplikationstabellen – en trädgård som växer när du övar.",
+  "name": "Mattedalen",
+  "short_name": "Mattedalen",
+  "description": "Korta dagliga mattepass i en dal där det du kan växer.",
   "lang": "sv",
   "dir": "ltr",
   "start_url": "./",

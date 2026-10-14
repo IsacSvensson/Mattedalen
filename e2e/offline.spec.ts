@@ -39,7 +39,7 @@ test('works fully offline after the first visit, without any outside traffic', a
 
   // App files are served by the worker; nothing reaches other hosts.
   const manifest = await page.evaluate(async () => (await fetch('./manifest.webmanifest')).json());
-  expect(manifest.name).toBe('Gångerträdgården');
+  expect(manifest.name).toBe('Mattedalen');
   expect(notFromWorker).toEqual([]);
   expect(foreign).toEqual([]);
 });
