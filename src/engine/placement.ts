@@ -1,7 +1,7 @@
 import { addDays, shuffle, type Rng } from './clock';
 import { emptyState, statusRank } from './status';
-import { sortedUnits } from './unlock';
-import type { ContentPack, DayKey, EngineConfig, Item, ItemId, ItemState, LearnerMeta, UnitId } from './types';
+import { computeUnlocked, sortedUnits } from './unlock';
+import type { ContentPack, DayKey, EngineConfig, Item, ItemId, ItemState, LearnerMeta, Unit, UnitId } from './types';
 
 /**
  * Placement check ("startkoll"): a short test that finds how far into the
@@ -11,8 +11,13 @@ import type { ContentPack, DayKey, EngineConfig, Item, ItemId, ItemState, Learne
  * Units are tested in order with a few random items each. A unit passes when
  * nearly all its sampled items are answered correctly (3 of 4). One miss too
  * many earns a second chance of two extra items that must both be right
- * (4 of 6), so a single slip does not stop a learner who knows the unit. The
- * check stops at the first unit that does not pass.
+ * (4 of 6), so a single slip does not stop a learner who knows the unit.
+ *
+ * A unit is only tested when its prerequisites passed: the previous unit
+ * (`previous`) or every required unit (`after`). In a chain of units the check
+ * therefore stops at the first unit that does not pass; in a knowledge graph
+ * a miss only skips what builds on it, and other branches are still tested.
+ * Units about understanding are not part of the check.
  *
  * Time decides how well a passed unit is known, not whether it passes: young
  * children type slowly, and failing a unit they know only because the answers
@@ -46,6 +51,8 @@ export interface PlacementResult {
   fluentUnitIds: UnitId[];
   /** First unit that did not pass (where learning starts), or null if all passed. */
   stoppedAt: UnitId | null;
+  /** Every unit that was tested and did not pass (in a chain of units, only `stoppedAt`). */
+  failedUnitIds?: UnitId[];
   answers: PlacementAnswer[];
 }
 
@@ -69,7 +76,10 @@ export class Placement {
   private extended = false;
   private done = false;
   private readonly passed: UnitId[] = [];
+  private readonly failed: UnitId[] = [];
   private readonly fluent: UnitId[] = [];
+  /** All units in order, to find the one before a `previous` unit. */
+  private readonly ordered: Unit[];
   private stoppedAt: UnitId | null = null;
   private readonly answers: PlacementAnswer[] = [];
   private readonly itemById: Map<ItemId, Item>;
@@ -79,7 +89,8 @@ export class Placement {
     private readonly rng: Rng,
     private readonly cfg: PlacementConfig = DEFAULT_PLACEMENT,
   ) {
-    this.units = sortedUnits(pack.units).filter((u) => u.itemIds.length > 0);
+    this.ordered = sortedUnits(pack.units);
+    this.units = this.ordered.filter((u) => u.itemIds.length > 0 && u.kind !== 'understanding');
     this.itemById = new Map(pack.items.map((i) => [i.id, i]));
     this.loadUnit();
   }
@@ -115,9 +126,11 @@ export class Placement {
         this.extended = true;
         this.queue.push(...this.unitPool.splice(0, EXTRA_ITEMS).map((id) => this.itemById.get(id)!));
       } else {
-        // Cannot pass this unit any more: learning starts here.
-        this.stoppedAt = unit.id;
-        this.done = true;
+        // Cannot pass this unit any more: learning starts here, and what builds on it is not tested.
+        this.stoppedAt ??= unit.id;
+        this.failed.push(unit.id);
+        this.unitIndex++;
+        this.loadUnit();
       }
     } else if (this.queue.length === 0) {
       // Every sample asked without too many misses: the unit is passed.
@@ -143,11 +156,22 @@ export class Placement {
       passedUnitIds: this.passed.slice(),
       fluentUnitIds: this.fluent.slice(),
       stoppedAt: this.stoppedAt,
+      failedUnitIds: this.failed.slice(),
       answers: this.answers.slice(),
     };
   }
 
+  /** True if the unit's prerequisites passed, so testing it makes sense. */
+  private testable(unit: Unit): boolean {
+    const rule = unit.unlockRule;
+    if (rule.kind === 'always') return true;
+    if (rule.kind === 'after') return rule.requires.every((id) => this.passed.includes(id));
+    const before = this.ordered[this.ordered.indexOf(unit) - 1];
+    return before !== undefined && this.passed.includes(before.id);
+  }
+
   private loadUnit(): void {
+    while (this.units[this.unitIndex] && !this.testable(this.units[this.unitIndex]!)) this.unitIndex++;
     const unit = this.units[this.unitIndex];
     this.unitHits = 0;
     this.unitMisses = 0;
@@ -201,11 +225,10 @@ export function applyPlacement(
       };
     }
   }
-  const order = sortedUnits(pack.units).map((u) => u.id);
-  const reached = new Set([...meta.unlockedUnitIds, ...result.passedUnitIds]);
-  if (result.stoppedAt) reached.add(result.stoppedAt);
-  // Unlocked units always form a prefix of the progression.
-  const lastIndex = Math.max(...order.map((id, i) => (reached.has(id) ? i : -1)));
-  const unlockedUnitIds = order.slice(0, lastIndex + 1);
+  // Units passed or where learning starts are open, and so is whatever the
+  // new knowledge opens. In a chain of units this is a prefix of the order.
+  const reached = [...meta.unlockedUnitIds, ...result.passedUnitIds, ...(result.failedUnitIds ?? [])];
+  if (result.stoppedAt) reached.push(result.stoppedAt);
+  const unlockedUnitIds = computeUnlocked(pack.units, out, reached);
   return { states: out, meta: { ...meta, unlockedUnitIds } };
 }

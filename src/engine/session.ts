@@ -126,6 +126,8 @@ export class Session {
   private readonly maxNew: number;
   private readonly focus: Set<ItemId> | null;
   private readonly excluded: Set<ItemId>;
+  /** Status rules per unit: the config's, with the unit's own on top. */
+  private readonly statusRules = new Map<string, EngineConfig['status']>();
   /** False when the current question's form gives no status evidence. */
   private currentEvidence = true;
   private unlocked: string[];
@@ -201,7 +203,7 @@ export class Session {
     const pick = this.withSupport(picked);
     const item = this.item(pick.itemId);
     const state = this.state(pick.itemId);
-    const format = this.formatFor(state, pick.kind);
+    const format = this.formatFor(state, pick.kind, item);
     const { config, pack, rng } = this.deps;
     // Only packs with several forms are asked, so the others draw the same random numbers as before.
     const shown = pack.present?.(item, { state, kind: pick.kind, format, rng });
@@ -241,7 +243,7 @@ export class Session {
       next = applyStatus(
         prev,
         { correct, given, rtMs, format: q.format, now, today: this.today, evidence: this.currentEvidence },
-        config.status,
+        this.statusRulesFor(q.item),
       );
       next = applyLeitner(prev, next, correct, this.today, config.leitner.intervalsDays);
     }
@@ -587,12 +589,26 @@ export class Session {
     return keyed.sort((a, b) => a.key - b.key).map((x) => x.id);
   }
 
-  private formatFor(state: ItemState, kind: QuestionKind): AnswerFormat {
+  private formatFor(state: ItemState, kind: QuestionKind, item: Item): AnswerFormat {
     const f = this.deps.config.format;
+    let format: AnswerFormat;
     // A derivation is worked out step by step on the number pad.
-    if (kind === 'derive') return 'free';
-    if (kind === 'new' || !f.allowFree) return 'choice';
-    return atLeast(state.status, f.freeFromStatus) ? 'free' : 'choice';
+    if (kind === 'derive') format = 'free';
+    else if (kind === 'new' || !f.allowFree) format = 'choice';
+    else format = atLeast(state.status, f.freeFromStatus) ? 'free' : 'choice';
+    // Some items can only be asked one way (a yes/no question has no number to type).
+    if (item.formats && !item.formats.includes(format)) format = item.formats[0] ?? format;
+    return format;
+  }
+
+  private statusRulesFor(item: Item): EngineConfig['status'] {
+    let rules = this.statusRules.get(item.unitId);
+    if (!rules) {
+      const own = this.deps.pack.units.find((u) => u.id === item.unitId)?.status;
+      rules = own ? { ...this.deps.config.status, ...own } : this.deps.config.status;
+      this.statusRules.set(item.unitId, rules);
+    }
+    return rules;
   }
 
   private item(id: ItemId): Item {

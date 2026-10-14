@@ -42,6 +42,8 @@ export interface Item {
   hints: Hint[];
   /** Mirrored twin item (e.g. a reversed form), if any. */
   pairId?: ItemId;
+  /** Answer formats the item can be asked in (default: any), e.g. only `choice` for a yes/no question. */
+  formats?: AnswerFormat[];
   /** Introduction order within the unit; lower is introduced first. */
   order: number;
 }
@@ -71,6 +73,8 @@ export interface Unit {
    * `understanding`: shown on different days and in different forms, not by speed.
    */
   kind?: 'fact' | 'understanding';
+  /** Status rules for this unit's items, over the pack's (e.g. no time limits for understanding). */
+  status?: Partial<StatusConfig>;
 }
 
 /**
