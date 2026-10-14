@@ -1,11 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#fbf6ea"/>
-  <ellipse cx="256" cy="402" rx="150" ry="40" fill="#a67c52"/>
-  <rect x="234" y="250" width="44" height="150" rx="16" fill="#8a5a36"/>
-  <circle cx="256" cy="196" r="128" fill="#5aa152"/>
-  <circle cx="200" cy="156" r="66" fill="#84c26f"/>
-  <circle cx="186" cy="228" r="20" fill="#f6c945"/>
-  <circle cx="312" cy="138" r="20" fill="#f6c945"/>
-  <circle cx="304" cy="232" r="20" fill="#f6c945"/>
-  <text x="256" y="226" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="120" fill="#fff">×</text>
+  <!-- Mattedalen: the valley with its brook and a sunflower on the hill. -->
+  <defs>
+    <clipPath id="frame"><rect width="512" height="512" rx="112"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)" stroke="#3a2a22" stroke-width="12" stroke-linejoin="round" stroke-linecap="round">
+    <rect width="512" height="512" fill="#cdeaf0" stroke="none"/>
+    <g transform="translate(124 120)">
+      <circle r="50" fill="#ffcf4a"/>
+    </g>
+    <path d="M-20 262 C70 206 170 210 256 246 S420 206 540 232 V540 H-20Z" fill="#9fd27e"/>
+    <path d="M-20 330 C90 296 200 304 286 322 S450 300 540 312 V540 H-20Z" fill="#6fb55c"/>
+    <!-- The brook comes from between the hills and widens towards us. -->
+    <path d="M262 318 C240 350 286 372 252 410 C226 440 178 462 186 540 H332 C318 470 360 444 340 404 C322 368 280 352 296 320 Z" fill="#7cc4e4"/>
+    <!-- A sunflower on the hill. -->
+    <path d="M384 340 V250" fill="none"/>
+    <path d="M384 312 c-22 -22 -50 -24 -62 -14 10 20 38 30 62 14Z" fill="#5aa152" stroke-width="9"/>
+    <g transform="translate(384 214) scale(1.35)" stroke-width="7">
+      <ellipse cx="0" cy="-28" rx="11" ry="17" fill="#ffc93a"/>
+      <ellipse cx="0" cy="-28" rx="11" ry="17" fill="#ffc93a" transform="rotate(45)"/>
+      <ellipse cx="0" cy="-28" rx="11" ry="17" fill="#ffc93a" transform="rotate(90)"/>
+      <ellipse cx="0" cy="-28" rx="11" ry="17" fill="#ffc93a" transform="rotate(135)"/>
+      <ellipse cx="0" cy="-28" rx="11" ry="17" fill="#ffc93a" transform="rotate(180)"/>
+      <ellipse cx="0" cy="-28" rx="11" ry="17" fill="#ffc93a" transform="rotate(225)"/>
+      <ellipse cx="0" cy="-28" rx="11" ry="17" fill="#ffc93a" transform="rotate(270)"/>
+      <ellipse cx="0" cy="-28" rx="11" ry="17" fill="#ffc93a" transform="rotate(315)"/>
+      <circle r="20" fill="#6b3f1e"/>
+    </g>
+  </g>
+  <rect x="6" y="6" width="500" height="500" rx="108" fill="none" stroke="#3a2a22" stroke-width="12"/>
 </svg>
