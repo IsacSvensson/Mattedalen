@@ -929,11 +929,6 @@ h1:focus {
   gap: 10px;
 }
 
-.icon-spacer {
-  width: 56px;
-  flex: none;
-}
-
 /* Passive: outline, no shadow. */
 .session-progress {
   display: flex;
@@ -943,17 +938,26 @@ h1:focus {
   border: var(--outline);
   border-radius: 999px;
   background: var(--card);
+  flex: 1 1 auto;
+  max-width: 360px;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* The drops shrink with the space they get, so they stay inside the pill on narrow phones. */
+.drops {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 14px));
+  gap: clamp(2px, 0.9vw, 4px);
+  flex: 1;
+  justify-content: center;
   min-width: 0;
 }
 
-.drops {
-  display: flex;
-  gap: 4px;
-}
-
 .drop {
-  width: 11px;
-  height: 14px;
+  width: 100%;
+  aspect-ratio: 11 / 14;
   border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
   background: #e3d6c1;
   transition: background 0.4s;

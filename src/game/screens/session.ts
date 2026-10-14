@@ -68,7 +68,7 @@ export async function showSession(ctx: AppContext, profile: Profile, mode: Sessi
         progress,
         voiceOn
           ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp igen', onclick: () => void speak(currentPrompt) }, icon('speaker'))
-          : h('span', { class: 'icon-spacer', 'aria-hidden': 'true' }),
+          : null,
       ),
     ),
     stage,
