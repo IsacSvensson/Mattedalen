@@ -68,6 +68,9 @@ function sanitizeMeta(raw: unknown): LearnerMeta {
     accuracyEma: typeof m.accuracyEma === 'number' ? m.accuracyEma : null,
     sessionsCompleted: num(m.sessionsCompleted, 0),
     lastSessionDay: typeof m.lastSessionDay === 'string' ? m.lastSessionDay : null,
+    ...(isObject(m.today) && typeof m.today.day === 'string'
+      ? { today: { day: m.today.day, practisedMs: num(m.today.practisedMs, 0), introduced: num(m.today.introduced, 0) } }
+      : {}),
   };
 }
 

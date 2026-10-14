@@ -103,8 +103,10 @@ export class PlayController {
     const fb = this.session.submit(given, rtMs);
     const { store, pack } = this.deps;
     await store.appendAttempt({ ...fb.attempt, profileId: this.profile.id, packId: pack.id });
-    // Item states are saved right away; learner meta (day done, pacing) only at the end.
-    await this.saveProgress(this.metaBefore);
+    // Item states are saved right away; learner meta (day done, pacing) only at
+    // the end – except today's practised time, so it adds up even if the app
+    // is simply closed in the middle of a session.
+    await this.saveProgress({ ...this.metaBefore, today: this.session.summary().meta.today });
     return fb;
   }
 

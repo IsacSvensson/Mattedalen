@@ -149,6 +149,12 @@ export interface LearnerMeta {
   /** Number of daily sessions finished. */
   sessionsCompleted: number;
   lastSessionDay: DayKey | null;
+  /**
+   * The day's regular session so far, when it was interrupted: time already
+   * practised and new items already introduced add up over the day, so
+   * leaving after 3 minutes and coming back continues the same session.
+   */
+  today?: { day: DayKey; practisedMs: number; introduced: number };
 }
 
 export interface StatusConfig {

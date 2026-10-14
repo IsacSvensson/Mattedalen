@@ -321,3 +321,59 @@ describe('focus sessions', () => {
     for (const q of asked) expect(COLOURS).toContain(q.item.id);
   });
 });
+
+describe('an interrupted daily session', () => {
+  it('adds up time and new items over the day, and finishes the day only at the full time', () => {
+    const { engine, clock } = setup({ session: { durationMs: 60_000 } });
+    const first = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta() });
+    for (let i = 0; i < 4; i++) {
+      const q = first.next()!;
+      clock.advance(5000);
+      first.submit(q.item.answer, 2000);
+    }
+    first.end();
+    const part = first.summary();
+    expect(part.completed).toBe(false);
+    expect(part.meta.lastSessionDay).toBeNull();
+    expect(part.meta.today).toEqual({ day: TODAY, practisedMs: 20_000, introduced: part.introduced.length });
+
+    // Back after a break: the drops continue where they were.
+    clock.advance(3 * 60_000);
+    const second = engine.startSession({ states: first.stateRecord(), meta: part.meta });
+    expect(second.progress()).toBeCloseTo(20 / 60);
+    const asked = run(second, clock);
+    expect(asked.length).toBe(8); // 40 s left, 5 s per answer
+    const done = second.summary();
+    expect(done.completed).toBe(true);
+    expect(done.meta.lastSessionDay).toBe(TODAY);
+    expect(done.meta.sessionsCompleted).toBe(1);
+    expect(done.meta.today?.practisedMs).toBe(60_000);
+  });
+
+  it('does not give extra new items for starting again', () => {
+    const { engine, clock } = setup({ pacing: { bootstrapNew: 2, maxNewPerSession: 2 } });
+    const s1 = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta() });
+    for (let i = 0; i < 12; i++) {
+      const q = s1.next()!;
+      clock.advance(5000);
+      s1.submit(q.item.answer, 2000);
+    }
+    s1.end();
+    const m1 = s1.summary();
+    expect(m1.introduced.length).toBe(2);
+    const s2 = engine.startSession({ states: s1.stateRecord(), meta: m1.meta });
+    const asked = run(s2, clock);
+    expect(asked.filter((q) => q.kind === 'new')).toHaveLength(0);
+  });
+
+  it('starts over on a new day, and extra practice never counts towards it', () => {
+    const { engine, clock } = setup({ session: { durationMs: 60_000 } });
+    const yesterday = { ...engine.initialMeta(), today: { day: addDays(TODAY, -1), practisedMs: 50_000, introduced: 3 } };
+    const s = engine.startSession({ states: engine.initialStates(), meta: yesterday });
+    expect(s.progress()).toBe(0);
+    const extra = engine.startSession({ states: knownAnimals(engine), meta: { ...engine.initialMeta(), today: { day: TODAY, practisedMs: 50_000, introduced: 0 } }, mode: 'extra', durationMs: 60_000 });
+    expect(extra.progress()).toBe(0);
+    run(extra, clock);
+    expect(extra.summary().meta.today?.practisedMs).toBe(50_000);
+  });
+});

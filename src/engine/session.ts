@@ -109,6 +109,9 @@ export class Session {
   readonly startedAt: number;
   readonly today: string;
   private readonly durationMs: number;
+  /** Earlier parts of today's regular session (it may have been interrupted). */
+  private readonly priorMs: number;
+  private readonly priorNew: number;
   private readonly states: Map<ItemId, ItemState>;
   private readonly pacing: PacingController;
   private readonly maxNew: number;
@@ -144,6 +147,9 @@ export class Session {
     this.startedAt = clock.now();
     this.today = clock.today();
     this.durationMs = opts.durationMs ?? config.session.durationMs;
+    const earlier = this.mode === 'daily' && meta.today?.day === this.today ? meta.today : undefined;
+    this.priorMs = Math.max(0, earlier?.practisedMs ?? 0);
+    this.priorNew = Math.max(0, earlier?.introduced ?? 0);
     this.states = new Map(pack.items.map((it) => [it.id, opts.states[it.id] ?? emptyState(it.id)]));
     this.pacing = new PacingController(config.pacing, meta.pacingGap);
     this.unlocked = computeUnlocked(pack.units, this.stateRecord(), meta.unlockedUnitIds, this.relaxedUnlock());
@@ -162,7 +168,7 @@ export class Session {
         ? 0
         : this.mode === 'focus'
           ? config.focus.maxNew
-          : Math.min(p.maxNewPerSession, p.bootstrapNew + Math.floor(known.length / p.knownPerNew));
+          : Math.max(0, Math.min(p.maxNewPerSession, p.bootstrapNew + Math.floor(known.length / p.knownPerNew)) - this.priorNew);
     // Let the first new item come right after the warm-up (a focus session
     // has none, so it starts with a couple of known items when there are some).
     const focusKnown = this.focus ? known.filter((s) => this.focus?.has(s.itemId)).length : 0;
@@ -268,15 +274,20 @@ export class Session {
     return { correct, given, expected, item: q.item, previousStatus: prev.status, state: next, attempt };
   }
 
+  /** Practised time, including earlier parts of today's regular session. */
+  private practisedMs(): number {
+    const end = this.endedAt ?? this.deps.clock.now();
+    return this.priorMs + Math.max(0, end - this.startedAt);
+  }
+
   /** True once the configured duration has passed (the current question may still be answered). */
   isOver(): boolean {
-    return this.endedAt !== null || this.deps.clock.now() - this.startedAt >= this.durationMs;
+    return this.endedAt !== null || this.practisedMs() >= this.durationMs;
   }
 
   /** Share of the session's time that has passed, 0–1 (for a progress display). */
   progress(): number {
-    const end = this.endedAt ?? this.deps.clock.now();
-    return Math.min(1, Math.max(0, (end - this.startedAt) / this.durationMs));
+    return Math.min(1, this.practisedMs() / this.durationMs);
   }
 
   /** End early (e.g. the child leaves). */
@@ -289,10 +300,12 @@ export class Session {
     return Object.fromEntries(this.states);
   }
 
-  /** True when the session ran its full time (ending early does not count as the day's session). */
+  /**
+   * True when the session ran its full time, counting earlier parts of
+   * today's regular session (ending early does not finish the day).
+   */
   completed(): boolean {
-    const end = this.endedAt ?? this.deps.clock.now();
-    return end - this.startedAt >= this.durationMs;
+    return this.practisedMs() >= this.durationMs;
   }
 
   summary(): SessionSummary {
@@ -306,6 +319,14 @@ export class Session {
       accuracyEma: accuracy === null ? prevEma : prevEma === null ? accuracy : prevEma * 0.7 + accuracy * 0.3,
       sessionsCompleted: this.meta.sessionsCompleted + (countsAsDaily ? 1 : 0),
       lastSessionDay: countsAsDaily ? this.today : this.meta.lastSessionDay,
+      today:
+        this.mode === 'daily' && this.answered > 0
+          ? {
+              day: this.today,
+              practisedMs: Math.min(this.durationMs, this.practisedMs()),
+              introduced: this.priorNew + this.introduced.length,
+            }
+          : this.meta.today,
     };
     return {
       sessionId: this.id,
@@ -390,7 +411,7 @@ export class Session {
       const p = this.deps.config.pacing;
       // Repeating the very same item is the one thing worse than a quick new item.
       const stuck = scope.every((id) => id === last);
-      const limit = this.mode === 'focus' ? this.maxNew : p.maxNewPerSession;
+      const limit = this.mode === 'focus' ? this.maxNew : p.maxNewPerSession - this.priorNew;
       const room = this.introduced.length < limit && (this.sinceNew >= p.minGap || stuck);
       if (this.mode !== 'extra' && room && this.pacing.allowNew()) {
         const candidate = this.nextNewCandidate();

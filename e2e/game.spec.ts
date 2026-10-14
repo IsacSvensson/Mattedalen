@@ -70,3 +70,30 @@ test('several children on one device', async ({ page }) => {
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await expect(page.locator('.profile-tile:not(.add)')).toHaveCount(2);
 });
+
+test('an interrupted session continues later the same day: the time adds up', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
+  await page.goto('/');
+  await createProfile(page, 'Alva');
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  await answer(page);
+  await expect(nextStep(page)).toBeVisible();
+  await page.clock.fastForward('03:00');
+  await answer(page);
+  // The child leaves after about 3 of 12 minutes.
+  await page.getByRole('button', { name: 'Tillbaka till trädgården' }).click();
+  await expect(page.getByRole('button', { name: 'Vattna trädgården' })).toBeVisible();
+
+  // Back later: the drops continue from a quarter, not from zero.
+  await page.clock.fastForward('02:00:00');
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  const progress = page.getByRole('progressbar', { name: 'Hur långt passet har kommit' });
+  await expect(progress).toHaveAttribute('aria-valuenow', /^(2[5-9]|3\d)$/);
+  await expect(page.locator('.drop.on')).toHaveCount(3);
+
+  // Another 9 minutes finishes the day's session.
+  await expect(nextStep(page)).toBeVisible();
+  await page.clock.fastForward('09:00');
+  await answer(page);
+  await expect(page.getByRole('heading', { name: 'Bra jobbat!' })).toBeVisible();
+});

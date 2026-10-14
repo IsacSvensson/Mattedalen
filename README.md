@@ -252,6 +252,11 @@ inget hämtas utifrån.
   bara ”fel” och aldrig rött. Är felsvaret en typisk förväxling får barnet en vänlig
   förklaring (”48 är 8 × 6 – nära!”, ”7 är 3 + 4. Här ska det vara 3 gånger 4.”).
   Felsvaret loggas som förväxling.
+- **Avbrutet pass.** Lämnar barnet passet i förtid och kommer tillbaka samma dag,
+  fortsätter samma pass: övad tid och antal nya fakta räknas ihop över dagen
+  (`meta.today`). Dropparna fortsätter där de var, dagen blir klar när summan når
+  hela tiden, och barnet får inga extra nya fakta för att det började om. Tiden
+  sparas efter varje svar, så den räknas även om appen bara stängs.
 - **Avslutningen.** När tiden är slut (12 minuter som standard) får barnet svara
   klart på frågan och ser sedan ”Trädgården behöver sova nu” med vad som växte.
   Under resten av dagen sover trädgården. Extra övning är frivillig, märkt som
