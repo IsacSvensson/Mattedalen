@@ -18,16 +18,16 @@ test('practise one chosen table: new facts from it, mixed with others', async ({
   await seedStates(page, fluent(tens()));
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
 
-  await page.getByRole('button', { name: '🎯 Öva på en tabell' }).click();
+  await page.getByRole('button', { name: 'Öva en tabell' }).click();
   await expect(page.getByRole('heading', { name: 'Vilken tabell vill du öva på?' })).toBeVisible();
   await expect(page.locator('.focus-tile')).toHaveCount(10);
   await page.getByRole('button', { name: /^×7,/ }).click();
   await expect(page.getByRole('button', { name: /^×7,/ })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByText('Du kan 2 av 19 bra.')).toBeVisible();
-  await expect(page.getByRole('button', { name: '⚡ Rekordjakt ×7' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Rekordjakt ×7' })).toBeDisabled();
 
-  await page.getByRole('button', { name: 'Öva ×7 ▶' }).click();
-  await expect(page.locator('.focus-tag')).toHaveText('🎯 ×7');
+  await page.getByRole('button', { name: 'Öva ×7' }).click();
+  await expect(page.locator('.focus-tag')).toHaveText('×7');
   const asked: string[] = [];
   let sawNewSeven = false;
   for (let i = 0; i < 8; i++) {
@@ -46,7 +46,7 @@ test('practise one chosen table: new facts from it, mixed with others', async ({
   await expect(page.getByRole('button', { name: 'Öva ×7 igen' })).toBeVisible();
   await page.getByRole('button', { name: 'Till trädgården' }).click();
   // Focus practice is optional: the daily session is still waiting.
-  await expect(page.getByRole('button', { name: 'Vattna trädgården ▶' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Vattna trädgården' })).toBeVisible();
 });
 
 test('a record challenge on one table keeps its own record', async ({ page }) => {
@@ -55,11 +55,11 @@ test('a record challenge on one table keeps its own record', async ({ page }) =>
   await seedStates(page, fluent([...tens(), '7x2', '2x7', '7x5', '5x7']));
   await page.locator('.profile-tile', { hasText: 'Bo' }).click();
 
-  await page.getByRole('button', { name: '🎯 Öva på en tabell' }).click();
+  await page.getByRole('button', { name: 'Öva en tabell' }).click();
   await page.getByRole('button', { name: /^×7,/ }).click();
-  await page.getByRole('button', { name: '⚡ Rekordjakt ×7' }).click();
+  await page.getByRole('button', { name: 'Rekordjakt ×7' }).click();
   await expect(page.getByRole('heading', { name: 'Slå ditt rekord på ×7' })).toBeVisible();
-  await page.getByRole('button', { name: 'Kör! ▶' }).click();
+  await page.getByRole('button', { name: 'Kör!' }).click();
   for (let i = 0; i < 3; i++) {
     const text = (await page.locator('.question .prompt').textContent())!;
     const [a, b] = text.match(/\d+/g)!.map(Number) as [number, number];
@@ -75,6 +75,6 @@ test('a record challenge on one table keeps its own record', async ({ page }) =>
 
   // The all-facts challenge has a record of its own.
   await page.getByRole('button', { name: 'Tillbaka till trädgården' }).click();
-  await page.getByRole('button', { name: '⚡ Slå ditt rekord' }).click();
+  await page.getByRole('button', { name: 'Slå rekord' }).click();
   await expect(page.getByText('Första gången – sätt ett rekord!')).toBeVisible();
 });

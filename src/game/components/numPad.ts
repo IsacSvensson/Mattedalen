@@ -1,4 +1,5 @@
 import { h } from '../dom';
+import { icon } from './icons';
 
 const MAX_DIGITS = 3;
 
@@ -15,9 +16,9 @@ export function numPad(onSubmit: (value: string) => void): NumPad {
   let value = '';
   let disabled = false;
   const display = h('output', { class: 'numpad-display', 'aria-live': 'polite', 'aria-label': 'Ditt svar' }, ' ');
-  const ok = h('button', { class: 'numpad-key ok', type: 'button', 'aria-label': 'Svara', disabled: true, onclick: () => submit() }, '✓');
+  const ok = h('button', { class: 'numpad-key ok', type: 'button', 'aria-label': 'Svara', disabled: true, onclick: () => submit() }, icon('check'));
   const keys = [...'123456789'].map((d) => key(d));
-  const back = h('button', { class: 'numpad-key back', type: 'button', 'aria-label': 'Sudda', onclick: () => erase() }, '⌫');
+  const back = h('button', { class: 'numpad-key back', type: 'button', 'aria-label': 'Sudda', onclick: () => erase() }, icon('erase'));
   const buttons = [...keys, back, key('0'), ok];
 
   function key(d: string) {

@@ -1,5 +1,6 @@
 import type { ArrayParts } from '../../content/multiplication';
 import { h, s } from '../dom';
+import { icon } from './icons';
 import { arrayView } from './arrayView';
 
 const BOARD = 10;
@@ -51,7 +52,7 @@ export function arrayBuilder({ rows, cols, parts, startRotated = false, onDone }
     { class: 'builder-instruction' },
     startRotated ? `Du kan redan ${cols} × ${rows}. Vrid den!` : `Dra ut ${rows} ${rows === 1 ? 'rad' : 'rader'} med ${cols} i varje`,
   );
-  const rotate = h('button', { class: 'soft-button', type: 'button', onclick: () => turn() }, 'Vrid 🔄');
+  const rotate = h('button', { class: 'soft-button', type: 'button', onclick: () => turn() }, icon('rotate'), 'Vrid');
   const showMe = h('button', { class: 'link-button', type: 'button', onclick: () => set({ r: rows, c: cols }, true) }, 'Visa mig');
   const boardWrap = h('div', { class: 'builder-wrap' }, board);
   const root = h('div', { class: 'array-builder' }, instruction, boardWrap, size, h('div', { class: 'builder-buttons' }, rotate, showMe));

@@ -24,7 +24,7 @@ test('works fully offline after the first visit, without any outside traffic', a
   });
   await page.reload();
   await createProfile(page, 'Alva');
-  await page.getByRole('button', { name: 'Vattna trädgården ▶' }).click();
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   for (let i = 0; i < 5; i++) await answer(page);
 
   // The lazily loaded QR reader also works offline.
@@ -35,7 +35,7 @@ test('works fully offline after the first visit, without any outside traffic', a
   const qr = await page.locator('.qr-code svg').screenshot();
   await page.getByRole('button', { name: 'Klar' }).click();
   await page.locator('input[type=file][accept="image/*"]').setInputFiles({ name: 'qr.png', mimeType: 'image/png', buffer: qr });
-  await expect(page.getByRole('heading', { name: /Hämta .* Alva\?/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Hämta Alva\?/ })).toBeVisible();
 
   // App files are served by the worker; nothing reaches other hosts.
   const manifest = await page.evaluate(async () => (await fetch('./manifest.webmanifest')).json());

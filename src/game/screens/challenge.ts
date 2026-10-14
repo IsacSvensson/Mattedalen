@@ -1,6 +1,7 @@
 import { buildChoices, mathRandomRng, systemClock, type FocusSet } from '../../engine';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
+import { icon } from '../components/icons';
 import { numPad } from '../components/numPad';
 import { h, wait } from '../dom';
 import { bestChallengeScore, CHALLENGE_SECONDS, challengeDeck, challengePool } from '../challenge';
@@ -17,12 +18,12 @@ export async function showChallenge(ctx: AppContext, profile: Profile, focus?: F
   const view = h(
     'main',
     { class: 'screen challenge' },
-    h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka till trädgården', onclick: () => void showGarden(ctx, profile) }, '🏡')),
-    h('p', { class: 'end-icon', 'aria-hidden': 'true' }, '⚡'),
+    h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka till trädgården', onclick: () => void showGarden(ctx, profile) }, icon('home'))),
+    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon('watch')),
     h('h1', null, focus ? `Slå ditt rekord på ${focus.title}` : 'Slå ditt rekord'),
     h('p', { class: 'end-text' }, `Svara på så många du kan på ${CHALLENGE_SECONDS} sekunder. Bara sådant du redan kan!`),
     h('p', { class: 'record' }, record === null ? 'Första gången – sätt ett rekord!' : `Ditt rekord: ${record}`),
-    h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runChallenge(ctx, profile, record, focus) }, 'Kör! ▶'),
+    h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runChallenge(ctx, profile, record, focus) }, 'Kör!', icon('arrow', 'on-primary')),
   );
   show(ctx, view);
 }
@@ -47,7 +48,7 @@ async function runChallenge(ctx: AppContext, profile: Profile, record: number | 
   const view = h(
     'main',
     { class: 'screen session challenge-run' },
-    h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Avbryt', onclick: () => void stop(true) }, '🏡'), h('div', { class: 'time-track' }, bar), scoreEl),
+    h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Avbryt', onclick: () => void stop(true) }, icon('home')), h('div', { class: 'time-track' }, bar), scoreEl),
     stage,
   );
   const setKey = (handler?: (e: KeyboardEvent) => void) => {
@@ -103,7 +104,12 @@ async function runChallenge(ctx: AppContext, profile: Profile, record: number | 
         clearInterval(finishRace);
         resolve(value);
       };
-      const prompt = h('p', { class: 'prompt' }, item.prompt, ' = ?');
+      const prompt = h(
+        'div',
+        { class: 'prompt-card card' },
+        h('p', { class: 'prompt' }, item.prompt),
+        free ? null : h('p', { class: 'eq', 'aria-hidden': 'true' }, '= ?'),
+      );
       if (free) {
         const pad = numPad((v) => {
           pad.disable();
@@ -142,7 +148,7 @@ function showChallengeResult(ctx: AppContext, profile: Profile, score: number, r
   const view = h(
     'main',
     { class: 'screen session-end' },
-    h('p', { class: 'end-icon', 'aria-hidden': 'true' }, newRecord ? '🏆' : '⚡'),
+    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon(newRecord ? 'trophy' : 'watch')),
     h('h1', null, `${score} rätt!`),
     h(
       'p',

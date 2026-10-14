@@ -199,7 +199,10 @@ blockerat, till exempel i vissa privata lägen. Båda körs mot samma kontraktst
 
 Spelet är skrivet i vanilla TypeScript med en liten `h()`-hjälpare (`dom.ts`). Det
 har få skärmar och lite delat tillstånd, så ett UI-ramverk skulle bara ge vikt.
-All grafik är inbäddad SVG, och det finns inga externa resurser.
+All grafik är inbäddad SVG: plantor, djur (`components/avatars.ts`), ikoner
+(`components/icons.ts`) och landskapet (`components/scene.ts`). Typsnitten
+(Fredoka och Nunito, SIL OFL, licenser i `src/game/fonts/`) följer med appen, så
+inget hämtas utifrån.
 
 - **`play.ts`** (`PlayController`) kopplar ihop motorn och lagringen utan DOM.
   Efter varje svar sparas försöket och faktans tillstånd. När passet är slut sparas
@@ -207,24 +210,25 @@ All grafik är inbäddad SVG, och det finns inga externa resurser.
   kvar, men dagen räknas inte som klar. Allt detta testas med minneslagringen.
 - **Profiler.** Flera barn kan använda samma enhet, och varje barn har namn och ett
   djur.
-- **Kartan** är 10×10-rutnätet som trädgårdsland. Raden *a* och kolumnen *b* visar
-  *a × b*, så 3×7 och 7×3 speglas över diagonalen. Varje ruta visar faktans
-  status: jord → frö → planta → buske → träd. Fakta som just har vuxit animeras.
+- **Kartan** är 10×10-rutnätet som en odlingslåda av trä. Raden *a* och kolumnen
+  *b* visar *a × b*, så 3×7 och 7×3 speglas över diagonalen. Vad rutorna betyder
+  beskrivs under Designregler nedan. Fakta som just har vuxit animeras.
 - **Introduktion av nya fakta.** Barnet drar ut rektangeln på en bräda med
   10 × 10 prickar och ser storleken medan det drar, till exempel ”3 × 6”. En
-  speglad rektangel kan vridas 90° med ”Vrid 🔄”. Kan barnet redan tvillingen
+  speglad rektangel kan vridas 90° med ”Vrid”. Kan barnet redan tvillingen
   (7 × 3) börjar brädet från den, och barnet vrider den till 3 × 7. ”Visa mig”
   bygger rektangeln åt barnet. När den är rätt visas strategin som färgade delar,
   till exempel 8 × 7 som två 4 × 7-halvor eller 9 × 6 som 10 × 6 där sista raden
   är struken. Sedan svarar barnet själv (”Nu du!”).
 - **Svarsformat.** Fakta under inlärning frågas med flerval: fyra stora knappar,
   och tangenterna 1–4 fungerar. Flytande fakta frågas med fritt svar på en stor
-  sifferknappsats (siffror, ⌫ och ✓, eller tangentbordet). Fritt svar krävs för
+  sifferknappsats (siffror, sudda och bock, eller tangentbordet). Fritt svar krävs för
   statusen ”automatiserad”. Svarstiden mäts men visas aldrig, och ingen klocka
   syns.
-- **Återkoppling.** Vid rätt svar kommer en kort glädjeanimation. Vid fel ersätts
-  svarsytan av ett hjälpkort med rätt svar, strategin och den färgade rektangeln,
-  aldrig bara ”fel”. Är felsvaret en typisk förväxling får barnet en vänlig
+- **Återkoppling.** Vid rätt svar blir frågekortet grönt, svaret visas och en
+  liten planta dyker upp. Vid fel ersätts frågan av ett hjälpkort: ”Du svarade 54.
+  Så här kan du tänka:”, rätt svar, strategin och den färgade rektangeln. Aldrig
+  bara ”fel” och aldrig rött. Är felsvaret en typisk förväxling får barnet en vänlig
   förklaring (”48 är 8 × 6 – nära!”, ”7 är 3 + 4. Här ska det vara 3 gånger 4.”).
   Felsvaret loggas som förväxling.
 - **Avslutningen.** När tiden är slut (12 minuter som standard) får barnet svara
@@ -232,9 +236,44 @@ All grafik är inbäddad SVG, och det finns inga externa resurser.
   Under resten av dagen sover trädgården. Extra övning är frivillig, märkt som
   frivillig, varar 5 minuter och ger inga nya fakta.
 
+### Designregler
+
+Utseendet bygger på några få regler. De står också överst i `styles.css`.
+
+**Tre begrepp, tre egna visuella uttryck.** De blandas aldrig:
+
+| Begrepp | Uttrycks bara genom | Värden |
+|---|---|---|
+| Tillgänglighet (spelvärlden) | rutans **bakgrund** | äng = inte upplåst · grävd jord = upplåst |
+| Kunskap (barnets lärande) | **växten** på rutan | ingen · frö · planta · buske · träd |
+| Hela tabeller | **odlingslådans kant och kullen** | solros på tabellens siffra · en solros på kullen |
+
+- Växterna följer statusreglerna i motorn. Frö och planta betyder att faktan
+  övas, buske att den är flytande (rätt och snabbt på 2 olika dagar) och träd att
+  den är automatiserad (3 dagar, utan alternativ). Ett fel svar sänker faktan ett
+  steg, och växten visar då den lägre nivån. Nedgången visas inte som en händelse.
+- En tabell (till exempel ×7, alla 19 fakta i båda ordningarna) räknas som kunnig
+  när alla dess fakta är minst buskar. Då blir siffran på lådan en solros, och en
+  solros växer på kullen i landskapet. Hela raden ändras inte, eftersom varje
+  fakta hör till två tabeller.
+
+**Form.**
+
+- Samma kontur överallt: `--outline` (2,5 px, mörkbrun).
+- Bara det man kan trycka på har en skugga under sig, och den är alltid lika djup
+  (`--press`, 4 px). Ytor som bara visar något har ingen skugga, till exempel
+  kort, odlingslådan och siffrorna under rutnätet.
+- Tre hörnradier: `--r-card` för kort, `--r-tile` för rutor och svarsknappar,
+  samt rund eller piller för knappar.
+- Typsnitt: Fredoka för rubriker och siffror, Nunito för text.
+- En huvudknapp per skärm (orange). Övriga val är ljusa.
+- Rätt svar visas i grönt. Fel svar visas lugnt och streckat, aldrig i rött.
+- Inga emojis i gränssnittet. Profilerna sparar fortfarande djuret som emoji, så
+  äldre profiler och säkerhetskopior fungerar, men det ritas som SVG.
+
 ### Föräldravy (`src/game/screens/parent`)
 
-Föräldravyn nås via ”🔒 För vuxna” på startsidan. Den skyddas av en fyrsiffrig
+Föräldravyn nås via ”För vuxna” på startsidan. Den skyddas av en fyrsiffrig
 vuxenkod som väljs första gången. Koden är ingen säkerhetsfunktion, eftersom
 datan ändå finns på enheten. Den finns bara för att barn inte ska hamna där av
 misstag. Den som glömt koden besvarar en additionsfråga för vuxna och väljer
@@ -306,7 +345,7 @@ göras om från föräldravyn.
 Extralägena är frivilliga och tydligt valbara under huvudknappen i trädgården.
 De påverkar inte schemaläggningen.
 
-- **🎯 Öva på en tabell** (`screens/focus.ts`). Barnet väljer ×1–×10. Varje
+- **Öva en tabell** (`screens/focus.ts`). Barnet väljer ×1–×10. Varje
   tabell visar en liten stapel över hur mycket som är buskar och plantor. En
   runda är 5 minuter och körs som ett fokuspass (se motorn ovan). Tabellen
   omfattar båda ordningarna (×7 är 1 × 7 … 10 × 7 och 7 × 1 … 7 × 10, 19 fakta)
@@ -314,12 +353,12 @@ De påverkar inte schemaläggningen.
   är upplåst än, eftersom passet ändå bara planterar några få nya fakta åt gången.
   Från samma vy finns **rekordjakt på en tabell**. Den öppnas när 4 av tabellens
   fakta är buskar och har ett eget rekord per tabell (`focusId` på passet).
-- **⚡ Slå ditt rekord** (`screens/challenge.ts`). Barnet har 90 sekunder och
+- **Slå rekord** (`screens/challenge.ts`). Barnet har 90 sekunder och
   får bara fakta som redan är minst ”flytande”. Läget öppnas när 5 fakta är
   buskar. Här, och bara här, syns en tidsstapel. Ett fel svar ger inget straff:
   rätt svar visas en kort stund och spelet fortsätter. Poängen jämförs bara med
   barnets eget bästa resultat (”Nytt rekord!”), aldrig med andra barn.
-- **🃏 Gångerkrig – barn mot vuxen** (`screens/duel.ts`). Två spelare på samma
+- **Gångerkrig – barn mot vuxen** (`screens/duel.ts`). Två spelare på samma
   enhet, inspirerat av multiplikationskrig med kortlek. Båda drar ett kort ur
   barnets kända fakta, så att den vuxna inte får lättare kort. Barnet svarar med
   flerval och den vuxna på sifferknappsatsen. Störst rätt svar tar rundan. Blir

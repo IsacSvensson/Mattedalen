@@ -256,6 +256,12 @@ export class Session {
     return this.endedAt !== null || this.deps.clock.now() - this.startedAt >= this.durationMs;
   }
 
+  /** Share of the session's time that has passed, 0–1 (for a progress display). */
+  progress(): number {
+    const end = this.endedAt ?? this.deps.clock.now();
+    return Math.min(1, Math.max(0, (end - this.startedAt) / this.durationMs));
+  }
+
   /** End early (e.g. the child leaves). */
   end(): void {
     this.endedAt ??= this.deps.clock.now();

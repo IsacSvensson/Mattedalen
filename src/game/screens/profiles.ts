@@ -6,8 +6,13 @@ import { choose } from '../components/modal';
 import { applyUpdate, installGuide, isStandalone, onUpdateReady, updateReady } from '../pwa';
 import { showPinGate } from './parent/pinGate';
 import { showPlacementOffer } from './placement';
+import { AVATAR_KEYS, avatarIcon, avatarName } from '../components/avatars';
+import { icon } from '../components/icons';
+import { plantIcon } from '../components/plant';
+import { scene } from '../components/scene';
 
-export const AVATARS = ['🦊', '🐢', '🐸', '🐰', '🐻', '🦉', '🐝', '🦋', '🐞', '🐱', '🐶', '🦁'];
+/** The animals a player can be (stored as emoji, drawn as pictures). */
+export const AVATARS = AVATAR_KEYS;
 
 export async function showProfiles(ctx: AppContext): Promise<void> {
   const profiles = await ctx.store.listProfiles();
@@ -15,7 +20,8 @@ export async function showProfiles(ctx: AppContext): Promise<void> {
 
   const view = h(
     'main',
-    { class: 'screen profiles' },
+    { class: 'screen profiles has-scene' },
+    scene({ height: 120 }),
     h('h1', null, 'Vem spelar?'),
     h(
       'div',
@@ -24,14 +30,14 @@ export async function showProfiles(ctx: AppContext): Promise<void> {
         h(
           'button',
           { class: 'profile-tile', type: 'button', onclick: () => void openProfile(ctx, p) },
-          h('span', { class: 'avatar', 'aria-hidden': 'true' }, p.avatar),
+          h('span', { class: 'avatar' }, avatarIcon(p.avatar)),
           h('span', { class: 'profile-name' }, p.name),
         ),
       ),
       h(
         'button',
         { class: 'profile-tile add', type: 'button', onclick: () => showNewProfile(ctx, false) },
-        h('span', { class: 'avatar', 'aria-hidden': 'true' }, '＋'),
+        h('span', { class: 'avatar add-ring' }, icon('plus')),
         h('span', { class: 'profile-name' }, 'Ny spelare'),
       ),
     ),
@@ -51,7 +57,7 @@ async function installBanner(ctx: AppContext): Promise<HTMLElement | null> {
   const banner: HTMLElement = h(
     'div',
     { class: 'install-banner' },
-    h('p', null, '📲 Lägg till appen på hemskärmen – då fungerar den utan internet och framstegen sparas säkrare.'),
+    h('p', null, icon('phone'), 'Lägg till appen på hemskärmen – då fungerar den utan internet och framstegen sparas säkrare.'),
     h(
       'div',
       { class: 'button-row' },
@@ -75,7 +81,7 @@ async function installBanner(ctx: AppContext): Promise<HTMLElement | null> {
 
 /** Offered here, between sessions, rather than swapping the app mid-game. */
 function updateBanner(): HTMLElement {
-  const banner = h('div', { class: 'update-banner', hidden: !updateReady() }, h('button', { class: 'soft-button small', type: 'button', onclick: () => applyUpdate() }, '🔄 Ny version finns – uppdatera'));
+  const banner = h('div', { class: 'update-banner', hidden: !updateReady() }, h('button', { class: 'soft-button small', type: 'button', onclick: () => applyUpdate() }, icon('refresh'), 'Ny version finns – uppdatera'));
   const stop = onUpdateReady(() => {
     if (!banner.isConnected) return stop();
     banner.hidden = false;
@@ -83,8 +89,8 @@ function updateBanner(): HTMLElement {
   return banner;
 }
 
-function parentLink(ctx: AppContext, text = '🔒 För vuxna'): HTMLElement {
-  return h('button', { class: 'link-button parent-link', type: 'button', onclick: () => void showPinGate(ctx) }, text);
+function parentLink(ctx: AppContext, text = 'För vuxna'): HTMLElement {
+  return h('button', { class: 'link-button parent-link', type: 'button', onclick: () => void showPinGate(ctx) }, icon('lock'), text);
 }
 
 async function openProfile(ctx: AppContext, profile: Profile): Promise<void> {
@@ -112,18 +118,19 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
       {
         class: `avatar-choice${a === avatar ? ' selected' : ''}`,
         type: 'button',
-        'aria-label': `Välj ${a}`,
+        'aria-label': `Välj ${avatarName(a) ?? a}`,
         'aria-pressed': String(a === avatar),
+        dataset: { avatar: a },
         onclick: () => {
           avatar = a;
           for (const b of avatarButtons) {
-            const on = b.textContent === a;
+            const on = b.dataset.avatar === a;
             b.classList.toggle('selected', on);
             b.setAttribute('aria-pressed', String(on));
           }
         },
       },
-      a,
+      avatarIcon(a),
     ),
   );
 
@@ -146,8 +153,9 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
 
   const view = h(
     'main',
-    { class: 'screen new-profile' },
-    first ? h('p', { class: 'welcome' }, '🌱 Välkommen till Gångerträdgården!') : null,
+    { class: 'screen new-profile has-scene' },
+    scene({ height: 96 }),
+    first ? h('p', { class: 'welcome' }, plantIcon('sprout'), 'Välkommen till Gångerträdgården!') : null,
     h('h1', null, 'Vad heter du?'),
     h(
       'form',
@@ -163,7 +171,7 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
       done,
     ),
     first
-      ? parentLink(ctx, '🔒 Har barnet spelat på en annan enhet? Hämta i föräldravyn')
+      ? parentLink(ctx, 'Har barnet spelat på en annan enhet? Hämta i föräldravyn')
       : h('button', { class: 'link-button', type: 'button', onclick: () => void showProfiles(ctx) }, 'Tillbaka'),
   );
   show(ctx, view);

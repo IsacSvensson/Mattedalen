@@ -94,6 +94,11 @@ export class PlayController {
     return this.session.isOver();
   }
 
+  /** How much of the session's time has passed, 0–1. */
+  progress(): number {
+    return this.session.progress();
+  }
+
   async answer(given: string, rtMs: number): Promise<Feedback> {
     const fb = this.session.submit(given, rtMs);
     const { store, pack } = this.deps;

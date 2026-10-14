@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test';
 
 export async function createProfile(page: Page, name: string): Promise<void> {
   await page.getByRole('textbox', { name: 'Namn' }).fill(name);
-  await page.getByRole('button', { name: 'Välj 🐢' }).click();
+  await page.getByRole('button', { name: 'Välj sköldpadda' }).click();
   await page.getByRole('button', { name: 'Klar' }).click();
   // New players are offered a placement check; most tests start from scratch.
   await page.getByRole('button', { name: 'Börja från början' }).click();
@@ -22,8 +22,8 @@ export async function passIntro(page: Page): Promise<void> {
   if (!(await page.locator('.intro-card').isVisible())) return;
   const showMe = page.getByRole('button', { name: 'Visa mig' });
   if (await showMe.isVisible()) await showMe.click();
-  else await page.getByRole('button', { name: 'Vrid 🔄' }).click();
-  await page.getByRole('button', { name: 'Nu du! ▶' }).click();
+  else await page.getByRole('button', { name: 'Vrid' }).click();
+  await page.getByRole('button', { name: 'Nu du!' }).click();
 }
 
 /** Answers the current question (multiple choice or number pad). Returns the fact asked. */
@@ -98,7 +98,7 @@ export async function seedStates(page: Page, states: Record<string, { status: st
 }
 
 /** Opens the parent view, choosing the PIN on first use. */
-export async function openParent(page: Page, pin = '2580', link: RegExp = /🔒/): Promise<void> {
+export async function openParent(page: Page, pin = '2580', link: RegExp = /För vuxna|föräldravyn/): Promise<void> {
   await page.getByRole('button', { name: link }).click();
   const choosing = page.getByRole('heading', { name: /Välj en vuxenkod/ });
   await expect(choosing.or(page.getByRole('heading', { name: /Vuxenkod/ }))).toBeVisible();

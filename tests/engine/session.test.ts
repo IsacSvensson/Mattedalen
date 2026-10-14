@@ -69,6 +69,16 @@ describe('session basics', () => {
     expect(s.next()).toBeNull();
   });
 
+  it('reports how much of its time has passed', () => {
+    const { engine, clock } = setup({ session: { durationMs: 60_000 } });
+    const s = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta() });
+    expect(s.progress()).toBe(0);
+    clock.advance(15_000);
+    expect(s.progress()).toBe(0.25);
+    clock.advance(120_000);
+    expect(s.progress()).toBe(1);
+  });
+
   it('can be ended early', () => {
     const { engine } = setup();
     const s = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta() });

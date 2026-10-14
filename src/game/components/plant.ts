@@ -5,8 +5,8 @@ import { s } from '../dom';
 export type Stage = 'locked' | 'soil' | 'seed' | 'sprout' | 'bush' | 'tree';
 
 export const STAGE_LABEL: Record<Stage, string> = {
-  locked: 'inte upplåst än',
-  soil: 'tom jord',
+  locked: 'äng, inte upplåst än',
+  soil: 'grävd jord, väntar på ett frö',
   seed: 'frö',
   sprout: 'planta',
   bush: 'buske',
@@ -24,9 +24,13 @@ export function stageFor(state: ItemState | undefined, unitUnlocked: boolean): S
 /**
  * SVG sprite with one symbol per stage, inserted once into the document and
  * referenced with <use>. Drawn inline so the app needs no image files.
+ *
+ * Only the plant says how well a fact is known; whether the square is open
+ * (meadow or dug earth) is shown by the cell behind it (see the garden CSS).
  */
 export function plantSprite(): SVGSVGElement {
-  const soil = () => s('ellipse', { cx: 20, cy: 33, rx: 13, ry: 4.5, fill: 'var(--soil)' });
+  const outline = { stroke: 'var(--ink)', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+  const furrow = (d: string) => s('path', { d, stroke: 'var(--furrow)', 'stroke-width': 2, 'stroke-linecap': 'round', fill: 'none' });
   const symbol = (id: Stage, ...children: SVGElement[]) => s('symbol', { id: `plant-${id}`, viewBox: '0 0 40 40' }, ...children);
   return s(
     'svg',
@@ -34,34 +38,34 @@ export function plantSprite(): SVGSVGElement {
     s(
       'defs',
       null,
-      symbol('locked', s('ellipse', { cx: 20, cy: 33, rx: 11, ry: 3.5, fill: 'var(--soil-locked)' })),
-      symbol('soil', soil()),
-      symbol('seed', soil(), s('ellipse', { cx: 20, cy: 29.5, rx: 3.2, ry: 2.4, fill: 'var(--seed)' })),
+      // Meadow: not open yet. A tuft of grass, nothing planted.
+      symbol(
+        'locked',
+        s('path', { d: 'M17 30c-.5-4-2-6.5-4.5-8M19.5 30c0-5 .8-8.5 2.5-11M22 30c.8-3 2.5-5 5-6', stroke: 'var(--tuft)', 'stroke-width': 2.2, 'stroke-linecap': 'round', fill: 'none' }),
+      ),
+      // Dug earth: open, waiting for a seed.
+      symbol('soil', furrow('M10 31h20M13 25h14')),
+      symbol('seed', furrow('M9 32h22'), s('ellipse', { cx: 20, cy: 25.5, rx: 5.2, ry: 4, fill: 'var(--seed)', ...outline })),
       symbol(
         'sprout',
-        soil(),
-        s('path', { d: 'M20 31 V20', stroke: 'var(--stem)', 'stroke-width': 2.2, 'stroke-linecap': 'round' }),
-        s('path', { d: 'M20 23 C14 23 12 18 12 16 C17 16 20 19 20 23 Z', fill: 'var(--leaf)' }),
-        s('path', { d: 'M20 21 C26 21 28 16 28 14 C23 14 20 17 20 21 Z', fill: 'var(--leaf-light)' }),
+        s('path', { d: 'M20 32V21', stroke: 'var(--ink)', 'stroke-width': 2.4, 'stroke-linecap': 'round' }),
+        s('path', { d: 'M20 24c-6 0-8-5-8-7 5 0 8 3 8 7Z', fill: 'var(--leaf)', ...outline }),
+        s('path', { d: 'M20 22c6 0 8-5 8-7-5 0-8 3-8 7Z', fill: 'var(--leaf-light)', ...outline }),
       ),
       symbol(
         'bush',
-        soil(),
-        s('circle', { cx: 14, cy: 25, r: 7, fill: 'var(--leaf)' }),
-        s('circle', { cx: 26, cy: 25, r: 7, fill: 'var(--leaf)' }),
-        s('circle', { cx: 20, cy: 19, r: 8.5, fill: 'var(--leaf-light)' }),
-        s('circle', { cx: 17, cy: 17, r: 2, fill: 'var(--berry)' }),
-        s('circle', { cx: 24, cy: 23, r: 2, fill: 'var(--berry)' }),
+        s('path', { d: 'M11 31a6.5 6.5 0 0 1-1.5-11.5A9 9 0 0 1 20 9a9 9 0 0 1 10.5 10.5A6.5 6.5 0 0 1 29 31Z', fill: 'var(--leaf-light)', ...outline }),
+        s('circle', { cx: 15.5, cy: 22, r: 2.2, fill: 'var(--berry)' }),
+        s('circle', { cx: 23, cy: 17, r: 2.2, fill: 'var(--berry)' }),
+        s('circle', { cx: 25, cy: 25, r: 2.2, fill: 'var(--berry)' }),
       ),
       symbol(
         'tree',
-        soil(),
-        s('rect', { x: 18, y: 20, width: 4, height: 12, rx: 1.5, fill: 'var(--trunk)' }),
-        s('circle', { cx: 20, cy: 14, r: 11, fill: 'var(--leaf)' }),
-        s('circle', { cx: 15, cy: 11, r: 6, fill: 'var(--leaf-light)' }),
-        s('circle', { cx: 14, cy: 16, r: 2.2, fill: 'var(--flower)' }),
-        s('circle', { cx: 25, cy: 10, r: 2.2, fill: 'var(--flower)' }),
-        s('circle', { cx: 24, cy: 18, r: 2.2, fill: 'var(--flower)' }),
+        s('path', { d: 'M18 33V22h4v11Z', fill: 'var(--trunk)', ...outline }),
+        s('circle', { cx: 20, cy: 15, r: 10.5, fill: 'var(--leaf)', ...outline }),
+        s('circle', { cx: 15.5, cy: 13, r: 2.2, fill: 'var(--flower)', ...outline, 'stroke-width': 1.2 }),
+        s('circle', { cx: 24, cy: 11, r: 2.2, fill: 'var(--flower)', ...outline, 'stroke-width': 1.2 }),
+        s('circle', { cx: 23, cy: 19, r: 2.2, fill: 'var(--flower)', ...outline, 'stroke-width': 1.2 }),
       ),
     ),
   );

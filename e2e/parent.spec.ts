@@ -13,7 +13,7 @@ test('the parent view is behind a PIN', async ({ page }) => {
   await openParent(page, '1357');
   await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
 
-  await page.getByRole('button', { name: /🔒/ }).click();
+  await page.getByRole('button', { name: /För vuxna|föräldravyn/ }).click();
   await expect(page.getByRole('heading', { name: /Vuxenkod/ })).toBeVisible();
   await page.keyboard.type('0000');
   await expect(page.getByText('Fel kod. Försök igen.')).toBeVisible();
@@ -23,10 +23,10 @@ test('the parent view is behind a PIN', async ({ page }) => {
 
 test('shows heatmap, confusions and practised minutes; settings can be changed', async ({ page }) => {
   await createProfile(page, 'Alva');
-  await page.getByRole('button', { name: 'Vattna trädgården ▶' }).click();
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   await answer(page);
   await answer(page, false);
-  await page.getByRole('button', { name: 'Fortsätt ▶' }).click();
+  await page.getByRole('button', { name: 'Fortsätt' }).click();
   await page.clock.fastForward('12:00');
   await answer(page);
   await page.getByRole('button', { name: 'Till trädgården' }).click();
@@ -47,7 +47,7 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   await expect(page.getByRole('combobox', { name: 'Passlängd' })).toHaveValue('15');
   await page.getByRole('textbox', { name: 'Namn' }).fill('Alva-Li');
   await page.getByRole('button', { name: 'Spara', exact: true }).click();
-  await expect(page.getByRole('button', { name: '🐢 Alva-Li' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Alva-Li', exact: true })).toBeVisible();
 });
 
 test('a JSON backup restores everything on another device', async ({ page, browser }) => {
@@ -86,7 +86,7 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
   await other.goto('/');
   await openParent(other, '2222', /annan enhet/);
   await other.locator('input[type=file][accept="image/*"]').setInputFiles({ name: 'qr.png', mimeType: 'image/png', buffer: qrImage });
-  await expect(other.getByRole('heading', { name: 'Hämta 🐢 Alva?' })).toBeVisible();
+  await expect(other.getByRole('heading', { name: 'Hämta Alva?' })).toBeVisible();
   await expect(other.getByText('10 automatiserade, 9 flytande och 1 som övas.')).toBeVisible();
   await other.getByRole('button', { name: 'Lägg till', exact: true }).click();
   await expect(other.getByText('Alva är hämtad')).toBeVisible();

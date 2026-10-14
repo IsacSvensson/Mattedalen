@@ -18,6 +18,12 @@ export function tableFocusId(table: number): string {
   return `t${table}`;
 }
 
+/** The table a focus set id stands for (`t7` → 7), or null. */
+export function focusTable(id: string): number | null {
+  const m = /^t(\d+)$/.exec(id);
+  return m ? Number(m[1]) : null;
+}
+
 /**
  * One focus set per table: every fact with that factor, in both orders
  * (×7 is 1 × 7 … 10 × 7 and 7 × 1 … 7 × 10), across units.

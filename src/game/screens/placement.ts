@@ -2,6 +2,7 @@ import { mathRandomRng, Placement, systemClock } from '../../engine';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { numPad } from '../components/numPad';
+import { icon } from '../components/icons';
 import { plantIcon } from '../components/plant';
 import { h } from '../dom';
 import { savePlacement } from '../play';
@@ -13,13 +14,13 @@ export function showPlacementOffer(ctx: AppContext, profile: Profile): void {
   const view = h(
     'main',
     { class: 'screen session-end placement-offer' },
-    h('p', { class: 'end-icon', 'aria-hidden': 'true' }, '🔎'),
+    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon('search')),
     h('h1', null, 'Kan du redan lite gånger?'),
     h('p', { class: 'end-text' }, 'Gör en snabb startkoll, så vet trädgården var du ska börja. Svara på det du kan – det gör inget om du inte kan allt!'),
     h(
       'div',
       { class: 'garden-actions' },
-      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runPlacement(ctx, profile) }, 'Gör startkollen ▶'),
+      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runPlacement(ctx, profile) }, 'Gör startkollen', icon('arrow', 'on-primary')),
       h('button', { class: 'soft-button', type: 'button', onclick: () => void showGarden(ctx, profile) }, 'Börja från början'),
     ),
   );
@@ -45,7 +46,7 @@ export async function runPlacement(ctx: AppContext, profile: Profile): Promise<v
     h(
       'header',
       { class: 'top-bar' },
-      h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Hoppa över startkollen', onclick: () => ((left = true), void showGarden(ctx, profile)) }, '🏡'),
+      h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Hoppa över startkollen', onclick: () => ((left = true), void showGarden(ctx, profile)) }, icon('home')),
       h('div', { class: 'time-track', role: 'progressbar', 'aria-label': 'Hur långt startkollen har kommit' }, progress),
     ),
     stage,
@@ -69,7 +70,7 @@ export async function runPlacement(ctx: AppContext, profile: Profile): Promise<v
         pad.disable();
         resolve({ given: v, rtMs: Math.round(performance.now() - shownAt) });
       });
-      stage.replaceChildren(h('div', { class: 'question free' }, h('p', { class: 'prompt' }, item.prompt, ' = ?'), pad.el));
+      stage.replaceChildren(h('div', { class: 'question free' }, h('div', { class: 'prompt-card card' }, h('p', { class: 'prompt' }, item.prompt)), pad.el));
       setKey((e) => pad.onKey(e));
     });
     if (left) return;
@@ -89,7 +90,7 @@ export async function runPlacement(ctx: AppContext, profile: Profile): Promise<v
     h(
       'main',
       { class: 'screen session-end' },
-      h('p', { class: 'end-icon', 'aria-hidden': 'true' }, titles.length ? '🌳' : '🌱'),
+      h('div', { class: 'end-icon plant-badge', 'aria-hidden': 'true' }, plantIcon(titles.length ? 'tree' : 'sprout')),
       h('h1', null, titles.length ? 'Bra jobbat!' : 'Tack!'),
       titles.length
         ? h(

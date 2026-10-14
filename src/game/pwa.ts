@@ -1,4 +1,5 @@
 import { h, s } from './dom';
+import { icon } from './components/icons';
 
 // --- service worker -------------------------------------------------------
 
@@ -93,7 +94,7 @@ async function promptInstall(): Promise<boolean> {
 
 /** Step-by-step instructions for adding the app to the home screen. */
 export function installGuide(platform = detectPlatform()): HTMLElement {
-  if (isStandalone()) return h('p', { class: 'install-done' }, '✅ Appen är redan tillagd på hemskärmen.');
+  if (isStandalone()) return h('p', { class: 'install-done' }, icon('check'), 'Appen är redan tillagd på hemskärmen.');
 
   const button = deferredPrompt
     ? h(
@@ -102,7 +103,7 @@ export function installGuide(platform = detectPlatform()): HTMLElement {
           class: 'big-button',
           type: 'button',
           onclick: async () => {
-            if (await promptInstall()) button?.replaceWith(h('p', { class: 'install-done' }, '✅ Appen installeras.'));
+            if (await promptInstall()) button?.replaceWith(h('p', { class: 'install-done' }, icon('check'), 'Appen installeras.'));
           },
         },
         'Installera appen',

@@ -4,6 +4,9 @@ import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { arrayBuilder } from '../components/arrayBuilder';
 import { arrayView, partsOf } from '../components/arrayView';
+import { icon } from '../components/icons';
+import { plantIcon } from '../components/plant';
+import { scene } from '../components/scene';
 import { numPad } from '../components/numPad';
 import { h, prefersReducedMotion, wait } from '../dom';
 import { PlayController } from '../play';
@@ -16,6 +19,11 @@ const CORRECT_PAUSE_MS = 650;
 
 /** Read questions aloud in this session (profile setting, if the device can speak). */
 let voiceOn = false;
+/** The prompt on screen, for the "read again" button in the top band. */
+let currentPrompt = '';
+
+/** Drops in the top band: they fill up as the session's time passes (no clock, no count). */
+const DROPS = 12;
 
 export async function showSession(ctx: AppContext, profile: Profile, mode: SessionMode, focus?: FocusSet): Promise<void> {
   const play = await PlayController.start(profile, ctx.deps, mode, focus);
@@ -32,14 +40,36 @@ export async function showSession(ctx: AppContext, profile: Profile, mode: Sessi
     else showSessionEnd(ctx, profile, summary, play.focus);
   };
 
+  const drops = Array.from({ length: DROPS }, () => h('i', { class: 'drop' }));
+  const progress = h(
+    'div',
+    { class: 'session-progress', role: 'progressbar', 'aria-label': 'Hur långt passet har kommit', 'aria-valuemin': 0, 'aria-valuemax': 100 },
+    play.focus ? h('span', { class: 'focus-tag' }, icon('target'), play.focus.title) : null,
+    h('span', { class: 'drops' }, drops),
+  );
+  const updateProgress = () => {
+    const done = play.progress();
+    drops.forEach((d, i) => d.classList.toggle('on', i < Math.round(done * DROPS)));
+    progress.setAttribute('aria-valuenow', String(Math.round(done * 100)));
+  };
+  updateProgress();
+
   const view = h(
     'main',
-    { class: `screen session mode-${mode}` },
+    { class: `screen session has-scene mode-${mode}` },
     h(
       'header',
-      { class: 'top-bar' },
-      h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka till trädgården', onclick: () => void finish(true) }, '🏡'),
-      play.focus ? h('p', { class: 'focus-tag' }, `🎯 ${play.focus.title}`) : null,
+      { class: 'play-head' },
+      scene({ height: 92, sun: false, cloud: false }),
+      h(
+        'div',
+        { class: 'scene-controls' },
+        h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka till trädgården', onclick: () => void finish(true) }, icon('home')),
+        progress,
+        voiceOn
+          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp igen', onclick: () => void speak(currentPrompt) }, icon('speaker'))
+          : h('span', { class: 'icon-spacer', 'aria-hidden': 'true' }),
+      ),
     ),
     stage,
   );
@@ -62,6 +92,7 @@ export async function showSession(ctx: AppContext, profile: Profile, mode: Sessi
     const { given, rtMs } = await ask(stage, q, setKeys);
     if (finished) return;
     const fb = await play.answer(given, rtMs);
+    updateProgress();
     await showFeedback(stage, q, fb, setKeys);
   }
   setKeys(undefined);
@@ -80,8 +111,14 @@ function introduce(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<v
   const strategy = q.item.hints.find((x) => x.kind === 'strategy')?.text;
   const swap = q.pairKnown ? q.item.hints.find((x) => x.kind === 'swap')?.text : undefined;
   return new Promise((resolve) => {
-    const go = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Nu du! ▶');
-    const after = h('div', { class: 'intro-after', hidden: true }, strategy ? h('p', { class: 'strategy' }, strategy) : null, swap ? h('p', { class: 'strategy swap' }, `🔄 ${swap}`) : null, go);
+    const go = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Nu du!', icon('arrow', 'on-primary'));
+    const after = h(
+      'div',
+      { class: 'intro-after', hidden: true },
+      strategy ? h('p', { class: 'strategy' }, strategy) : null,
+      swap ? h('p', { class: 'strategy swap' }, icon('rotate'), swap) : null,
+      go,
+    );
     const builder = arrayBuilder({
       rows: a,
       cols: b,
@@ -98,9 +135,17 @@ function introduce(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<v
         });
       },
     });
+    currentPrompt = q.item.prompt;
     if (voiceOn) void speak(`Ett nytt frö. ${q.item.prompt}`);
     stage.replaceChildren(
-      h('div', { class: 'intro-card' }, h('p', { class: 'intro-label' }, '🌱 Ett nytt frö'), h('p', { class: 'prompt' }, q.item.prompt), builder, after),
+      h(
+        'div',
+        { class: 'intro-card card' },
+        h('p', { class: 'intro-label' }, plantIcon('seed'), 'Ett nytt frö'),
+        h('p', { class: 'prompt' }, q.item.prompt),
+        builder,
+        after,
+      ),
     );
     setKeys(undefined);
   });
@@ -111,6 +156,7 @@ function ask(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<{ given
   return new Promise((resolve) => {
     let answered = false;
     let shownAt = performance.now();
+    currentPrompt = q.item.prompt;
     if (voiceOn) {
       // Time the answer from when the question has been heard, not while it is read.
       void speak(q.item.prompt).then(() => {
@@ -125,9 +171,9 @@ function ask(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<{ given
     };
     const prompt = h(
       'div',
-      { class: 'prompt-row' },
-      h('p', { class: 'prompt', 'aria-label': `${q.item.prompt.replace('×', 'gånger')} är lika med?` }, q.item.prompt, ' = ?'),
-      voiceOn ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp igen', onclick: () => void speak(q.item.prompt) }, '🔊') : null,
+      { class: 'prompt-card card' },
+      h('p', { class: 'prompt', 'aria-label': `${q.item.prompt.replace('×', 'gånger')} är lika med?` }, q.item.prompt),
+      q.format === 'free' ? null : h('p', { class: 'eq', 'aria-hidden': 'true' }, '= ?'),
     );
 
     if (q.format === 'free') {
@@ -176,7 +222,11 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, setKe
   stage.querySelector('.numpad-display')?.classList.add(fb.correct ? 'correct' : 'wrong');
   setKeys(undefined);
   if (fb.correct) {
-    stage.querySelector('.question')?.classList.add('cheer');
+    const card = stage.querySelector('.prompt-card');
+    card?.classList.add('is-right');
+    const eq = card?.querySelector('.eq');
+    if (eq) eq.textContent = `= ${fb.expected}`;
+    card?.append(h('span', { class: 'cheer-plant', 'aria-hidden': 'true' }, plantIcon('sprout')));
     await wait(prefersReducedMotion() ? 300 : CORRECT_PAUSE_MS);
     return;
   }
@@ -186,16 +236,21 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, setKe
   const note = confusionNote(a, b, fb.given);
   if (voiceOn) void speak(`${q.item.prompt} = ${fb.expected}`);
   await new Promise<void>((resolve) => {
-    const next = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Fortsätt ▶');
-    // The help card takes the place of the answer area so it fits on one screen.
-    stage.querySelector('.choices, .numpad')?.replaceWith(
+    const next = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Fortsätt', icon('arrow', 'on-primary'));
+    // The help takes the place of the question: the answer is in it.
+    stage.replaceChildren(
       h(
         'div',
-        { class: 'help-card' },
-        h('p', { class: 'help-answer' }, `${q.item.prompt} = ${fb.expected}`),
-        note ? h('p', { class: 'confusion-note' }, note) : null,
-        strategy ? h('p', { class: 'strategy' }, strategy) : null,
-        arrayView(a, b, { size: 'small', parts: partsOf(q.item.hints) }),
+        { class: 'help-wrap' },
+        h(
+          'div',
+          { class: 'help-card card' },
+          h('p', { class: 'you-said' }, fb.given ? `Du svarade ${fb.given}.` : 'Inget svar den här gången.', strategy ? ' Så här kan du tänka:' : ''),
+          h('p', { class: 'help-answer' }, `${q.item.prompt} = ${fb.expected}`),
+          note ? h('p', { class: 'confusion-note' }, note) : null,
+          strategy ? h('p', { class: 'strategy' }, strategy) : null,
+          arrayView(a, b, { size: 'small', parts: partsOf(q.item.hints) }),
+        ),
         next,
       ),
     );

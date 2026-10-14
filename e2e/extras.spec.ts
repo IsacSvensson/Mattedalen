@@ -14,13 +14,13 @@ test.beforeEach(async ({ page }) => {
 test('the record challenge opens once facts are fluent and only compares with yourself', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Alva');
-  await expect(page.getByRole('button', { name: '⚡ Slå ditt rekord' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Slå rekord' })).toBeDisabled();
 
   await seedStates(page, fluentTens());
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
-  await page.getByRole('button', { name: '⚡ Slå ditt rekord' }).click();
+  await page.getByRole('button', { name: 'Slå rekord' }).click();
   await expect(page.getByText('Första gången – sätt ett rekord!')).toBeVisible();
-  await page.getByRole('button', { name: 'Kör! ▶' }).click();
+  await page.getByRole('button', { name: 'Kör!' }).click();
 
   for (let i = 0; i < 4; i++) {
     const text = (await page.locator('.question .prompt').textContent())!;
@@ -40,20 +40,20 @@ test('the record challenge opens once facts are fluent and only compares with yo
 test('two players: a child against a grown-up, seven rounds of multiplication war', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Bo');
-  await page.getByRole('button', { name: '🃏 Spela mot en vuxen' }).click();
-  await page.getByRole('button', { name: 'Dra kort! ▶' }).click();
+  await page.getByRole('button', { name: 'Mot en vuxen' }).click();
+  await page.getByRole('button', { name: 'Dra kort!' }).click();
   for (let round = 1; round <= 7; round++) {
-    await expect(page.getByText('🐢 Bos tur')).toBeVisible();
+    await expect(page.getByText('Bos tur')).toBeVisible();
     const child = (await page.locator('.duel-card').textContent())!.match(/\d+/g)!.map(Number);
     await page.locator('.choice', { hasText: new RegExp(`^${child[0]! * child[1]!}$`) }).click();
-    await expect(page.getByText('🧑 Den vuxnas tur')).toBeVisible();
+    await expect(page.getByText('Den vuxnas tur')).toBeVisible();
     const adult = (await page.locator('.duel-card').textContent())!.match(/\d+/g)!.map(Number);
     // The grown-up gets one wrong, on purpose.
     await page.keyboard.type(String(adult[0]! * adult[1]! + (round === 3 ? 1 : 0)));
     await page.keyboard.press('Enter');
     await expect(page.locator('.duel-message')).toBeVisible();
     if (round === 3) await expect(page.locator('.duel-reveal.adult')).toContainText('inte rätt');
-    await page.getByRole('button', { name: round < 7 ? 'Nästa runda ▶' : 'Se resultatet ▶' }).click();
+    await page.getByRole('button', { name: round < 7 ? 'Nästa runda' : 'Se resultatet' }).click();
   }
   await expect(page.getByRole('heading', { name: /vann|Oavgjort/ })).toBeVisible();
   await expect(page.locator('.end-text')).toHaveText(/^\d+ – \d+$/);
@@ -92,7 +92,7 @@ test('questions can be read aloud in Swedish', async ({ page }) => {
   await expect(page.locator('.voice-note')).toHaveText('');
   await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
-  await page.getByRole('button', { name: 'Vattna trädgården ▶' }).click();
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   await expect(nextStep(page)).toBeVisible();
   await answer(page);
   await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual(

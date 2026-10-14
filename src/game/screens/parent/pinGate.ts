@@ -1,5 +1,6 @@
 import { show, type AppContext } from '../../app';
 import { h } from '../../dom';
+import { icon } from '../../components/icons';
 import { showProfiles } from '../profiles';
 import { showParent } from './parent';
 
@@ -65,7 +66,7 @@ function pinScreen(ctx: AppContext, title: string, text: string, onPin: (pin: st
     'div',
     { class: 'numpad-keys pin-keys' },
     [...'123456789'].map(key),
-    h('button', { class: 'numpad-key back', type: 'button', 'aria-label': 'Sudda', onclick: erase }, '⌫'),
+    h('button', { class: 'numpad-key back', type: 'button', 'aria-label': 'Sudda', onclick: erase }, icon('erase')),
     key('0'),
     h('span'),
   );
@@ -77,8 +78,9 @@ function pinScreen(ctx: AppContext, title: string, text: string, onPin: (pin: st
   const view = h(
     'main',
     { class: 'screen pin-screen' },
-    h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka', onclick: () => void showProfiles(ctx) }, '←')),
-    h('h1', null, `🔒 ${title}`),
+    h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka', onclick: () => void showProfiles(ctx) }, icon('back'))),
+    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon('lock')),
+    h('h1', null, title),
     h('p', null, text),
     dots,
     message,

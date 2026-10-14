@@ -1,6 +1,7 @@
 import type { FocusSet, SessionSummary } from '../../engine';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
+import { icon } from '../components/icons';
 import { plantIcon } from '../components/plant';
 import { h } from '../dom';
 import { showGarden } from './garden';
@@ -21,7 +22,7 @@ export function showSessionEnd(ctx: AppContext, profile: Profile, summary: Sessi
   const view = h(
     'main',
     { class: `screen session-end${daily ? ' asleep' : ''}` },
-    h('p', { class: 'end-icon', 'aria-hidden': 'true' }, daily ? '🌙' : '☀️'),
+    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon(daily ? 'moon' : 'sun')),
     h('h1', null, daily ? 'Bra jobbat!' : focus ? `Bra övat på ${focus.title}!` : 'Bra övat!'),
     daily ? h('p', { class: 'end-text' }, 'Trädgården behöver sova nu. Den växer medan du sover – kom tillbaka i morgon!') : null,
     h('ul', { class: 'end-list' }, lines),

@@ -1,9 +1,12 @@
-import type { ItemId } from '../../engine';
-import { formatFact } from '../../content/multiplication';
+import { atLeast, type ContentPack, type ItemId, type ItemState } from '../../engine';
+import { focusTable, formatFact } from '../../content/multiplication';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { gardenGrid } from '../components/grid';
 import { plantIcon, stageFor, type Stage } from '../components/plant';
+import { avatarIcon } from '../components/avatars';
+import { icon } from '../components/icons';
+import { scene } from '../components/scene';
 import { h } from '../dom';
 import { engineFor, loadProgress } from '../play';
 import { showProfiles } from './profiles';
@@ -35,6 +38,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
     states,
     unlockedItemIds,
     highlight,
+    masteredTables: knownTables(ctx.pack, states),
     onSelect: ({ a, b, stage }) => {
       // Only facts the child has met show their answer.
       info.textContent = ['seed', 'sprout', 'bush', 'tree'].includes(stage)
@@ -49,54 +53,79 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
     ? h(
         'div',
         { class: 'garden-actions' },
-        h('p', { class: 'sleep-text' }, '🌙 Trädgården sover. Kom tillbaka i morgon!'),
+        h('p', { class: 'sleep-text' }, icon('moon'), 'Trädgården sover. Kom tillbaka i morgon!'),
         h('button', { class: 'soft-button', type: 'button', onclick: () => void showSession(ctx, profile, 'extra') }, 'Öva lite till (frivilligt)'),
       )
     : h(
         'div',
         { class: 'garden-actions' },
-        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showSession(ctx, profile, 'daily') }, 'Vattna trädgården ▶'),
+        h(
+          'button',
+          { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showSession(ctx, profile, 'daily') },
+          icon('can'),
+          'Vattna trädgården',
+        ),
       );
 
   // Optional extras, clearly separate from the daily session.
   const canChallenge = challengeOpen(states);
+  const tile = (iconName: Parameters<typeof icon>[0], label: string, onclick: () => void, disabled = false) =>
+    h('button', { class: 'extra-tile', type: 'button', disabled, onclick }, icon(iconName), h('span', null, label));
   const extras = h(
-    'div',
-    { class: 'garden-extras' },
-    ctx.pack.focusSets?.length
-      ? h('button', { class: 'soft-button small', type: 'button', onclick: () => void showFocusPicker(ctx, profile) }, '🎯 Öva på en tabell')
-      : null,
-    h(
-      'button',
-      { class: 'soft-button small', type: 'button', disabled: !canChallenge, onclick: () => void showChallenge(ctx, profile) },
-      '⚡ Slå ditt rekord',
-    ),
-    h('button', { class: 'soft-button small', type: 'button', onclick: () => void showDuel(ctx, profile) }, '🃏 Spela mot en vuxen'),
-    canChallenge ? null : h('p', { class: 'extras-note' }, `Rekordjakten öppnar när ${CHALLENGE_MIN_FACTS} plantor blivit buskar.`),
+    'nav',
+    { class: 'garden-extras', 'aria-label': 'Mer att göra' },
+    ctx.pack.focusSets?.length ? tile('target', 'Öva en tabell', () => void showFocusPicker(ctx, profile)) : null,
+    tile('watch', 'Slå rekord', () => void showChallenge(ctx, profile), !canChallenge),
+    tile('cards', 'Mot en vuxen', () => void showDuel(ctx, profile)),
   );
 
+  const known = knownTables(ctx.pack, states);
   const view = h(
     'main',
-    { class: `screen garden${asleep ? ' asleep' : ''}` },
+    { class: `screen garden has-scene${asleep ? ' asleep' : ''}` },
     h(
       'header',
-      { class: 'top-bar' },
-      h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Byt spelare', onclick: () => void showProfiles(ctx) }, profile.avatar),
-      h('h1', null, `${genitive(profile.name)} trädgård`),
-    ),
-    grid,
-    info,
-    h(
-      'ul',
-      { class: 'garden-counts', 'aria-label': 'Så här växer det' },
-      (['seed', 'sprout', 'bush', 'tree'] as const).map((stage) =>
-        h('li', { 'aria-label': `${counts[stage]} ${STAGE_PLURAL[stage]}` }, plantIcon(stage), h('span', { 'aria-hidden': 'true' }, counts[stage])),
+      { class: 'garden-head' },
+      scene({ height: 150, sunflowers: known.size, cloud: false }),
+      h(
+        'div',
+        { class: 'scene-title' },
+        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Byt spelare', onclick: () => void showProfiles(ctx) }, avatarIcon(profile.avatar)),
+        h('h1', null, `${genitive(profile.name)} trädgård`),
       ),
     ),
-    actions,
-    extras,
+    h('div', { class: 'garden-bed' }, grid),
+    known.size
+      ? h('p', { class: 'sr-only' }, `Tabeller du kan: ${[...known].map((t) => `×${t}`).join(', ')}.`)
+      : null,
+    // Beside the bed on wide screens, below it on phones.
+    h(
+      'div',
+      { class: 'garden-side' },
+      info,
+      h(
+        'ul',
+        { class: 'garden-counts', 'aria-label': 'Så här växer det' },
+        (['seed', 'sprout', 'bush', 'tree'] as const).map((stage) =>
+          h('li', { 'aria-label': `${counts[stage]} ${STAGE_PLURAL[stage]}` }, plantIcon(stage), h('span', { 'aria-hidden': 'true' }, counts[stage])),
+        ),
+      ),
+      actions,
+      extras,
+      canChallenge ? null : h('p', { class: 'extras-note' }, `Rekordjakten öppnar när ${CHALLENGE_MIN_FACTS} plantor blivit buskar.`),
+    ),
   );
   show(ctx, view);
+}
+
+/** Tables (e.g. 7 for ×7) where every fact is at least fluent. */
+export function knownTables(pack: ContentPack, states: Record<ItemId, ItemState>): Set<number> {
+  const out = new Set<number>();
+  for (const set of pack.focusSets ?? []) {
+    const table = focusTable(set.id);
+    if (table !== null && set.itemIds.every((id) => atLeast(states[id]?.status ?? 'new', 'fluent'))) out.add(table);
+  }
+  return out;
 }
 
 /** Swedish genitive: "Alvas", but "Lars" and "Max" stay as they are. */

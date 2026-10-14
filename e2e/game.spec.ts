@@ -10,7 +10,7 @@ test('a first daily session: new profile, intro, questions, soft ending', async 
   await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
   await createProfile(page, 'Alva');
   await expect(page.locator('.grid-cell')).toHaveCount(100);
-  await page.getByRole('button', { name: 'Vattna trädgården ▶' }).click();
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
 
   // The very first question introduces a new fact: the child builds its rectangle.
   await expect(page.getByText('Ett nytt frö')).toBeVisible();
@@ -42,23 +42,23 @@ test('a first daily session: new profile, intro, questions, soft ending', async 
 
 test('a wrong answer shows the right answer and a strategy, never just "fel"', async ({ page }) => {
   await createProfile(page, 'Bo');
-  await page.getByRole('button', { name: 'Vattna trädgården ▶' }).click();
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   const fact = await answer(page, false);
   const [a, b] = fact.split('×').map(Number) as [number, number];
   await expect(page.locator('.help-answer')).toHaveText(`${a} × ${b} = ${a * b}`);
   await expect(page.locator('.help-card .strategy')).toBeVisible();
   await expect(page.getByText(/^fel$/i)).toHaveCount(0);
-  await page.getByRole('button', { name: 'Fortsätt ▶' }).click();
+  await page.getByRole('button', { name: 'Fortsätt' }).click();
   await expect(nextStep(page)).toBeVisible();
 });
 
 test('leaving early keeps progress but does not end the day', async ({ page }) => {
   await createProfile(page, 'Max');
-  await page.getByRole('button', { name: 'Vattna trädgården ▶' }).click();
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   await answer(page);
   await page.getByRole('button', { name: 'Tillbaka till trädgården' }).click();
   await expect(page.getByRole('heading', { name: 'Max trädgård' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Vattna trädgården ▶' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Vattna trädgården' })).toBeVisible();
   await expect(page.locator('.grid-cell.stage-seed')).toHaveCount(1);
 });
 

@@ -1,6 +1,7 @@
 import { atLeast, type FocusSet, type ItemId, type ItemState } from '../../engine';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
+import { icon } from '../components/icons';
 import { h } from '../dom';
 import { canChallenge, CHALLENGE_MIN_FOCUS_FACTS } from '../challenge';
 import { engineFor, EXTRA_PRACTICE_MINUTES, loadProgress } from '../play';
@@ -87,7 +88,8 @@ export async function showFocusPicker(ctx: AppContext, profile: Profile, selecte
               type: 'button',
               onclick: () => void showSession(ctx, profile, 'focus', set),
             },
-            `Öva ${set.title} ▶`,
+            `Öva ${set.title}`,
+          icon('arrow', 'on-primary'),
           ),
           h(
             'button',
@@ -97,7 +99,8 @@ export async function showFocusPicker(ctx: AppContext, profile: Profile, selecte
               disabled: !challengeOpen,
               onclick: () => void showChallenge(ctx, profile, set),
             },
-            `⚡ Rekordjakt ${set.title}`,
+            icon('watch'),
+          `Rekordjakt ${set.title}`,
           ),
           challengeOpen
             ? null
@@ -125,7 +128,7 @@ export async function showFocusPicker(ctx: AppContext, profile: Profile, selecte
           'aria-label': 'Tillbaka till trädgården',
           onclick: () => void showGarden(ctx, profile),
         },
-        '🏡',
+        icon('home'),
       ),
       h('h1', null, 'Vilken tabell vill du öva på?'),
     ),

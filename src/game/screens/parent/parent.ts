@@ -18,7 +18,9 @@ import { h } from '../../dom';
 import { formatDay, factStats, minutesPerDay, STATUS_TEXT, topConfusions, type FactStats } from '../../parentStats';
 import { engineFor, loadProgress } from '../../play';
 import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, snapshotOf } from '../../transfer';
-import { AVATARS, showProfiles } from '../profiles';
+import { showProfiles } from '../profiles';
+import { AVATAR_KEYS, avatarIcon, avatarName } from '../../components/avatars';
+import { icon } from '../../components/icons';
 import { installGuide } from '../../pwa';
 import { hasSwedishVoice, speechSupported } from '../../speech';
 import { showPlacementOffer } from '../placement';
@@ -34,7 +36,7 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
     h(
       'header',
       { class: 'top-bar' },
-      h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Stäng föräldravyn', onclick: () => void showProfiles(ctx) }, '✕'),
+      h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Stäng föräldravyn', onclick: () => void showProfiles(ctx) }, icon('close')),
       h('h1', null, 'Föräldravy'),
     ),
     profiles.length
@@ -45,7 +47,8 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
             h(
               'button',
               { class: `parent-tab${p.id === selected?.id ? ' active' : ''}`, type: 'button', 'aria-pressed': String(p.id === selected?.id), onclick: () => void showParent(ctx, p.id) },
-              `${p.avatar} ${p.name}`,
+              h('span', { class: 'avatar-badge small' }, avatarIcon(p.avatar)),
+              p.name,
             ),
           ),
         )
@@ -75,7 +78,7 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
   return h(
     'section',
     { class: 'parent-section', 'aria-labelledby': 'child-heading' },
-    h('h2', { id: 'child-heading' }, `${profile.avatar} ${profile.name}`),
+    h('h2', { id: 'child-heading', class: 'child-heading' }, h('span', { class: 'avatar-badge small' }, avatarIcon(profile.avatar)), profile.name),
     h(
       'ul',
       { class: 'status-summary' },
@@ -232,7 +235,7 @@ function settingsForm(ctx: AppContext, profile: Profile): HTMLElement {
       h(
         'select',
         { 'aria-label': 'Djur', onchange: (e: Event) => void save({ avatar: (e.target as HTMLSelectElement).value }) },
-        AVATARS.map((a) => h('option', { value: a, selected: a === profile.avatar }, a)),
+        AVATAR_KEYS.map((a) => h('option', { value: a, selected: a === profile.avatar }, capitalize(avatarName(a) ?? a))),
       ),
     ),
     h(
@@ -372,7 +375,7 @@ async function importQr(ctx: AppContext, text: string): Promise<void> {
     const counts = engine.statusCounts(states);
     const existing = (await ctx.store.listProfiles()).find((p) => p.name === snap.name);
     const answer = await choose(
-      `Hämta ${snap.avatar} ${snap.name}?`,
+      `Hämta ${snap.name}?`,
       h('p', null, `${counts.automatic} automatiserade, ${counts.fluent} flytande och ${counts.learning} som övas.`),
       [
         ...(existing ? [{ value: 'replace' as const, label: `Ersätt ${existing.name} här`, primary: true }] : []),
@@ -475,3 +478,5 @@ async function deviceSection(ctx: AppContext): Promise<HTMLElement> {
     h('button', { class: 'soft-button', type: 'button', onclick: () => choosePin(ctx, async () => (toast('Ny kod sparad'), showParent(ctx))) }, 'Byt vuxenkod'),
   );
 }
+
+const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);

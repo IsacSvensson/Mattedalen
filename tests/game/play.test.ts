@@ -3,7 +3,7 @@ import { ManualClock, seededRng } from '../../src/engine';
 import { createMultiplicationPack } from '../../src/content/multiplication';
 import { DEFAULT_SETTINGS, MemoryProgressStore, type Profile } from '../../src/storage';
 import { EXTRA_PRACTICE_MINUTES, loadProgress, PlayController, type GameDeps } from '../../src/game/play';
-import { genitive } from '../../src/game/screens/garden';
+import { genitive, knownTables } from '../../src/game/screens/garden';
 import { stageFor } from '../../src/game/components/plant';
 import { emptyState } from '../../src/engine';
 
@@ -116,6 +116,18 @@ describe('garden helpers', () => {
     expect(stageFor({ ...emptyState('x'), status: 'learning', box: 2 }, true)).toBe('sprout');
     expect(stageFor({ ...emptyState('x'), status: 'fluent' }, true)).toBe('bush');
     expect(stageFor({ ...emptyState('x'), status: 'automatic' }, true)).toBe('tree');
+  });
+
+  it('knows which whole tables the child has (they become sunflowers)', () => {
+    const pack = createMultiplicationPack();
+    const states: Record<string, ReturnType<typeof emptyState>> = {};
+    for (let n = 1; n <= 10; n++) {
+      states[`10x${n}`] = { ...emptyState(`10x${n}`), status: 'fluent' };
+      states[`${n}x10`] = { ...emptyState(`${n}x10`), status: n === 3 ? 'automatic' : 'fluent' };
+    }
+    expect([...knownTables(pack, states)]).toEqual([10]);
+    states['10x2'] = { ...emptyState('10x2'), status: 'learning' };
+    expect(knownTables(pack, states).size).toBe(0);
   });
 
   it('writes Swedish genitive', () => {
