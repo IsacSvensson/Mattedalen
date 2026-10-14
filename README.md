@@ -512,3 +512,13 @@ befästning och blir lättare, vilket är väntat.
   12 nya fakta per pass och inte hoppar över enheter.
 - Den svaga eleven når sällan ”automatiserad”, eftersom den simulerade svarstiden
   sällan går under 3 s. Gränsen går att ändra i `config.ts`.
+
+## Licens
+
+Gångerträdgården är ett ideellt projekt, fritt att använda för att barn ska lära sig matematik.
+
+- **Koden och grafiken** omfattas av [PolyForm Noncommercial License 1.0.0](LICENSE.md). Alla får använda, ändra och dela den för **icke-kommersiella syften**. Licensen tillåter uttryckligen användning hos skolor, bibliotek, ideella organisationer och myndigheter, oavsett hur de finansieras. Den tillåter inte att någon säljer appen eller bygger in den i en betald produkt. Vill någon använda den kommersiellt kan upphovspersonen ge ett separat tillstånd.
+- **Ingående delar** har egna, tillåtande licenser: idb (ISC), jsQR (Apache-2.0), qrcode-generator (MIT) och typsnitten Fredoka och Nunito (SIL Open Font License). Licenstexterna följer med appen i `THIRD-PARTY-LICENSES.txt`, som skapas med `npm run licenses`.
+- Appen levereras utan garantier, enligt licensens avsnitt ”No Liability”.
+
+Observera att en licens med förbud mot kommersiell användning inte räknas som öppen källkod enligt OSI:s definition, även om koden är öppen att läsa, ändra och dela.

@@ -486,6 +486,13 @@ async function deviceSection(ctx: AppContext): Promise<HTMLElement> {
     h('h3', null, 'Version'),
     h('p', { class: 'muted' }, `Appen: ${APP_BUILD}. Nya versioner hämtas av sig själva och tas i bruk när appen startas, eller med knappen ”Ny version finns”.`),
     h(
+      'p',
+      { class: 'muted' },
+      'Ett ideellt projekt, fritt att använda för icke-kommersiella syften (PolyForm Noncommercial 1.0.0). ',
+      h('a', { href: './THIRD-PARTY-LICENSES.txt', target: '_blank', rel: 'noopener' }, 'Licenser för ingående delar'),
+      '.',
+    ),
+    h(
       'button',
       {
         class: 'soft-button',

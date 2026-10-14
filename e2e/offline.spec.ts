@@ -52,7 +52,11 @@ test('is installable: manifest, icons and service worker are in place', async ({
   for (const icon of manifest.icons as { src: string }[]) expect((await page.request.get(icon.src)).ok()).toBe(true);
   expect(manifest.icons.some((i: { purpose: string }) => i.purpose === 'maskable')).toBe(true);
   expect((await page.request.get(await page.locator('link[rel=apple-touch-icon]').getAttribute('href') as string)).ok()).toBe(true);
+  // The licenses of bundled libraries and fonts ship with the app (and work offline).
+  const notices = await (await page.request.get('THIRD-PARTY-LICENSES.txt')).text();
+  for (const part of ['PolyForm Noncommercial', 'jsQR', 'Apache License', 'Open Font License']) expect(notices).toContain(part);
   const sw = await (await page.request.get('sw.js')).text();
+  expect(sw).toContain('./THIRD-PARTY-LICENSES.txt');
   expect(sw).toContain('./index.html');
   expect(sw).toMatch(/\.\/assets\/jsQR-[\w-]+\.js/);
 });
