@@ -1,0 +1,584 @@
+import { diffDays, randomId, shuffle, weightedPick, type Clock, type Rng } from './clock';
+import { buildChoices } from './distractors';
+import { applyLeitner, isDue } from './leitner';
+import { PacingController } from './pacing';
+import { applyStatus, atLeast, emptyState } from './status';
+import { isStruggling } from './support';
+import { computeUnlocked, sortedUnits } from './unlock';
+import type {
+  AnswerFormat,
+  Attempt,
+  ContentPack,
+  EngineConfig,
+  Item,
+  ItemId,
+  ItemState,
+  LearnerMeta,
+  QuestionKind,
+  Status,
+} from './types';
+
+export type SessionMode = 'daily' | 'extra' | 'focus';
+
+export interface SessionOptions {
+  states: Record<ItemId, ItemState>;
+  meta: LearnerMeta;
+  /**
+   * `daily` is the regular session; `extra` is optional practice afterwards
+   * (no new items); `focus` is optional practice aimed at `focusItemIds`.
+   */
+  mode?: SessionMode;
+  /** Items to concentrate on in a `focus` session (e.g. one table). */
+  focusItemIds?: ItemId[];
+  durationMs?: number;
+  sessionId?: string;
+}
+
+export interface Question {
+  seq: number;
+  item: Item;
+  kind: QuestionKind;
+  format: AnswerFormat;
+  /** Options for multiple choice (includes the correct answer). */
+  choices?: string[];
+  /** True if the item's mirrored twin is already known (useful for "turn it around" hints). */
+  pairKnown: boolean;
+}
+
+export interface Feedback {
+  correct: boolean;
+  given: string;
+  expected: string;
+  item: Item;
+  previousStatus: Status;
+  state: ItemState;
+  attempt: Attempt;
+}
+
+export interface SessionSummary {
+  sessionId: string;
+  mode: SessionMode;
+  startedAt: number;
+  endedAt: number;
+  answered: number;
+  correct: number;
+  accuracy: number | null;
+  /** Ran the full configured time. */
+  completed: boolean;
+  introduced: ItemId[];
+  promoted: ItemId[];
+  meta: LearnerMeta;
+}
+
+interface Pending {
+  itemId: ItemId;
+  atSeq: number;
+  kind: 'retry' | 'rehearse';
+}
+
+interface Deps {
+  pack: ContentPack;
+  config: EngineConfig;
+  clock: Clock;
+  rng: Rng;
+  itemById: Map<ItemId, Item>;
+}
+
+/**
+ * One practice session. Every step is a retrieval question; the session is
+ * assembled adaptively, one question at a time, so it can end on time:
+ *
+ * 1. scheduled retries (wrong answers) and rehearsals of just-introduced items
+ * 2. warm-up with safe items
+ * 3. a new item whenever `pacingGap` known items have been asked since the last one
+ * 4. items due for spaced review (Leitner)
+ * 5. weighted mixed practice over all unlocked units
+ *
+ * A hard item (see support.ts) whose underlying items are known is asked as a
+ * `derive` question instead: the game walks the learner there in steps. It
+ * gives no status evidence; the item is asked again from memory a few
+ * questions later, and that answer counts.
+ *
+ * A focus session takes about `config.focus.share` of steps 4–5 from the
+ * focus set and the rest from everything else known, and may introduce a few
+ * new items from the set even if their unit is not unlocked yet.
+ */
+export class Session {
+  readonly id: string;
+  readonly mode: SessionMode;
+  readonly startedAt: number;
+  readonly today: string;
+  private readonly durationMs: number;
+  /** Earlier parts of today's regular session (it may have been interrupted). */
+  private readonly priorMs: number;
+  private readonly priorNew: number;
+  private readonly states: Map<ItemId, ItemState>;
+  private readonly pacing: PacingController;
+  private readonly maxNew: number;
+  private readonly focus: Set<ItemId> | null;
+  private unlocked: string[];
+  private pending: Pending[] = [];
+  private warmup: ItemId[];
+  private due: ItemId[];
+  private recent: ItemId[] = [];
+  private askedCount = new Map<ItemId, number>();
+  private lastAskedSeq = new Map<ItemId, number>();
+  private daysUntilCache = new Map<string, number>();
+  private retries = new Map<ItemId, number>();
+  private introduced: ItemId[] = [];
+  private supported = 0;
+  private promoted = new Set<ItemId>();
+  private sinceNew: number;
+  private askCap: number;
+  private seq = 0;
+  private answered = 0;
+  private correctCount = 0;
+  private current: Question | null = null;
+  private endedAt: number | null = null;
+
+  constructor(
+    private readonly deps: Deps,
+    private readonly meta: LearnerMeta,
+    opts: SessionOptions,
+  ) {
+    const { config, clock, rng, pack } = deps;
+    this.id = opts.sessionId ?? randomId(rng);
+    this.mode = opts.mode ?? 'daily';
+    this.startedAt = clock.now();
+    this.today = clock.today();
+    this.durationMs = opts.durationMs ?? config.session.durationMs;
+    const earlier = this.mode === 'daily' && meta.today?.day === this.today ? meta.today : undefined;
+    this.priorMs = Math.max(0, earlier?.practisedMs ?? 0);
+    this.priorNew = Math.max(0, earlier?.introduced ?? 0);
+    this.states = new Map(pack.items.map((it) => [it.id, opts.states[it.id] ?? emptyState(it.id)]));
+    this.pacing = new PacingController(config.pacing, meta.pacingGap);
+    this.unlocked = computeUnlocked(pack.units, this.stateRecord(), meta.unlockedUnitIds, this.relaxedUnlock());
+    if (this.mode === 'focus') {
+      const ids = (opts.focusItemIds ?? []).filter((id) => this.states.has(id));
+      if (ids.length === 0) throw new Error('A focus session needs focusItemIds');
+      this.focus = new Set(ids);
+    } else {
+      this.focus = null;
+    }
+
+    const known = [...this.states.values()].filter((s) => s.status !== 'new');
+    const p = config.pacing;
+    this.maxNew =
+      this.mode === 'extra'
+        ? 0
+        : this.mode === 'focus'
+          ? config.focus.maxNew
+          : Math.max(0, Math.min(p.maxNewPerSession, p.bootstrapNew + Math.floor(known.length / p.knownPerNew)) - this.priorNew);
+    // Let the first new item come right after the warm-up (a focus session
+    // has none, so it starts with a couple of known items when there are some).
+    const focusKnown = this.focus ? known.filter((s) => this.focus?.has(s.itemId)).length : 0;
+    this.sinceNew = focusKnown >= 2 ? Math.max(0, this.pacing.gap - 2) : this.pacing.gap;
+    this.askCap = config.session.maxAsksPerItem;
+
+    this.warmup = this.mode === 'daily' ? this.pickWarmup(known) : [];
+    this.due = this.sortDue(known.filter((s) => isDue(s, this.today)));
+  }
+
+  /** Current question, or null when the session is over. Idempotent until `submit`. */
+  next(): Question | null {
+    if (this.current) return this.current;
+    if (this.isOver()) return null;
+    const picked = this.pick();
+    if (!picked) return null;
+    const pick = this.withSupport(picked);
+    const item = this.item(pick.itemId);
+    const state = this.state(pick.itemId);
+    const format = this.formatFor(state, pick.kind);
+    const { config, pack, rng } = this.deps;
+    this.seq++;
+    this.current = {
+      seq: this.seq,
+      item,
+      kind: pick.kind,
+      format,
+      choices: format === 'choice' ? buildChoices(pack, item, state, rng, config.format.choiceCount) : undefined,
+      pairKnown: item.pairId !== undefined && this.state(item.pairId).status !== 'new',
+    };
+    return this.current;
+  }
+
+  submit(rawGiven: string, rtMs: number): Feedback {
+    const q = this.current;
+    if (!q) throw new Error('submit() without an active question');
+    const { pack, config, clock } = this.deps;
+    const given = pack.normalizeAnswer(rawGiven);
+    const expected = pack.normalizeAnswer(q.item.answer);
+    const correct = given === expected;
+    const prev = this.state(q.item.id);
+    const now = clock.now();
+
+    let next: ItemState;
+    if (q.kind === 'derive') {
+      // Reached with help: no evidence and no step down, only a note that
+      // support was given. The item comes back from memory shortly.
+      next = { ...prev, supportDay: this.today, lastSeenAt: now };
+      this.supported++;
+      this.pending.push({ itemId: q.item.id, atSeq: q.seq + config.session.retryGap + 1, kind: 'retry' });
+    } else {
+      next = applyStatus(prev, { correct, given, rtMs, format: q.format, now, today: this.today }, config.status);
+      next = applyLeitner(prev, next, correct, this.today, config.leitner.intervalsDays);
+    }
+    this.states.set(q.item.id, next);
+    if (next.status !== prev.status && atLeast(next.status, 'fluent') && !atLeast(prev.status, next.status)) {
+      this.promoted.add(q.item.id);
+    }
+
+    this.answered++;
+    if (correct) this.correctCount++;
+    this.pacing.record(correct);
+    this.recent.push(q.item.id);
+    if (this.recent.length > 10) this.recent.shift();
+    this.askedCount.set(q.item.id, (this.askedCount.get(q.item.id) ?? 0) + 1);
+    this.lastAskedSeq.set(q.item.id, q.seq);
+
+    if (q.kind === 'new') {
+      this.introduced.push(q.item.id);
+      this.sinceNew = 0;
+      for (const gap of config.session.rehearsalGaps) {
+        this.pending.push({ itemId: q.item.id, atSeq: q.seq + gap, kind: 'rehearse' });
+      }
+    } else if (q.kind !== 'rehearse') {
+      this.sinceNew++;
+    }
+
+    if (!correct && q.kind !== 'new' && q.kind !== 'derive') {
+      const used = this.retries.get(q.item.id) ?? 0;
+      const alreadyPending = this.pending.some((p) => p.itemId === q.item.id);
+      if (used < config.session.maxRetriesPerItem && !alreadyPending) {
+        this.retries.set(q.item.id, used + 1);
+        this.pending.push({ itemId: q.item.id, atSeq: q.seq + config.session.retryGap, kind: 'retry' });
+      }
+    }
+
+    // Fluency can be reached mid-session, which may open the next unit.
+    if (next.status !== prev.status || this.answered % 10 === 0) {
+      this.unlocked = computeUnlocked(pack.units, this.stateRecord(), this.unlocked, this.relaxedUnlock());
+    }
+    this.current = null;
+
+    const attempt: Attempt = {
+      itemId: q.item.id,
+      ts: now,
+      sessionId: this.id,
+      format: q.format,
+      kind: q.kind,
+      given,
+      correct,
+      rtMs,
+    };
+    return { correct, given, expected, item: q.item, previousStatus: prev.status, state: next, attempt };
+  }
+
+  /** Practised time, including earlier parts of today's regular session. */
+  private practisedMs(): number {
+    const end = this.endedAt ?? this.deps.clock.now();
+    return this.priorMs + Math.max(0, end - this.startedAt);
+  }
+
+  /** True once the configured duration has passed (the current question may still be answered). */
+  isOver(): boolean {
+    return this.endedAt !== null || this.practisedMs() >= this.durationMs;
+  }
+
+  /** Share of the session's time that has passed, 0–1 (for a progress display). */
+  progress(): number {
+    return Math.min(1, this.practisedMs() / this.durationMs);
+  }
+
+  /** End early (e.g. the child leaves). */
+  end(): void {
+    this.endedAt ??= this.deps.clock.now();
+    this.current = null;
+  }
+
+  stateRecord(): Record<ItemId, ItemState> {
+    return Object.fromEntries(this.states);
+  }
+
+  /**
+   * True when the session ran its full time, counting earlier parts of
+   * today's regular session (ending early does not finish the day).
+   */
+  completed(): boolean {
+    return this.practisedMs() >= this.durationMs;
+  }
+
+  summary(): SessionSummary {
+    const accuracy = this.answered ? this.correctCount / this.answered : null;
+    const prevEma = this.meta.accuracyEma;
+    const countsAsDaily = this.mode === 'daily' && this.answered > 0 && this.completed();
+    const meta: LearnerMeta = {
+      ...this.meta,
+      pacingGap: this.pacing.gap,
+      unlockedUnitIds: this.unlocked,
+      accuracyEma: accuracy === null ? prevEma : prevEma === null ? accuracy : prevEma * 0.7 + accuracy * 0.3,
+      sessionsCompleted: this.meta.sessionsCompleted + (countsAsDaily ? 1 : 0),
+      lastSessionDay: countsAsDaily ? this.today : this.meta.lastSessionDay,
+      today:
+        this.mode === 'daily' && this.answered > 0
+          ? {
+              day: this.today,
+              practisedMs: Math.min(this.durationMs, this.practisedMs()),
+              introduced: this.priorNew + this.introduced.length,
+            }
+          : this.meta.today,
+    };
+    return {
+      sessionId: this.id,
+      mode: this.mode,
+      startedAt: this.startedAt,
+      endedAt: this.endedAt ?? this.deps.clock.now(),
+      answered: this.answered,
+      correct: this.correctCount,
+      accuracy,
+      completed: this.completed(),
+      introduced: this.introduced.slice(),
+      promoted: [...this.promoted],
+      meta,
+    };
+  }
+
+  /**
+   * When the learner is above the target band (over recent sessions, or in
+   * this one), new material may be opened earlier: units unlock at a lower
+   * share of fluent items.
+   */
+  private relaxedUnlock(): number | undefined {
+    const p = this.deps.config.pacing;
+    const ema = this.meta.accuracyEma;
+    const sessionAcc = this.answered >= 30 ? this.correctCount / this.answered : null;
+    const easy = (ema !== null && ema > p.targetHigh) || (sessionAcc !== null && sessionAcc > p.targetHigh);
+    return easy ? p.easyUnlockFraction : undefined;
+  }
+
+  // --- selection -----------------------------------------------------------
+
+  private pick(): { itemId: ItemId; kind: QuestionKind } | null {
+    const last = this.recent[this.recent.length - 1];
+
+    // 1. Scheduled retries and rehearsals.
+    const ready = this.pending
+      .filter((p) => p.atSeq <= this.seq + 1 && p.itemId !== last)
+      .sort((a, b) => a.atSeq - b.atSeq)[0];
+    if (ready) {
+      this.pending.splice(this.pending.indexOf(ready), 1);
+      return { itemId: ready.itemId, kind: ready.kind };
+    }
+
+    // 2. Warm-up.
+    while (this.warmup.length) {
+      const id = this.warmup.shift() as ItemId;
+      if (id !== last) return { itemId: id, kind: 'warmup' };
+    }
+
+    // 3. New item (incremental rehearsal: one new among several known).
+    const knownPool = this.knownPool();
+    const canIntroduce =
+      this.introduced.length < this.maxNew && this.sinceNew >= this.newGap(knownPool) && this.pacing.allowNew();
+    if (canIntroduce || (knownPool.length === 0 && this.mode !== 'extra')) {
+      const candidate = this.nextNewCandidate();
+      if (candidate) return { itemId: candidate, kind: 'new' };
+    }
+
+    // In a focus session, steps 4–5 draw from the focus set or the rest.
+    const scope = this.scope(knownPool, last);
+    const inScope = new Set(scope);
+
+    // 4. Spaced review of due items.
+    const avoid = new Set(this.recent.slice(-this.deps.config.session.avoidRecent));
+    for (let i = 0; i < this.due.length; i++) {
+      const id = this.due[i] as ItemId;
+      const s = this.state(id);
+      if (!isDue(s, this.today) || this.askedCount.has(id)) {
+        this.due.splice(i--, 1);
+        continue;
+      }
+      if (avoid.has(id) || !inScope.has(id)) continue;
+      this.due.splice(i, 1);
+      return { itemId: id, kind: 'due' };
+    }
+
+    // 5. Mixed practice, weighted towards weaker items.
+    let pool = scope.filter((id) => (this.askedCount.get(id) ?? 0) < this.askCap);
+    if (pool.length < 2) {
+      // Everything known has been practised enough today. If the learner is
+      // doing well, an extra new item is better than drilling the same few.
+      const p = this.deps.config.pacing;
+      // Repeating the very same item is the one thing worse than a quick new item.
+      const stuck = scope.every((id) => id === last);
+      const limit = this.mode === 'focus' ? this.maxNew : p.maxNewPerSession - this.priorNew;
+      const room = this.introduced.length < limit && (this.sinceNew >= p.minGap || stuck);
+      if (this.mode !== 'extra' && room && this.pacing.allowNew()) {
+        const candidate = this.nextNewCandidate();
+        if (candidate) return { itemId: candidate, kind: 'new' };
+      }
+      while (pool.length < 2 && pool.length < scope.length) {
+        this.askCap += 2;
+        pool = scope.filter((id) => (this.askedCount.get(id) ?? 0) < this.askCap);
+      }
+    }
+    const mixed = this.pickMixed(pool, last);
+    if (mixed) return { itemId: mixed, kind: 'mixed' };
+    return null;
+  }
+
+  /**
+   * Questions between new items. A focus session on a set the learner hardly
+   * knows uses the shortest gap: otherwise it would mostly drill the one or
+   * two known items of the set and fill up with items from outside it.
+   */
+  private newGap(knownPool: ItemId[]): number {
+    const focus = this.focus;
+    if (focus && knownPool.filter((id) => focus.has(id)).length < this.deps.config.focus.minKnown) {
+      return Math.min(this.pacing.gap, this.deps.config.pacing.minGap);
+    }
+    return this.pacing.gap;
+  }
+
+  /** Every introduced item (normally in unlocked units; focus practice may open a few early). */
+  private knownPool(): ItemId[] {
+    const out: ItemId[] = [];
+    for (const s of this.states.values()) if (s.status !== 'new') out.push(s.itemId);
+    return out;
+  }
+
+  /**
+   * A hard item becomes a supported `derive` question, at most once per day
+   * and `config.support.maxPerSession` times per session, and only when the
+   * items it is derived from are already known (fluent).
+   */
+  private withSupport(pick: { itemId: ItemId; kind: QuestionKind }): { itemId: ItemId; kind: QuestionKind } {
+    if (pick.kind !== 'retry' && pick.kind !== 'due' && pick.kind !== 'mixed') return pick;
+    const cfg = this.deps.config.support;
+    // The steps are typed answers; without free answers there is no support.
+    if (!this.deps.config.format.allowFree || this.supported >= cfg.maxPerSession) return pick;
+    const state = this.state(pick.itemId);
+    if (state.supportDay === this.today || !isStruggling(state, this.today, cfg)) return pick;
+    const from = this.item(pick.itemId).derivedFrom;
+    if (from.length === 0 || !from.every((id) => atLeast(this.state(id).status, 'fluent'))) return pick;
+    return { itemId: pick.itemId, kind: 'derive' };
+  }
+
+  /**
+   * Known items to draw from in steps 4–5. Outside focus sessions that is
+   * everything known; in a focus session it is the focus set with probability
+   * `config.focus.share`, otherwise the rest (falling back to the other group
+   * when the chosen one has nothing but the item just asked).
+   */
+  private scope(knownPool: ItemId[], last: ItemId | undefined): ItemId[] {
+    const focus = this.focus;
+    if (!focus) return knownPool;
+    const inside = knownPool.filter((id) => focus.has(id));
+    const outside = knownPool.filter((id) => !focus.has(id));
+    const wantInside = this.deps.rng.next() < this.deps.config.focus.share;
+    const [first, second] = wantInside ? [inside, outside] : [outside, inside];
+    const usable = (g: ItemId[]) => g.some((id) => id !== last);
+    if (usable(first)) return first;
+    if (usable(second)) return second;
+    return knownPool;
+  }
+
+  private pickMixed(pool: ItemId[], last: ItemId | undefined): ItemId | undefined {
+    if (pool.length === 0) return undefined;
+    const avoidN = Math.min(this.deps.config.session.avoidRecent, pool.length - 1);
+    const avoid = new Set(this.recent.slice(-avoidN));
+    if (last !== undefined && pool.length > 1) avoid.add(last);
+    const options = pool.filter((id) => !avoid.has(id));
+    const candidates = options.length ? options : pool;
+    const weights = new Map(candidates.map((id) => [id, this.mixedWeight(id)]));
+    return weightedPick(this.deps.rng, candidates, (id) => weights.get(id) ?? 0);
+  }
+
+  /**
+   * Weaker and less recently practised items are picked more often. Items
+   * asked a moment ago get a low weight: spaced retrieval beats massed
+   * repetition.
+   */
+  private mixedWeight(id: ItemId): number {
+    const s = this.state(id);
+    const lastBox = this.deps.config.leitner.intervalsDays.length - 1;
+    const errorRate = s.seen ? 1 - s.correct / s.seen : 0;
+    let w = 1 + (lastBox - s.box) * 0.4 + errorRate * 3;
+    if (s.status === 'learning') w += 1.5;
+    // Close to (or past) its review day: retrieval is effortful and worth more.
+    if (s.dueDay !== null) {
+      const interval = this.deps.config.leitner.intervalsDays[s.box] ?? 1;
+      const daysLeft = this.daysUntil(s.dueDay);
+      w += 2 * Math.max(0, 1 - daysLeft / interval);
+    }
+    if (s.lastWrongDay === this.today) w += 1;
+    const lastSeq = this.lastAskedSeq.get(id);
+    const spacing = lastSeq === undefined ? 2 : Math.min(1, (this.seq - lastSeq) / 15);
+    return (w * spacing) / (1 + (this.askedCount.get(id) ?? 0));
+  }
+
+  private daysUntil(day: string): number {
+    let n = this.daysUntilCache.get(day);
+    if (n === undefined) {
+      n = diffDays(this.today, day);
+      this.daysUntilCache.set(day, n);
+    }
+    return n;
+  }
+
+  private nextNewCandidate(): ItemId | undefined {
+    let best: { id: ItemId; score: number } | undefined;
+    for (const unit of sortedUnits(this.deps.pack.units)) {
+      // Focus practice may open items of a unit that is not unlocked yet.
+      if (!this.focus && !this.unlocked.includes(unit.id)) continue;
+      for (const id of unit.itemIds) {
+        if (this.focus && !this.focus.has(id)) continue;
+        if (this.state(id).status !== 'new') continue;
+        const item = this.item(id);
+        // Prefer items whose mirrored twin is already known: an easy, meaningful step.
+        const pairKnown = item.pairId !== undefined && this.state(item.pairId).status !== 'new';
+        const score = unit.order * 1000 + item.order - (pairKnown ? 500 : 0);
+        if (!best || score < best.score) best = { id, score };
+      }
+    }
+    return best?.id;
+  }
+
+  private pickWarmup(known: ItemState[]): ItemId[] {
+    const n = this.deps.config.session.warmupCount;
+    const safety = (s: ItemState) => {
+      const acc = s.seen ? s.correct / s.seen : 0;
+      const statusBonus = s.status === 'automatic' ? 3 : s.status === 'fluent' ? 2 : 0;
+      return statusBonus + s.box * 0.5 + acc * 2 - (s.lastWrongDay ? 0.5 : 0);
+    };
+    const safe = known.filter((s) => atLeast(s.status, 'fluent') || (s.seen >= 2 && s.correct / s.seen >= 0.8));
+    const top = safe.sort((a, b) => safety(b) - safety(a)).slice(0, n * 2);
+    return shuffle(this.deps.rng, top)
+      .slice(0, n)
+      .map((s) => s.itemId);
+  }
+
+  private sortDue(due: ItemState[]): ItemId[] {
+    // Lowest box (weakest) first; random tie-break interleaves units.
+    const keyed = due.map((s) => ({ id: s.itemId, key: s.box + this.deps.rng.next() * 0.9 }));
+    return keyed.sort((a, b) => a.key - b.key).map((x) => x.id);
+  }
+
+  private formatFor(state: ItemState, kind: QuestionKind): AnswerFormat {
+    const f = this.deps.config.format;
+    // A derivation is worked out step by step on the number pad.
+    if (kind === 'derive') return 'free';
+    if (kind === 'new' || !f.allowFree) return 'choice';
+    return atLeast(state.status, f.freeFromStatus) ? 'free' : 'choice';
+  }
+
+  private item(id: ItemId): Item {
+    const item = this.deps.itemById.get(id);
+    if (!item) throw new Error(`Unknown item ${id}`);
+    return item;
+  }
+
+  private state(id: ItemId): ItemState {
+    return this.states.get(id) ?? emptyState(id);
+  }
+}

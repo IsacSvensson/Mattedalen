@@ -1,0 +1,43 @@
+import { expect, test, type Page } from '@playwright/test';
+import { answer, createProfile, nextStep, seedStates } from './helpers';
+
+/** A phone on its side: very little height. */
+test.use({ viewport: { width: 800, height: 360 } });
+
+async function cellSize(page: Page): Promise<number> {
+  return (await page.locator('.grid-cell').first().boundingBox())!.width;
+}
+
+test('the garden fits beside its buttons, with readable squares', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Isac');
+  const f = { status: 'fluent', box: 3 };
+  const s: Record<string, typeof f> = {};
+  for (const t of [1, 2, 3]) for (let n = 1; n <= 10; n++) Object.assign(s, { [`${t}x${n}`]: f, [`${n}x${t}`]: f });
+  await seedStates(page, s);
+  await page.locator('.profile-tile').first().click();
+  await expect(page.locator('.garden-grid')).toBeVisible();
+  expect(await cellSize(page)).toBeGreaterThanOrEqual(20);
+  // The whole bed and the main button are on screen without scrolling.
+  const bed = (await page.locator('.garden-bed').boundingBox())!;
+  expect(bed.y + bed.height).toBeLessThanOrEqual(360);
+  const button = (await page.getByRole('button', { name: 'Vattna trädgården' }).boundingBox())!;
+  expect(button.y + button.height).toBeLessThanOrEqual(360);
+  expect(button.x).toBeGreaterThan(bed.x + bed.width);
+});
+
+test('a question fits beside its answers', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Bo');
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  for (let i = 0; i < 6; i++) {
+    await expect(nextStep(page)).toBeVisible();
+    if (await page.locator('.question').isVisible()) {
+      const card = (await page.locator('.question .prompt-card').boundingBox())!;
+      const answers = (await page.locator('.question .choices, .question .numpad').first().boundingBox())!;
+      expect(answers.x).toBeGreaterThan(card.x + card.width - 1);
+      expect(answers.y + answers.height).toBeLessThanOrEqual(361);
+    }
+    await answer(page);
+  }
+});
