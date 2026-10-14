@@ -3,6 +3,7 @@ import { buildChoices } from './distractors';
 import { applyLeitner, isDue } from './leitner';
 import { PacingController } from './pacing';
 import { applyStatus, atLeast, emptyState } from './status';
+import { isStruggling } from './support';
 import { computeUnlocked, sortedUnits } from './unlock';
 import type {
   AnswerFormat,
@@ -93,6 +94,11 @@ interface Deps {
  * 4. items due for spaced review (Leitner)
  * 5. weighted mixed practice over all unlocked units
  *
+ * A hard item (see support.ts) whose underlying items are known is asked as a
+ * `derive` question instead: the game walks the learner there in steps. It
+ * gives no status evidence; the item is asked again from memory a few
+ * questions later, and that answer counts.
+ *
  * A focus session takes about `config.focus.share` of steps 4–5 from the
  * focus set and the rest from everything else known, and may introduce a few
  * new items from the set even if their unit is not unlocked yet.
@@ -117,6 +123,7 @@ export class Session {
   private daysUntilCache = new Map<string, number>();
   private retries = new Map<ItemId, number>();
   private introduced: ItemId[] = [];
+  private supported = 0;
   private promoted = new Set<ItemId>();
   private sinceNew: number;
   private askCap: number;
@@ -170,8 +177,9 @@ export class Session {
   next(): Question | null {
     if (this.current) return this.current;
     if (this.isOver()) return null;
-    const pick = this.pick();
-    if (!pick) return null;
+    const picked = this.pick();
+    if (!picked) return null;
+    const pick = this.withSupport(picked);
     const item = this.item(pick.itemId);
     const state = this.state(pick.itemId);
     const format = this.formatFor(state, pick.kind);
@@ -198,8 +206,17 @@ export class Session {
     const prev = this.state(q.item.id);
     const now = clock.now();
 
-    let next = applyStatus(prev, { correct, given, rtMs, format: q.format, now, today: this.today }, config.status);
-    next = applyLeitner(prev, next, correct, this.today, config.leitner.intervalsDays);
+    let next: ItemState;
+    if (q.kind === 'derive') {
+      // Reached with help: no evidence and no step down, only a note that
+      // support was given. The item comes back from memory shortly.
+      next = { ...prev, supportDay: this.today, lastSeenAt: now };
+      this.supported++;
+      this.pending.push({ itemId: q.item.id, atSeq: q.seq + config.session.retryGap + 1, kind: 'retry' });
+    } else {
+      next = applyStatus(prev, { correct, given, rtMs, format: q.format, now, today: this.today }, config.status);
+      next = applyLeitner(prev, next, correct, this.today, config.leitner.intervalsDays);
+    }
     this.states.set(q.item.id, next);
     if (next.status !== prev.status && atLeast(next.status, 'fluent') && !atLeast(prev.status, next.status)) {
       this.promoted.add(q.item.id);
@@ -223,7 +240,7 @@ export class Session {
       this.sinceNew++;
     }
 
-    if (!correct && q.kind !== 'new') {
+    if (!correct && q.kind !== 'new' && q.kind !== 'derive') {
       const used = this.retries.get(q.item.id) ?? 0;
       const alreadyPending = this.pending.some((p) => p.itemId === q.item.id);
       if (used < config.session.maxRetriesPerItem && !alreadyPending) {
@@ -397,6 +414,23 @@ export class Session {
   }
 
   /**
+   * A hard item becomes a supported `derive` question, at most once per day
+   * and `config.support.maxPerSession` times per session, and only when the
+   * items it is derived from are already known (fluent).
+   */
+  private withSupport(pick: { itemId: ItemId; kind: QuestionKind }): { itemId: ItemId; kind: QuestionKind } {
+    if (pick.kind !== 'retry' && pick.kind !== 'due' && pick.kind !== 'mixed') return pick;
+    const cfg = this.deps.config.support;
+    // The steps are typed answers; without free answers there is no support.
+    if (!this.deps.config.format.allowFree || this.supported >= cfg.maxPerSession) return pick;
+    const state = this.state(pick.itemId);
+    if (state.supportDay === this.today || !isStruggling(state, this.today, cfg)) return pick;
+    const from = this.item(pick.itemId).derivedFrom;
+    if (from.length === 0 || !from.every((id) => atLeast(this.state(id).status, 'fluent'))) return pick;
+    return { itemId: pick.itemId, kind: 'derive' };
+  }
+
+  /**
    * Known items to draw from in steps 4–5. Outside focus sessions that is
    * everything known; in a focus session it is the focus set with probability
    * `config.focus.share`, otherwise the rest (falling back to the other group
@@ -498,6 +532,8 @@ export class Session {
 
   private formatFor(state: ItemState, kind: QuestionKind): AnswerFormat {
     const f = this.deps.config.format;
+    // A derivation is worked out step by step on the number pad.
+    if (kind === 'derive') return 'free';
     if (kind === 'new' || !f.allowFree) return 'choice';
     return atLeast(state.status, f.freeFromStatus) ? 'free' : 'choice';
   }

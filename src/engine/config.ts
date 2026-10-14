@@ -34,6 +34,14 @@ export const DEFAULT_CONFIG: EngineConfig = {
     knownPerNew: 4,
     easyUnlockFraction: 0.6,
   },
+  // Hard items are reached in steps from known ones (derived facts), then
+  // asked again from memory a few questions later.
+  support: {
+    wrongDays: 2,
+    drops: 2,
+    stuckDays: 7,
+    maxPerSession: 3,
+  },
   // Focus practice: mostly the chosen set, but interleaved with other known
   // items (blocked practice feels effective but is retained worse).
   focus: {
@@ -56,6 +64,7 @@ export function makeConfig(overrides: ConfigOverrides = {}): EngineConfig {
     leitner: { ...DEFAULT_CONFIG.leitner, ...overrides.leitner },
     session: { ...DEFAULT_CONFIG.session, ...overrides.session },
     pacing: { ...DEFAULT_CONFIG.pacing, ...overrides.pacing },
+    support: { ...DEFAULT_CONFIG.support, ...overrides.support },
     focus: { ...DEFAULT_CONFIG.focus, ...overrides.focus },
     format: { ...DEFAULT_CONFIG.format, ...overrides.format },
   } as EngineConfig;

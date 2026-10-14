@@ -1,5 +1,5 @@
 import type { Feedback, FocusSet, Question, SessionMode } from '../../engine';
-import { confusionNote, parseFactId } from '../../content/multiplication';
+import { confusionNote, derivationSteps, parseFactId, type DeriveStep } from '../../content/multiplication';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { arrayBuilder } from '../components/arrayBuilder';
@@ -89,7 +89,8 @@ export async function showSession(ctx: AppContext, profile: Profile, mode: Sessi
     if (!q) break;
     if (q.kind === 'new') await introduce(stage, q, setKeys);
     if (finished) return;
-    const { given, rtMs } = await ask(stage, q, setKeys);
+    const steps = q.kind === 'derive' ? derivationFor(q) : null;
+    const { given, rtMs } = steps ? await derive(stage, q, steps, setKeys) : await ask(stage, q, setKeys);
     if (finished) return;
     const fb = await play.answer(given, rtMs);
     updateProgress();
@@ -149,6 +150,69 @@ function introduce(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<v
     );
     setKeys(undefined);
   });
+}
+
+function derivationFor(q: Question): DeriveStep[] | null {
+  const { a, b } = parseFactId(q.item.id);
+  return derivationSteps(a, b);
+}
+
+/**
+ * "Räknestigen": a fact the child finds hard, reached in steps from facts it
+ * knows (5 × 7 = 35 → 35 + 7 → 6 × 7). A wrong step just shows the number and
+ * the path goes on; only the last step is the answer to the question.
+ */
+async function derive(stage: HTMLElement, q: Question, steps: DeriveStep[], setKeys: SetKeys): Promise<{ given: string; rtMs: number }> {
+  const { a, b } = parseFactId(q.item.id);
+  const list = h('ol', { class: 'derive-steps' });
+  const card = h(
+    'div',
+    { class: 'derive-card card' },
+    h('p', { class: 'derive-title' }, icon('steps'), 'Räknestigen'),
+    list,
+    arrayView(a, b, { size: 'small', parts: partsOf(q.item.hints) }),
+  );
+  const done: HTMLElement[] = [];
+  let result = { given: '', rtMs: 0 };
+  // Built once, so the rectangle does not animate again at every step.
+  const padSlot = h('div', { class: 'derive-pad' });
+  stage.replaceChildren(h('div', { class: 'question free derive' }, card, padSlot));
+
+  for (const [i, step] of steps.entries()) {
+    const last = i === steps.length - 1;
+    const current = h(
+      'li',
+      { class: `derive-step current${last ? ' target' : ''}` },
+      h('span', { class: 'derive-label' }, step.label),
+      h('span', { class: 'derive-prompt' }, step.prompt),
+      h('span', { class: 'derive-eq' }, ' = ?'),
+    );
+    list.replaceChildren(...done, current);
+    currentPrompt = step.prompt;
+    if (voiceOn) void speak(`${step.label}. ${step.prompt}`);
+    const answer = await new Promise<{ given: string; rtMs: number }>((resolve) => {
+      const shownAt = performance.now();
+      const pad = numPad((value) => {
+        pad.disable();
+        resolve({ given: value, rtMs: Math.round(performance.now() - shownAt) });
+      });
+      padSlot.replaceChildren(pad.el);
+      setKeys((e) => pad.onKey(e));
+    });
+    setKeys(undefined);
+    if (last) {
+      result = answer;
+      break;
+    }
+    const right = Number(answer.given) === step.answer;
+    current.classList.remove('current');
+    current.classList.add(right ? 'right' : 'shown');
+    current.querySelector('.derive-eq')?.replaceWith(h('span', { class: 'derive-eq' }, ` = ${step.answer}`), right ? icon('check') : '');
+    done.push(current);
+    // A wrong step: the number stays visible a moment longer, without any red.
+    await wait(prefersReducedMotion() ? 200 : right ? 450 : 1200);
+  }
+  return result;
 }
 
 /** Multiple choice or free answer on a number pad. Response time is measured but never shown. */

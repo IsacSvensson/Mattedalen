@@ -7,5 +7,6 @@ export * from './pacing';
 export * from './unlock';
 export * from './distractors';
 export * from './session';
+export * from './support';
 export * from './engine';
 export * from './placement';

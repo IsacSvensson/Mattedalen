@@ -49,6 +49,7 @@ const ICONS = {
   check: { paths: [['M5 12.5l4.5 4.5L19 7.5']] },
   erase: { paths: [['M8.5 5.5H19a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H8.5L3 12Z', 'var(--card)'], ['M11 9.5l5 5'], ['M16 9.5l-5 5']] },
   drop: { paths: [['M12 3.5c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11Z', 'var(--i-blue)']] },
+  steps: { paths: [['M3.5 20.5V16h5v-4.5h5V7h5V3.5h2.5v17Z', 'var(--i-yellow)']] },
   rotate: { paths: [['M19 12a7 7 0 1 1-2.1-5'], ['M17.5 3v4.5H13']] },
   phone: {
     paths: [['M7.5 2.5h9a1 1 0 0 1 1 1v17a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-17a1 1 0 0 1 1-1Z', 'var(--i-blue)'], ['M12 7v7'], ['M9 11.5l3 3 3-3'], ['M10.5 18.5h3']],

@@ -3,6 +3,7 @@ import { validatePack } from '../../src/engine';
 import {
   confusionNote,
   createMultiplicationPack,
+  derivationSteps,
   factId,
   multiplicationDistractors,
   normalizeNumberAnswer,
@@ -206,5 +207,44 @@ describe('focus sets', () => {
     const pack = createMultiplicationPack({ maxUnits: 2 });
     const ids = new Set(pack.items.map((i) => i.id));
     for (const set of pack.focusSets!) for (const id of set.itemIds) expect(ids.has(id)).toBe(true);
+  });
+});
+
+describe('derivation paths (räknestigen)', () => {
+  const evaluate = (prompt: string): number => {
+    const half = /^hälften av (\d+)$/.exec(prompt);
+    if (half) return Number(half[1]) / 2;
+    const m = /^(\d+) ([+−×]) (\d+)$/.exec(prompt);
+    if (!m) throw new Error(prompt);
+    const [x, op, y] = [Number(m[1]), m[2], Number(m[3])];
+    return op === '+' ? x + y : op === '−' ? x - y : x * y;
+  };
+
+  it('every derived fact has steps that add up, from facts it is derived from', () => {
+    const pack = createMultiplicationPack();
+    let withSteps = 0;
+    for (const item of pack.items) {
+      const { a, b } = parseFactId(item.id);
+      const steps = derivationSteps(a, b);
+      if (item.derivedFrom.length === 0) {
+        expect(steps).toBeNull();
+        continue;
+      }
+      withSteps++;
+      expect(steps).not.toBeNull();
+      const known = steps!.filter((st) => st.kind === 'known');
+      expect(known.map((st) => st.itemId)).toEqual(item.derivedFrom);
+      for (const st of steps!) expect(evaluate(st.prompt)).toBe(st.answer);
+      expect(steps!.at(-1)).toMatchObject({ kind: 'target', answer: a * b });
+      expect(steps!.at(-2)).toMatchObject({ kind: 'combine', answer: a * b });
+    }
+    expect(withSteps).toBeGreaterThan(50);
+  });
+
+  it('reads like the strategy: 6 × 7 via 5 × 7, 8 × 7 by doubling, 9 × 6 from 10 × 6', () => {
+    expect(derivationSteps(6, 7)!.map((s) => s.prompt)).toEqual(['5 × 7', '35 + 7', '6 × 7']);
+    expect(derivationSteps(8, 7)!.map((s) => s.prompt)).toEqual(['4 × 7', '28 + 28', '8 × 7']);
+    expect(derivationSteps(9, 6)!.map((s) => s.prompt)).toEqual(['10 × 6', '60 − 6', '9 × 6']);
+    expect(derivationSteps(7, 7)!.map((s) => s.prompt)).toEqual(['5 × 7', '2 × 7', '35 + 14', '7 × 7']);
   });
 });

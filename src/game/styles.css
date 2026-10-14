@@ -2208,3 +2208,112 @@ h1:focus {
     --cell: min(calc((100dvh - 240px) / 11), 58px);
   }
 }
+
+/* --- räknestigen: a hard fact reached in steps ------------------------ */
+
+.derive-card {
+  width: 100%;
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.derive-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+}
+
+.derive-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.derive-step {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto 1fr;
+  align-items: center;
+  column-gap: 6px;
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.derive-label {
+  grid-column: 1 / -1;
+  font-family: var(--font-text);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.derive-step .derive-prompt {
+  grid-column: 2;
+}
+
+.derive-step .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.derive-step.current {
+  background: #fff;
+  border: var(--outline);
+  font-size: 2.2rem;
+}
+
+.derive-step.current.target {
+  background: var(--selected);
+}
+
+.derive-step.right .derive-eq {
+  color: var(--good-ink);
+}
+
+/* A step the child did not get: the number is shown, calmly. */
+.derive-step.shown .derive-eq {
+  color: var(--ink-soft);
+  text-decoration: underline dashed;
+  text-underline-offset: 6px;
+}
+
+.question.derive {
+  gap: 14px;
+}
+
+.derive-pad {
+  display: contents;
+}
+
+/* Steps already done: one compact line, without their label. */
+.derive-step:not(.current) {
+  font-size: 1.25rem;
+  padding: 0 12px;
+}
+
+.derive-step:not(.current) .derive-label {
+  display: none;
+}
+
+.derive-card .array-view {
+  --unit: min(2px, 15dvh / var(--h), (100vw - 80px) / var(--w));
+}
+
+.hard-list {
+  margin: 0;
+  padding-left: 1.3em;
+  line-height: 1.6;
+}

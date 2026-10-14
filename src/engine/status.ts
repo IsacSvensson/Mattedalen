@@ -116,6 +116,8 @@ export function applyStatus(prev: ItemState, input: AnswerInput, cfg: StatusConf
 
   if (!input.correct) {
     s.lapses++;
+    if (prev.lastWrongDay !== input.today) s.wrongDays = (prev.wrongDays ?? 0) + 1;
+    if (atLeast(prev.status, 'fluent')) s.drops = (prev.drops ?? 0) + 1;
     s.lastWrongDay = input.today;
     s.confusions[input.given] = (s.confusions[input.given] ?? 0) + 1;
     s.status = demotedStatus(s.status);
@@ -131,6 +133,14 @@ export function applyStatus(prev: ItemState, input: AnswerInput, cfg: StatusConf
     s.dayBest[input.today] = ev;
     s.dayBest = pruneEvidence(s.dayBest, input.today, cfg.keepEvidenceDays);
     s.status = promotedStatus(s, cfg);
+    // Answered from memory on a later day than the supported practice: the
+    // item has settled, and the hard-item counters start over.
+    if (s.supportDay !== undefined && s.supportDay < input.today) {
+      s.wrongDays = 0;
+      s.drops = 0;
+      s.supportDay = undefined;
+      s.settledDay = input.today;
+    }
   }
   return s;
 }

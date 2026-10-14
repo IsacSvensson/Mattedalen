@@ -110,9 +110,23 @@ export interface ItemState {
   dayBest: Record<DayKey, DayEvidence>;
   /** Wrong answers given (normalized) → count. */
   confusions: Record<string, number>;
+  /*
+   * Support for items the learner finds hard (all optional: older saved
+   * states simply lack them). The counters cover the time since the item
+   * last "settled", i.e. was answered from memory after a supported step.
+   */
+  /** Distinct days with a wrong answer. */
+  wrongDays?: number;
+  /** Times the item fell back from fluent or automatic. */
+  drops?: number;
+  /** Last day the item was practised with support (a derivation path). */
+  supportDay?: DayKey;
+  /** Day the item was last answered from memory after support. */
+  settledDay?: DayKey;
 }
 
-export type QuestionKind = 'warmup' | 'new' | 'rehearse' | 'retry' | 'due' | 'mixed' | 'placement';
+/** `derive`: a hard item reached in steps from items the learner knows (no status evidence). */
+export type QuestionKind = 'warmup' | 'new' | 'rehearse' | 'retry' | 'due' | 'mixed' | 'placement' | 'derive';
 
 export interface Attempt {
   itemId: ItemId;
@@ -179,6 +193,17 @@ export interface EngineConfig {
     knownPerNew: number;
     /** Unlock fraction used instead of the unit rule while the learner is above `targetHigh`. */
     easyUnlockFraction: number;
+  };
+  /** When an item counts as hard and gets a supported, step-by-step question. */
+  support: {
+    /** Hard after wrong answers on this many different days … */
+    wrongDays: number;
+    /** … or after falling back from fluent this many times … */
+    drops: number;
+    /** … or after this many days of practice without becoming fluent. */
+    stuckDays: number;
+    /** Supported questions per session at most. */
+    maxPerSession: number;
   };
   focus: {
     /** Share of questions taken from the chosen focus set (the rest keeps practice mixed). */

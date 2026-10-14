@@ -1,5 +1,5 @@
-import { systemClock, type ItemState } from '../../../engine';
-import { factId, formatFact, MAX_FACTOR, MIN_FACTOR } from '../../../content/multiplication';
+import { isStruggling, systemClock, type EngineConfig, type ItemState } from '../../../engine';
+import { factId, formatFact, MAX_FACTOR, MIN_FACTOR, parseFactId, strategyFor } from '../../../content/multiplication';
 import {
   decodeSnapshot,
   encodeSnapshot,
@@ -95,6 +95,8 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
     ),
     h('h3', null, 'Värmekarta'),
     heatmap(states, stats),
+    h('h3', null, 'Svåra just nu'),
+    hardList(states, engine.config, today),
     h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states),
     h('h3', null, 'Övade minuter per dag'),
@@ -120,6 +122,32 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
       'button',
       { class: 'link-button danger', type: 'button', onclick: () => void deleteProfile(ctx, profile) },
       `Ta bort ${profile.name}…`,
+    ),
+  );
+}
+
+/**
+ * Facts the child finds hard right now, with the way the game helps
+ * ("räknestigen"): grown-ups can use the same idea when talking about it.
+ */
+function hardList(states: Record<string, ItemState>, config: EngineConfig, today: string): HTMLElement {
+  const hard = Object.values(states)
+    .filter((s) => isStruggling(s, today, config.support))
+    .map((s) => parseFactId(s.itemId))
+    .sort((x, y) => x.a * x.b - y.a * y.b || x.a - y.a);
+  if (hard.length === 0) return h('p', { class: 'muted' }, 'Inga just nu.');
+  return h(
+    'div',
+    null,
+    h(
+      'p',
+      { class: 'muted' },
+      'Fel på flera dagar, eller länge utan att fastna. De här tas i steg från det barnet redan kan (räknestigen), och kommer sedan tillbaka utan hjälp.',
+    ),
+    h(
+      'ul',
+      { class: 'hard-list' },
+      hard.map(({ a, b }) => h('li', null, h('strong', null, `${formatFact(a, b)} = ${a * b}`), ' – ', strategyFor(a, b).text)),
     ),
   );
 }

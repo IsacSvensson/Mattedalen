@@ -120,6 +120,20 @@ högst 3 nya fakta ur gruppen (`config.focus.maxNew`) med samma takt som vanligt
 dagens pass fortsätter i ordning. Ett fokuspass räknas aldrig som dagens pass.
 Innehållspaketet beskriver valbara grupper med `focusSets` (`FocusSet`).
 
+**Svåra fakta: räknestigen** (`support.ts`, `mode`-oberoende). En fakta räknas
+som svår om barnet har svarat fel på den på 2 olika dagar, om den har fallit
+tillbaka från flytande 2 gånger eller om den har övats i mer än 7 dagar utan att
+bli flytande (`config.support`). När en svår fakta kommer upp frågas den i stället
+som `derive`, men bara om de fakta den härleds från (`item.derivedFrom`) redan är
+flytande, högst en gång per dag och högst 3 gånger per pass. Spelet går då steg
+för steg från det barnet kan: 5 × 7 = 35 → 35 + 7 → 6 × 7. Svaret på stigen räknas
+inte som bevis och sänker inte heller faktan, eftersom barnet fick hjälp. Några
+frågor senare kommer samma fakta tillbaka som en vanlig fråga, och det svaret
+räknas. Klarar barnet faktan ur minnet på en senare dag nollställs räkningen
+(`settledDay`), och stigen visas inte längre. Stödet trappas alltså ner mot att
+plocka fram svaret ur minnet, och härledningen blir inte en permanent omväg.
+Utan fritt svar (inställning i föräldravyn) används ingen stig.
+
 **Svarsformat.** Nya fakta och fakta under inlärning frågas med flerval
 (4 alternativ). Flytande fakta frågas med fritt svar. Distraktorerna kommer från
 innehållspaketet, och barnets egna tidigare felsvar blandas in med hög vikt.
@@ -225,6 +239,13 @@ inget hämtas utifrån.
   sifferknappsats (siffror, sudda och bock, eller tangentbordet). Fritt svar krävs för
   statusen ”automatiserad”. Svarstiden mäts men visas aldrig, och ingen klocka
   syns.
+- **Räknestigen** (`derivationSteps` i `content/multiplication/derive.ts`). Stegen
+  följer faktans strategi: en grupp till (6 × 7 från 5 × 7), dela upp och lägg
+  ihop (7 × 7 = 5 × 7 + 2 × 7), dubbla (8 × 7 från 4 × 7), ta bort en grupp
+  (9 × 6 från 10 × 6) och hälften (5 × 8 från 10 × 8). Varje steg besvaras på
+  sifferknappsatsen, med rektangeln i färgade delar bredvid. Ett fel steg visar
+  bara talet, och stigen fortsätter. Föräldravyn visar ”Svåra just nu” med samma
+  strategi, så att vuxna kan prata om samma knep.
 - **Återkoppling.** Vid rätt svar blir frågekortet grönt, svaret visas och en
   liten planta dyker upp. Vid fel ersätts frågan av ett hjälpkort: ”Du svarade 54.
   Så här kan du tänka:”, rätt svar, strategin och den färgade rektangeln. Aldrig

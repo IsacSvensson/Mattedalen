@@ -26,10 +26,39 @@ export async function passIntro(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Nu du!' }).click();
 }
 
+/** Value of a step on the derivation path: "5 × 7", "35 + 7", "60 − 6" or "hälften av 70". */
+function evaluate(prompt: string): number {
+  const half = /hälften av (\d+)/.exec(prompt);
+  if (half) return Number(half[1]) / 2;
+  const [x, op, y] = prompt.match(/\d+|[+−×]/g)! as [string, string, string];
+  return op === '+' ? Number(x) + Number(y) : op === '−' ? Number(x) - Number(y) : Number(x) * Number(y);
+}
+
+async function typeOnPad(page: Page, value: string): Promise<void> {
+  for (const d of value) await page.locator('.numpad-key', { hasText: new RegExp(`^${d}$`) }).click();
+  await page.getByRole('button', { name: 'Svara' }).click();
+}
+
+/** Walks a derivation path ("räknestigen"); only the last step is the answer. Returns the fact. */
+export async function answerDerive(page: Page, correct = true): Promise<string> {
+  const steps = page.locator('.derive-step');
+  for (;;) {
+    const current = page.locator('.derive-step.current .derive-prompt');
+    await expect(current).toBeVisible();
+    const prompt = (await current.textContent())!;
+    const target = await page.locator('.derive-step.current.target').isVisible();
+    const done = await steps.count();
+    await typeOnPad(page, String(evaluate(prompt) + (target && !correct ? 1 : 0)));
+    if (target) return prompt.replace(/ /g, '');
+    await expect(steps.nth(done - 1)).not.toHaveClass(/current/);
+  }
+}
+
 /** Answers the current question (multiple choice or number pad). Returns the fact asked. */
 export async function answer(page: Page, correct = true): Promise<string> {
   await expect(nextStep(page)).toBeVisible();
   await passIntro(page);
+  if (await page.locator('.question.derive').isVisible()) return answerDerive(page, correct);
   const prompt = page.locator('.question .prompt');
   await expect(prompt).toBeVisible();
   const text = (await prompt.textContent()) ?? '';
@@ -52,7 +81,9 @@ export async function answer(page: Page, correct = true): Promise<string> {
 }
 
 /** Writes item states for the (only) profile straight into IndexedDB, then reloads. */
-export async function seedStates(page: Page, states: Record<string, { status: string; box: number; dueDay?: string }>): Promise<void> {
+export type SeedState = { status: string; box: number; dueDay?: string } & Record<string, unknown>;
+
+export async function seedStates(page: Page, states: Record<string, SeedState>): Promise<void> {
   await page.evaluate(async (seed) => {
     const db: IDBDatabase = await new Promise((r) => {
       const q = indexedDB.open('gangertradgarden');
@@ -64,11 +95,10 @@ export async function seedStates(page: Page, states: Record<string, { status: st
     });
     const full: Record<string, unknown> = {};
     for (const [itemId, s] of Object.entries(seed)) {
+      // Any other fields (e.g. wrongDays, introducedDay) override the defaults.
       full[itemId] = {
         itemId,
-        status: s.status,
-        box: s.box,
-        dueDay: s.dueDay ?? '2026-02-02',
+        dueDay: '2026-02-02',
         introducedDay: '2026-01-10',
         lastSeenAt: null,
         lastWrongDay: null,
@@ -78,6 +108,7 @@ export async function seedStates(page: Page, states: Record<string, { status: st
         lapses: 0,
         dayBest: {},
         confusions: {},
+        ...s,
       };
     }
     await new Promise((r) => {

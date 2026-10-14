@@ -3,6 +3,7 @@ import { multiplicationDistractors } from './distractors';
 import { buildFacts, MAX_FACTOR, MIN_FACTOR, parseFactId, UNIT_DEFS } from './facts';
 
 export * from './facts';
+export * from './derive';
 export { multiplicationDistractors } from './distractors';
 
 /** A unit opens when ~80 % of the previous one is at least "fluent". */
