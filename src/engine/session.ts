@@ -379,7 +379,7 @@ export class Session {
     // 3. New item (incremental rehearsal: one new among several known).
     const knownPool = this.knownPool();
     const canIntroduce =
-      this.introduced.length < this.maxNew && this.sinceNew >= this.pacing.gap && this.pacing.allowNew();
+      this.introduced.length < this.maxNew && this.sinceNew >= this.newGap(knownPool) && this.pacing.allowNew();
     if (canIntroduce || (knownPool.length === 0 && this.mode !== 'extra')) {
       const candidate = this.nextNewCandidate();
       if (candidate) return { itemId: candidate, kind: 'new' };
@@ -425,6 +425,19 @@ export class Session {
     const mixed = this.pickMixed(pool, last);
     if (mixed) return { itemId: mixed, kind: 'mixed' };
     return null;
+  }
+
+  /**
+   * Questions between new items. A focus session on a set the learner hardly
+   * knows uses the shortest gap: otherwise it would mostly drill the one or
+   * two known items of the set and fill up with items from outside it.
+   */
+  private newGap(knownPool: ItemId[]): number {
+    const focus = this.focus;
+    if (focus && knownPool.filter((id) => focus.has(id)).length < this.deps.config.focus.minKnown) {
+      return Math.min(this.pacing.gap, this.deps.config.pacing.minGap);
+    }
+    return this.pacing.gap;
   }
 
   /** Every introduced item (normally in unlocked units; focus practice may open a few early). */

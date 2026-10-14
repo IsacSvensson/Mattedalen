@@ -115,8 +115,11 @@ en vald grupp fakta, till exempel en tabell. Cirka 70 % av frågorna i steg 4–
 tas ur gruppen (`config.focus.share`) och resten ur allt annat barnet kan. Att
 öva en tabell helt för sig känns effektivt men fastnar sämre än blandad övning,
 och barnet kan då svara på mönstret i stället för faktan. Passet får plantera
-högst 3 nya fakta ur gruppen (`config.focus.maxNew`) med samma takt som vanligt,
-även om faktans enhet inte är upplåst än. Enheten låses inte upp av det, så
+högst 6 nya fakta ur gruppen (`config.focus.maxNew`), även om faktans enhet inte
+är upplåst än. Takten är som vanligt, men så länge barnet kan färre än 4 fakta i
+gruppen (`config.focus.minKnown`) kommer en ny så ofta som takten tillåter.
+Annars skulle ett pass på en nästan okänd tabell mest nöta de ett eller två fakta
+barnet redan har och fyllas ut med annat. Enheten låses inte upp av det, så
 dagens pass fortsätter i ordning. Ett fokuspass räknas aldrig som dagens pass.
 Innehållspaketet beskriver valbara grupper med `focusSets` (`FocusSet`).
 
@@ -346,23 +349,29 @@ göras om från föräldravyn.
 
 - **Motorn** (`engine/placement.ts`) är innehållsneutral. Den går igenom
   enheterna i ordning och frågar 4 slumpade fakta ur varje.
-- **Godkänd enhet:** minst 3 av 4 rätt, och varje rätt svar ska komma inom 5 s.
-  Den som räknar på fingrarna får alltså inte enheten godkänd.
+- **Godkänd enhet:** minst 3 av 4 rätt. Svarstiden avgör inte om enheten
+  klaras, bara hur den placeras: med minst 3 snabba svar (under 6 s) blir den
+  *flytande* (buskar), annars *lär sig* (plantor som ska bli snabbare). Små barn
+  skriver långsamt på knappsatsen, och tidigare stoppades barn som kunde ×10 av
+  att svaren tog några sekunder. Ett rätt svar som tar över 20 s har räknats
+  fram steg för steg och räknas som fel. Det första svaret räknas aldrig som
+  långsamt, eftersom barnet då också provar knappsatsen för första gången.
 - **Andra chans:** med exakt två fel i en enhet kommer 2 extra frågor som båda
   måste vara rätt, alltså 4 av 6. Ett enstaka felslag stoppar då inte ett barn
   som kan enheten.
 - **Slut:** kollen stannar vid den första enhet som inte klaras.
 - **Svaren** ges på sifferknappsatsen, eftersom flerval ger för mycket
   gissning. Ingen rätt- eller fel-markering visas och ingen klocka syns.
-- **Resultat** (`applyPlacement`): fakta i godkända enheter blir *flytande*
-  (buskar), inte automatiserade, och enheterna låses upp fram till den första
-  som inte klarades. De placerade fakta läggs in för repetition utspritt över
-  den första veckan. En för generös placering rättas därför av den vanliga
+- **Resultat** (`applyPlacement`): fakta i snabbt godkända enheter blir
+  *flytande* (buskar), inte automatiserade, och läggs in för repetition
+  utspritt över den första veckan. Fakta i långsamt godkända enheter blir
+  *lär sig* (plantor) och kommer tillbaka inom tre dagar. Enheterna låses upp
+  fram till den första som inte klarades. En för generös placering rättas därför av den vanliga
   repetitionen, eftersom ett fel svar sänker faktan ett steg. Startkollen kan
   bara flytta fram ett barn, aldrig bakåt.
 - **Simulering:** genomsnittliga elever som redan övat de fyra lätta tabellerna
-  placeras vid ×4 (7 av 8 frön) efter cirka 19 frågor. Den åttonde placeras
-  lite lägre, vid ×2, vilket är den säkra sidan. Efter placeringen ligger
+  placeras vid ×4 (7 av 8 frön) efter cirka 20 frågor. Den åttonde räknar ut
+  ×4 långsamt genom att dubbla, och får ×4 som plantor. Efter placeringen ligger
   andelen rätt på 80–93 %, och efter sex veckor är minst 8 av 10 enheter
   upplåsta.
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validatePack } from '../../src/engine';
+import { createEngine, makeConfig, ManualClock, seededRng, validatePack, type ItemState } from '../../src/engine';
 import {
   confusionNote,
   createMultiplicationPack,
@@ -201,6 +201,33 @@ describe('focus sets', () => {
     expect(seven.itemIds).toEqual(expect.arrayContaining(['7x1', '1x7', '7x7', '7x8', '8x7', '10x7']));
     // A table cuts across units (×7 includes facts from ×1, ×2, ×5 …).
     expect(new Set(seven.itemIds.map((id) => pack.items.find((i) => i.id === id)!.unitId)).size).toBeGreaterThan(5);
+  });
+
+  it('a focus session on a table the child hardly knows is spent mostly on that table', () => {
+    // Knows ×10 (still learning), nothing of ×7 beyond 7 × 10 and 10 × 7.
+    const pack = createMultiplicationPack();
+    const seven = pack.focusSets!.find((f) => f.id === 't7')!;
+    for (const seed of [1, 2, 3]) {
+      const clock = new ManualClock(Date.UTC(2026, 9, 14, 15));
+      const engine = createEngine({ pack, clock, rng: seededRng(seed), config: makeConfig() });
+      const states = engine.initialStates();
+      for (const id of pack.units[0]!.itemIds) {
+        states[id] = { ...states[id]!, status: 'learning', box: 1, introducedDay: '2026-10-10', dueDay: '2026-10-15', seen: 4, correct: 4 } as ItemState;
+      }
+      const s = engine.startSession({ states, meta: engine.initialMeta(), mode: 'focus', focusItemIds: seven.itemIds, durationMs: 5 * 60_000 });
+      let inSet = 0;
+      let asked = 0;
+      let introduced = 0;
+      for (let q = s.next(); q; q = s.next()) {
+        asked++;
+        if (seven.itemIds.includes(q.item.id)) inSet++;
+        if (q.kind === 'new') introduced++;
+        clock.advance(6000);
+        s.submit(q.item.answer, 3000);
+      }
+      expect(inSet / asked).toBeGreaterThan(0.75);
+      expect(introduced).toBeGreaterThanOrEqual(5);
+    }
   });
 
   it('only includes released facts', () => {

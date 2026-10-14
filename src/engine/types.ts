@@ -216,6 +216,12 @@ export interface EngineConfig {
     share: number;
     /** New items a focus session may introduce from the set. */
     maxNew: number;
+    /**
+     * While fewer items of the set than this are known, new ones come at the
+     * shortest pacing gap, so a session on an unfamiliar table is spent on
+     * that table rather than on the few facts of it the learner already has.
+     */
+    minKnown: number;
   };
   format: {
     allowFree: boolean;

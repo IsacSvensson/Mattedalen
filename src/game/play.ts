@@ -148,9 +148,9 @@ export class PlayController {
 }
 
 /**
- * Stores the outcome of a placement check: passed units become fluent (never
- * lowering earlier progress), the answers go into the log and the check is
- * kept as a session record.
+ * Stores the outcome of a placement check: passed units become fluent, or
+ * learning if the answers were slow (never lowering earlier progress), the
+ * answers go into the log and the check is kept as a session record.
  */
 export async function savePlacement(
   profile: Profile,
@@ -190,7 +190,7 @@ export async function savePlacement(
     answered: result.answers.length,
     correct: result.answers.filter((a) => a.correct).length,
     introduced: [],
-    extra: { passedUnits: result.passedUnitIds.length },
+    extra: { passedUnits: result.passedUnitIds.length, fluentUnits: result.fluentUnitIds.length },
   });
   return placed;
 }

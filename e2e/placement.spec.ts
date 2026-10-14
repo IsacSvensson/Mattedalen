@@ -2,13 +2,14 @@ import { expect, test } from '@playwright/test';
 import { openParent } from './helpers';
 
 /** Answers the check: right (and fast) for facts with a factor in `known`, otherwise "0". */
-async function answerCheck(page: import('@playwright/test').Page, known: number[]) {
+async function answerCheck(page: import('@playwright/test').Page, known: number[], thinkMs = 0) {
   for (let i = 0; i < 60; i++) {
     const done = page.getByRole('button', { name: 'Till trädgården' });
     const prompt = page.locator('.question .prompt');
     await expect(done.or(page.locator('.numpad-key:not([disabled])').first())).toBeVisible();
     if (await done.isVisible()) return;
     const [a, b] = (await prompt.textContent())!.match(/\d+/g)!.map(Number) as [number, number];
+    if (thinkMs) await page.clock.fastForward(thinkMs);
     await page.keyboard.type(known.includes(a) || known.includes(b) ? String(a * b) : '0');
     await page.keyboard.press('Enter');
   }
@@ -42,6 +43,20 @@ test('a new player who knows ×10, ×2, ×5 and ×1 starts at ×4', async ({ pag
     } else await page.locator(`.choice[data-value="${a * b}"]`).click();
   }
   await expect(page.locator('.intro-card .prompt')).toHaveText(/(^4 × \d+$)|(^\d+ × 4$)/);
+});
+
+test('a child who knows ×10 but answers slowly still starts after it', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/');
+  await page.getByRole('textbox', { name: 'Namn' }).fill('Sixten');
+  await page.getByRole('button', { name: 'Klar' }).click();
+  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await answerCheck(page, [10], 9000);
+  await expect(page.getByText('Du kan ×10 – de blev plantor', { exact: false })).toBeVisible();
+  await expect(page.getByText('Vi fortsätter med ×2.')).toBeVisible();
+  await page.getByRole('button', { name: 'Till trädgården' }).click();
+  await expect(page.locator('.grid-cell.stage-sprout')).toHaveCount(19);
+  await expect(page.locator('.grid-cell.stage-bush')).toHaveCount(0);
 });
 
 test('a beginner is told kindly and starts from the beginning', async ({ page }) => {

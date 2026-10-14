@@ -30,6 +30,8 @@ export function showPlacementOffer(ctx: AppContext, profile: Profile): void {
 /**
  * The check itself: free answers on the number pad (no guessing among
  * options), no right/wrong marks and no clock – just "show what you know".
+ * Answer times are measured, but only decide whether a known table is placed
+ * as bushes (fast) or as sprouts (right but slow).
  */
 export async function runPlacement(ctx: AppContext, profile: Profile): Promise<void> {
   const placement = new Placement(ctx.pack, mathRandomRng);
@@ -81,7 +83,10 @@ export async function runPlacement(ctx: AppContext, profile: Profile): Promise<v
 
   const result = placement.result();
   await savePlacement(profile, ctx.deps, result, startedAt);
-  const titles = result.passedUnitIds.map((id) => ctx.pack.units.find((u) => u.id === id)?.title ?? id);
+  const title = (id: string) => ctx.pack.units.find((u) => u.id === id)?.title ?? id;
+  const titles = result.passedUnitIds.map(title);
+  const fastTitles = result.fluentUnitIds.map(title);
+  const slowTitles = result.passedUnitIds.filter((id) => !result.fluentUnitIds.includes(id)).map(title);
   const next = result.stoppedAt ? ctx.pack.units.find((u) => u.id === result.stoppedAt)?.title : null;
   const passed = new Set(ctx.pack.units.filter((u) => result.passedUnitIds.includes(u.id)).flatMap((u) => u.itemIds));
 
@@ -92,14 +97,23 @@ export async function runPlacement(ctx: AppContext, profile: Profile): Promise<v
       { class: 'screen session-end' },
       h('div', { class: 'end-icon plant-badge', 'aria-hidden': 'true' }, plantIcon(titles.length ? 'tree' : 'sprout')),
       h('h1', null, titles.length ? 'Bra jobbat!' : 'Tack!'),
-      titles.length
+      fastTitles.length
         ? h(
             'p',
             { class: 'end-text placement-summary' },
             plantIcon('bush'),
-            ` Du kan redan ${listSv(titles)} – de blev buskar i trädgården!`,
+            ` Du kan redan ${listSv(fastTitles)} – de blev buskar i trädgården!`,
           )
-        : h('p', { class: 'end-text' }, 'Nu vet trädgården var vi ska börja. Vi planterar de första fröna tillsammans!'),
+        : null,
+      slowTitles.length
+        ? h(
+            'p',
+            { class: 'end-text placement-summary' },
+            plantIcon('sprout'),
+            ` Du kan ${listSv(slowTitles)}${fastTitles.length ? ' också' : ''} – de blev plantor. När du svarar snabbt blir de buskar.`,
+          )
+        : null,
+      titles.length ? null : h('p', { class: 'end-text' }, 'Nu vet trädgården var vi ska börja. Vi planterar de första fröna tillsammans!'),
       next ? h('p', { class: 'end-text' }, `Vi fortsätter med ${next}.`) : h('p', { class: 'end-text' }, 'Du kan hela tabellen! Nu ska vi göra den riktigt snabb.'),
       h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showGarden(ctx, profile, passed) }, 'Till trädgården'),
     ),

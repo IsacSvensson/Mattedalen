@@ -9,19 +9,28 @@ import type { ContentPack, DayKey, EngineConfig, Item, ItemId, ItemState, Learne
  * does not have to work through them again.
  *
  * Units are tested in order with a few random items each. A unit passes when
- * nearly all its sampled items are answered correctly and fast (3 of 4). One
- * miss too many earns a second chance of two extra items that must both be
- * right (4 of 6), so a single slip does not stop a learner who knows the
- * unit. The check stops at the first unit that does not pass.
+ * nearly all its sampled items are answered correctly (3 of 4). One miss too
+ * many earns a second chance of two extra items that must both be right
+ * (4 of 6), so a single slip does not stop a learner who knows the unit. The
+ * check stops at the first unit that does not pass.
+ *
+ * Time decides how well a passed unit is known, not whether it passes: young
+ * children type slowly, and failing a unit they know only because the answers
+ * took a few seconds placed them at the very start. A unit is placed as
+ * fluent when enough of its right answers were also fast; otherwise as
+ * learning ("you know it, now it gets quicker"). The first answer of the check
+ * is never counted as slow, since it is also the first go at the number pad.
  */
 export interface PlacementConfig {
   /** Items sampled per unit (fewer if the unit is smaller). */
   perUnit: number;
-  /** A correct answer only counts if it came faster than this. */
+  /** A right answer faster than this counts as fluent. */
+  fluentRtMs: number;
+  /** A right answer slower than this is counted out step by step, and counts as a miss. */
   maxRtMs: number;
 }
 
-export const DEFAULT_PLACEMENT: PlacementConfig = { perUnit: 4, maxRtMs: 5000 };
+export const DEFAULT_PLACEMENT: PlacementConfig = { perUnit: 4, fluentRtMs: 6000, maxRtMs: 20_000 };
 
 export interface PlacementAnswer {
   itemId: ItemId;
@@ -33,6 +42,8 @@ export interface PlacementAnswer {
 
 export interface PlacementResult {
   passedUnitIds: UnitId[];
+  /** Passed units whose answers were also fast (a subset of `passedUnitIds`). */
+  fluentUnitIds: UnitId[];
   /** First unit that did not pass (where learning starts), or null if all passed. */
   stoppedAt: UnitId | null;
   answers: PlacementAnswer[];
@@ -53,10 +64,12 @@ export class Placement {
   private current: Item | null = null;
   private unitHits = 0;
   private unitMisses = 0;
+  private unitFast = 0;
   private unitPool: ItemId[] = [];
   private extended = false;
   private done = false;
   private readonly passed: UnitId[] = [];
+  private readonly fluent: UnitId[] = [];
   private stoppedAt: UnitId | null = null;
   private readonly answers: PlacementAnswer[] = [];
   private readonly itemById: Map<ItemId, Item>;
@@ -86,8 +99,13 @@ export class Placement {
     const given = this.pack.normalizeAnswer(rawGiven);
     const correct = given === this.pack.normalizeAnswer(item.answer);
     this.answers.push({ itemId: item.id, unitId: unit.id, given, correct, rtMs });
-    if (correct && rtMs < this.cfg.maxRtMs) this.unitHits++;
-    else this.unitMisses++;
+    const first = this.answers.length === 1;
+    if (correct && rtMs < this.cfg.maxRtMs) {
+      this.unitHits++;
+      if (first || rtMs < this.cfg.fluentRtMs) this.unitFast++;
+    } else {
+      this.unitMisses++;
+    }
 
     const sampled = Math.min(this.cfg.perUnit, unit.itemIds.length);
     const allowedMisses = sampled - passThreshold(sampled) + (this.extended ? 1 : 0);
@@ -104,6 +122,7 @@ export class Placement {
     } else if (this.queue.length === 0) {
       // Every sample asked without too many misses: the unit is passed.
       this.passed.push(unit.id);
+      if (this.unitFast >= passThreshold(sampled)) this.fluent.push(unit.id);
       this.unitIndex++;
       this.loadUnit();
     }
@@ -120,13 +139,19 @@ export class Placement {
   }
 
   result(): PlacementResult {
-    return { passedUnitIds: this.passed.slice(), stoppedAt: this.stoppedAt, answers: this.answers.slice() };
+    return {
+      passedUnitIds: this.passed.slice(),
+      fluentUnitIds: this.fluent.slice(),
+      stoppedAt: this.stoppedAt,
+      answers: this.answers.slice(),
+    };
   }
 
   private loadUnit(): void {
     const unit = this.units[this.unitIndex];
     this.unitHits = 0;
     this.unitMisses = 0;
+    this.unitFast = 0;
     if (!unit) {
       this.done = true;
       this.queue = [];
@@ -140,10 +165,12 @@ export class Placement {
 }
 
 /**
- * Turns a placement result into learner state. Items of passed units become
- * `fluent` (not `automatic`: that still has to be earned) and are scheduled
- * for review spread over the coming week, so a too-generous placement is
- * corrected by ordinary spaced review. Existing progress is never lowered.
+ * Turns a placement result into learner state. Items of units passed with fast
+ * answers become `fluent` (not `automatic`: that still has to be earned) and
+ * are scheduled for review spread over the coming week, so a too-generous
+ * placement is corrected by ordinary spaced review. Items of units passed with
+ * slow answers become `learning`, due over the next few days. Existing
+ * progress is never lowered.
  */
 export function applyPlacement(
   pack: ContentPack,
@@ -154,18 +181,22 @@ export function applyPlacement(
   today: DayKey,
 ): { states: Record<ItemId, ItemState>; meta: LearnerMeta } {
   const out: Record<ItemId, ItemState> = { ...states };
-  const box = Math.min(2, config.leitner.intervalsDays.length - 1);
+  const lastBox = config.leitner.intervalsDays.length - 1;
+  const fluent = new Set(result.fluentUnitIds);
   let spread = 0;
+  let slowSpread = 0;
   for (const unitId of result.passedUnitIds) {
     const unit = pack.units.find((u) => u.id === unitId);
+    const fast = fluent.has(unitId);
+    const status = fast ? 'fluent' : 'learning';
     for (const id of unit?.itemIds ?? []) {
       const prev = out[id] ?? emptyState(id);
-      if (statusRank(prev.status) >= statusRank('fluent')) continue;
+      if (statusRank(prev.status) >= statusRank(status)) continue;
       out[id] = {
         ...prev,
-        status: 'fluent',
-        box,
-        dueDay: addDays(today, 1 + (spread++ % 7)),
+        status,
+        box: Math.max(prev.box, Math.min(fast ? 2 : 1, lastBox)),
+        dueDay: fast ? addDays(today, 1 + (spread++ % 7)) : addDays(today, 1 + (slowSpread++ % 3)),
         introducedDay: prev.introducedDay ?? addDays(today, -1),
       };
     }

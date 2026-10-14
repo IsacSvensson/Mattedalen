@@ -45,10 +45,12 @@ describe('placement with simulated learners', () => {
     console.log('stopped at', runs.map((r) => r.result.stoppedAt).join(' '), 'asked', runs.map((r) => r.asked).join(' '));
     expect(atFour).toBeGreaterThanOrEqual(6);
     for (const r of runs) {
-      // Never placed beyond what they know, and always past the first unit.
+      // Never placed as fluent beyond what they know, and always past the first
+      // unit. A unit they can work out slowly (×4 by doubling) may pass as learning.
       expect(r.result.passedUnitIds.length).toBeGreaterThanOrEqual(1);
-      expect(r.result.passedUnitIds.length).toBeLessThanOrEqual(4);
-      expect(r.asked).toBeLessThanOrEqual(24);
+      expect(r.result.fluentUnitIds.length).toBeLessThanOrEqual(4);
+      expect(r.result.passedUnitIds.length).toBeLessThanOrEqual(5);
+      expect(r.asked).toBeLessThanOrEqual(30);
     }
   });
 

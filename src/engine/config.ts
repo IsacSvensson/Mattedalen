@@ -46,7 +46,8 @@ export const DEFAULT_CONFIG: EngineConfig = {
   // items (blocked practice feels effective but is retained worse).
   focus: {
     share: 0.7,
-    maxNew: 3,
+    maxNew: 6,
+    minKnown: 4,
   },
   format: {
     allowFree: true,

@@ -143,7 +143,7 @@ describe('saving a placement check', () => {
   it('stores fluent facts, the answers and a session record', async () => {
     const { store, deps } = setup();
     const full: GameDeps = { ...deps, pack: createMultiplicationPack() };
-    const result = { passedUnitIds: ['u10'], stoppedAt: 'u2', answers: [{ itemId: '10x3', unitId: 'u10', given: '30', correct: true, rtMs: 1800 }] };
+    const result = { passedUnitIds: ['u10'], fluentUnitIds: ['u10'], stoppedAt: 'u2', answers: [{ itemId: '10x3', unitId: 'u10', given: '30', correct: true, rtMs: 1800 }] };
     await savePlacement(profile, full, result, Date.UTC(2026, 1, 2, 15));
     const { states, meta } = await loadProgress(profile, full);
     expect(Object.values(states).filter((s) => s.status === 'fluent')).toHaveLength(19);
