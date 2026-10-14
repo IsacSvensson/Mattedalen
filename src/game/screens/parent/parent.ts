@@ -21,7 +21,7 @@ import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, snapshotOf } fr
 import { showProfiles } from '../profiles';
 import { AVATAR_KEYS, avatarIcon, avatarName } from '../../components/avatars';
 import { icon } from '../../components/icons';
-import { installGuide } from '../../pwa';
+import { APP_BUILD, checkForUpdate, installGuide } from '../../pwa';
 import { hasSwedishVoice, speechSupported } from '../../speech';
 import { showPlacementOffer } from '../placement';
 import { choosePin } from './pinGate';
@@ -483,6 +483,30 @@ async function deviceSection(ctx: AppContext): Promise<HTMLElement> {
           'Be om beständig lagring',
         )
       : null,
+    h('h3', null, 'Version'),
+    h('p', { class: 'muted' }, `Appen: ${APP_BUILD}. Nya versioner hämtas av sig själva och tas i bruk när appen startas, eller med knappen ”Ny version finns”.`),
+    h(
+      'button',
+      {
+        class: 'soft-button',
+        type: 'button',
+        onclick: async (e: Event) => {
+          const button = e.currentTarget as HTMLButtonElement;
+          button.disabled = true;
+          const result = await checkForUpdate();
+          button.disabled = false;
+          toast(
+            result === 'updating'
+              ? 'Ny version hittad – appen startar om'
+              : result === 'latest'
+                ? 'Du har den senaste versionen'
+                : 'Kunde inte söka just nu (ingen anslutning?)',
+          );
+        },
+      },
+      icon('refresh'),
+      'Sök efter uppdatering',
+    ),
     h('h3', null, 'Lägg till på hemskärmen'),
     installGuide(),
     h('h3', null, 'Varför lägga till på hemskärmen?'),

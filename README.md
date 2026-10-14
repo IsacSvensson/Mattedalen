@@ -406,9 +406,21 @@ tabellövning som `mode: 'focus'`.
   filerna. Workern cachar bara appens egna statiska filer och svarar
   cache-first. Navigering får den cachade `index.html`. Allt annat lämnas
   orört, och ingen data går över nätet.
-- **Uppdateringar.** En ny version installeras i bakgrunden och väntar.
-  Startsidan visar då ”🔄 Ny version finns – uppdatera”. Appen byts aldrig ut
-  mitt i ett pass.
+- **Uppdateringar** (`pwa.ts`). Appen letar efter en ny version när den startar,
+  när den kommer tillbaka i förgrunden, när nätet kommer tillbaka och var 30:e
+  minut. En ny version laddas ner i bakgrunden och väntar. Sedan gäller:
+  - Fanns den redan när appen startade, tas den i bruk direkt, innan något har
+    spelats. En installerad app stängs sällan helt, så annars skulle den vänta
+    för evigt.
+  - Annars visas knappen ”Ny version finns – uppdatera” längst ner på alla
+    skärmar utom under ett spel (pass, rekordjakt, duell, startkoll). Appen byts
+    aldrig ut mitt i ett spel. Byter en annan flik version, laddas den här om
+    först när spelet är slut.
+  - Föräldravyn visar vilken version som körs (byggdatum och commit) och har
+    knappen ”Sök efter uppdatering”, som söker direkt och startar om med den nya
+    versionen.
+  `sw.js` hämtas alltid förbi webbläsarens cache (`updateViaCache: 'none'`), och
+  installationen hämtar varje fil med `cache: 'reload'`.
 - **Installation.** En vänlig banderoll på startsidan och en guide i
   föräldravyn visar hur man lägger till appen på hemskärmen. Guiden har steg för
   iPhone och iPad (Safari → Dela → Lägg till på hemskärmen), för Android och för
@@ -419,6 +431,9 @@ tabellövning som `mode: 'focus'`.
   föräldravyn och läser en QR-bild, där läsarbiblioteket laddas först då. Testet
   kontrollerar att varje svar kom från service workern och att inget anrop gick
   till någon annan värd.
+  `e2e/update.spec.ts` publicerar en ny version under testet och kontrollerar att
+  den erbjuds, att den aldrig dyker upp mitt i ett spel, att en nedladdad version
+  tas i bruk vid nästa start och att föräldravyns knapp fungerar.
 
 ### Integritet
 

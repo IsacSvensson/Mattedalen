@@ -65,8 +65,8 @@ test('shows how to add the app to the home screen', async ({ page }) => {
   await expect(page.getByRole('dialog')).toContainText('Lägg till på hemskärmen');
   await page.getByRole('button', { name: 'Klar' }).click();
   await page.getByRole('button', { name: 'Inte nu' }).click();
-  await expect(page.getByText('📲', { exact: false })).toHaveCount(0);
+  await expect(page.locator('.install-banner')).toHaveCount(0);
   await page.reload();
   await expect(page.locator('.profile-tile', { hasText: 'Alva' })).toBeVisible();
-  await expect(page.getByText('📲', { exact: false })).toHaveCount(0);
+  await expect(page.locator('.install-banner')).toHaveCount(0);
 });

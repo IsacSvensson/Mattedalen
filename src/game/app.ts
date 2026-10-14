@@ -1,6 +1,7 @@
 import type { ContentPack } from '../engine';
 import type { PersistStatus, ProgressStore } from '../storage';
 import type { GameDeps } from './play';
+import { setScreenBusy } from './pwa';
 
 export interface AppContext {
   root: HTMLElement;
@@ -20,6 +21,8 @@ export function show(ctx: AppContext, view: HTMLElement, cleanup?: Cleanup): voi
   current?.();
   current = cleanup;
   ctx.root.replaceChildren(view);
+  // Games (a session, challenge, duel or start check) are never interrupted by an update.
+  setScreenBusy(view.classList.contains('session'));
   // Move focus to the new screen for keyboard and screen-reader users.
   const focusTarget = view.querySelector<HTMLElement>('[autofocus], h1');
   if (focusTarget) {

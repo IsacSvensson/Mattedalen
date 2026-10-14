@@ -39,7 +39,11 @@ function swPlugin(): Plugin {
   };
 }
 
+/** Shown in the parent view, so a grown-up can see which version is running. */
+const APP_BUILD = [new Date().toISOString().slice(0, 10), process.env.GITHUB_SHA?.slice(0, 7)].filter(Boolean).join(' · ');
+
 export default defineConfig({
+  define: { __APP_BUILD__: JSON.stringify(APP_BUILD) },
   // Relative base so the static build works under any path (e.g. GitHub Pages /Multiplikation/).
   base: './',
   plugins: [swPlugin()],

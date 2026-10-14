@@ -3,25 +3,52 @@ import { icon } from './components/icons';
 
 // --- service worker -------------------------------------------------------
 
+let registration: ServiceWorkerRegistration | null = null;
 let waiting: ServiceWorker | null = null;
+/** A game is on screen: never reload in the middle of it. */
+let busy = false;
+let reloadWhenFree = false;
 const updateListeners = new Set<() => void>();
 
+/** How often an open app looks for a new version (besides at start and when it comes back to the front). */
+const UPDATE_CHECK_MS = 30 * 60_000;
+
+/** Build of the running app, e.g. "2026-10-14 · 8ba0bb2" (set by vite.config.ts). */
+export const APP_BUILD: string = typeof __APP_BUILD__ === 'string' ? __APP_BUILD__ : 'utveckling';
+
 /**
- * Registers the service worker (production builds only). A new version is
- * installed in the background and waits; the app offers it on the start
- * screen instead of swapping files in the middle of a session.
+ * Registers the service worker (production builds only).
+ *
+ * A new version is downloaded in the background and then:
+ * - taken into use right away if it was already waiting when the app started
+ *   (an installed app is often never fully closed, so it would wait forever),
+ * - otherwise offered with an update button on every screen except during a
+ *   game, so files are never swapped in the middle of a session.
  */
 export async function registerServiceWorker(): Promise<void> {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
+  const hadController = !!navigator.serviceWorker.controller;
   try {
     const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+    registration = reg;
+    // The first install takes control without a reload; later versions reload the page.
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController) return;
+      if (busy) reloadWhenFree = true;
+      else location.reload();
+    });
+    if (reg.waiting && hadController && !busy) {
+      // Downloaded during an earlier visit: start the new version now, before anything is played.
+      reg.waiting.postMessage('skipWaiting');
+      return;
+    }
     const track = (worker: ServiceWorker | null) => {
       if (!worker) return;
       const check = () => {
         // Only an update (not the first install) needs the user's go-ahead.
         if (worker.state === 'installed' && navigator.serviceWorker.controller) {
           waiting = worker;
-          for (const listener of updateListeners) listener();
+          notify();
         }
       };
       check();
@@ -29,13 +56,22 @@ export async function registerServiceWorker(): Promise<void> {
     };
     track(reg.waiting);
     reg.addEventListener('updatefound', () => track(reg.installing));
-    // Look for updates when the app comes back to the foreground.
+    const lookForUpdate = () => void reg.update().catch(() => undefined);
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') void reg.update().catch(() => undefined);
+      if (document.visibilityState === 'visible') lookForUpdate();
     });
+    window.addEventListener('online', lookForUpdate);
+    setInterval(() => {
+      if (document.visibilityState === 'visible') lookForUpdate();
+    }, UPDATE_CHECK_MS);
   } catch {
     // Offline support is a bonus; the app still works online without it.
   }
+}
+
+function notify(): void {
+  for (const listener of updateListeners) listener();
+  renderUpdateBar();
 }
 
 export function updateReady(): boolean {
@@ -49,8 +85,59 @@ export function onUpdateReady(listener: () => void): () => void {
 
 export function applyUpdate(): void {
   if (!waiting) return;
-  navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true });
   waiting.postMessage('skipWaiting');
+}
+
+/** Called for every new screen: games are "busy", everything else may update. */
+export function setScreenBusy(isBusy: boolean): void {
+  busy = isBusy;
+  if (!busy && reloadWhenFree) {
+    location.reload();
+    return;
+  }
+  renderUpdateBar();
+}
+
+export type UpdateCheck = 'updating' | 'latest' | 'unavailable';
+
+/** "Sök efter uppdatering" in the parent view: looks now and starts a new version at once. */
+export async function checkForUpdate(): Promise<UpdateCheck> {
+  const reg = registration;
+  if (!reg) return 'unavailable';
+  try {
+    await reg.update();
+  } catch {
+    return 'unavailable';
+  }
+  const worker = reg.installing ?? reg.waiting;
+  if (!worker) return 'latest';
+  if (worker.state === 'installing') {
+    await new Promise<void>((resolve) => {
+      const done = () => worker.state !== 'installing' && resolve();
+      worker.addEventListener('statechange', done);
+    });
+  }
+  if (!reg.waiting) return 'latest';
+  waiting = reg.waiting;
+  applyUpdate();
+  return 'updating';
+}
+
+/** A small, fixed "new version" button, shown on every screen except during a game. */
+function renderUpdateBar(): void {
+  let bar = document.getElementById('update-bar');
+  const visible = waiting !== null && !busy;
+  if (!visible) {
+    bar?.remove();
+    return;
+  }
+  if (bar) return;
+  bar = h(
+    'div',
+    { id: 'update-bar', class: 'update-bar', role: 'status' },
+    h('button', { class: 'soft-button small', type: 'button', onclick: () => applyUpdate() }, icon('refresh'), 'Ny version finns – uppdatera'),
+  );
+  document.body.append(bar);
 }
 
 // --- installation ---------------------------------------------------------

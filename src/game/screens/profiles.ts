@@ -3,7 +3,7 @@ import { show, type AppContext } from '../app';
 import { h } from '../dom';
 import { showGarden } from './garden';
 import { choose } from '../components/modal';
-import { applyUpdate, installGuide, isStandalone, onUpdateReady, updateReady } from '../pwa';
+import { installGuide, isStandalone } from '../pwa';
 import { showPinGate } from './parent/pinGate';
 import { showPlacementOffer } from './placement';
 import { AVATAR_KEYS, avatarIcon, avatarName } from '../components/avatars';
@@ -42,7 +42,6 @@ export async function showProfiles(ctx: AppContext): Promise<void> {
       ),
     ),
     storageNotice(ctx),
-    updateBanner(),
     await installBanner(ctx),
     parentLink(ctx),
   );
@@ -76,16 +75,6 @@ async function installBanner(ctx: AppContext): Promise<HTMLElement | null> {
       ),
     ),
   );
-  return banner;
-}
-
-/** Offered here, between sessions, rather than swapping the app mid-game. */
-function updateBanner(): HTMLElement {
-  const banner = h('div', { class: 'update-banner', hidden: !updateReady() }, h('button', { class: 'soft-button small', type: 'button', onclick: () => applyUpdate() }, icon('refresh'), 'Ny version finns – uppdatera'));
-  const stop = onUpdateReady(() => {
-    if (!banner.isConnected) return stop();
-    banner.hidden = false;
-  });
   return banner;
 }
 
