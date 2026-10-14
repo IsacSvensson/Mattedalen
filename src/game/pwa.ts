@@ -10,6 +10,8 @@ let busy = false;
 let reloadWhenFree = false;
 const updateListeners = new Set<() => void>();
 
+/** Pause after the page has loaded before a waiting version is started. */
+const SETTLE_MS = 1000;
 /** How often an open app looks for a new version (besides at start and when it comes back to the front). */
 const UPDATE_CHECK_MS = 30 * 60_000;
 
@@ -38,9 +40,18 @@ export async function registerServiceWorker(): Promise<void> {
       else location.reload();
     });
     if (reg.waiting && hadController && !busy) {
-      // Downloaded during an earlier visit: start the new version now, before anything is played.
-      reg.waiting.postMessage('skipWaiting');
-      return;
+      // Downloaded during an earlier visit: start the new version now, before
+      // anything is played. Asked a moment after the page has loaded: asked
+      // while the old version is still starting up and serving the page,
+      // Chromium could leave the new one waiting for good (seen in CI).
+      const worker = reg.waiting;
+      await pageLoaded();
+      await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+      if (!busy) {
+        worker.postMessage('skipWaiting');
+        return;
+      }
+      // A game started meanwhile: offer the update afterwards instead.
     }
     const track = (worker: ServiceWorker | null) => {
       if (!worker) return;
@@ -67,6 +78,11 @@ export async function registerServiceWorker(): Promise<void> {
   } catch {
     // Offline support is a bonus; the app still works online without it.
   }
+}
+
+function pageLoaded(): Promise<void> {
+  if (document.readyState === 'complete') return Promise.resolve();
+  return new Promise((resolve) => window.addEventListener('load', () => resolve(), { once: true }));
 }
 
 function notify(): void {
