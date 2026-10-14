@@ -27,6 +27,16 @@ förkunskaper som kanter i en graf. Se ordningen i
 - **Inställningar per paket.** `pack.config` läggs ovanpå standardvärdena och
   under spelets egna (`makeConfig(pack.config, …)`), till exempel gränserna för
   svarstid.
+- **Svarsformat per fakta.** `Item.formats` begränsar hur en fakta kan frågas,
+  till exempel bara flerval för ”stämmer det?” (ja eller nej).
+- **Statusregler per del.** `Unit.status` skriver över paketets regler för en
+  del. En förståelsedel (Vågen i Bäcken) bedöms då på rätt svar på olika dagar,
+  utan tidsgräns.
+- **Startkollen följer grafen.** En del testas bara när dess förkunskaper
+  klarades: föregående del (`previous`) eller alla som krävs (`after`). I en
+  kedja av delar (Trädgården) stannar kollen därför vid första missen, som förut.
+  I en graf (Bäcken) hoppar en miss bara över det som bygger på den. Delar om
+  förståelse ingår inte. Efter kollen räknas upplåsningen med samma graf.
 - **Uteslutna fakta.** Ett pass kan få `excludedItemIds`. De frågas aldrig, inte
   ens som nya eller förfallna, och räknas inte heller när delar öppnas. En del
   där hälften hålls utanför (pilotens otränade halva) kan därför ändå öppna det

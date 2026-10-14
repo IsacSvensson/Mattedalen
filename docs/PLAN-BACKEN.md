@@ -146,12 +146,20 @@ upphovspersonen.
   svåra just nu, vågens format och kollens resultat.
 - **Simulering:** den simulerade eleven utökas med räkning steg för steg.
 
+## Fynd från fas B
+
+Simuleringen ([BACKEN.md](BACKEN.md#simulering)) visar att startkollen tar
+barnet till övergångarna två till tre veckor tidigare (J4). Den visar också att
+en svag elev ligger under målbandet (76 % rätt), främst på grund av
+repetitionerna av övergången över tiotalet. Det följs upp i fas C (tallinjen kvar
+längre för svåra fakta, fler räknestigar) och i piloten.
+
 ## Faser
 
 | Fas | Innehåll |
 |---|---|
 | A. Grund **(klar)** | Skal och platser, `Place`, motorns graf, varianter, konfiguration per paket och uteslutna fakta, uppdelad sessionsskärm och bara lokala röster. Inget ändras för barnen. |
-| B. Innehåll inom 20 | Fakta, graf, varianter, distraktorer, räknestigar, vågen och simulering, utan gränssnitt. |
+| B. Innehåll inom 20 **(klar, se [BACKEN.md](BACKEN.md))** | Fakta, graf, varianter, distraktorer, räknestigar, vågen och simulering, utan gränssnitt. |
 | C. Bäcken som plats | Pass med tallinjen och uttoning, svarstid till första siffran, vågen, hjälpkort, räknestigar, uppläsning av landningspunkter, Bäcken och bron på kartan. |
 | D. Skalet för flera platser | Dagens pass efter förfallna repetitioner, Trädgårdens öppning, startkoll för Bäcken, föräldravyns del, QR `MD1:`. |
 | E. Bäckens koll | Kontrolluppgifter med vågens format, resultat i föräldravyn. |

@@ -21,6 +21,9 @@ Mer att läsa:
   räknestigar, startkoll) och de simulerade eleverna.
 - [docs/TRADGARDEN.md](docs/TRADGARDEN.md): Trädgården, multiplikationspaketet
   och dess spel.
+- [docs/PLAN-BACKEN.md](docs/PLAN-BACKEN.md) och [docs/BACKEN.md](docs/BACKEN.md):
+  Bäcken, addition och subtraktion inom 20. Innehållet är byggt, och platsen
+  kommer härnäst.
 
 ## Principer
 
@@ -77,6 +80,7 @@ liggande telefon. Logiken utan DOM testas i `tests/game/valley.test.ts`.
 src/
   engine/                   innehållsneutral faktamotor (ren logik), se docs/MOTORN.md
   content/multiplication/   Trädgårdens innehållspaket: fakta, enheter, strategier, distraktorer
+  content/addition/         Bäckens innehållspaket: faktafamiljer, graf, format, Vågen, räknestigar
   storage/                  ProgressStore, IndexedDB, säkerhetskopior, import från Gångerträdgården
   sw/                       service workerns mall
   shell/                    skalet, gemensamt för alla platser (vanilla TS + liten h()-hjälpare)
@@ -88,8 +92,8 @@ src/
     tradgarden/             Trädgården: platsen, dess skärmar och dess del av föräldravyn
 tests/
   engine/                   enhetstester för motorn (med ett glosor-paket)
-  content/                  tester för multiplikationspaketet
-  simulation/               simulerade elever över 26 veckor
+  content/                  tester för innehållspaketen
+  simulation/               simulerade elever över 26 veckor, i Trädgården och Bäcken
   storage/                  kontraktstester för minne och IndexedDB, importen
   game/                     spelets och dalens logik (utan DOM)
 e2e/                        Playwright: hela flöden i riktig webbläsare
