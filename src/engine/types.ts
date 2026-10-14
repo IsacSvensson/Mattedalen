@@ -6,6 +6,9 @@
  * are plausible, which strategy hints exist) lives in a ContentPack.
  */
 
+import type { Rng } from './clock';
+import type { ConfigOverrides } from './config';
+
 export type ItemId = string;
 export type UnitId = string;
 /** Local calendar day, formatted `YYYY-MM-DD`. */
@@ -46,14 +49,28 @@ export interface Item {
 export type UnlockRule =
   | { kind: 'always' }
   /** Unlocked when `fraction` of the previous unit's items are at least `minStatus`. */
-  | { kind: 'previous'; fraction: number; minStatus: Status };
+  | { kind: 'previous'; fraction: number; minStatus: Status }
+  /**
+   * A knowledge graph: unlocked when every unit in `requires` (all earlier in
+   * the order) is unlocked and has `fraction` of its items at least `minStatus`.
+   */
+  | { kind: 'after'; requires: UnitId[]; fraction: number; minStatus: Status };
 
+/**
+ * A unit is a knowledge component: a group of items learnt together, with
+ * prerequisite edges in its unlock rule.
+ */
 export interface Unit {
   id: UnitId;
   title: string;
   itemIds: ItemId[];
   order: number;
   unlockRule: UnlockRule;
+  /**
+   * `fact`: recalled from memory, fluency matters (the default).
+   * `understanding`: shown on different days and in different forms, not by speed.
+   */
+  kind?: 'fact' | 'understanding';
 }
 
 /**
@@ -73,6 +90,26 @@ export interface DistractorCandidate {
   weight: number;
 }
 
+/** What the pack knows when it chooses how to show an item. */
+export interface PresentContext {
+  state: ItemState;
+  kind: QuestionKind;
+  format: AnswerFormat;
+  rng: Rng;
+}
+
+/**
+ * One way of showing an item, e.g. `7 + 5 = __` or `__ = 7 + 5`. The answer
+ * is always the item's answer.
+ */
+export interface Presentation {
+  /** Short id stored with the attempt, e.g. `standard` or `reversed`. */
+  variant: string;
+  prompt: string;
+  /** False if a right answer in this form is no evidence for the item's status (default true). */
+  evidence?: boolean;
+}
+
 export interface ContentPack {
   id: string;
   version: number;
@@ -84,6 +121,10 @@ export interface ContentPack {
   distractorCandidates(item: Item): DistractorCandidate[];
   /** Groups the learner can choose to practise extra (optional). */
   focusSets?: FocusSet[];
+  /** Different ways of showing an item (optional; otherwise `item.prompt`). */
+  present?(item: Item, context: PresentContext): Presentation;
+  /** Engine settings for this pack (e.g. response-time thresholds), applied before the game's own. */
+  config?: ConfigOverrides;
 }
 
 /** Best correct response time (ms) per answer format on one day. */
@@ -137,6 +178,8 @@ export interface Attempt {
   given: string;
   correct: boolean;
   rtMs: number;
+  /** How the item was shown, when the pack has several forms (`Presentation.variant`). */
+  variant?: string;
 }
 
 /** Engine state that persists between sessions for one learner. */

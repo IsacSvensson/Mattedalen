@@ -91,6 +91,8 @@ export interface AnswerInput {
   format: AnswerFormat;
   now: number;
   today: DayKey;
+  /** False when the item was shown in a form that is no evidence of its status (default true). */
+  evidence?: boolean;
 }
 
 /**
@@ -126,7 +128,7 @@ export function applyStatus(prev: ItemState, input: AnswerInput, cfg: StatusConf
   }
 
   s.correct++;
-  const countsAsEvidence = s.introducedDay !== input.today && s.lastWrongDay !== input.today;
+  const countsAsEvidence = input.evidence !== false && s.introducedDay !== input.today && s.lastWrongDay !== input.today;
   if (countsAsEvidence) {
     const ev = { ...s.dayBest[input.today] };
     ev[input.format] = Math.min(ev[input.format] ?? Infinity, input.rtMs);

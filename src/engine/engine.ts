@@ -1,5 +1,5 @@
 import { systemClock, mathRandomRng, type Clock, type Rng } from './clock';
-import { DEFAULT_CONFIG, initialLearnerMeta } from './config';
+import { initialLearnerMeta, makeConfig } from './config';
 import { isDue } from './leitner';
 import { Session, type SessionOptions } from './session';
 import { emptyState } from './status';
@@ -8,6 +8,7 @@ import type { ContentPack, EngineConfig, Item, ItemId, ItemState, LearnerMeta, S
 
 export interface EngineDeps {
   pack: ContentPack;
+  /** Defaults to the engine defaults with the pack's own settings (`pack.config`). */
   config?: EngineConfig;
   clock?: Clock;
   rng?: Rng;
@@ -19,7 +20,8 @@ export interface Engine {
   item(id: ItemId): Item;
   initialStates(): Record<ItemId, ItemState>;
   initialMeta(): LearnerMeta;
-  unlockedUnits(states: Record<ItemId, ItemState>, meta: LearnerMeta): string[];
+  /** Unlocked units; excluded items (not practised) are not counted. */
+  unlockedUnits(states: Record<ItemId, ItemState>, meta: LearnerMeta, excluded?: readonly ItemId[]): string[];
   dueCount(states: Record<ItemId, ItemState>): number;
   statusCounts(states: Record<ItemId, ItemState>): Record<Status, number>;
   /** True if today's regular session is already done ("the garden is asleep"). */
@@ -50,10 +52,19 @@ export function validatePack(pack: ContentPack): void {
     }
     for (const d of item.derivedFrom) if (!ids.has(d)) throw new Error(`Item ${item.id} derives from unknown ${d}`);
   }
-  if (sortedUnits(pack.units)[0]?.unlockRule.kind !== 'always') throw new Error('The first unit must always be unlocked');
+  const units = sortedUnits(pack.units);
+  if (units[0]?.unlockRule.kind !== 'always') throw new Error('The first unit must always be unlocked');
+  units.forEach((unit, i) => {
+    if (unit.unlockRule.kind !== 'after') return;
+    for (const id of unit.unlockRule.requires) {
+      const at = units.findIndex((u) => u.id === id);
+      if (at < 0) throw new Error(`Unit ${unit.id} requires unknown unit ${id}`);
+      if (at >= i) throw new Error(`Unit ${unit.id} requires ${id}, which does not come before it`);
+    }
+  });
 }
 
-export function createEngine({ pack, config = DEFAULT_CONFIG, clock = systemClock, rng = mathRandomRng }: EngineDeps): Engine {
+export function createEngine({ pack, config = makeConfig(pack.config ?? {}), clock = systemClock, rng = mathRandomRng }: EngineDeps): Engine {
   validatePack(pack);
   const itemById = new Map(pack.items.map((i) => [i.id, i]));
   const firstUnits = sortedUnits(pack.units)
@@ -73,7 +84,8 @@ export function createEngine({ pack, config = DEFAULT_CONFIG, clock = systemCloc
     },
     initialStates: () => withDefaults({}),
     initialMeta: () => initialLearnerMeta(config, firstUnits),
-    unlockedUnits: (states, meta) => computeUnlocked(pack.units, withDefaults(states), meta.unlockedUnitIds),
+    unlockedUnits: (states, meta, excluded) =>
+      computeUnlocked(pack.units, withDefaults(states), meta.unlockedUnitIds, undefined, new Set(excluded ?? [])),
     dueCount(states) {
       const today = clock.today();
       return Object.values(states).filter((s) => isDue(s, today)).length;

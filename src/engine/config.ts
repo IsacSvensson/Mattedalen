@@ -59,15 +59,17 @@ export const DEFAULT_CONFIG: EngineConfig = {
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? (T[K] extends unknown[] ? T[K] : DeepPartial<T[K]>) : T[K] };
 export type ConfigOverrides = DeepPartial<EngineConfig>;
 
-export function makeConfig(overrides: ConfigOverrides = {}): EngineConfig {
+/** Defaults with the overrides applied in order (later ones win), e.g. the pack's, then the game's. */
+export function makeConfig(...layers: ConfigOverrides[]): EngineConfig {
+  const merged = (key: keyof EngineConfig) => Object.assign({}, DEFAULT_CONFIG[key], ...layers.map((l) => l[key]));
   return {
-    status: { ...DEFAULT_CONFIG.status, ...overrides.status },
-    leitner: { ...DEFAULT_CONFIG.leitner, ...overrides.leitner },
-    session: { ...DEFAULT_CONFIG.session, ...overrides.session },
-    pacing: { ...DEFAULT_CONFIG.pacing, ...overrides.pacing },
-    support: { ...DEFAULT_CONFIG.support, ...overrides.support },
-    focus: { ...DEFAULT_CONFIG.focus, ...overrides.focus },
-    format: { ...DEFAULT_CONFIG.format, ...overrides.format },
+    status: merged('status'),
+    leitner: merged('leitner'),
+    session: merged('session'),
+    pacing: merged('pacing'),
+    support: merged('support'),
+    focus: merged('focus'),
+    format: merged('format'),
   } as EngineConfig;
 }
 

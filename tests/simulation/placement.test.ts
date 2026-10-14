@@ -27,7 +27,7 @@ function place(seed: number) {
   const placement = new Placement(pack, seededRng(seed + 7));
   let seq = 0;
   for (let item = placement.next(); item; item = placement.next()) {
-    const q: Question = { seq: ++seq, item, kind: 'placement', format: 'free', pairKnown: false };
+    const q: Question = { seq: ++seq, item, prompt: item.prompt, kind: 'placement', format: 'free', pairKnown: false };
     const { given, rtMs } = learner.answer(q, clock.now());
     clock.advance(rtMs + 1500);
     placement.submit(given, rtMs);

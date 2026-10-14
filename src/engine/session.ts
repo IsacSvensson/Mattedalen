@@ -32,11 +32,20 @@ export interface SessionOptions {
   focusItemIds?: ItemId[];
   durationMs?: number;
   sessionId?: string;
+  /**
+   * Items never asked in this session (e.g. the untrained half of a pilot).
+   * They are not counted when units unlock either.
+   */
+  excludedItemIds?: ItemId[];
 }
 
 export interface Question {
   seq: number;
   item: Item;
+  /** What to show: the pack's presentation of the item, or `item.prompt`. */
+  prompt: string;
+  /** The pack's form of the item (`Presentation.variant`), if it has several. */
+  variant?: string;
   kind: QuestionKind;
   format: AnswerFormat;
   /** Options for multiple choice (includes the correct answer). */
@@ -116,6 +125,9 @@ export class Session {
   private readonly pacing: PacingController;
   private readonly maxNew: number;
   private readonly focus: Set<ItemId> | null;
+  private readonly excluded: Set<ItemId>;
+  /** False when the current question's form gives no status evidence. */
+  private currentEvidence = true;
   private unlocked: string[];
   private pending: Pending[] = [];
   private warmup: ItemId[];
@@ -152,16 +164,17 @@ export class Session {
     this.priorNew = Math.max(0, earlier?.introduced ?? 0);
     this.states = new Map(pack.items.map((it) => [it.id, opts.states[it.id] ?? emptyState(it.id)]));
     this.pacing = new PacingController(config.pacing, meta.pacingGap);
-    this.unlocked = computeUnlocked(pack.units, this.stateRecord(), meta.unlockedUnitIds, this.relaxedUnlock());
+    this.excluded = new Set(opts.excludedItemIds ?? []);
+    this.unlocked = computeUnlocked(pack.units, this.stateRecord(), meta.unlockedUnitIds, this.relaxedUnlock(), this.excluded);
     if (this.mode === 'focus') {
-      const ids = (opts.focusItemIds ?? []).filter((id) => this.states.has(id));
+      const ids = (opts.focusItemIds ?? []).filter((id) => this.states.has(id) && !this.excluded.has(id));
       if (ids.length === 0) throw new Error('A focus session needs focusItemIds');
       this.focus = new Set(ids);
     } else {
       this.focus = null;
     }
 
-    const known = [...this.states.values()].filter((s) => s.status !== 'new');
+    const known = [...this.states.values()].filter((s) => s.status !== 'new' && !this.excluded.has(s.itemId));
     const p = config.pacing;
     this.maxNew =
       this.mode === 'extra'
@@ -190,10 +203,15 @@ export class Session {
     const state = this.state(pick.itemId);
     const format = this.formatFor(state, pick.kind);
     const { config, pack, rng } = this.deps;
+    // Only packs with several forms are asked, so the others draw the same random numbers as before.
+    const shown = pack.present?.(item, { state, kind: pick.kind, format, rng });
+    this.currentEvidence = shown?.evidence ?? true;
     this.seq++;
     this.current = {
       seq: this.seq,
       item,
+      prompt: shown?.prompt ?? item.prompt,
+      ...(shown ? { variant: shown.variant } : {}),
       kind: pick.kind,
       format,
       choices: format === 'choice' ? buildChoices(pack, item, state, rng, config.format.choiceCount) : undefined,
@@ -220,7 +238,11 @@ export class Session {
       this.supported++;
       this.pending.push({ itemId: q.item.id, atSeq: q.seq + config.session.retryGap + 1, kind: 'retry' });
     } else {
-      next = applyStatus(prev, { correct, given, rtMs, format: q.format, now, today: this.today }, config.status);
+      next = applyStatus(
+        prev,
+        { correct, given, rtMs, format: q.format, now, today: this.today, evidence: this.currentEvidence },
+        config.status,
+      );
       next = applyLeitner(prev, next, correct, this.today, config.leitner.intervalsDays);
     }
     this.states.set(q.item.id, next);
@@ -257,7 +279,7 @@ export class Session {
 
     // Fluency can be reached mid-session, which may open the next unit.
     if (next.status !== prev.status || this.answered % 10 === 0) {
-      this.unlocked = computeUnlocked(pack.units, this.stateRecord(), this.unlocked, this.relaxedUnlock());
+      this.unlocked = computeUnlocked(pack.units, this.stateRecord(), this.unlocked, this.relaxedUnlock(), this.excluded);
     }
     this.current = null;
 
@@ -270,6 +292,7 @@ export class Session {
       given,
       correct,
       rtMs,
+      ...(q.variant !== undefined ? { variant: q.variant } : {}),
     };
     return { correct, given, expected, item: q.item, previousStatus: prev.status, state: next, attempt };
   }
@@ -440,10 +463,10 @@ export class Session {
     return this.pacing.gap;
   }
 
-  /** Every introduced item (normally in unlocked units; focus practice may open a few early). */
+  /** Every introduced item (normally in unlocked units; focus practice may open a few early), except excluded ones. */
   private knownPool(): ItemId[] {
     const out: ItemId[] = [];
-    for (const s of this.states.values()) if (s.status !== 'new') out.push(s.itemId);
+    for (const s of this.states.values()) if (s.status !== 'new' && !this.excluded.has(s.itemId)) out.push(s.itemId);
     return out;
   }
 
@@ -533,7 +556,7 @@ export class Session {
       if (!this.focus && !this.unlocked.includes(unit.id)) continue;
       for (const id of unit.itemIds) {
         if (this.focus && !this.focus.has(id)) continue;
-        if (this.state(id).status !== 'new') continue;
+        if (this.excluded.has(id) || this.state(id).status !== 'new') continue;
         const item = this.item(id);
         // Prefer items whose mirrored twin is already known: an easy, meaningful step.
         const pairKnown = item.pairId !== undefined && this.state(item.pairId).status !== 'new';
