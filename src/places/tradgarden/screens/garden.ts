@@ -1,20 +1,21 @@
-import { atLeast, type ContentPack, type ItemId, type ItemState } from '../../engine';
-import { focusTable, formatFact } from '../../content/multiplication';
-import type { Profile } from '../../storage';
-import { show, type AppContext } from '../app';
+import { atLeast, type ContentPack, type ItemId, type ItemState } from '../../../engine';
+import { focusTable, formatFact } from '../../../content/multiplication';
+import type { Profile } from '../../../storage';
+import { show, type AppContext } from '../../../shell/app';
 import { gardenGrid } from '../components/grid';
-import { plantIcon, stageFor, type Stage } from '../components/plant';
-import { avatarIcon } from '../components/avatars';
-import { icon } from '../components/icons';
-import { scene } from '../components/scene';
-import { h } from '../dom';
-import { engineFor, loadProgress } from '../play';
-import { showValley } from './valley';
+import { plantIcon, stageFor, type Stage } from '../../../shell/components/plant';
+import { avatarIcon } from '../../../shell/components/avatars';
+import { icon } from '../../../shell/components/icons';
+import { scene } from '../../../shell/components/scene';
+import { h } from '../../../shell/dom';
+import { engineFor, loadProgress } from '../../../shell/play';
+import { showValley } from '../../../shell/screens/valley';
 import { showSession } from './session';
 import { CHALLENGE_MIN_FACTS, canChallenge as challengeOpen } from '../challenge';
 import { showChallenge } from './challenge';
 import { showDuel } from './duel';
 import { showFocusPicker } from './focus';
+import { gardenDeps, pack } from '../pack';
 
 const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
   seed: 'frön',
@@ -24,10 +25,10 @@ const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
 };
 
 export async function showGarden(ctx: AppContext, profile: Profile, highlight?: Set<ItemId>): Promise<void> {
-  const engine = engineFor(profile, ctx.deps);
-  const { states, meta } = await loadProgress(profile, ctx.deps, engine);
+  const engine = engineFor(profile, gardenDeps(ctx));
+  const { states, meta } = await loadProgress(profile, gardenDeps(ctx), engine);
   const unlockedUnits = new Set(engine.unlockedUnits(states, meta));
-  const unlockedItemIds = new Set(ctx.pack.units.filter((u) => unlockedUnits.has(u.id)).flatMap((u) => u.itemIds));
+  const unlockedItemIds = new Set(pack.units.filter((u) => unlockedUnits.has(u.id)).flatMap((u) => u.itemIds));
   const asleep = engine.dailyDone(meta);
 
   const counts: Record<Stage, number> = { locked: 0, soil: 0, seed: 0, sprout: 0, bush: 0, tree: 0 };
@@ -38,7 +39,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
     states,
     unlockedItemIds,
     highlight,
-    masteredTables: knownTables(ctx.pack, states),
+    masteredTables: knownTables(pack, states),
     onSelect: ({ a, b, stage }) => {
       // Only facts the child has met show their answer.
       info.textContent = ['seed', 'sprout', 'bush', 'tree'].includes(stage)
@@ -74,12 +75,12 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
   const extras = h(
     'nav',
     { class: 'garden-extras', 'aria-label': 'Mer att göra' },
-    ctx.pack.focusSets?.length ? tile('target', 'Öva en tabell', () => void showFocusPicker(ctx, profile)) : null,
+    pack.focusSets?.length ? tile('target', 'Öva en tabell', () => void showFocusPicker(ctx, profile)) : null,
     tile('watch', 'Slå rekord', () => void showChallenge(ctx, profile), !canChallenge),
     tile('cards', 'Mot en vuxen', () => void showDuel(ctx, profile)),
   );
 
-  const known = knownTables(ctx.pack, states);
+  const known = knownTables(pack, states);
   const view = h(
     'main',
     { class: `screen garden has-scene${asleep ? ' asleep' : ''}` },

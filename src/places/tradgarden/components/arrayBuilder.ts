@@ -1,6 +1,6 @@
-import type { ArrayParts } from '../../content/multiplication';
-import { h, s } from '../dom';
-import { icon } from './icons';
+import type { ArrayParts } from '../../../content/multiplication';
+import { h, s } from '../../../shell/dom';
+import { icon } from '../../../shell/components/icons';
 import { arrayView } from './arrayView';
 
 const BOARD = 10;

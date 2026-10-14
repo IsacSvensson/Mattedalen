@@ -1,0 +1,341 @@
+import type { Feedback, FocusSet, ItemId, Question, SessionMode, SessionSummary } from '../../engine';
+import type { Profile } from '../../storage';
+import { show, type AppContext } from '../app';
+import { icon } from '../components/icons';
+import { plantIcon } from '../components/plant';
+import { numPad } from '../components/numPad';
+import { scene } from '../components/scene';
+import { h, prefersReducedMotion, wait } from '../dom';
+import { PlayController, type GameDeps } from '../play';
+import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../speech';
+
+/** One step on a derivation path ("räknestigen"). Only the last step is the answer to the question. */
+export interface PathStep {
+  label: string;
+  prompt: string;
+  answer: number;
+}
+
+/** A new item, as the place introduces it. */
+export interface IntroParts {
+  /** Above the prompt, e.g. a seed and "Ett nytt frö". */
+  label: (Node | string)[];
+  /** Read aloud when the card appears. */
+  spoken: string;
+  /** What the child does with the new item; calls `ready` when the child may answer. */
+  body: HTMLElement;
+  /** Shown with the "Nu du!" button once ready, e.g. the strategy. */
+  after: (Node | null)[];
+}
+
+/** Help after a wrong answer, as the place shows it. */
+export interface HelpParts {
+  /** A friendly word about a typical mix-up, e.g. "48 är 8 × 6 – nära!". */
+  note?: string | null;
+  /** A way to think. */
+  strategy?: string;
+  /** A picture of the item. */
+  visual?: Element;
+}
+
+/**
+ * What a place adds to a practice session. The session itself (the band of
+ * drops, questions, answers, read-aloud, the derivation path and the help
+ * card) is the same in every place.
+ */
+export interface SessionPlace {
+  deps: GameDeps;
+  /** Label of the button back to the place, e.g. "Tillbaka till trädgården". */
+  homeLabel: string;
+  /** Back to the place when the session ends early; `grew` are items that reached a new level. */
+  leave(grew: Set<ItemId>): Promise<void>;
+  /** The ending after a whole session. */
+  end(summary: SessionSummary, focus?: FocusSet): void;
+  intro(q: Question, ready: () => void): IntroParts;
+  /** A derivation path for a hard item, with a picture beside it, or null. */
+  derivation(q: Question): { steps: PathStep[]; visual: Element } | null;
+  help(q: Question, fb: Feedback): HelpParts;
+}
+
+/** Pause after a correct answer before the next question. */
+const CORRECT_PAUSE_MS = 650;
+
+/** Read questions aloud in this session (profile setting, if the device can speak). */
+let voiceOn = false;
+/** The prompt on screen, for the "read again" button in the top band. */
+let currentPrompt = '';
+
+/** Drops in the top band: they fill up as the session's time passes (no clock, no count). */
+const DROPS = 12;
+
+export async function runSession(
+  ctx: AppContext,
+  profile: Profile,
+  place: SessionPlace,
+  mode: SessionMode,
+  focus?: FocusSet,
+): Promise<void> {
+  const play = await PlayController.start(profile, place.deps, mode, focus);
+  voiceOn = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
+  const stage = h('section', { class: 'play-stage', 'aria-live': 'polite' });
+  let keyHandler: ((e: KeyboardEvent) => void) | undefined;
+  let finished = false;
+
+  const finish = async (early: boolean) => {
+    if (finished) return;
+    finished = true;
+    const summary = await play.finish();
+    if (early || summary.answered === 0) await place.leave(new Set(summary.promoted));
+    else place.end(summary, play.focus);
+  };
+
+  const drops = Array.from({ length: DROPS }, () => h('i', { class: 'drop' }));
+  const progress = h(
+    'div',
+    { class: 'session-progress', role: 'progressbar', 'aria-label': 'Hur långt passet har kommit', 'aria-valuemin': 0, 'aria-valuemax': 100 },
+    play.focus ? h('span', { class: 'focus-tag' }, icon('target'), play.focus.title) : null,
+    h('span', { class: 'drops' }, drops),
+  );
+  const updateProgress = () => {
+    const done = play.progress();
+    drops.forEach((d, i) => d.classList.toggle('on', i < Math.round(done * DROPS)));
+    progress.setAttribute('aria-valuenow', String(Math.round(done * 100)));
+  };
+  updateProgress();
+
+  const view = h(
+    'main',
+    { class: `screen session has-scene mode-${mode}` },
+    h(
+      'header',
+      { class: 'play-head' },
+      scene({ height: 92, sun: false, cloud: false }),
+      h(
+        'div',
+        { class: 'scene-controls' },
+        h('button', { class: 'icon-button', type: 'button', 'aria-label': place.homeLabel, onclick: () => void finish(true) }, icon('home')),
+        progress,
+        voiceOn
+          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp igen', onclick: () => void speak(currentPrompt) }, icon('speaker'))
+          : null,
+      ),
+    ),
+    stage,
+  );
+  show(ctx, view, () => {
+    if (keyHandler) document.removeEventListener('keydown', keyHandler);
+    stopSpeaking();
+  });
+
+  const setKeys = (handler?: (e: KeyboardEvent) => void) => {
+    if (keyHandler) document.removeEventListener('keydown', keyHandler);
+    keyHandler = handler;
+    if (handler) document.addEventListener('keydown', handler);
+  };
+
+  while (!finished) {
+    const q = play.question();
+    if (!q) break;
+    if (q.kind === 'new') await introduce(stage, q, place, setKeys);
+    if (finished) return;
+    const path = q.kind === 'derive' ? place.derivation(q) : null;
+    const { given, rtMs } = path ? await derive(stage, path.steps, path.visual, setKeys) : await ask(stage, q, setKeys);
+    if (finished) return;
+    const fb = await play.answer(given, rtMs);
+    updateProgress();
+    await showFeedback(stage, q, fb, place, setKeys);
+  }
+  setKeys(undefined);
+  await finish(false);
+}
+
+type SetKeys = (handler?: (e: KeyboardEvent) => void) => void;
+
+/** A new item: the place shows how it works, then the child answers it themselves ("Nu du!"). */
+function introduce(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetKeys): Promise<void> {
+  return new Promise((resolve) => {
+    const go = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Nu du!', icon('arrow', 'on-primary'));
+    const after = h('div', { class: 'intro-after', hidden: true });
+    const parts = place.intro(q, () => {
+      after.hidden = false;
+      go.focus();
+      setKeys((e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          resolve();
+        }
+      });
+    });
+    after.append(...parts.after.filter((n): n is Node => n !== null), go);
+    currentPrompt = q.prompt;
+    if (voiceOn) void speak(parts.spoken);
+    stage.replaceChildren(
+      h('div', { class: 'intro-card card' }, h('p', { class: 'intro-label' }, parts.label), h('p', { class: 'prompt' }, q.prompt), parts.body, after),
+    );
+    setKeys(undefined);
+  });
+}
+
+/**
+ * "Räknestigen": an item the child finds hard, reached in steps from items it
+ * knows (5 × 7 = 35 → 35 + 7 → 6 × 7). A wrong step just shows the number and
+ * the path goes on; only the last step is the answer to the question.
+ */
+async function derive(stage: HTMLElement, steps: PathStep[], visual: Element, setKeys: SetKeys): Promise<{ given: string; rtMs: number }> {
+  const list = h('ol', { class: 'derive-steps' });
+  const card = h('div', { class: 'derive-card card' }, h('p', { class: 'derive-title' }, icon('steps'), 'Räknestigen'), list, visual);
+  const done: HTMLElement[] = [];
+  let result = { given: '', rtMs: 0 };
+  // Built once, so the picture does not animate again at every step.
+  const padSlot = h('div', { class: 'derive-pad' });
+  stage.replaceChildren(h('div', { class: 'question free derive' }, card, padSlot));
+
+  for (const [i, step] of steps.entries()) {
+    const last = i === steps.length - 1;
+    const current = h(
+      'li',
+      { class: `derive-step current${last ? ' target' : ''}` },
+      h('span', { class: 'derive-label' }, step.label),
+      h('span', { class: 'derive-prompt' }, step.prompt),
+      h('span', { class: 'derive-eq' }, ' = ?'),
+    );
+    list.replaceChildren(...done, current);
+    currentPrompt = step.prompt;
+    if (voiceOn) void speak(`${step.label}. ${step.prompt}`);
+    const answer = await new Promise<{ given: string; rtMs: number }>((resolve) => {
+      const shownAt = performance.now();
+      const pad = numPad((value) => {
+        pad.disable();
+        resolve({ given: value, rtMs: Math.round(performance.now() - shownAt) });
+      });
+      padSlot.replaceChildren(pad.el);
+      setKeys((e) => pad.onKey(e));
+    });
+    setKeys(undefined);
+    if (last) {
+      result = answer;
+      break;
+    }
+    const right = Number(answer.given) === step.answer;
+    current.classList.remove('current');
+    current.classList.add(right ? 'right' : 'shown');
+    current.querySelector('.derive-eq')?.replaceWith(h('span', { class: 'derive-eq' }, ` = ${step.answer}`), right ? icon('check') : '');
+    done.push(current);
+    // A wrong step: the number stays visible a moment longer, without any red.
+    await wait(prefersReducedMotion() ? 200 : right ? 450 : 1200);
+  }
+  return result;
+}
+
+/** Multiple choice or free answer on a number pad. Response time is measured but never shown. */
+function ask(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<{ given: string; rtMs: number }> {
+  return new Promise((resolve) => {
+    let answered = false;
+    let shownAt = performance.now();
+    currentPrompt = q.prompt;
+    if (voiceOn) {
+      // Time the answer from when the question has been heard, not while it is read.
+      void speak(q.prompt).then(() => {
+        if (!answered) shownAt = performance.now();
+      });
+    }
+    const done = (value: string) => {
+      if (answered) return false;
+      answered = true;
+      resolve({ given: value, rtMs: Math.round(performance.now() - shownAt) });
+      return true;
+    };
+    const prompt = h(
+      'div',
+      { class: 'prompt-card card' },
+      h('p', { class: 'prompt', 'aria-label': `${q.prompt.replace('×', 'gånger')} är lika med?` }, q.prompt),
+      q.format === 'free' ? null : h('p', { class: 'eq', 'aria-hidden': 'true' }, '= ?'),
+    );
+
+    if (q.format === 'free') {
+      const pad = numPad((value) => {
+        if (done(value)) pad.disable();
+      });
+      stage.replaceChildren(h('div', { class: 'question free' }, prompt, pad.el));
+      setKeys((e) => pad.onKey(e));
+      return;
+    }
+
+    const choices = q.choices ?? [];
+    const choose = (value: string, button: HTMLButtonElement) => {
+      if (!done(value)) return;
+      button.classList.add('chosen');
+      for (const b of buttons) b.disabled = true;
+    };
+    const buttons = choices.map((value, i) =>
+      h(
+        'button',
+        {
+          class: 'choice',
+          type: 'button',
+          dataset: { value },
+          'aria-keyshortcuts': String(i + 1),
+          onclick: (e: Event) => choose(value, e.currentTarget as HTMLButtonElement),
+        },
+        value,
+      ),
+    );
+    stage.replaceChildren(h('div', { class: 'question' }, prompt, h('div', { class: 'answer-area choices' }, buttons)));
+    setKeys((e) => {
+      const i = Number(e.key) - 1;
+      const button = buttons[i];
+      if (button) choose(choices[i] as string, button);
+    });
+  });
+}
+
+/** Correct: a short cheer. Wrong: never just "fel" — show the right answer and a way to think. */
+async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place: SessionPlace, setKeys: SetKeys): Promise<void> {
+  for (const b of stage.querySelectorAll<HTMLButtonElement>('.choice')) {
+    if (b.dataset.value === fb.expected) b.classList.add('correct');
+    else if (b.dataset.value === fb.given) b.classList.add('wrong');
+  }
+  stage.querySelector('.numpad-display')?.classList.add(fb.correct ? 'correct' : 'wrong');
+  setKeys(undefined);
+  if (fb.correct) {
+    const card = stage.querySelector('.prompt-card');
+    card?.classList.add('is-right');
+    const eq = card?.querySelector('.eq');
+    if (eq) eq.textContent = `= ${fb.expected}`;
+    card?.append(h('span', { class: 'cheer-plant', 'aria-hidden': 'true' }, plantIcon('sprout')));
+    await wait(prefersReducedMotion() ? 300 : CORRECT_PAUSE_MS);
+    return;
+  }
+
+  const help = place.help(q, fb);
+  // The help shows the item in its usual form, whatever form it was asked in.
+  if (voiceOn) void speak(`${q.item.prompt} = ${fb.expected}`);
+  await new Promise<void>((resolve) => {
+    const next = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Fortsätt', icon('arrow', 'on-primary'));
+    // The help takes the place of the question: the answer is in it.
+    stage.replaceChildren(
+      h(
+        'div',
+        { class: 'help-wrap' },
+        h(
+          'div',
+          { class: 'help-card card' },
+          h('p', { class: 'you-said' }, fb.given ? `Du svarade ${fb.given}.` : 'Inget svar den här gången.', help.strategy ? ' Så här kan du tänka:' : ''),
+          h('p', { class: 'help-answer' }, `${q.item.prompt} = ${fb.expected}`),
+          help.note ? h('p', { class: 'confusion-note' }, help.note) : null,
+          help.strategy ? h('p', { class: 'strategy' }, help.strategy) : null,
+          help.visual ?? null,
+        ),
+        next,
+      ),
+    );
+    next.focus();
+    setKeys((e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        resolve();
+      }
+    });
+  });
+  setKeys(undefined);
+}

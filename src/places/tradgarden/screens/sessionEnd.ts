@@ -1,9 +1,9 @@
-import type { FocusSet, SessionSummary } from '../../engine';
-import type { Profile } from '../../storage';
-import { show, type AppContext } from '../app';
-import { icon } from '../components/icons';
-import { plantIcon } from '../components/plant';
-import { h } from '../dom';
+import type { FocusSet, SessionSummary } from '../../../engine';
+import type { Profile } from '../../../storage';
+import { show, type AppContext } from '../../../shell/app';
+import { icon } from '../../../shell/components/icons';
+import { plantIcon } from '../../../shell/components/plant';
+import { h } from '../../../shell/dom';
 import { showGarden } from './garden';
 import { showSession } from './session';
 

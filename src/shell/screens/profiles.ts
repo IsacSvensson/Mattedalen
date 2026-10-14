@@ -4,12 +4,11 @@ import { h } from '../dom';
 import { choose } from '../components/modal';
 import { installGuide, isStandalone } from '../pwa';
 import { showPinGate } from './parent/pinGate';
-import { showPlacementOffer } from './placement';
+import { showValley } from './valley';
 import { AVATAR_KEYS, avatarIcon, avatarName } from '../components/avatars';
 import { icon } from '../components/icons';
 import { plantIcon } from '../components/plant';
 import { scene } from '../components/scene';
-import { showValley } from './valley';
 
 /** The animals a player can be (stored as emoji, drawn as pictures). */
 export const AVATARS = AVATAR_KEYS;
@@ -137,7 +136,10 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
     };
     await ctx.store.saveProfile(profile);
     await ctx.store.setSetting('lastProfileId', profile.id);
-    showPlacementOffer(ctx, profile);
+    // A new child starts where a place welcomes them (Trädgården: the start check), otherwise in the valley.
+    const welcoming = ctx.places.find((place) => place.welcome);
+    if (welcoming?.welcome) welcoming.welcome(ctx, profile);
+    else await showValley(ctx, profile);
   }
 
   const view = h(

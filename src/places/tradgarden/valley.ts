@@ -1,5 +1,5 @@
-import type { ItemId, ItemState } from '../engine';
-import { stageFor, STAGE_ORDER, type Stage } from './components/plant';
+import type { ItemId, ItemState } from '../../engine';
+import { stageFor, STAGE_ORDER, type Stage } from '../../shell/components/plant';
 
 /**
  * What a place in the valley shows, without the DOM. The valley shows what a

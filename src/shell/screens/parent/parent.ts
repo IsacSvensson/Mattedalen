@@ -1,5 +1,4 @@
-import { formatDay as toDayKey, isStruggling, systemClock, type EngineConfig, type ItemState } from '../../../engine';
-import { factId, formatFact, MAX_FACTOR, MIN_FACTOR, parseFactId, strategyFor } from '../../../content/multiplication';
+import { formatDay as toDayKey, systemClock } from '../../../engine';
 import {
   decodeSnapshot,
   encodeSnapshot,
@@ -17,16 +16,15 @@ import { show, type AppContext } from '../../app';
 import { choose, toast } from '../../components/modal';
 import { cameraScanner, decodeImageFile } from '../../components/qrScanner';
 import { h } from '../../dom';
-import { formatDay, factStats, minutesPerDay, STATUS_TEXT, topConfusions, type FactStats } from '../../parentStats';
-import { engineFor, loadProgress } from '../../play';
+import { formatDay, minutesPerDay } from '../../stats';
+import { engineFor, loadProgress, type GameDeps } from '../../play';
+import type { Place, SaveProfile } from '../../place';
 import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, snapshotOf } from '../../transfer';
 import { showProfiles } from '../profiles';
 import { AVATAR_KEYS, avatarIcon, avatarName } from '../../components/avatars';
 import { icon } from '../../components/icons';
-import { plantIcon } from '../../components/plant';
 import { APP_BUILD, checkForUpdate, installGuide } from '../../pwa';
 import { hasSwedishVoice, speechSupported } from '../../speech';
-import { showPlacementOffer } from '../placement';
 import { choosePin } from './pinGate';
 
 export async function showParent(ctx: AppContext, selectedId?: string): Promise<void> {
@@ -66,65 +64,12 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
 // --- one child ----------------------------------------------------------
 
 async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElement> {
-  const engine = engineFor(profile, ctx.deps);
-  const { states, meta } = await loadProgress(profile, ctx.deps, engine);
-  const [sessions, attempts, summaries] = await Promise.all([
-    ctx.store.listSessions(profile.id),
-    ctx.store.listAttempts(profile.id),
-    ctx.store.listDaySummaries(profile.id),
-  ]);
-  const counts = engine.statusCounts(states);
-  const stats = factStats(attempts, summaries);
+  const sessions = await ctx.store.listSessions(profile.id);
   const today = systemClock.today();
-  const lastPlayed = sessions.length ? sessions[sessions.length - 1]!.day : null;
-
   const save = profileSaver(ctx, profile);
 
   // The child (shared by every place), then one part per place in the valley.
-  const garden = h(
-    'section',
-    { class: 'place-section', 'aria-labelledby': 'place-garden-heading' },
-    h('h3', { id: 'place-garden-heading', class: 'place-heading' }, plantIcon('tree'), 'Trädgården'),
-    h('p', { class: 'muted place-about' }, `${ctx.pack.title} 1–10.`),
-    h(
-      'ul',
-      { class: 'status-summary' },
-      (['automatic', 'fluent', 'learning', 'new'] as const).map((s) =>
-        h('li', { class: `status-${s}` }, h('strong', null, counts[s]), ` ${STATUS_TEXT[s]}`),
-      ),
-    ),
-    h(
-      'p',
-      { class: 'muted' },
-      `${meta.sessionsCompleted} fullständiga pass`,
-      lastPlayed ? ` · senast ${formatDay(lastPlayed)}` : '',
-      ` · ${meta.unlockedUnitIds.length} av ${ctx.pack.units.length} enheter upplåsta`,
-    ),
-    h('h4', null, 'Värmekarta'),
-    heatmap(states, stats),
-    h('h4', null, 'Svåra just nu'),
-    hardList(states, engine.config, today),
-    h('h4', null, 'Vanligaste förväxlingarna'),
-    confusionList(states),
-    h('h4', null, 'Inställning'),
-    h(
-      'div',
-      { class: 'settings' },
-      h(
-        'label',
-        { class: 'check' },
-        h('input', {
-          type: 'checkbox',
-          checked: profile.settings.allowFree,
-          onchange: (e: Event) => void save({ settings: { allowFree: (e.target as HTMLInputElement).checked } }),
-        }),
-        ' Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)',
-      ),
-    ),
-    h('h4', null, 'Startkoll'),
-    h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
-    h('button', { class: 'soft-button', type: 'button', onclick: () => showPlacementOffer(ctx, profile) }, 'Gör om startkollen'),
-  );
+  const places = await Promise.all(ctx.places.map((place) => place.parentSection(ctx, profile, save)));
 
   return h(
     'section',
@@ -134,7 +79,7 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
     minutesChart(minutesPerDay(sessions, today, 14)),
     h('h3', null, 'Inställningar'),
     settingsForm(profile, save),
-    garden,
+    places,
     h('h3', null, 'Flytta till en annan enhet'),
     h(
       'p',
@@ -144,7 +89,7 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
     h(
       'div',
       { class: 'button-row' },
-      h('button', { class: 'soft-button', type: 'button', onclick: () => showQr(ctx, profile, states) }, 'Visa QR-kod'),
+      h('button', { class: 'soft-button', type: 'button', onclick: () => void showQr(ctx, profile) }, 'Visa QR-kod'),
       h('button', { class: 'soft-button', type: 'button', onclick: () => void downloadBackup(ctx, profile) }, 'Spara säkerhetskopia (JSON)'),
     ),
     h(
@@ -152,87 +97,6 @@ async function childSection(ctx: AppContext, profile: Profile): Promise<HTMLElem
       { class: 'link-button danger', type: 'button', onclick: () => void deleteProfile(ctx, profile) },
       `Ta bort ${profile.name}…`,
     ),
-  );
-}
-
-/**
- * Facts the child finds hard right now, with the way the game helps
- * ("räknestigen"): grown-ups can use the same idea when talking about it.
- */
-function hardList(states: Record<string, ItemState>, config: EngineConfig, today: string): HTMLElement {
-  const hard = Object.values(states)
-    .filter((s) => isStruggling(s, today, config.support))
-    .map((s) => parseFactId(s.itemId))
-    .sort((x, y) => x.a * x.b - y.a * y.b || x.a - y.a);
-  if (hard.length === 0) return h('p', { class: 'muted' }, 'Inga just nu.');
-  return h(
-    'div',
-    null,
-    h(
-      'p',
-      { class: 'muted' },
-      'Fel på flera dagar, eller länge utan att fastna. De här tas i steg från det barnet redan kan (räknestigen), och kommer sedan tillbaka utan hjälp.',
-    ),
-    h(
-      'ul',
-      { class: 'hard-list' },
-      hard.map(({ a, b }) => h('li', null, h('strong', null, `${formatFact(a, b)} = ${a * b}`), ' – ', strategyFor(a, b).text)),
-    ),
-  );
-}
-
-const HEAT_CLASS = (s: ItemState | undefined) => {
-  if (!s || s.status === 'new') return 'heat-new';
-  if (s.status === 'learning') return s.box === 0 ? 'heat-learning-0' : 'heat-learning-1';
-  return s.status === 'fluent' ? 'heat-fluent' : 'heat-automatic';
-};
-
-function heatmap(states: Record<string, ItemState>, stats: Map<string, FactStats>): HTMLElement {
-  const detail = h('p', { class: 'heat-detail', 'aria-live': 'polite' }, 'Tryck på en ruta för detaljer.');
-  const cells: HTMLElement[] = [h('div', { class: 'grid-corner' }, '×')];
-  for (let b = MIN_FACTOR; b <= MAX_FACTOR; b++) cells.push(h('div', { class: 'grid-head' }, b));
-  for (let a = MIN_FACTOR; a <= MAX_FACTOR; a++) {
-    cells.push(h('div', { class: 'grid-head' }, a));
-    for (let b = MIN_FACTOR; b <= MAX_FACTOR; b++) {
-      const id = factId(a, b);
-      const s = states[id];
-      const st = stats.get(id);
-      const text = describeFact(a, b, s, st);
-      cells.push(h('button', { class: `heat-cell ${HEAT_CLASS(s)}`, type: 'button', 'aria-label': text, onclick: () => (detail.textContent = text) }));
-    }
-  }
-  const legend = h(
-    'ul',
-    { class: 'heat-legend' },
-    [
-      ['heat-new', 'inte påbörjad'],
-      ['heat-learning-0', 'ny'],
-      ['heat-learning-1', 'övas'],
-      ['heat-fluent', 'flytande'],
-      ['heat-automatic', 'automatiserad'],
-    ].map(([cls, label]) => h('li', null, h('span', { class: `heat-swatch ${cls}` }), label)),
-  );
-  return h('div', { class: 'heatmap-wrap' }, h('div', { class: 'heatmap', role: 'group', 'aria-label': 'Värmekarta' }, cells), legend, detail);
-}
-
-function describeFact(a: number, b: number, s: ItemState | undefined, st: FactStats | undefined): string {
-  const parts = [`${formatFact(a, b)} = ${a * b}: ${STATUS_TEXT[s?.status ?? 'new']}`];
-  if (st?.attempts) {
-    parts.push(`${st.attempts} försök, ${Math.round((st.correct / st.attempts) * 100)} % rätt`);
-    if (st.meanRtMs) parts.push(`snitt ${(st.meanRtMs / 1000).toFixed(1)} s`);
-  }
-  const worst = Object.entries(s?.confusions ?? {}).sort((x, y) => y[1] - x[1])[0];
-  if (worst) parts.push(`vanligaste felsvar ${worst[0]}`);
-  return parts.join(' · ');
-}
-
-function confusionList(states: Record<string, ItemState>): HTMLElement {
-  const list = topConfusions(states, 8);
-  if (!list.length) return h('p', { class: 'muted' }, 'Inga förväxlingar ännu.');
-  return h(
-    'ol',
-    { class: 'confusions' },
-    list.map((c) => h('li', null, h('strong', null, c.fact), ` – svarade ${c.given} `, h('span', { class: 'muted' }, `(${c.count} ${c.count === 1 ? 'gång' : 'gånger'})`))),
   );
 }
 
@@ -259,9 +123,6 @@ function minutesChart(days: { day: string; minutes: number }[]): HTMLElement {
   );
 }
 
-type ProfileChange = Partial<Omit<Profile, 'settings'>> & { settings?: Partial<Profile['settings']> };
-type SaveProfile = (change: ProfileChange) => Promise<void>;
-
 /** Saves changes to a child; every setting on the page goes through the same one. */
 function profileSaver(ctx: AppContext, profile: Profile): SaveProfile {
   // Always merge into the latest saved version; only name/avatar changes need a redraw.
@@ -281,7 +142,9 @@ function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
   if (!speechSupported()) voiceNote.textContent = 'Den här webbläsaren kan inte läsa upp text.';
   else
     void hasSwedishVoice().then((ok) => {
-      if (!ok) voiceNote.textContent = 'Ingen svensk röst hittades på enheten. Lägg till en i enhetens inställningar för tal/uppläsning.';
+      if (!ok)
+        voiceNote.textContent =
+          'Ingen svensk röst finns på enheten. Uppläsningen använder bara röster på enheten, så att ingen text skickas iväg. Lägg till en svensk röst i enhetens inställningar för tal/uppläsning.';
     });
   return h(
     'div',
@@ -328,8 +191,16 @@ function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
   );
 }
 
-function showQr(ctx: AppContext, profile: Profile, states: Record<string, ItemState>): void {
-  const text = encodeSnapshot(snapshotOf(profile, ctx.pack, states));
+/**
+ * The QR code holds one place, Trädgården (the first), until the format with
+ * one block per place (MD1) comes. The JSON backup holds every place.
+ */
+const qrDeps = (ctx: AppContext): GameDeps => ({ store: ctx.store, pack: (ctx.places[0] as Place).pack });
+
+async function showQr(ctx: AppContext, profile: Profile): Promise<void> {
+  const deps = qrDeps(ctx);
+  const { states } = await loadProgress(profile, deps);
+  const text = encodeSnapshot(snapshotOf(profile, deps.pack, states));
   const qr = h('div', { class: 'qr-code', 'aria-label': `QR-kod för ${profile.name}` });
   qr.innerHTML = qrSvgMarkup(text).svg;
   void choose(
@@ -452,7 +323,8 @@ function importSection(ctx: AppContext, legacy: HTMLElement): HTMLElement {
 async function importQr(ctx: AppContext, text: string): Promise<void> {
   try {
     const snap = decodeSnapshot(text);
-    const engine = engineFor(profileFromSnapshot(snap, 'tmp', 0), ctx.deps);
+    const deps = qrDeps(ctx);
+    const engine = engineFor(profileFromSnapshot(snap, 'tmp', 0), deps);
     const { states, meta } = progressFromSnapshot(snap, engine, systemClock.today());
     const counts = engine.statusCounts(states);
     const existing = (await ctx.store.listProfiles()).find((p) => p.name === snap.name);
@@ -470,7 +342,7 @@ async function importQr(ctx: AppContext, text: string): Promise<void> {
         ? { ...existing, avatar: snap.avatar || existing.avatar }
         : profileFromSnapshot(snap, crypto.randomUUID(), Date.now());
     await ctx.store.saveProfile(profile);
-    await ctx.store.save({ profileId: profile.id, packId: ctx.pack.id, packVersion: ctx.pack.version, states, meta, updatedAt: Date.now() });
+    await ctx.store.save({ profileId: profile.id, packId: deps.pack.id, packVersion: deps.pack.version, states, meta, updatedAt: Date.now() });
     toast(`${profile.name} är hämtad`);
     await showParent(ctx, profile.id);
   } catch (e) {

@@ -1,8 +1,8 @@
-import type { ItemId, ItemState } from '../../engine';
-import { factId, formatFact, MAX_FACTOR, MIN_FACTOR } from '../../content/multiplication';
-import { h, s } from '../dom';
-import { plantIcon, STAGE_LABEL, stageFor, type Stage } from './plant';
-import { sunflowerHead } from './scene';
+import type { ItemId, ItemState } from '../../../engine';
+import { factId, formatFact, MAX_FACTOR, MIN_FACTOR } from '../../../content/multiplication';
+import { h, s } from '../../../shell/dom';
+import { plantIcon, STAGE_LABEL, stageFor, type Stage } from '../../../shell/components/plant';
+import { sunflowerHead } from '../../../shell/components/scene';
 
 export interface GridOptions {
   states: Record<ItemId, ItemState>;

@@ -1,15 +1,16 @@
-import { buildChoices, mathRandomRng, systemClock } from '../../engine';
-import { factId, formatFact, parseFactId } from '../../content/multiplication';
-import type { Profile } from '../../storage';
-import { show, type AppContext } from '../app';
-import { numPad } from '../components/numPad';
-import { avatarIcon } from '../components/avatars';
-import { icon } from '../components/icons';
-import { h, type Child } from '../dom';
+import { buildChoices, mathRandomRng, systemClock } from '../../../engine';
+import { factId, formatFact, parseFactId } from '../../../content/multiplication';
+import type { Profile } from '../../../storage';
+import { show, type AppContext } from '../../../shell/app';
+import { numPad } from '../../../shell/components/numPad';
+import { avatarIcon } from '../../../shell/components/avatars';
+import { icon } from '../../../shell/components/icons';
+import { h, type Child } from '../../../shell/dom';
 import { drawRound, duelPool, DUEL_ROUNDS, roundWinner, scoreRound, type DuelCard, type DuelScore } from '../challenge';
-import { engineFor, loadProgress } from '../play';
-import { speak, speechSupported, stopSpeaking } from '../speech';
+import { engineFor, loadProgress } from '../../../shell/play';
+import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../../../shell/speech';
 import { genitive, showGarden } from './garden';
+import { gardenDeps, pack } from '../pack';
 
 const MIN_CARDS = 6;
 
@@ -38,13 +39,13 @@ export async function showDuel(ctx: AppContext, profile: Profile): Promise<void>
 }
 
 async function runDuel(ctx: AppContext, profile: Profile): Promise<void> {
-  const engine = engineFor(profile, ctx.deps);
-  const { states } = await loadProgress(profile, ctx.deps, engine);
+  const engine = engineFor(profile, gardenDeps(ctx));
+  const { states } = await loadProgress(profile, gardenDeps(ctx), engine);
   let ids = duelPool(states);
   // Too few known facts: play with the first unit (×10), which every child starts with.
-  if (ids.length < MIN_CARDS) ids = [...new Set([...ids, ...(ctx.pack.units[0]?.itemIds ?? [])])];
+  if (ids.length < MIN_CARDS) ids = [...new Set([...ids, ...(pack.units[0]?.itemIds ?? [])])];
   const cards: DuelCard[] = ids.map(parseFactId);
-  const voice = profile.settings.readAloud && speechSupported();
+  const voice = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
   const startedAt = systemClock.now();
   let score: DuelScore = { child: 0, adult: 0, stake: 1 };
   let childCorrect = 0;
@@ -99,7 +100,7 @@ async function runDuel(ctx: AppContext, profile: Profile): Promise<void> {
   await ctx.store.saveSession({
     id: crypto.randomUUID(),
     profileId: profile.id,
-    packId: ctx.pack.id,
+    packId: pack.id,
     mode: 'duel',
     day: systemClock.today(),
     startedAt,
@@ -127,7 +128,7 @@ async function runDuel(ctx: AppContext, profile: Profile): Promise<void> {
         return;
       }
       const item = engine.item(factId(card.a, card.b));
-      const choices = buildChoices(ctx.pack, item, states[item.id], mathRandomRng, 4);
+      const choices = buildChoices(pack, item, states[item.id], mathRandomRng, 4);
       const buttons = choices.map((v) => h('button', { class: 'choice', type: 'button', onclick: () => resolve(v) }, v));
       stage.replaceChildren(h('div', { class: 'question' }, head, h('div', { class: 'choices' }, buttons)));
       setKey((e) => {

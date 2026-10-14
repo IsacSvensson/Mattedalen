@@ -33,7 +33,8 @@ export interface GameDeps {
 }
 
 export function engineFor(profile: Profile, deps: GameDeps): Engine {
-  const config = makeConfig({
+  // The pack's own settings first, then the child's.
+  const config = makeConfig(deps.pack.config ?? {}, {
     session: { durationMs: profile.settings.sessionMinutes * 60_000 },
     format: { allowFree: (deps.allowFree ?? true) && profile.settings.allowFree },
   });

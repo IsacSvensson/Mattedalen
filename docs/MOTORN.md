@@ -4,9 +4,33 @@ Motorn i `src/engine` bär alla platser i Mattedalen som tränar fakta. Den komm
 från Gångerträdgården och används som den är. Trädgården (multiplikation) är den
 första platsen som använder den, se [TRADGARDEN.md](TRADGARDEN.md).
 
-När Bäcken byggs blir kunskapskomponenter med en graf över förkunskaper kärnan,
-och en fakta (`Item`) blir en kunskapskomponent av typen fakta. Se ordningen i
-[OVERLAMNING-MATTEDALEN.md](OVERLAMNING-MATTEDALEN.md).
+En del (`Unit`) är en kunskapskomponent: fakta som lärs in tillsammans, med
+förkunskaper som kanter i en graf. Se ordningen i
+[OVERLAMNING-MATTEDALEN.md](OVERLAMNING-MATTEDALEN.md) och planen för Bäcken i
+[PLAN-BACKEN.md](PLAN-BACKEN.md).
+
+## Graf, format och uteslutna fakta
+
+- **Graf.** En del kan öppnas efter föregående del (`previous`, som i
+  Trädgården) eller efter alla sina förkunskaper (`after`, med `requires`). En
+  del öppnas när ungefär `fraction` av varje förkunskap är minst `minStatus`. En
+  del får bara kräva delar som kommer före den, och `validatePack` kontrollerar
+  det. En öppnad del stängs aldrig igen.
+- **Sort.** En del är fakta (minnet, där snabbheten räknas) eller förståelse
+  (`kind: 'understanding'`, visas på olika dagar och i olika former).
+- **Olika format för samma fakta.** Paketet kan ange `present(item, …)`, som ger
+  en prompt och ett namn på formatet, till exempel `7 + 5 = __` eller
+  `__ = 7 + 5`. Svaret är alltid faktans. Formatet sparas i svarsloggen
+  (`Attempt.variant`). Ett format kan markeras som inget bevis
+  (`evidence: false`), och då flyttar ett rätt svar inte upp faktan. Paket utan
+  `present` drar samma slumptal som förut.
+- **Inställningar per paket.** `pack.config` läggs ovanpå standardvärdena och
+  under spelets egna (`makeConfig(pack.config, …)`), till exempel gränserna för
+  svarstid.
+- **Uteslutna fakta.** Ett pass kan få `excludedItemIds`. De frågas aldrig, inte
+  ens som nya eller förfallna, och räknas inte heller när delar öppnas. En del
+  där hälften hålls utanför (pilotens otränade halva) kan därför ändå öppna det
+  som kommer efter.
 
 ## Motorn (`src/engine`)
 

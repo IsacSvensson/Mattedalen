@@ -1,5 +1,5 @@
 import './styles.css';
-import { createMultiplicationPack } from '../content/multiplication';
+import { tradgarden } from '../places/tradgarden';
 import { createProgressStore, importLegacyData, requestPersistence } from '../storage';
 import type { AppContext } from './app';
 import { plantSprite } from './components/plant';
@@ -13,7 +13,6 @@ async function start(): Promise<void> {
   void registerServiceWorker();
   document.body.prepend(plantSprite());
 
-  const pack = createMultiplicationPack();
   const { store, kind } = await createProgressStore();
   // Children who played Gångerträdgården on this device come along on the first start.
   if (kind === 'indexeddb') await importLegacyData(store);
@@ -21,10 +20,9 @@ async function start(): Promise<void> {
   const ctx: AppContext = {
     root,
     store,
-    pack,
+    places: [tradgarden],
     storageKind: kind,
     persist,
-    deps: { store, pack },
   };
   await showProfiles(ctx);
 }

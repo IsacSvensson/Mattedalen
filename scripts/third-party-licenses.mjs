@@ -33,8 +33,8 @@ const parts = [
   ['idb', version('idb'), 'ISC', read('node_modules/idb/LICENSE')],
   ['jsQR', version('jsqr'), 'Apache-2.0', read('node_modules/jsqr/LICENSE')],
   ['qrcode-generator', version('qrcode-generator'), 'MIT', MIT('2009 Kazuhiko Arase')],
-  ['Fredoka (typsnitt)', '', 'SIL Open Font License 1.1', read('src/game/fonts/OFL-Fredoka.txt')],
-  ['Nunito (typsnitt)', '', 'SIL Open Font License 1.1', read('src/game/fonts/OFL-Nunito.txt')],
+  ['Fredoka (typsnitt)', '', 'SIL Open Font License 1.1', read('src/shell/fonts/OFL-Fredoka.txt')],
+  ['Nunito (typsnitt)', '', 'SIL Open Font License 1.1', read('src/shell/fonts/OFL-Nunito.txt')],
 ];
 
 const rule = '='.repeat(72);

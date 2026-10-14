@@ -15,7 +15,7 @@ import {
   unpackLevels,
   type Profile,
 } from '../../src/storage';
-import { progressFromSnapshot, qrSvgMarkup, snapshotOf } from '../../src/game/transfer';
+import { progressFromSnapshot, qrSvgMarkup, snapshotOf } from '../../src/shell/transfer';
 
 const pack = createMultiplicationPack();
 const profile: Profile = { id: 'p', name: 'Åsa', avatar: '🦊', createdAt: 0, settings: { ...DEFAULT_SETTINGS, sessionMinutes: 14 } };

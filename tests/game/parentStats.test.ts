@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyState } from '../../src/engine';
-import { factStats, formatDay, minutesPerDay, topConfusions } from '../../src/game/parentStats';
+import { factStats, formatDay, minutesPerDay, topConfusions } from '../../src/shell/stats';
 import type { SessionRecord, StoredAttempt } from '../../src/storage';
 
 const session = (day: string, minutes: number): SessionRecord => ({
@@ -32,7 +32,8 @@ describe('parent statistics', () => {
       '7x8': { ...emptyState('7x8'), confusions: { '48': 4, '54': 1 } },
       '6x7': { ...emptyState('6x7'), confusions: { '48': 2 } },
     };
-    expect(topConfusions(states, 2)).toEqual([
+    const label = (id: string) => id.replace('x', ' × ');
+    expect(topConfusions(states, 2, label)).toEqual([
       { itemId: '7x8', fact: '7 × 8', given: '48', count: 4 },
       { itemId: '6x7', fact: '6 × 7', given: '48', count: 2 },
     ]);

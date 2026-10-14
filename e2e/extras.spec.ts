@@ -74,7 +74,7 @@ test('questions can be read aloud in Swedish', async ({ page }) => {
     Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: FakeUtterance });
     Object.defineProperty(window, 'speechSynthesis', {
       value: {
-        getVoices: () => [{ lang: 'sv-SE', name: 'Alva' }],
+        getVoices: () => [{ lang: 'sv-SE', name: 'Alva', localService: true }],
         speak: (u: FakeUtterance) => {
           spoken.push(`${u.lang}: ${u.text}`);
           setTimeout(() => u.onend?.(), 10);
@@ -100,3 +100,60 @@ test('questions can be read aloud in Swedish', async ({ page }) => {
   );
   await expect(page.getByRole('button', { name: 'Läs upp igen' })).toBeVisible();
 });
+
+/** Read-aloud never uses a network voice: the text would leave the device. */
+for (const local of [false, true]) {
+  test(`read-aloud ${local ? 'uses the voice on the device' : 'stays silent with only a network voice'}`, async ({ page }) => {
+    await page.addInitScript((withLocal) => {
+      const spoken: string[] = [];
+      (window as unknown as { spoken: string[] }).spoken = spoken;
+      class FakeUtterance {
+        lang = '';
+        rate = 1;
+        voice: { name: string } | null = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(public text: string) {}
+      }
+      const voices = [
+        { lang: 'sv-SE', name: 'Google svenska', localService: false },
+        ...(withLocal ? [{ lang: 'sv-SE', name: 'Alva', localService: true }] : []),
+      ];
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        value: {
+          getVoices: () => voices,
+          speak: (u: FakeUtterance) => {
+            spoken.push(`${u.voice?.name ?? 'standardröst'}: ${u.text}`);
+            setTimeout(() => u.onend?.(), 10);
+          },
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    }, local);
+    await page.goto('/');
+    await createProfile(page, 'Alva');
+    await switchPlayer(page);
+    await openParent(page);
+    await page.getByRole('checkbox', { name: /Läs upp frågorna/ }).check();
+    if (local) await expect(page.locator('.voice-note')).toHaveText('');
+    else await expect(page.locator('.voice-note')).toContainText('bara röster på enheten');
+    await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+    await enterGarden(page, 'Alva');
+    await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+    await answer(page);
+    await answer(page);
+    const spoken = () => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken);
+    if (local) {
+      await expect.poll(spoken).toEqual(expect.arrayContaining([expect.stringMatching(/^Alva: /)]));
+      await expect(page.getByRole('button', { name: 'Läs upp igen' })).toBeVisible();
+    } else {
+      // No button that could read aloud, and nothing read.
+      await expect(page.getByRole('button', { name: 'Läs upp igen' })).toHaveCount(0);
+      await page.waitForTimeout(2000);
+      expect(await spoken()).toEqual([]);
+    }
+    expect((await spoken()).filter((s) => !s.startsWith('Alva: '))).toEqual([]);
+  });
+}

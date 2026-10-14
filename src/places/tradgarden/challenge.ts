@@ -1,5 +1,5 @@
-import { atLeast, randInt, type ItemId, type ItemState, type Rng } from '../engine';
-import type { SessionRecord } from '../storage';
+import { atLeast, randInt, type ItemId, type ItemState, type Rng } from '../../engine';
+import type { SessionRecord } from '../../storage';
 
 /** "Beat your own record": short, timed, only with facts the child already knows well. */
 export const CHALLENGE_SECONDS = 90;

@@ -82,7 +82,7 @@ test('the valley can be read aloud', async ({ page }) => {
     Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: FakeUtterance });
     Object.defineProperty(window, 'speechSynthesis', {
       value: {
-        getVoices: () => [{ lang: 'sv-SE', name: 'Alva' }],
+        getVoices: () => [{ lang: 'sv-SE', name: 'Alva', localService: true }],
         speak: (u: FakeUtterance) => {
           spoken.push(`${u.lang}: ${u.text}`);
           setTimeout(() => u.onend?.(), 10);

@@ -1,13 +1,14 @@
-import { mathRandomRng, Placement, systemClock } from '../../engine';
-import type { Profile } from '../../storage';
-import { show, type AppContext } from '../app';
-import { numPad } from '../components/numPad';
-import { icon } from '../components/icons';
-import { plantIcon } from '../components/plant';
-import { h } from '../dom';
-import { savePlacement } from '../play';
-import { speak, speechSupported, stopSpeaking } from '../speech';
+import { mathRandomRng, Placement, systemClock } from '../../../engine';
+import type { Profile } from '../../../storage';
+import { show, type AppContext } from '../../../shell/app';
+import { numPad } from '../../../shell/components/numPad';
+import { icon } from '../../../shell/components/icons';
+import { plantIcon } from '../../../shell/components/plant';
+import { h } from '../../../shell/dom';
+import { savePlacement } from '../../../shell/play';
+import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../../../shell/speech';
 import { showGarden } from './garden';
+import { gardenDeps, pack } from '../pack';
 
 /** Offered right after a new player is created (and from the parent view). */
 export function showPlacementOffer(ctx: AppContext, profile: Profile): void {
@@ -34,9 +35,9 @@ export function showPlacementOffer(ctx: AppContext, profile: Profile): void {
  * as bushes (fast) or as sprouts (right but slow).
  */
 export async function runPlacement(ctx: AppContext, profile: Profile): Promise<void> {
-  const placement = new Placement(ctx.pack, mathRandomRng);
+  const placement = new Placement(pack, mathRandomRng);
   const startedAt = systemClock.now();
-  const voice = profile.settings.readAloud && speechSupported();
+  const voice = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
   let onKey: ((e: KeyboardEvent) => void) | undefined;
   let left = false;
 
@@ -82,13 +83,13 @@ export async function runPlacement(ctx: AppContext, profile: Profile): Promise<v
   setKey(undefined);
 
   const result = placement.result();
-  await savePlacement(profile, ctx.deps, result, startedAt);
-  const title = (id: string) => ctx.pack.units.find((u) => u.id === id)?.title ?? id;
+  await savePlacement(profile, gardenDeps(ctx), result, startedAt);
+  const title = (id: string) => pack.units.find((u) => u.id === id)?.title ?? id;
   const titles = result.passedUnitIds.map(title);
   const fastTitles = result.fluentUnitIds.map(title);
   const slowTitles = result.passedUnitIds.filter((id) => !result.fluentUnitIds.includes(id)).map(title);
-  const next = result.stoppedAt ? ctx.pack.units.find((u) => u.id === result.stoppedAt)?.title : null;
-  const passed = new Set(ctx.pack.units.filter((u) => result.passedUnitIds.includes(u.id)).flatMap((u) => u.itemIds));
+  const next = result.stoppedAt ? pack.units.find((u) => u.id === result.stoppedAt)?.title : null;
+  const passed = new Set(pack.units.filter((u) => result.passedUnitIds.includes(u.id)).flatMap((u) => u.itemIds));
 
   show(
     ctx,

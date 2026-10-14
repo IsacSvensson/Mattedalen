@@ -1,13 +1,14 @@
-import { atLeast, type FocusSet, type ItemId, type ItemState } from '../../engine';
-import type { Profile } from '../../storage';
-import { show, type AppContext } from '../app';
-import { icon } from '../components/icons';
-import { h } from '../dom';
+import { atLeast, type FocusSet, type ItemId, type ItemState } from '../../../engine';
+import type { Profile } from '../../../storage';
+import { show, type AppContext } from '../../../shell/app';
+import { icon } from '../../../shell/components/icons';
+import { h } from '../../../shell/dom';
 import { canChallenge, CHALLENGE_MIN_FOCUS_FACTS } from '../challenge';
-import { engineFor, EXTRA_PRACTICE_MINUTES, loadProgress } from '../play';
+import { engineFor, EXTRA_PRACTICE_MINUTES, loadProgress } from '../../../shell/play';
 import { showChallenge } from './challenge';
 import { showGarden } from './garden';
 import { showSession } from './session';
+import { gardenDeps, pack } from '../pack';
 
 export interface FocusProgress {
   total: number;
@@ -33,9 +34,9 @@ export function focusProgress(set: FocusSet, states: Record<ItemId, ItemState>):
  * with a few other facts) or races their own record on just that table.
  */
 export async function showFocusPicker(ctx: AppContext, profile: Profile, selectedId?: string): Promise<void> {
-  const sets = ctx.pack.focusSets ?? [];
-  const engine = engineFor(profile, ctx.deps);
-  const { states } = await loadProgress(profile, ctx.deps, engine);
+  const sets = pack.focusSets ?? [];
+  const engine = engineFor(profile, gardenDeps(ctx));
+  const { states } = await loadProgress(profile, gardenDeps(ctx), engine);
 
   const panel = h('section', { class: 'focus-panel', 'aria-live': 'polite' }, h('p', { class: 'end-text' }, 'Tryck på en tabell.'));
   const tiles = sets.map((set) => {

@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { ManualClock, seededRng } from '../../src/engine';
 import { createMultiplicationPack } from '../../src/content/multiplication';
 import { DEFAULT_SETTINGS, MemoryProgressStore, type Profile } from '../../src/storage';
-import { EXTRA_PRACTICE_MINUTES, loadProgress, PlayController, type GameDeps } from '../../src/game/play';
-import { genitive, knownTables } from '../../src/game/screens/garden';
-import { stageFor } from '../../src/game/components/plant';
+import { EXTRA_PRACTICE_MINUTES, loadProgress, PlayController, type GameDeps } from '../../src/shell/play';
+import { genitive, knownTables } from '../../src/places/tradgarden/screens/garden';
+import { stageFor } from '../../src/shell/components/plant';
 import { emptyState } from '../../src/engine';
 
 const profile: Profile = { id: 'p1', name: 'Alva', avatar: '🦊', createdAt: 0, settings: { ...DEFAULT_SETTINGS, sessionMinutes: 10 } };
@@ -137,7 +137,7 @@ describe('garden helpers', () => {
   });
 });
 
-import { savePlacement } from '../../src/game/play';
+import { savePlacement } from '../../src/shell/play';
 
 describe('saving a placement check', () => {
   it('stores fluent facts, the answers and a session record', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectPlatform } from '../../src/game/pwa';
+import { detectPlatform } from '../../src/shell/pwa';
 
 describe('platform detection for the install guide', () => {
   it('recognises iPhone and iPad (also iPadOS posing as a Mac)', () => {
@@ -13,7 +13,7 @@ describe('platform detection for the install guide', () => {
   });
 });
 
-import { spokenText } from '../../src/game/speech';
+import { spokenText } from '../../src/shell/speech';
 
 describe('read-aloud text', () => {
   it('says facts the way children say them', () => {

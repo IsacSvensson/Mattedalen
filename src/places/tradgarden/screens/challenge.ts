@@ -1,13 +1,14 @@
-import { buildChoices, mathRandomRng, systemClock, type FocusSet } from '../../engine';
-import type { Profile } from '../../storage';
-import { show, type AppContext } from '../app';
-import { icon } from '../components/icons';
-import { numPad } from '../components/numPad';
-import { h, wait } from '../dom';
+import { buildChoices, mathRandomRng, systemClock, type FocusSet } from '../../../engine';
+import type { Profile } from '../../../storage';
+import { show, type AppContext } from '../../../shell/app';
+import { icon } from '../../../shell/components/icons';
+import { numPad } from '../../../shell/components/numPad';
+import { h, wait } from '../../../shell/dom';
 import { bestChallengeScore, CHALLENGE_SECONDS, challengeDeck, challengePool } from '../challenge';
-import { engineFor, loadProgress } from '../play';
-import { speak, speechSupported, stopSpeaking } from '../speech';
+import { engineFor, loadProgress } from '../../../shell/play';
+import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../../../shell/speech';
 import { showGarden } from './garden';
+import { gardenDeps, pack } from '../pack';
 
 /**
  * "Slå ditt rekord": optional, short and timed, only with facts the child
@@ -29,12 +30,12 @@ export async function showChallenge(ctx: AppContext, profile: Profile, focus?: F
 }
 
 async function runChallenge(ctx: AppContext, profile: Profile, record: number | null, focus?: FocusSet): Promise<void> {
-  const engine = engineFor(profile, ctx.deps);
-  const { states } = await loadProgress(profile, ctx.deps, engine);
+  const engine = engineFor(profile, gardenDeps(ctx));
+  const { states } = await loadProgress(profile, gardenDeps(ctx), engine);
   const pool = challengePool(states, focus?.itemIds);
   const next = challengeDeck(pool, mathRandomRng);
   const free = profile.settings.allowFree;
-  const voice = profile.settings.readAloud && speechSupported();
+  const voice = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
   const startedAt = systemClock.now();
   const endsAt = performance.now() + CHALLENGE_SECONDS * 1000;
   let score = 0;
@@ -80,7 +81,7 @@ async function runChallenge(ctx: AppContext, profile: Profile, record: number | 
       await ctx.store.saveSession({
         id: crypto.randomUUID(),
         profileId: profile.id,
-        packId: ctx.pack.id,
+        packId: pack.id,
         mode: 'challenge',
         day: systemClock.today(),
         startedAt,
@@ -118,7 +119,7 @@ async function runChallenge(ctx: AppContext, profile: Profile, record: number | 
         stage.replaceChildren(h('div', { class: 'question free' }, prompt, pad.el));
         setKey((e) => pad.onKey(e));
       } else {
-        const choices = buildChoices(ctx.pack, item, states[item.id], mathRandomRng, 4);
+        const choices = buildChoices(pack, item, states[item.id], mathRandomRng, 4);
         const buttons = choices.map((v) => h('button', { class: 'choice', type: 'button', dataset: { value: v }, onclick: () => submit(v) }, v));
         stage.replaceChildren(h('div', { class: 'question' }, prompt, h('div', { class: 'choices' }, buttons)));
         setKey((e) => {
@@ -129,7 +130,7 @@ async function runChallenge(ctx: AppContext, profile: Profile, record: number | 
     });
     if (given === null || over) break;
     answered++;
-    if (ctx.pack.normalizeAnswer(given) === item.answer) {
+    if (pack.normalizeAnswer(given) === item.answer) {
       score++;
       scoreEl.textContent = String(score);
       scoreEl.classList.remove('bump');

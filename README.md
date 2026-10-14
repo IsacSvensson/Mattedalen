@@ -43,10 +43,10 @@ hela områden (kanten och landskapet). Samma kontur (`--outline`) överallt,
 tryckskugga (`--press`) bara på det man kan trycka på, tre hörnradier, en orange
 huvudknapp per skärm, Fredoka för rubriker och siffror och Nunito för text. All
 grafik är ritad SVG och typsnitten följer med appen. Reglerna står överst i
-`src/game/styles.css`, och hur de används i trädgården beskrivs i
+`src/shell/styles.css`, och hur de används i trädgården beskrivs i
 [TRADGARDEN.md](docs/TRADGARDEN.md#designregler).
 
-## Dalen (`src/game/screens/valley.ts`)
+## Dalen (`src/shell/screens/valley.ts`)
 
 Dalen är barnets startsida. Barnet väljer sig själv under ”Vem spelar?” och
 kommer då till dalens karta. Därifrån går barnet till platserna.
@@ -56,7 +56,7 @@ kommer då till dalens karta. Därifrån går barnet till platserna.
   platser som väntar på att låsas upp, för innehåll öppnas när det finns och när
   barnet har förkunskaperna, aldrig som belöning.
 - **Kartan visar vad barnet kan.** Trädgården ritas som en liten odlingslåda med
-  barnets mest utvecklade plantor (`miniBed` i `src/game/valley.ts`). Solrosorna
+  barnets mest utvecklade plantor (`miniBed` i `src/places/tradgarden/valley.ts`). Solrosorna
   på kullen är samma som i trädgården: en per tabell barnet kan.
 - **Dagens läge står i text och bild**, aldrig bara i färg. Platsen kan vänta på
   sina första frön, vara törstig när dagens pass inte är gjort, eller sova när
@@ -79,10 +79,13 @@ src/
   content/multiplication/   Trädgårdens innehållspaket: fakta, enheter, strategier, distraktorer
   storage/                  ProgressStore, IndexedDB, säkerhetskopior, import från Gångerträdgården
   sw/                       service workerns mall
-  game/                     skal och UI (vanilla TS + liten h()-hjälpare)
+  shell/                    skalet, gemensamt för alla platser (vanilla TS + liten h()-hjälpare)
+    place.ts                gränssnittet Place som varje plats implementerar
     screens/valley.ts       dalen: startsidan med kartan
-    screens/garden.ts …     Trädgården och dess spel
-    screens/parent/         föräldravyn för alla platser
+    screens/session.ts      ramen för ett pass (frågor, svar, uppläsning, räknestig, hjälpkort)
+    screens/parent/         föräldravyn, med en del per plats
+  places/
+    tradgarden/             Trädgården: platsen, dess skärmar och dess del av föräldravyn
 tests/
   engine/                   enhetstester för motorn (med ett glosor-paket)
   content/                  tester för multiplikationspaketet
@@ -93,10 +96,20 @@ e2e/                        Playwright: hela flöden i riktig webbläsare
 ```
 
 Spelet är skrivet i vanilla TypeScript med en liten `h()`-hjälpare (`dom.ts`).
-Skalet (profiler, dalen, föräldravyn, lagring och PWA) är gemensamt för alla
-platser. En plats är ett innehållspaket och dess skärmar. Mappstrukturen delas
-upp i skal och platser när Bäcken byggs, på samma sätt som grafen över
-kunskapskomponenter byggs när den behövs.
+Skalet (profiler, dalen, föräldravyn, passets ram, lagring och PWA) är gemensamt
+för alla platser och beror inte på någon av dem. Bara `main.ts` vet vilka platser
+som finns.
+
+En plats implementerar `Place` (`src/shell/place.ts`): namn, innehållspaket, sin
+skärm, hur den ser ut på kartan (det som växer, dagens läge, solrosor på kullen),
+vad ett nytt barn möter först och sin del av föräldravyn. I ett pass bidrar
+platsen med hur en ny fakta presenteras, räknestigen och bilden i hjälpkortet
+(`SessionPlace`); resten är skalets ram.
+
+Motorn förstår en graf av kunskapskomponenter (`unlockRule: 'after'`), olika
+format för samma fakta (`present`), inställningar per innehållspaket och fakta
+som hålls utanför övningen (pilotens otränade halva). Se
+[docs/MOTORN.md](docs/MOTORN.md#graf-format-och-uteslutna-fakta).
 
 ## Kom igång
 
@@ -202,7 +215,7 @@ webbläsaren (`e2e/legacy.spec.ts`).
 Båda vägarna testas i e2e mellan två separata webbläsarkontexter. QR-koden testas
 också i enhetstester genom att den ritas till pixlar och läses av med jsQR.
 
-## Föräldravy (`src/game/screens/parent`)
+## Föräldravy (`src/shell/screens/parent`)
 
 Föräldravyn nås via ”För vuxna” på startsidan. Den skyddas av en fyrsiffrig
 vuxenkod som väljs första gången. Koden är ingen säkerhetsfunktion, eftersom
@@ -282,6 +295,13 @@ för att tjänsten ska fungera. Därför krävs inget samtyckesformulär enligt 
 om elektronisk kommunikation (9 kap. 28 §). Ingen data lämnar enheten om inte
 föräldern själv exporterar den. Föräldravyn har en kort integritetstext.
 Värden, GitHub Pages, loggar IP-adresser enligt GitHubs integritetspolicy.
+
+Uppläsningen använder bara röster som finns på enheten (`voice.localService`).
+Chrome erbjuder också nätverksröster som skickar texten till en server. De
+används aldrig, inte heller webbläsarens standardröst, som kan vara en sådan.
+Finns ingen svensk röst på enheten läses ingenting upp, och föräldravyn säger
+det. Det testas i `e2e/extras.spec.ts`. Det finns ingen taligenkänning, eftersom
+den skickar ljud från enheten.
 
 ## Publicering på GitHub Pages
 

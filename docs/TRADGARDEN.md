@@ -38,13 +38,13 @@ fakta har tre ledtrådar:
 Distraktorerna är grannprodukter i samma tabell (6×8 mot 7×8), addition i stället
 för multiplikation, omvända siffror (54/45) samt ±1- och ±10-fel.
 
-## Spelet (`src/game`)
+## Spelet (`src/places/tradgarden`)
 
 Spelet är skrivet i vanilla TypeScript med en liten `h()`-hjälpare (`dom.ts`). Det
 har få skärmar och lite delat tillstånd, så ett UI-ramverk skulle bara ge vikt.
 All grafik är inbäddad SVG: plantor, djur (`components/avatars.ts`), ikoner
 (`components/icons.ts`) och landskapet (`components/scene.ts`). Typsnitten
-(Fredoka och Nunito, SIL OFL, licenser i `src/game/fonts/`) följer med appen, så
+(Fredoka och Nunito, SIL OFL, licenser i `src/shell/fonts/`) följer med appen, så
 inget hämtas utifrån.
 
 - **`play.ts`** (`PlayController`) kopplar ihop motorn och lagringen utan DOM.
@@ -184,10 +184,12 @@ De påverkar inte schemaläggningen.
   flerval och den vuxna på sifferknappsatsen. Störst rätt svar tar rundan. Blir
   det lika är det ”krig”, och nästa runda är värd dubbelt. Ett spel är 7 rundor.
 - **Uppläsning** (`speech.ts`). Uppläsningen slås på per barn i föräldravyn och
-  använder Web Speech API med en svensk röst (`sv-SE`). Frågan läses upp så som
+  använder Web Speech API med en svensk röst (`sv-SE`) som finns på enheten,
+  aldrig en nätverksröst (se README, Integritet). Frågan läses upp så som
   barn säger den (”3 gånger 7”), och en 🔊-knapp läser upp den igen. Svarstiden
   börjar mätas först när frågan är uppläst, så uppläsningen gör inte barnets
-  svarstid längre. Saknas en svensk röst på enheten står det i föräldravyn.
+  svarstid längre. Saknas en svensk röst på enheten läses ingenting upp, och det
+  står i föräldravyn.
 
 Logiken för båda spelen (`challenge.ts`) är rena funktioner med egna tester.
 Spelen sparas som pass med `mode: 'challenge'` respektive `'duel'`, och

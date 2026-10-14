@@ -1,5 +1,4 @@
 import { addDays, type DayKey, type ItemId, type ItemState } from '../engine';
-import { formatFact, parseFactId } from '../content/multiplication';
 import type { AttemptDaySummary, SessionRecord, StoredAttempt } from '../storage';
 
 export interface DayMinutes {
@@ -26,14 +25,11 @@ export interface Confusion {
   count: number;
 }
 
-/** The most frequent wrong answers across all facts. */
-export function topConfusions(states: Record<ItemId, ItemState>, limit = 8): Confusion[] {
+/** The most frequent wrong answers across all facts; `label` writes a fact as the place shows it. */
+export function topConfusions(states: Record<ItemId, ItemState>, limit = 8, label: (id: ItemId) => string = (id) => id): Confusion[] {
   const all: Confusion[] = [];
   for (const s of Object.values(states)) {
-    for (const [given, count] of Object.entries(s.confusions)) {
-      const { a, b } = parseFactId(s.itemId);
-      all.push({ itemId: s.itemId, fact: formatFact(a, b), given, count });
-    }
+    for (const [given, count] of Object.entries(s.confusions)) all.push({ itemId: s.itemId, fact: label(s.itemId), given, count });
   }
   return all.sort((x, y) => y.count - x.count || x.fact.localeCompare(y.fact)).slice(0, limit);
 }

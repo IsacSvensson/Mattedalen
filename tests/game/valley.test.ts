@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyState, type ItemState } from '../../src/engine';
-import { gardenMood, miniBed, MINI_BED_CELLS } from '../../src/game/valley';
+import { gardenMood, miniBed, MINI_BED_CELLS } from '../../src/places/tradgarden/valley';
 
 const at = (itemId: string, status: ItemState['status'], box = 0): ItemState => ({ ...emptyState(itemId), status, box });
 const record = (...states: ItemState[]) => Object.fromEntries(states.map((s) => [s.itemId, s]));

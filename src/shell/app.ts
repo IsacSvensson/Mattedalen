@@ -1,13 +1,12 @@
-import type { ContentPack } from '../engine';
 import type { PersistStatus, ProgressStore } from '../storage';
-import type { GameDeps } from './play';
+import type { Place } from './place';
 import { setScreenBusy } from './pwa';
 
 export interface AppContext {
   root: HTMLElement;
-  deps: GameDeps;
   store: ProgressStore;
-  pack: ContentPack;
+  /** The places in the valley, in map order. */
+  places: Place[];
   storageKind: 'indexeddb' | 'memory';
   persist: PersistStatus;
 }

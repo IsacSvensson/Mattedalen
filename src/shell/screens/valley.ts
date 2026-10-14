@@ -2,13 +2,10 @@ import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { avatarIcon } from '../components/avatars';
 import { icon } from '../components/icons';
-import { plantIcon } from '../components/plant';
 import { scene } from '../components/scene';
 import { h, s } from '../dom';
-import { engineFor, loadProgress } from '../play';
-import { speak, speechSupported } from '../speech';
-import { gardenMood, miniBed, MOOD_TEXT, type PlaceMood } from '../valley';
-import { knownTables, showGarden } from './garden';
+import type { Place } from '../place';
+import { hasSwedishVoice, speak, speechSupported } from '../speech';
 import { showProfiles } from './profiles';
 
 /**
@@ -17,14 +14,13 @@ import { showProfiles } from './profiles';
  * built, so nothing waits to be unlocked.
  */
 export async function showValley(ctx: AppContext, profile: Profile): Promise<void> {
-  const engine = engineFor(profile, ctx.deps);
-  const { states, meta } = await loadProgress(profile, ctx.deps, engine);
-  const mood = gardenMood(states, engine.dailyDone(meta));
-  const known = knownTables(ctx.pack, states);
-  const goToGarden = () => void showGarden(ctx, profile);
+  // Only Trädgården so far; Bäcken gets its own spot by the brook.
+  const place = ctx.places[0] as Place;
+  const map = await place.onMap(ctx, profile);
+  const go = () => void place.open(ctx, profile);
 
-  const status = h('p', { class: 'place-status' }, moodIcon(mood), h('span', null, MOOD_TEXT[mood]));
-  const voiceOn = profile.settings.readAloud && speechSupported();
+  const status = h('p', { class: 'place-status' }, map.moodIcon, h('span', null, map.moodText));
+  const voiceOn = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
 
   const view = h(
     'main',
@@ -38,23 +34,22 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
     h(
       'div',
       { class: 'valley-map' },
-      // Whole areas: one sunflower on the hill per table the child knows, as in the garden.
-      scene({ height: 120, sunflowers: known.size, cloud: true }),
+      scene({ height: 120, sunflowers: map.sunflowers, cloud: true }),
       h(
         'div',
         { class: 'valley-ground' },
         valleyLand(),
         h(
           'button',
-          { class: `place place-garden mood-${mood}`, type: 'button', 'aria-label': `Trädgården. ${MOOD_TEXT[mood]}`, onclick: goToGarden },
-          h('span', { class: 'mini-bed', 'aria-hidden': 'true' }, miniBed(states).map((stage) => h('span', { class: 'mini-cell' }, stage === 'soil' ? null : plantIcon(stage)))),
-          h('span', { class: 'place-name' }, mood === 'asleep' ? icon('moon') : null, 'Trädgården'),
+          { class: `place ${map.spot} mood-${map.mood}`, type: 'button', 'aria-label': `${place.name}. ${map.moodText}`, onclick: go },
+          map.art,
+          h('span', { class: 'place-name' }, map.nameIcon, place.name),
         ),
         // The child's animal stands on the path by the place it goes to.
         h('span', { class: 'valley-walker', 'aria-hidden': 'true' }, avatarIcon(profile.avatar)),
       ),
     ),
-    known.size ? h('p', { class: 'sr-only' }, `Solrosor på kullen: ${known.size}, en för varje tabell du kan.`) : null,
+    map.landscapeText ? h('p', { class: 'sr-only' }, map.landscapeText) : null,
     h(
       'div',
       { class: 'valley-side' },
@@ -63,18 +58,13 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
         { class: 'place-status-row' },
         status,
         voiceOn
-          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp', onclick: () => void speak(`Trädgården. ${MOOD_TEXT[mood]}`) }, icon('speaker'))
+          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp', onclick: () => void speak(`${place.name}. ${map.moodText}`) }, icon('speaker'))
           : null,
       ),
-      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: goToGarden }, icon('can'), 'Gå till trädgården'),
+      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: go }, icon(map.go.icon), map.go.label),
     ),
   );
   show(ctx, view);
-}
-
-function moodIcon(mood: PlaceMood): Element {
-  if (mood === 'new') return plantIcon('sprout');
-  return icon(mood === 'asleep' ? 'moon' : 'drop');
 }
 
 /** The brook and the path, stretched to the ground's shape (the outlines keep their width). */

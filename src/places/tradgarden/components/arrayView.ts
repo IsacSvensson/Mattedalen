@@ -1,5 +1,5 @@
-import type { ArrayParts } from '../../content/multiplication';
-import { s } from '../dom';
+import type { ArrayParts } from '../../../content/multiplication';
+import { s } from '../../../shell/dom';
 
 const GAP = 10;
 const PAD = 6;

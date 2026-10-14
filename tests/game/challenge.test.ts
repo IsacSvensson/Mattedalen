@@ -9,7 +9,7 @@ import {
   duelPool,
   roundWinner,
   scoreRound,
-} from '../../src/game/challenge';
+} from '../../src/places/tradgarden/challenge';
 import type { SessionRecord } from '../../src/storage';
 
 const st = (id: string, status: ItemState['status']): ItemState => ({ ...emptyState(id), status });
