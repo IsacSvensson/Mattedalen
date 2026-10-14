@@ -10,6 +10,7 @@ export * from './persist';
 export { maybeCompactLog } from './shared';
 export { IndexedDbProgressStore, openProgressDb, MIGRATIONS, DB_NAME, type Migration, type ProgressDB } from './idb';
 export { MemoryProgressStore } from './memory';
+export * from './legacy';
 
 export interface OpenedStore {
   store: ProgressStore;

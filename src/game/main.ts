@@ -1,6 +1,6 @@
 import './styles.css';
 import { createMultiplicationPack } from '../content/multiplication';
-import { createProgressStore, requestPersistence } from '../storage';
+import { createProgressStore, importLegacyData, requestPersistence } from '../storage';
 import type { AppContext } from './app';
 import { plantSprite } from './components/plant';
 import { captureInstallPrompt, registerServiceWorker } from './pwa';
@@ -15,6 +15,8 @@ async function start(): Promise<void> {
 
   const pack = createMultiplicationPack();
   const { store, kind } = await createProgressStore();
+  // Children who played Gångerträdgården on this device come along on the first start.
+  if (kind === 'indexeddb') await importLegacyData(store);
   const persist = await requestPersistence();
   const ctx: AppContext = {
     root,

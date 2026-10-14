@@ -1,14 +1,50 @@
-# Gångerträdgården
+# Mattedalen
 
-Ett forskningsbaserat webbspel som lär barn 6–9 år multiplikationstabellen 1–10.
-Spelet är en offline-PWA utan backend. All data stannar i webbläsaren.
+Ideell matteplattform för barn 7–9 år. Korta dagliga pass i en tecknad dal där det
+barnet kan växer och byggs. Forskningsbaserad repetition, inga poäng eller
+topplistor. Fungerar offline, ingen data lämnar enheten. Fri för icke-kommersiellt
+bruk.
 
-> **Status:** Alla sju faser är klara: motor och innehåll, lagring, spelet med hela
-> tabellen, interaktiv introduktion, strategiåterkoppling, fritt svar, föräldravy,
-> flytt mellan enheter (QR och JSON), offline-PWA på GitHub Pages samt utmaning,
-> tvåspelarläge och uppläsning.
+> **Status:** Mattedalen bygger vidare på Gångerträdgården
+> ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation)),
+> som blir dalens första plats, Trädgården. Arbetet följer ordningen i
+> [docs/OVERLAMNING-MATTEDALEN.md](docs/OVERLAMNING-MATTEDALEN.md). Steg 1 (eget
+> repo, egen databas och import från Gångerträdgården) är klart. Härnäst kommer
+> skalet med dalens karta. Dokumentationen nedan beskriver tills vidare
+> Trädgården och skrivs om när skalet är på plats.
 >
-> **Spela:** https://isacsvensson.github.io/Multiplikation/
+> **Spela:** https://isacsvensson.github.io/Mattedalen/ (när Pages är påslaget)
+
+## Flytt från Gångerträdgården
+
+Gångerträdgården och Mattedalen ligger på samma ursprung
+(`https://isacsvensson.github.io/`), och där delar alla appar på IndexedDB och
+cachar. Därför gäller:
+
+- **Egen databas.** Mattedalen sparar i databasen `mattedalen`. Gångerträdgården
+  använder `gangertradgarden`.
+- **Automatisk import vid första start** (`src/storage/legacy.ts`). Finns
+  Gångerträdgårdens databas och har Mattedalen inga barn än, kopieras alla barn
+  med framsteg, pass och logg, vuxenkoden, senast valda barn och valet att dölja
+  installationsbanderollen. Den gamla databasen öppnas bara för läsning och
+  lämnas orörd, så Gångerträdgården fungerar som förut. Importen görs en gång.
+  En markering skrivs innan barnen kopieras och avslutas efteråt, så en avbruten
+  import görs klart vid nästa start. Ett barn vars data inte går att läsa hoppas
+  över, och resten följer med. Finns ingen gammal databas skapas ingen heller.
+- **Egen cache.** Service workern använder prefixet `mattedalen-` och rensar bara
+  sina egna cachar. Gångerträdgården raderar alla cachar som heter
+  `gangertradgarden-*` utom sin egen, så prefixet får aldrig vara detsamma.
+- **Säkerhetskopior.** Nya kopior har formatet `mattedalen-profil`. Kopior med det
+  gamla formatet `gangertradgarden-profil` kan fortfarande läsas, och QR-koder från
+  Gångerträdgården (`GT1:`) också.
+- **iPhone och iPad.** En app som lagts till på hemskärmen har egen lagring, skild
+  från Safari. Barn som spelat Gångerträdgården från hemskärmen följer därför inte
+  med automatiskt. Flytta dem i stället med QR-kod eller säkerhetskopia från
+  Gångerträdgårdens föräldravy. På Android och dator fungerar den automatiska
+  importen.
+
+Importen testas med enhetstester (`tests/storage/legacy.test.ts`) och i
+webbläsaren (`e2e/legacy.spec.ts`).
 
 ## Kom igång
 
@@ -524,7 +560,7 @@ befästning och blir lättare, vilket är väntat.
 
 ## Licens
 
-Gångerträdgården är ett ideellt projekt, fritt att använda för att barn ska lära sig matematik.
+Mattedalen är ett ideellt projekt, fritt att använda för att barn ska lära sig matematik.
 
 - **Koden och grafiken** omfattas av [PolyForm Noncommercial License 1.0.0](LICENSE.md). Alla får använda, ändra och dela den för **icke-kommersiella syften**. Licensen tillåter uttryckligen användning hos skolor, bibliotek, ideella organisationer och myndigheter, oavsett hur de finansieras. Den tillåter inte att någon säljer appen eller bygger in den i en betald produkt. Vill någon använda den kommersiellt kan upphovspersonen ge ett separat tillstånd.
 - **Ingående delar** har egna, tillåtande licenser: idb (ISC), jsQR (Apache-2.0), qrcode-generator (MIT) och typsnitten Fredoka och Nunito (SIL Open Font License). Licenstexterna följer med appen i `THIRD-PARTY-LICENSES.txt`, som skapas med `npm run licenses`.
