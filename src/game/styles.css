@@ -530,6 +530,7 @@ h1:focus {
 }
 
 .scene {
+  --sf-head: 34px;
   position: relative;
   box-sizing: content-box;
   width: 100vw;
@@ -567,9 +568,9 @@ h1:focus {
 .scene-sky {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 6px);
-  right: max(8px, calc(50vw - 380px));
-  width: 120px;
-  height: 60px;
+  right: max(4px, calc(50vw - 380px));
+  width: clamp(88px, 26vw, 120px);
+  aspect-ratio: 2;
   overflow: visible;
 }
 
@@ -640,7 +641,7 @@ h1:focus {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 16px);
   left: max(16px, calc(50vw - 364px));
-  right: 92px;
+  right: clamp(64px, 18vw, 92px);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -655,13 +656,14 @@ h1:focus {
   margin: 0;
   padding: 3px 16px 5px;
   border: var(--outline);
-  border-radius: 999px;
+  border-radius: 22px;
   background: var(--card);
-  font-size: clamp(1.2rem, 5.6vw, 1.9rem);
+  font-size: clamp(1.1rem, 5.4vw, 1.9rem);
+  line-height: 1.1;
   text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Long names wrap onto a second line instead of being cut off. */
+  overflow-wrap: anywhere;
+  text-wrap: balance;
   min-width: 0;
 }
 
@@ -694,7 +696,8 @@ h1:focus {
 
 .garden-grid {
   /* 11 columns + 10 gaps + bed padding/outline must fit the 16px gutters; leave room for the rest of the screen below. */
-  --cell: min(calc((100vw - 32px - 21px - 20px) / 11), calc((100dvh - 470px) / 11), 58px);
+  /* Width first: on phones the page may scroll a little, but the squares stay big enough to read. */
+  --cell: min(calc((100vw - 32px - 21px - 20px) / 11), max(calc((100dvh - 470px) / 11), 28px), 58px);
   display: grid;
   grid-template-columns: repeat(11, var(--cell));
   grid-auto-rows: var(--cell);
@@ -718,10 +721,9 @@ h1:focus {
 
 .grid-head.mastered .sunflower {
   position: absolute;
-  inset: -3px;
-  width: calc(100% + 6px);
-  height: calc(100% + 6px);
-  overflow: visible;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .grid-head.mastered span {
@@ -940,6 +942,7 @@ h1:focus {
   background: var(--card);
   flex: 1 1 auto;
   max-width: 360px;
+  margin: 0 auto;
   justify-content: center;
   min-width: 0;
   overflow: hidden;
@@ -2316,4 +2319,170 @@ h1:focus {
   margin: 0;
   padding-left: 1.3em;
   line-height: 1.6;
+}
+
+.scene-title h1.long-name {
+  font-size: clamp(1rem, 4.4vw, 1.6rem);
+}
+
+/* Very narrow phones (≤ 360 px): a little less padding so nothing wraps awkwardly. */
+@media (max-width: 360px) {
+  .big-button {
+    min-width: 0;
+    padding: 0 22px;
+    font-size: 1.3rem;
+  }
+
+  .garden-counts li {
+    padding-right: 10px;
+    font-size: 1.05rem;
+  }
+
+  .garden-counts .plant {
+    width: 30px;
+    height: 30px;
+  }
+
+  .garden-counts {
+    gap: 6px;
+  }
+}
+
+/*
+ * Phones on their side: little height, plenty of width. A lower band, the
+ * bed beside the buttons, and the question beside its answers.
+ */
+@media (orientation: landscape) and (max-height: 520px) {
+  .scene {
+    height: 64px !important;
+    --sf-head: 22px;
+  }
+
+  .scene-title,
+  .scene-controls {
+    top: calc(env(safe-area-inset-top) + 6px);
+  }
+
+  .scene-title h1 {
+    font-size: 1.15rem;
+    padding: 2px 12px 3px;
+  }
+
+  .avatar-button,
+  .scene-controls .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .scene-controls .icon-button .icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .scene-sky {
+    width: 64px;
+  }
+
+  /* Garden: bed on the left, everything else on the right. */
+  .screen.garden {
+    display: grid;
+    grid-template-columns: auto minmax(260px, 400px);
+    justify-content: center;
+    align-items: center;
+    column-gap: 28px;
+    row-gap: 10px;
+    max-width: none;
+  }
+
+  .garden-head {
+    grid-column: 1 / -1;
+  }
+
+  .garden-grid {
+    --cell: min(calc((100dvh - 64px - 60px) / 11), 40px);
+  }
+
+  .garden-side {
+    gap: 10px;
+  }
+
+  .garden-side .grid-info {
+    display: none;
+  }
+
+  .big-button {
+    min-height: 56px;
+    font-size: 1.25rem;
+  }
+
+  .extra-tile {
+    padding: 6px 4px;
+    font-size: 0.85rem;
+  }
+
+  .extra-tile .icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Question: the card beside the answers. */
+  .play-stage {
+    padding: 6px 0;
+  }
+
+  .question,
+  .question.free {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: min(100%, 820px);
+  }
+
+  .question > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .prompt-card {
+    padding: 14px 12px;
+  }
+
+  .prompt {
+    font-size: clamp(2.4rem, 12dvh, 4rem);
+  }
+
+  .choice {
+    min-height: min(84px, 22dvh);
+  }
+
+  .numpad {
+    gap: 6px;
+    max-width: 320px;
+  }
+
+  .numpad-display {
+    font-size: 1.9rem;
+  }
+
+  .numpad-keys {
+    gap: 6px;
+  }
+
+  .numpad-key {
+    min-height: min(52px, 12.5dvh);
+    font-size: 1.5rem;
+  }
+
+  .intro-card,
+  .help-card,
+  .derive-card {
+    padding: 10px 14px;
+    gap: 6px;
+  }
+
+  .help-wrap {
+    flex-direction: row;
+    justify-content: center;
+  }
 }

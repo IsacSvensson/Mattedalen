@@ -16,6 +16,21 @@ for (const width of [320, 360]) {
       await expectNoSidewaysScroll(page);
     });
 
+    test('the garden title is never cut off, even for a long name', async ({ page }) => {
+      for (const name of ['Isac', 'Alexandra-Charlotte']) {
+        await page.goto('/');
+        await page.evaluate(() => indexedDB.deleteDatabase('gangertradgarden'));
+        await page.reload();
+        await createProfile(page, name);
+        const title = page.locator('.scene-title h1');
+        await expect(title).toContainText(name);
+        const cut = await title.evaluate((el) => el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1);
+        expect(cut).toBe(false);
+        await expectInside(page, '.scene-title h1', 'main');
+        await expectNoSidewaysScroll(page);
+      }
+    });
+
     test('a focus session fits the table label and the drops', async ({ page }) => {
       await page.goto('/');
       await createProfile(page, 'Bo');

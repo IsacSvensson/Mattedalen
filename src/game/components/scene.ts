@@ -59,13 +59,13 @@ export function scene({ height, sunflowers = 0, sun = true, cloud = true }: Scen
   const flowers = SPOTS.slice(0, Math.max(0, Math.min(sunflowers, SPOTS.length))).map((x, i) => {
     const stem = 10 + ((i * 7) % 3) * 4;
     const el = sunflowerPlant(stem);
-    // Head size 34px; the stem's foot sits a little into the front hill.
-    const scale = 34 / 44;
-    const footY = frontHill(x) * height + 6;
+    // Sized by the head (--sf-head, set in CSS) and placed by fractions of the
+    // band, so they stay on the hill when the band is made lower (landscape phones).
+    const tall = (44 + stem) / 44;
     el.style.left = `${x * 100}%`;
-    el.style.top = `${footY - (44 + stem) * scale}px`;
-    el.style.width = `${44 * scale}px`;
-    el.style.height = `${(44 + stem) * scale}px`;
+    el.style.top = `calc(${(frontHill(x) * 100).toFixed(2)}% + 0.18 * var(--sf-head) - ${tall.toFixed(3)} * var(--sf-head))`;
+    el.style.width = 'var(--sf-head)';
+    el.style.height = `calc(${tall.toFixed(3)} * var(--sf-head))`;
     return el;
   });
 

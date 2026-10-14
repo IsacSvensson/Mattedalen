@@ -91,7 +91,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
         'div',
         { class: 'scene-title' },
         h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Byt spelare', onclick: () => void showProfiles(ctx) }, avatarIcon(profile.avatar)),
-        h('h1', null, `${genitive(profile.name)} trädgård`),
+        h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} trädgård`),
       ),
     ),
     h('div', { class: 'garden-bed' }, grid),
