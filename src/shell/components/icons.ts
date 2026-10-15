@@ -55,6 +55,15 @@ const ICONS = {
       ['M6.5 15.5h11'],
     ],
   },
+  lantern: {
+    paths: [
+      ['M12 2.5v2.5'],
+      ['M7.5 8 12 5l4.5 3Z', 'var(--i-red)'],
+      ['M8.5 8h7v9h-7Z', 'var(--i-yellow)'],
+      ['M12 10.5c1.1 1.3 1.5 2.2 1.5 3a1.5 1.5 0 0 1-3 0c0-.8.4-1.7 1.5-3Z', 'var(--i-red)'],
+      ['M7 17h10v3.5H7Z', 'var(--i-blue)'],
+    ],
+  },
   drop: { paths: [['M12 3.5c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11Z', 'var(--i-blue)']] },
   steps: { paths: [['M3.5 20.5V16h5v-4.5h5V7h5V3.5h2.5v17Z', 'var(--i-yellow)']] },
   rotate: { paths: [['M19 12a7 7 0 1 1-2.1-5'], ['M17.5 3v4.5H13']] },

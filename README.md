@@ -30,8 +30,8 @@ Mer att läsa:
   med blommor och frukt på plantorna: beslut, design och fynd från varje fas.
 - [docs/PLAN-HUNDRA.md](docs/PLAN-HUNDRA.md): förslag om talen till 100
   (Stigen) och en tydligare väg in i gånger, jämfört med hur skolan gör.
-- [docs/STIGEN.md](docs/STIGEN.md): Stigens innehåll, talen till 100: delar,
-  former, räknestigar och felsvar. Platsen byggs i nästa fas.
+- [docs/STIGEN.md](docs/STIGEN.md): Stigen, talen till 100: delar, former,
+  räknestigar, felsvar och platsen. Den syns bara med `?stigen` tills den slås på.
 
 ## Principer
 
@@ -112,7 +112,7 @@ src/
   engine/                   innehållsneutral faktamotor (ren logik), se docs/MOTORN.md
   content/multiplication/   Trädgårdens innehållspaket: gånger och delat med, Dela lika, former, räknestigar, koll
   content/addition/         Bäckens innehållspaket: faktafamiljer, graf, format, Vågen, räknestigar
-  content/hundred/          Stigens innehållspaket (talen till 100): delar, former, räknestigar, felsvar; ännu inte på någon plats
+  content/hundred/          Stigens innehållspaket (talen till 100): delar, former, räknestigar, felsvar
   storage/                  ProgressStore, IndexedDB, säkerhetskopior, import från Gångerträdgården
   sw/                       service workerns mall
   shell/                    skalet, gemensamt för alla platser (vanilla TS + liten h()-hjälpare)
@@ -123,6 +123,7 @@ src/
   places/
     tradgarden/             Trädgården: platsen, dess skärmar och dess del av föräldravyn
     backen/                 Bäcken: bron, tallinjen, tiotalsramen, vågen, skärmarna och föräldradelen
+    stigen/                 Stigen (talen till 100, bakom ?stigen): stolpar och lyktor, stavar och kuber, tom tallinje, hundraplatta
 tests/
   engine/                   enhetstester för motorn (med ett glosor-paket)
   content/                  tester för innehållspaketen

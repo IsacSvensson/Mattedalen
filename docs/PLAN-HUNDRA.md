@@ -230,7 +230,7 @@ med dubblorna, villkoret för att Trädgården ska öppna.
 | H1. Trädgårdens ordning **(klar)** | Lika stora grupper, ×2 först, tabellerna som graf, Trädgården öppnar efter dubblor. Fungerar utan Stigen. |
 | H2. Motorn **(klar)** | `heldUnitIds`, tester och simulering. |
 | H3. Stigens innehåll **(klar)** | Paketet: delar, fakta, former, räknestigar, felsvar. Bakom en flagga. |
-| H4. Stigen som plats | Skärmen med stolpar och lyktor, bilderna (stavar och kuber, tom tallinje, hundraplatta), kartan, föräldradelen. |
+| H4. Stigen som plats **(klar)** | Skärmen med stolpar och lyktor, bilderna (stavar och kuber, tom tallinje, hundraplatta), kartan, föräldradelen. |
 | H5. Kopplingen | Tabellerna väntar på Stigen, raden i trädgården, startkoll, koll, QR och säkerhetskopior. Stigen slås på. |
 | H6. Verifiering | e2e, skärmbilder i alla storlekar, dokumentation. |
 
@@ -299,6 +299,29 @@ direkt, även om Stigen dröjer.
   länge trädgårdens tabeller då väntar. En vuxen kan öppna en tabell.
 - **Subtraktion med två tvåsiffriga tal** (75 − 23) finns inte med, som i planen.
   Den kan bli en egen del senare.
+
+## Fynd från H4
+
+- **Platsen** finns i `src/places/stigen` och beskrivs i [STIGEN.md](STIGEN.md#platsen).
+  Den syns bara med `?stigen` tills H5 slår på den.
+- **Tio stolpar och åtta delar.** Stolparna står vid 10, 20 … 100. Lyktorna hänger
+  på stolparna 20 till 90, en för varje del. Siffrorna sitter överst på stolparna,
+  så att barnets djur kan stå mellan dem utan att dölja dem.
+- **Kartan.** Med tre platser fick stigen inte plats utan att täcka trädgården.
+  Kartan blir därför lite högre på en stående telefon när stigen finns. På en
+  liggande telefon står stigen i hörnet till höger om bäckens skylt.
+- **Hundraplattan** tog för mycket plats tillsammans med tallinjen i en ny
+  uppgift. En ny uppgift i Hoppa tio visar därför bara hundraplattan. Hjälpkortet
+  visar båda.
+- **Hjälpkortet** fyller nu i luckan även när uppgiften har ord: ”3 tiotal = 30”
+  i stället för ”3 tiotal = __ Svaret är 30.” Det gäller också trädgårdens
+  hoppuppgifter.
+- **Startkollen och kollen** väntar till H5, som planen säger. Det gör också regeln
+  att Stigen öppnar efter Över tiotalet vid bäcken. Med flaggan är Stigen öppen
+  direkt.
+- **QR och säkerhetskopior:** QR-koden tar med ett block för varje plats på
+  kartan, och säkerhetskopian tar med allt barnet har övat. Med flaggan kommer
+  Stigen alltså med. Det prövas i H5.
 
 ## Avgjorda frågor
 

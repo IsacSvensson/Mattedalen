@@ -2,8 +2,12 @@
 
 Stigen blir dalens tredje plats: talen till 100. Den ligger mellan Bäcken och
 Trädgården. Planen finns i [PLAN-HUNDRA.md](PLAN-HUNDRA.md). Innehållet
-(`src/content/hundred`) byggdes i fas H3. Platsen byggs i H4 och slås på i H5.
-Tills dess använder ingen plats paketet, så barnen ser inget av det.
+(`src/content/hundred`) byggdes i fas H3 och platsen (`src/places/stigen`) i H4.
+Den slås på för alla i H5.
+
+Tills dess syns Stigen bara på en enhet där appen har öppnats med `?stigen` en
+gång (`src/shell/features.ts`). Valet sparas i webbläsaren på enheten. Med
+`?stigen=0` försvinner den igen.
 
 ## Uppgifterna
 
@@ -72,7 +76,7 @@ hälften av 16, alltså 20 + 8.
 
 Varje uppgift har en ledtråd med strategin, och de flesta har hoppen på
 tallinjen (`numberline`). Tiotal och ental har en ledtråd för stavar och kuber
-(`base10`). Bilderna byggs i H4.
+(`base10`). Bilderna beskrivs under [Platsen](#platsen).
 
 ## Former
 
@@ -117,6 +121,59 @@ något vänligt om det:
 | Halva varje siffra | hälften av 56 = 23 | Dela upp 56 i 40 och 16. |
 | Tiotal och ental bytta | 74 för 47 | Tiotalen står först. |
 | Entalen kvar i 14 ental | 3 tiotal och 14 ental = 34 | Det tiotalet ska också räknas. |
+
+## Platsen
+
+### Stolparna och lyktorna
+
+Stigen är en sandig stig med en stolpe vid varje tiotal, från 10 till 100. Siffran
+står på en skylt överst på stolpen. Stolparna 20 till 90 bär en lykta var, en för
+varje del i ordning. Stigen börjar vid 10 och slutar vid 100.
+
+Lyktorna visar vad barnet kan, på samma sätt som bron vid bäcken och plantorna i
+trädgården:
+
+- **En del som inte är öppen** har bara en tom krok.
+- **En öppen del** har en lykta med mörkt glas. Lågan växer när mer av delen
+  sitter.
+- **En del som sitter** (ungefär 80 %) har en tänd lykta med ett varmt sken.
+
+Barnets djur står vid lyktan för den del barnet är på: den första öppna delen
+som inte är tänd. Under stigen finns delarna med hur mycket som sitter, som vid
+bäcken. Knappen heter ”Gå på stigen”. När dagens pass är klart vilar stigen.
+
+### På kartan
+
+Stigen står mellan bron och trädgården, med skylten bredvid. Den visar stolparna
+i litet format och ett ljus för varje öppen del. Med tre platser blir kartan lite
+högre på en stående telefon, så att varje plats får ett eget band. På en liggande
+telefon står stigen i hörnet till höger om bäckens skylt.
+
+### Bilderna i passet
+
+- **Stavar och kuber** (`base10.ts`): 47 är fyra stavar och sju kuber. Kuberna
+  ligger i staplar om fem, så 7 syns som 5 och 2.
+- **Bygget:** en ny uppgift om tiotal och ental byggs först. Barnet trycker på
+  ”tiotal” eller ”ental”, eller drar dem till brädet. Med minusknappen tas en bort.
+  Med tio ental eller fler kan tio ental bytas mot ett tiotal. Bygget är klart när
+  talet stämmer och färre än tio ental ligger kvar.
+- **Tom tallinje** (`emptyLine.ts`): bara tiotalen är utmärkta, och hoppen ritas i
+  skala. 18 + 6 visas som 18 → 20 → 24, med +2 och +4.
+- **Hundraplattan** (`hundredChart.ts`): ett hopp på tio är ett steg rakt ner.
+  En ny uppgift i Hoppa tio visas på hundraplattan.
+
+En ny uträkning visas med hoppen på den tomma tallinjen. Medan uppgiften är ny
+står tallinjen med startpunkten bredvid frågan. Hjälpkortet efter ett fel visar
+hoppen, och för tvåsiffrigt och dubblor också stavar och kuber. Räknestigen visar
+bara var man börjar, så att hoppen inte avslöjar svaret.
+
+Svaren skrivs på stenar, som vid bäcken, och tiden räknas till första siffran.
+
+### Föräldravyn
+
+Stigens del visar hur mycket som sitter, hur långt barnet har kommit i varje del,
+vad som är svårt just nu (med räknestigens sätt att tänka) och de vanligaste
+förväxlingarna. Startkollen och Stigens koll kommer i H5.
 
 ## Simulering
 

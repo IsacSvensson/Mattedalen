@@ -213,3 +213,11 @@ export function buildItems(): Item[] {
     };
   });
 }
+
+/** The task with its answer, for grown-ups: "37 + 3 = 40", "hälften av 56 = 28", "47 = 4 tiotal och 7 ental". */
+export function taskWithAnswer(t: Task): string {
+  const answer = taskAnswer(t);
+  if (t.kind === 'next') return `${formatFact('+', t.n, answer)} = ${tenAbove(t.n)}`;
+  const prompt = taskPrompt(t);
+  return prompt.includes('__') ? prompt.replace('__', String(answer)) : `${prompt} = ${answer}`;
+}

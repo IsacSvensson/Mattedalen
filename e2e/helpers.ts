@@ -97,6 +97,15 @@ export async function passIntro(page: Page): Promise<void> {
     // "Dela lika": deal the berries out, one tap on the pile at a time.
     const go = page.getByRole('button', { name: 'Nu du!' });
     while (!(await go.isVisible())) await page.locator('.intro-card .share-pile').click();
+  } else if (await page.locator('.intro-card .b10-builder').isVisible()) {
+    // Stigen: build the number with rods and cubes, or change ten ones for a ten.
+    const change = page.getByRole('button', { name: 'Byt 10 ental mot 1 tiotal' });
+    if (await change.isVisible()) await change.click();
+    else {
+      const target = Number(await page.locator('.intro-card .b10-builder').getAttribute('data-target'));
+      for (let i = 0; i < Math.floor(target / 10); i++) await page.getByRole('button', { name: 'Lägg till ett tiotal' }).click();
+      for (let i = 0; i < target % 10; i++) await page.getByRole('button', { name: 'Lägg till ett ental' }).click();
+    }
   } else if (await showMe.isVisible()) await showMe.click();
   else if (await page.getByRole('button', { name: 'Vrid' }).isVisible()) await page.getByRole('button', { name: 'Vrid' }).click();
   // "Lika stora grupper" has nothing to build: "Nu du!" is there at once.
@@ -124,8 +133,39 @@ export function solve(prompt: string): number {
   if (missing) return Number(missing[2]) / Number(missing[1]);
   const div = /(\d+) ÷ (\d+)/.exec(prompt);
   if (div) return Number(div[1]) / Number(div[2]);
+  // Stigen (and the brook): sums and differences to 100, in words or with a blank.
+  if (!/[×÷]/.test(prompt)) return solveSum(prompt);
   const [a, b] = prompt.match(/\d+/g)!.map(Number) as [number, number];
   return a * b;
+}
+
+/** The value of one side: "47 + 8", "hälften av 56", "dubbla 14", "6 tiotal och 3 ental", "7 ental och 4 tiotal". */
+function sideValue(side: string): number | null {
+  const s = side.trim();
+  if (/^\d+$/.test(s)) return Number(s);
+  let m = /^hälften av (\d+)$/.exec(s);
+  if (m) return Number(m[1]) / 2;
+  m = /^dubbla (\d+)$/.exec(s);
+  if (m) return 2 * Number(m[1]);
+  m = /^(\d+) tiotal$/.exec(s);
+  if (m) return 10 * Number(m[1]);
+  m = /^(\d+) tiotal och (\d+) ental$/.exec(s);
+  if (m) return 10 * Number(m[1]) + Number(m[2]);
+  m = /^(\d+) ental och (\d+) tiotal$/.exec(s);
+  if (m) return 10 * Number(m[2]) + Number(m[1]);
+  if (!/^\d+( [+−] \d+)*$/.test(s)) return null;
+  return evaluate(s);
+}
+
+/** The number that makes both sides of a sentence with a blank equal (0–100). */
+function solveSum(prompt: string): number {
+  if (!prompt.includes('__')) return sideValue(prompt)!;
+  for (let n = 0; n <= 100; n++) {
+    const [l, r] = prompt.replace('__', String(n)).split(' = ');
+    const [a, b] = [sideValue(l!), sideValue(r!)];
+    if (a !== null && b !== null && a === b) return n;
+  }
+  throw new Error(`Cannot solve ${prompt}`);
 }
 
 /** Value of a step on the derivation path: "5 × 7", "35 + 7", "60 − 6" or "hälften av 70". */

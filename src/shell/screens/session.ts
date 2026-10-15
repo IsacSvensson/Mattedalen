@@ -235,8 +235,8 @@ function introduce(stage: HTMLElement, q: Question, intro: (ready: () => void) =
  * ("5 + 3 = 4 + 4"), or a statement with its verdict ("3 + 4 = 4 + 3: Ja").
  */
 export function helpAnswer(prompt: string, expected: string): string {
-  if (isWords(prompt)) return `${prompt} Svaret är ${expected}.`;
   if (prompt.includes('__')) return prompt.replace('__', expected);
+  if (isWords(prompt)) return `${prompt} Svaret är ${expected}.`;
   if (prompt.includes('=')) return `${prompt}: ${expected}`;
   return `${prompt} = ${expected}`;
 }

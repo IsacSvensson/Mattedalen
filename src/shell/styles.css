@@ -3955,3 +3955,476 @@ h1:focus {
 .intro-card .prompt.long {
   font-size: clamp(1.8rem, 8.6vw, 3.4rem);
 }
+
+/* --- Stigen: the numbers to 100 (docs/STIGEN.md) ----------------------- */
+/*
+ * The same three channels as the other places, in a form of its own:
+ * - availability: an open part has a lantern on its post (a closed one only the hook)
+ * - knowledge: the flame grows as more of the part sits
+ * - whole area: the lantern is lit, with a warm glow
+ * The empty number line, the rods and cubes and the hundred chart are tools, never knowledge.
+ */
+.trail {
+  display: block;
+  position: relative;
+}
+
+.trail-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.trail.mini {
+  width: clamp(130px, 38vw, 180px);
+}
+
+.tr-path {
+  fill: none;
+  stroke: var(--path-stone);
+  stroke-width: 16;
+  stroke-linecap: round;
+}
+
+.trail.mini .tr-path {
+  stroke-width: 9;
+}
+
+.tr-post {
+  fill: var(--plank);
+  stroke: var(--ink);
+  stroke-width: 1.6;
+}
+
+.trail.mini .tr-post {
+  stroke-width: 1.1;
+}
+
+.tr-arm,
+.tr-hanger,
+.tr-hook {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.tr-arm {
+  stroke: var(--plank-edge);
+  stroke-width: 3;
+}
+
+.trail.mini .tr-arm {
+  stroke-width: 1.6;
+}
+
+.tr-roof,
+.tr-base {
+  fill: #5a4636;
+  stroke: var(--ink);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+/* An open part's lantern: dark glass until its flame is lit. */
+.tr-glass {
+  fill: #5b6b7d;
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+
+.trail.mini .tr-glass {
+  stroke-width: 1;
+}
+
+.tr-glass.lit {
+  fill: #fff2b8;
+}
+
+.tr-flame {
+  fill: #f2a33a;
+  stroke: #c9631f;
+  stroke-width: 0.8;
+}
+
+.tr-flame.lit {
+  fill: var(--sun);
+}
+
+.tr-glow {
+  fill: var(--sun);
+  opacity: 0.45;
+}
+
+.tr-plate {
+  fill: var(--card);
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+
+.tr-number {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: var(--ink);
+}
+
+.trail-walker {
+  position: absolute;
+  bottom: 2%;
+  width: 8.2%;
+  transform: translateX(-50%);
+}
+
+.trail-walker svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.path-trail {
+  width: min(100%, 640px);
+  padding: 8px 10px 0;
+  border: var(--outline);
+  border-radius: var(--r-card);
+  background: var(--sky);
+  overflow: hidden;
+}
+
+/* At night the lanterns are what shines. */
+.asleep .path-trail {
+  background: var(--night-soft);
+}
+
+/*
+ * On the map: the path between the brook and the garden, with its sign beside
+ * it. With three places the map is a little taller, so each has its own band.
+ */
+@media (orientation: portrait) {
+  .valley-ground:has(.place-path) {
+    height: clamp(290px, 82vw, max(400px, calc(100dvh - 520px)));
+  }
+}
+
+.place-path {
+  left: 62%;
+  top: 38%;
+  flex-direction: row;
+  gap: 6px;
+}
+
+.place-path .trail.mini {
+  width: clamp(100px, 30vw, 160px);
+}
+
+.place.mood-asleep .trail {
+  filter: saturate(0.6) brightness(0.8);
+}
+
+.valley-walker.at-place-path {
+  left: 34%;
+  top: 49%;
+}
+
+/* Rods and cubes. */
+.base10 {
+  display: inline-block;
+}
+
+.b10-svg {
+  display: block;
+  height: 96px;
+  width: auto;
+}
+
+.b10-rod,
+.b10-cube {
+  fill: #9fd0ec;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+}
+
+.b10-cube {
+  fill: var(--i-yellow);
+}
+
+.b10-line {
+  stroke: var(--ink);
+  stroke-width: 0.6;
+}
+
+.base10-sum {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.b10-plus {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.b10-builder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.b10-instruction,
+.b10-status {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.b10-status {
+  min-height: 1.5em;
+}
+
+.b10-board {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: min(100%, 360px);
+  min-height: 112px;
+  padding: 8px;
+  border: 2px dashed var(--path-edge);
+  border-radius: 14px;
+  background: var(--paper);
+}
+
+.b10-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  justify-content: center;
+}
+
+.b10-source-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.b10-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 6px 14px;
+  border: var(--outline);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: none;
+}
+
+.b10-source:active {
+  transform: translateY(var(--press-depth));
+  box-shadow: none;
+}
+
+.b10-source-svg.rod {
+  height: 56px;
+  width: auto;
+}
+
+.b10-source-svg.cube {
+  height: 20px;
+  width: auto;
+}
+
+.b10-take {
+  width: 48px;
+  height: 48px;
+  border: var(--outline);
+  border-radius: 50%;
+  background: var(--card);
+  font: inherit;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* Only while there are ten ones or more to change. */
+.b10-change[hidden] {
+  display: none;
+}
+
+.b10-source:disabled,
+.b10-take:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+}
+
+.b10-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.b10-ghost svg {
+  height: 56px;
+  width: auto;
+}
+
+.b10-ghost.cube svg {
+  height: 20px;
+}
+
+/* The empty number line: only the tens, and where the hops land. */
+.empty-line {
+  width: min(100%, 460px);
+}
+
+.empty-line-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.el-line {
+  stroke: var(--ink);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.el-ten {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.el-ten-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  text-anchor: middle;
+  fill: var(--ink-soft);
+}
+
+.el-stop {
+  fill: var(--card);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.el-stop.start {
+  fill: var(--i-yellow);
+}
+
+.el-stop-label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: var(--ink);
+}
+
+/* The hundred chart: a hop of ten is a step straight down. */
+.hundred-chart {
+  width: min(100%, 300px);
+}
+
+.intro-card .hundred-chart,
+.help-card .hundred-chart {
+  width: min(100%, 240px);
+}
+
+.hundred-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hc-cell {
+  fill: var(--card);
+  stroke: var(--divider);
+  stroke-width: 1;
+}
+
+.hc-cell.start {
+  fill: var(--i-yellow);
+}
+
+.hc-cell.stop {
+  fill: var(--selected);
+}
+
+.hc-cell.end {
+  fill: var(--good);
+}
+
+.hc-number {
+  font-family: var(--font-text);
+  font-size: 10px;
+  text-anchor: middle;
+  fill: var(--ink-soft);
+}
+
+.hc-number.start,
+.hc-number.stop,
+.hc-number.end {
+  font-weight: 800;
+  fill: var(--ink);
+}
+
+.hc-hop {
+  stroke: var(--primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+.help-pictures {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  /* A low map: the path goes up in the free corner to the right of the brook's sign. */
+  .place-path {
+    left: 85%;
+    top: 19%;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .place-path .trail.mini {
+    width: clamp(80px, 26dvh, 110px);
+  }
+
+  .valley-walker.at-place-path {
+    left: 47%;
+    top: 52%;
+  }
+
+  .path-trail {
+    width: min(100%, 520px);
+  }
+
+  .intro-card .hundred-chart,
+  .help-card .hundred-chart {
+    width: min(100%, 200px);
+  }
+
+  .b10-svg {
+    height: 72px;
+  }
+}

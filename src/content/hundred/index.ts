@@ -5,7 +5,7 @@ import { presentHundred } from './present';
 import { parseTaskId, UNIT_DEFS } from './tasks';
 
 export * from './tasks';
-export { buildItems, halfSplit, hintsFor, landings, strategyFor } from './items';
+export { buildItems, halfSplit, hintsFor, landings, strategyFor, taskWithAnswer } from './items';
 export * from './derive';
 export { hundredDistractors, hundredNote, onesTurned } from './distractors';
 export { presentHundred } from './present';
