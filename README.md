@@ -10,8 +10,9 @@ bruk.
 > **Status:** Dalens karta är startsidan och har två platser: Bäcken (addition
 > och subtraktion inom 20), där ett nytt barn börjar, och Trädgården
 > (multiplikation), som öppnar senare. Dagens tid delas efter vad som väntar på
-> repetition. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
-> med hela dess historik. Härnäst kommer Bäckens koll (fas E), se
+> repetition, och Bäckens koll mäter ungefär var sjunde speldag vad barnet kan
+> utan stöd. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
+> med hela dess historik. Härnäst kommer piloten, och inom 100 efter den, se
 > [PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser).
 
 Mer att läsa:
@@ -271,6 +272,8 @@ För **Bäcken**:
 - delarna med hur många plus- och minusfakta som sitter i varje del
 - svåra just nu med strategin, de vanligaste förväxlingarna och Vågen per
   uppgiftstyp (”Vad ska stå i rutan?” och ”Stämmer det?”)
+- **Bäckens koll**: rätt per sort vid varje koll, med likhetstecknet i former
+  barnet inte har övat (se [BACKEN.md](docs/BACKEN.md#bäckens-koll-checkts))
 - att göra om startkollen vid bäcken
 
 Under ”Hämta ett barn från en annan enhet” finns hjälp för den som spelat

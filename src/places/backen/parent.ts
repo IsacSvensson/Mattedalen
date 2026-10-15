@@ -1,6 +1,6 @@
 import { atLeast, isStruggling, systemClock, type Engine, type ItemId, type ItemState } from '../../engine';
-import { EQUALITIES, equalityId, formatEquality, formatFact, isEqualityId, parseFactId } from '../../content/addition';
-import type { Profile } from '../../storage';
+import { CHECK_CATEGORIES, EQUALITIES, equalityId, formatEquality, formatFact, isEqualityId, parseFactId } from '../../content/addition';
+import type { Profile, SessionRecord } from '../../storage';
 import type { AppContext } from '../../shell/app';
 import { heatmapView } from '../../shell/components/heatmap';
 import { icon } from '../../shell/components/icons';
@@ -75,9 +75,46 @@ export async function brookParentSection(ctx: AppContext, profile: Profile): Pro
     confusionList(states),
     h('h4', null, 'Vågen'),
     scaleSummary(states),
+    h('h4', null, 'Bäckens koll'),
+    checkResults(sessionsAll.filter((x) => x.packId === pack.id && x.mode === 'check')),
     h('h4', null, 'Startkoll'),
     h('p', { class: 'muted' }, 'En kort koll av vad barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
     h('button', { class: 'soft-button', type: 'button', onclick: () => void runBrookPlacement(ctx, profile, () => showBrook(ctx, profile)) }, 'Gör om startkollen vid bäcken'),
+  );
+}
+
+/**
+ * The checks, newest first: right answers per kind of task (and how many of
+ * them came quickly). The same kinds of tasks every time, not adapted to the
+ * child, so the results can be compared over time.
+ */
+function checkResults(checks: SessionRecord[]): HTMLElement {
+  const about = h(
+    'p',
+    { class: 'muted' },
+    'Samma sorts uppgifter ungefär var sjunde speldag, utan anpassning, så att det går att jämföra över tid. Likhetstecknet prövas i former barnet inte har övat.',
+  );
+  if (!checks.length) return h('div', null, about, h('p', { class: 'muted' }, 'Ingen koll än. Den första kommer andra dagen barnet är vid bäcken.'));
+  const rows = [...checks].sort((a, b) => b.startedAt - a.startedAt);
+  const cell = (c: SessionRecord, id: string) => {
+    const right = c.extra?.[`${id}:right`] ?? 0;
+    const quick = c.extra?.[`${id}:quick`] ?? 0;
+    return h('td', null, `${right} av ${c.extra?.[`${id}:total`] ?? 0}`, quick ? h('span', { class: 'muted quick' }, `${quick} snabbt`) : null);
+  };
+  return h(
+    'div',
+    null,
+    about,
+    h(
+      'table',
+      { class: 'check-results' },
+      h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Dag'), CHECK_CATEGORIES.map((c) => h('th', { scope: 'col', title: c.title }, c.short)))),
+      h(
+        'tbody',
+        null,
+        rows.map((c) => h('tr', null, h('th', { scope: 'row' }, formatDay(c.day)), CHECK_CATEGORIES.map((cat) => cell(c, cat.id)))),
+      ),
+    ),
   );
 }
 

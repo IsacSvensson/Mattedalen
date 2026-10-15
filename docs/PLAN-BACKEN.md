@@ -163,5 +163,5 @@ står tallinjen kvar bara medan en fakta är helt ny.
 | B. Innehåll inom 20 **(klar, se [BACKEN.md](BACKEN.md))** | Fakta, graf, varianter, distraktorer, räknestigar, vågen och simulering, utan gränssnitt. |
 | C. Bäcken som plats **(klar, se [BACKEN.md](BACKEN.md#platsen))** | Pass med tallinjen och uttoning, svarstid till första siffran, vågen, hjälpkort, räknestigar, uppläsning av landningspunkter, Bäcken och bron på kartan. Startkollen och en första föräldradel kom med redan här, och dagens tid delas lika mellan platserna. |
 | D. Skalet för flera platser **(klar)** | Dagens pass efter förfallna repetitioner, högst två platser om dagen, Trädgårdens öppning, fylligare föräldradel för Bäcken, QR `MD1:`. Ett nytt barn börjar vid bäcken. QR-koden behövde inte delas per plats: båda platserna ryms i version 10. |
-| E. Bäckens koll | Kontrolluppgifter med vågens format, resultat i föräldravyn. |
+| E. Bäckens koll **(klar, se [BACKEN.md](BACKEN.md#bäckens-koll-checkts))** | Kontrolluppgifter med vågens format, resultat i föräldravyn. |
 | F. Inom 100 | Efter piloten. |

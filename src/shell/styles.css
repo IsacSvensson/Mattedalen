@@ -1546,6 +1546,36 @@ h1:focus {
   margin-left: auto;
 }
 
+/* Bäckens koll in the parent view: one row per check, newest first. */
+.check-results {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.check-results th,
+.check-results td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--divider);
+  text-align: left;
+  vertical-align: top;
+}
+
+.check-results thead th {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.check-results .quick {
+  display: block;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.check-results tbody th {
+  white-space: nowrap;
+}
+
 .brook-parts.parent li.closed {
   color: var(--ink-soft);
 }

@@ -9,6 +9,7 @@ export * from './equality';
 export * from './derive';
 export { additionDistractors, additionNote } from './distractors';
 export { presentFact } from './present';
+export * from './check';
 
 /** A unit opens when ~80 % of each prerequisite is at least "fluent". */
 export const UNLOCK_FRACTION = 0.8;

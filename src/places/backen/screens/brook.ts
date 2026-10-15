@@ -1,3 +1,4 @@
+import { systemClock } from '../../../engine';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { avatarIcon } from '../../../shell/components/avatars';
@@ -10,6 +11,8 @@ import { genitive } from '../../../shell/words';
 import { bridge, laidCount } from '../components/bridge';
 import { bridgeStones, partProgress } from '../logic';
 import { brookDeps, pack } from '../pack';
+import { checkDue, checkLaterKey } from '../check';
+import { showCheckOffer } from './check';
 import { offeredKey, showBrookPlacementOffer } from './placement';
 import { showBrookSession } from './session';
 
@@ -31,6 +34,10 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
   const stones = bridgeStones(pack, states, unlocked);
   const parts = partProgress(pack, states, unlocked).filter((p) => p.open);
   const laid = laidCount(stones);
+  // Bäckens koll comes first on the days it is due (about every seventh play day).
+  const checkFirst =
+    !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(checkLaterKey(profile.id)));
+  const play = () => showBrookSession(ctx, profile, 'daily');
 
   const actions = asleep
     ? h(
@@ -42,7 +49,7 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
     : h(
         'div',
         { class: 'garden-actions' },
-        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showBrookSession(ctx, profile, 'daily') }, icon('steps'), 'Hoppa på stenarna'),
+        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void (checkFirst ? showCheckOffer(ctx, profile, play) : play()) }, icon('steps'), 'Hoppa på stenarna'),
       );
 
   const view = h(

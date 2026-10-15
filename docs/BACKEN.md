@@ -148,6 +148,33 @@ tillbaka till dalen.
   minusfakta som sitter, svåra just nu med strategin, de vanligaste
   förväxlingarna, Vågen per uppgiftstyp och ”Gör om startkollen vid bäcken”.
 
+## Bäckens koll (`check.ts`)
+
+Träffsäkerheten i passet säger inte vad barnet kan, eftersom motorn håller den
+runt 80–90 % med flit. Därför finns en separat koll med 13 uppgifter efter samma
+mall varje gång, utan anpassning efter barnet:
+
+| Sort | Antal | Exempel |
+|---|---|---|
+| Inom 10 | 3 | 3 + 5, 8 − 3 |
+| Plus över tiotalet | 3 | 8 + 5 |
+| Minus över tiotalet | 3 | 13 − 5 |
+| Likhetstecknet i nya former | 4 | 8 + 4 = __ + 5, __ + 6 = 9 + 4 |
+
+- Uppgifterna dras slumpvis inom varje sort och turas om. De väljs aldrig efter
+  vad barnet kan. Likheterna finns inte bland Vågens 24 övade uppgifter, så de
+  mäter transfer.
+- Barnet svarar fritt på stenarna. Ingen rätt- eller fel-markering visas och
+  ingen klocka syns. Tiden mäts till första siffran.
+- Kollen kommer före passet, första gången på barnets andra speldag vid bäcken
+  (en baslinje) och sedan ungefär var sjunde speldag. ”Inte nu” skjuter den till
+  en annan dag.
+- Kollen ändrar inte vad bäcken vet om barnet. Resultatet sparas som ett pass med
+  typen `check`, med antal rätt och snabba svar (under 3 s) per sort och tiden för
+  varje uppgift (−1 vid fel). Det följer med i säkerhetskopian, så att piloten kan
+  jämföra övade och oövade fakta.
+- Föräldravyn visar varje koll som en rad: dag och rätt per sort.
+
 ## Simulering
 
 Den simulerade eleven är samma minnesmodell som för Trädgården
