@@ -3,9 +3,8 @@
 Bäcken är dalens andra plats: addition och subtraktion inom 20 som faktafamiljer,
 på en linjär, numrerad tallinje, och likhetstecknet i varierade format från
 första veckan. Planen och upphovspersonens justeringar finns i
-[PLAN-BACKEN.md](PLAN-BACKEN.md). Den här filen beskriver innehållet
-(`src/content/addition`), som är byggt i fas B. Platsen med skärmar och bro
-kommer i fas C.
+[PLAN-BACKEN.md](PLAN-BACKEN.md). Innehållet (`src/content/addition`) byggdes
+i fas B och platsen (`src/places/backen`) i fas C.
 
 ## Fakta och familjer
 
@@ -19,8 +18,8 @@ familjen ligger i samma del. Varje fakta har en tvilling åt andra hållet:
 
 | Ordning | Del | Antal | Kräver |
 |---|---|---|---|
-| 1 | Noll | 42 | – |
-| 2 | Ett mer, ett mindre | 38 | – |
+| 1 | Ett mer, ett mindre | 38 | – |
+| 2 | Noll | 42 | – |
 | 3 | Små summor | 4 | ett mer |
 | 4 | Tio och några | 34 | ett mer |
 | 5 | Tiokamrater | 12 | små summor |
@@ -34,7 +33,9 @@ En del öppnas när cirka 80 % av varje förkunskap är flytande. En familj hamn
 den första del som passar: noll, ett mer, tio, dubblor, tiokamrater, små summor
 (summa högst 5), nära dubblor, inom 10 och sist över tiotalet.
 
-Noll, ett mer och tio och några är nästan hälften av alla fakta. De flesta
+Ett mer kommer först, så att barnets första fakta är 1 + 1 och inte 0 + 0.
+Inom noll kommer 0 + 0 och 0 − 0 sist. Noll, ett mer och tio och några är nästan
+hälften av alla fakta. De flesta
 7-åringar kan dem redan, och då markerar **startkollen** dem som kända med drygt
 20 frågor (J4). Startkollen följer grafen: en missad del hoppar bara över det som
 bygger på den, och andra grenar testas ändå. Vågen ingår inte i startkollen.
@@ -99,6 +100,47 @@ Varje fakta har landningspunkterna för tallinjen (`landings`, J2). Vid 8 + 5 ä
 det 8 → 10 → 13, vid 13 − 5 är det 13 → 10 → 8 och vid 12 − 9, räknat uppåt,
 9 → 10 → 12. Tiokamrater, dubblor och nära dubblor har också en tiotalsram.
 
+## Platsen
+
+Barnet når bäcken från dalen: platsen på kartan (bäcken med en liten bro) eller
+huvudknappen ”Gå till bäcken” när trädgården vilar. Djuret i sidhuvudet leder
+tillbaka till dalen.
+
+- **Humör i dalen.** ”Nya stenar väntar vid bäcken.” innan något är övat,
+  ”Bäcken har något att visa dig.” när dagens pass återstår och ”Bäcken vilar.
+  Kom tillbaka i morgon!” när det är gjort.
+- **Bron** (`components/bridge.ts`) har ett block per del om fakta, i delarnas
+  ordning. En öppen del har en streckad plats, blocket fylls med andelen fakta som
+  är minst flytande och räknas som lagt vid 80 % (`LAID_AT`). Blocken är fyrkantiga
+  och huggna, så att de inte förväxlas med tallinjens runda stenar (J7). Vågen är
+  inget block. På kartan är bron en liten valvbåge.
+- **Delarna** står under bron med ”8 av 16” och en stapel. Bara öppna delar visas.
+- **Startkoll.** Första gången vid bäcken, innan något är övat, erbjuds startkollen
+  en gång (`brookCheckOffered:<profil>`). Svaren ges på sifferknappsatsen, tiden
+  mäts till första siffran och ingen rätt- eller fel-markering visas. Kollen kan
+  göras om från föräldravyn.
+- **Ny fakta.** Kortet ”En ny sten” visar faktan med lucka, hoppen mellan
+  landningspunkterna (animerade, 700 ms per hopp) och tiotalsramen där den finns.
+  Uppläsningen säger landningspunkterna: ”8 … 10 … 13” (J2). Sedan visas svaret
+  och strategin, och barnet trycker ”Nu du!”.
+- **Frågan.** Så länge en fakta är helt ny står tallinjen kvar vid frågan, med
+  startstenen markerad men utan hopp. Vid Vågen står vågen vid frågan, med
+  ”Vad ska stå i rutan?” eller ”Stämmer det?”. Ja står alltid till vänster om Nej.
+- **Tid.** Vid tvåsiffriga svar mäts tiden till första siffran (J5).
+- **Räknestigen** visar tallinjen med startstenen men utan hopp, eftersom hoppen
+  skulle avslöja svaret på stegen.
+- **Hjälpkortet** visar ”Du svarade 12. Så här kan du tänka:”, faktan med svaret
+  (luckan ifylld), en eventuell förklaring av förväxlingen, strategin och
+  tallinjen med hoppen, eller vågen.
+- **Smal telefon.** Under 560 px visar tallinjen ett fönster med 11 stenar runt
+  hoppen i stället för hela 0–20.
+- **Dagens tid** delas lika mellan dalens platser, minst 5 minuter per plats
+  (`placeMinutes`). Med två platser och 12 minuter får bäcken 6. I fas D delas
+  tiden i stället efter hur mycket som är förfallet.
+- **Föräldravyn** har en egen del för bäcken: antal fakta per status, varje del
+  med hur många som sitter eller ”inte öppen än”, och ”Gör om startkollen vid
+  bäcken”.
+
 ## Simulering
 
 Den simulerade eleven är samma minnesmodell som för Trädgården
@@ -115,7 +157,7 @@ veckan, med två slumpfrön (`tests/simulation/addition.test.ts`):
 Startkollen tar drygt 20 frågor, och barnet når övergångarna två till tre veckor
 tidigare.
 
-**Fynd att följa upp i fas C och i piloten:**
+**Fynd att följa upp i piloten:**
 
 - **Den svaga eleven** ligger under målbandet (76 %). Felen kommer främst från
   repetitionerna av övergången över tiotalet: cirka 60 % rätt på förfallna

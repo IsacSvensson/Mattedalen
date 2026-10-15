@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { answer, createProfile, enterGarden, nextStep, openParent, seedStates, switchPlayer } from './helpers';
 
-/** The valley is the child's start page; the garden is its only place so far. */
+/** The valley is the child's start page, with the garden and the brook. */
 
 test('a child chooses their name and lands in the valley, and walks to the garden and back', async ({ page }) => {
   await page.goto('/');
@@ -9,8 +9,10 @@ test('a child chooses their name and lands in the valley, and walks to the garde
   // A new child goes straight on from the start check into the garden, as before.
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.getByRole('heading', { name: 'Mattedalen' })).toBeVisible();
-  await expect(page.locator('.place')).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Trädgården. Här väntar nya frön.' })).toBeVisible();
+  await expect(page.locator('.place')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Trädgården. Nya frön väntar i trädgården.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Bäcken. Nya stenar väntar vid bäcken.' })).toBeVisible();
+  await expect(page.locator('.valley-walker')).toHaveClass(/at-place-garden/);
   await expect(page.locator('.mini-cell .plant')).toHaveCount(0);
 
   // The place itself leads to the garden …
@@ -20,6 +22,14 @@ test('a child chooses their name and lands in the valley, and walks to the garde
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await page.getByRole('button', { name: 'Gå till trädgården' }).click();
   await expect(page.getByRole('heading', { name: 'Alvas trädgård' })).toBeVisible();
+
+  // To the brook and back: the child's animal now stands by the brook.
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: /^Bäcken\./ }).click();
+  await page.getByRole('button', { name: 'Börja från början' }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas bäck' })).toBeVisible();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await expect(page.locator('.valley-walker')).toHaveClass(/at-place-brook/);
 
   // Opening the app again: choose the player, and the valley is the start page.
   await page.reload();
@@ -41,7 +51,7 @@ test('the valley shows what the child knows: plants in the bed and a sunflower p
 
   const thirsty = page.getByRole('button', { name: 'Trädgården. Trädgården är törstig.' });
   await expect(thirsty).toBeVisible();
-  await expect(page.locator('.place-status')).toHaveText('Trädgården är törstig.');
+  await expect(page.locator('.place-status')).toHaveText(['Trädgården är törstig.', 'Nya stenar väntar vid bäcken.']);
   // The furthest grown plants first: one tree, then bushes.
   await expect(page.locator('.mini-cell .plant')).toHaveCount(8);
   await expect(page.locator('.mini-cell').first().locator('.plant-tree')).toHaveCount(1);
@@ -62,8 +72,10 @@ test('the valley shows what the child knows: plants in the bed and a sunflower p
   await end.click();
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.getByRole('button', { name: 'Trädgården. Trädgården sover. Kom tillbaka i morgon!' })).toBeVisible();
-  await expect(page.locator('.place-name .icon')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Gå till trädgården' }).click();
+  await expect(page.locator('.place-garden .place-name .icon')).toHaveCount(1);
+  // The main button now suggests the brook; the sleeping garden can still be visited.
+  await expect(page.getByRole('button', { name: 'Gå till bäcken' })).toBeVisible();
+  await enterGarden(page);
   await expect(page.getByText('Trädgården sover. Kom tillbaka i morgon!')).toBeVisible();
 });
 
@@ -105,7 +117,7 @@ test('the valley can be read aloud', async ({ page }) => {
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: 'Läs upp' }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual([
-    'sv-SE: Trädgården. Här väntar nya frön.',
+    'sv-SE: Nya frön väntar i trädgården. Nya stenar väntar vid bäcken.',
   ]);
 });
 

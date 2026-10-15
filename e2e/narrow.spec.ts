@@ -31,20 +31,22 @@ for (const width of [320, 360]) {
       }
     });
 
-    test('the valley fits: the place, the animal and the main button', async ({ page }) => {
+    test('the valley fits: the places, the animal and the main button', async ({ page }) => {
       await page.goto('/');
       await createProfile(page, 'Alexandra-Charlotte');
       await page.getByRole('button', { name: 'Till dalen' }).click();
       await expect(page.locator('.valley-map')).toBeVisible();
-      await expectWithin(page, '.place', '.valley-ground');
+      await expect(page.locator('.place')).toHaveCount(2);
+      for (const place of ['.place-garden', '.place-brook']) await expectWithin(page, place, '.valley-ground');
       await expectWithin(page, '.valley-walker', '.valley-ground');
       await expectInside(page, '.place-status-row', 'main');
       await expectInside(page, '.valley-side .big-button', 'main');
-      // The animal does not stand on the place.
-      const place = (await page.locator('.place').boundingBox())!;
-      const walker = (await page.locator('.valley-walker').boundingBox())!;
-      const apart = walker.x + walker.width <= place.x || walker.y >= place.y + place.height;
-      expect(apart).toBe(true);
+      // What is drawn never overlaps: the animal, and each place's picture and sign.
+      const parts = ['.place-garden > :first-child', '.place-garden .place-name', '.place-brook > :first-child', '.place-brook .place-name', '.valley-walker'];
+      const boxes = await Promise.all(parts.map(async (sel) => (await page.locator(sel).boundingBox())!));
+      for (let i = 0; i < parts.length; i++)
+        for (let j = i + 1; j < parts.length; j++)
+          if (parts[i]!.split(' ')[0] !== parts[j]!.split(' ')[0]) expect(overlap(boxes[i]!, boxes[j]!), `${parts[i]} / ${parts[j]}`).toBe(false);
       await expectNoSidewaysScroll(page);
     });
 
@@ -77,6 +79,10 @@ async function expectInside(page: Page, inner: string, outer: string): Promise<v
   expect(a.x).toBeGreaterThanOrEqual(b.x);
   expect(a.x + a.width).toBeLessThanOrEqual(b.x + b.width + 0.5);
 }
+
+type Box = { x: number; y: number; width: number; height: number };
+
+const overlap = (a: Box, b: Box) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
 async function expectWithin(page: Page, inner: string, outer: string): Promise<void> {
   const a = (await page.locator(inner).first().boundingBox())!;

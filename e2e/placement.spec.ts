@@ -81,7 +81,7 @@ test('the check can be redone from the parent view and never moves a child back'
 
   await switchPlayer(page);
   await openParent(page);
-  await page.getByRole('button', { name: 'Gör om startkollen' }).click();
+  await page.getByRole('button', { name: 'Gör om startkollen', exact: true }).click();
   await page.getByRole('button', { name: 'Gör startkollen' }).click();
   await answerCheck(page, []);
   await page.getByRole('button', { name: 'Till trädgården' }).click();

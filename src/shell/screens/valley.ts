@@ -11,16 +11,21 @@ import { showProfiles } from './profiles';
 /**
  * The valley: the child's start page and the map of the places. Only places
  * that exist are drawn; the rest of the valley is landscape until a place is
- * built, so nothing waits to be unlocked.
+ * built, so nothing waits to be unlocked. The child chooses which place to go
+ * to; the main button suggests the first one that is not resting.
  */
 export async function showValley(ctx: AppContext, profile: Profile): Promise<void> {
-  // Only Trädgården so far; Bäcken gets its own spot by the brook.
-  const place = ctx.places[0] as Place;
-  const map = await place.onMap(ctx, profile);
-  const go = () => void place.open(ctx, profile);
-
-  const status = h('p', { class: 'place-status' }, map.moodIcon, h('span', null, map.moodText));
+  const maps = await Promise.all(ctx.places.map(async (place) => ({ place, map: await place.onMap(ctx, profile) })));
+  const lastId = await ctx.store.getSetting<string>(lastPlaceKey(profile));
+  const last = maps.find((m) => m.place.id === lastId) ?? maps[0]!;
+  const suggested = maps.find((m) => m.map.mood !== 'asleep') ?? maps[0]!;
+  const go = (place: Place) => async () => {
+    await ctx.store.setSetting(lastPlaceKey(profile), place.id);
+    await place.open(ctx, profile);
+  };
+  const sunflowers = maps.reduce((n, m) => n + m.map.sunflowers, 0);
   const voiceOn = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
+  const spoken = maps.map(({ map }) => map.moodText).join(' ');
 
   const view = h(
     'main',
@@ -34,38 +39,48 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
     h(
       'div',
       { class: 'valley-map' },
-      scene({ height: 120, sunflowers: map.sunflowers, cloud: true }),
+      scene({ height: 120, sunflowers, cloud: true }),
       h(
         'div',
         { class: 'valley-ground' },
         valleyLand(),
-        h(
-          'button',
-          { class: `place ${map.spot} mood-${map.mood}`, type: 'button', 'aria-label': `${place.name}. ${map.moodText}`, onclick: go },
-          map.art,
-          h('span', { class: 'place-name' }, map.nameIcon, place.name),
+        maps.map(({ place, map }) =>
+          h(
+            'button',
+            { class: `place ${map.spot} mood-${map.mood}`, type: 'button', 'aria-label': `${place.name}. ${map.moodText}`, onclick: () => void go(place)() },
+            map.art,
+            h('span', { class: 'place-name' }, map.nameIcon, place.name),
+          ),
         ),
-        // The child's animal stands on the path by the place it goes to.
-        h('span', { class: 'valley-walker', 'aria-hidden': 'true' }, avatarIcon(profile.avatar)),
+        // The child's animal stands on the path by the place it went to last.
+        h('span', { class: `valley-walker at-${last.map.spot}`, 'aria-hidden': 'true' }, avatarIcon(profile.avatar)),
       ),
     ),
-    map.landscapeText ? h('p', { class: 'sr-only' }, map.landscapeText) : null,
+    maps.map(({ map }) => (map.landscapeText ? h('p', { class: 'sr-only' }, map.landscapeText) : null)),
     h(
       'div',
       { class: 'valley-side' },
       h(
         'div',
         { class: 'place-status-row' },
-        status,
+        h('div', { class: 'place-statuses' }, maps.map(({ map }) => h('p', { class: 'place-status' }, map.moodIcon, h('span', null, map.moodText)))),
         voiceOn
-          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp', onclick: () => void speak(`${place.name}. ${map.moodText}`) }, icon('speaker'))
+          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp', onclick: () => void speak(spoken) }, icon('speaker'))
           : null,
       ),
-      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: go }, icon(map.go.icon), map.go.label),
+      h(
+        'button',
+        { class: 'big-button', type: 'button', autofocus: true, onclick: () => void go(suggested.place)() },
+        icon(suggested.map.go.icon),
+        suggested.map.go.label,
+      ),
     ),
   );
   show(ctx, view);
 }
+
+/** Where a child went last, so their animal stands there (per child). */
+const lastPlaceKey = (profile: Profile) => `lastPlace:${profile.id}`;
 
 /** The brook and the path, stretched to the ground's shape (the outlines keep their width). */
 function valleyLand(): SVGSVGElement {

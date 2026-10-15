@@ -7,11 +7,11 @@ bruk.
 
 > **Spela:** https://isacsvensson.github.io/Mattedalen/
 >
-> **Status:** Skalet är klart: dalens karta är startsidan, och Trädgården
-> (multiplikation) är den första platsen. Mattedalen bygger vidare på
-> Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
-> med hela dess historik. Härnäst kommer Bäcken (addition och subtraktion), se
-> [Ordning framåt](#ordning-framåt).
+> **Status:** Dalens karta är startsidan och har två platser: Trädgården
+> (multiplikation) och Bäcken (addition och subtraktion inom 20). Mattedalen
+> bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
+> med hela dess historik. Härnäst kommer dagens plan för flera platser (fas D),
+> se [PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser).
 
 Mer att läsa:
 
@@ -22,8 +22,7 @@ Mer att läsa:
 - [docs/TRADGARDEN.md](docs/TRADGARDEN.md): Trädgården, multiplikationspaketet
   och dess spel.
 - [docs/PLAN-BACKEN.md](docs/PLAN-BACKEN.md) och [docs/BACKEN.md](docs/BACKEN.md):
-  Bäcken, addition och subtraktion inom 20. Innehållet är byggt, och platsen
-  kommer härnäst.
+  Bäcken, addition och subtraktion inom 20: innehållet, platsen och planen.
 
 ## Principer
 
@@ -54,22 +53,26 @@ grafik är ritad SVG och typsnitten följer med appen. Reglerna står överst i
 Dalen är barnets startsida. Barnet väljer sig själv under ”Vem spelar?” och
 kommer då till dalens karta. Därifrån går barnet till platserna.
 
-- **Bara platser som finns ritas.** Trädgården är den enda platsen än så länge.
-  Resten av dalen är landskap med en bäck och en stig. Det finns inga stängda
+- **Bara platser som finns ritas.** Trädgården och Bäcken finns. Resten av dalen
+  är landskap med en stig. Det finns inga stängda
   platser som väntar på att låsas upp, för innehåll öppnas när det finns och när
   barnet har förkunskaperna, aldrig som belöning.
 - **Kartan visar vad barnet kan.** Trädgården ritas som en liten odlingslåda med
   barnets mest utvecklade plantor (`miniBed` i `src/places/tradgarden/valley.ts`). Solrosorna
-  på kullen är samma som i trädgården: en per tabell barnet kan.
+  på kullen är samma som i trädgården: en per tabell barnet kan. Bäcken ritas med
+  en liten valvbro av barnets lagda block.
 - **Dagens läge står i text och bild**, aldrig bara i färg. Platsen kan vänta på
   sina första frön, vara törstig när dagens pass inte är gjort, eller sova när
   passet är klart. Inget vissnar, och inga dagar räknas.
 - **Uppläsning.** Har barnet uppläsning påslagen finns en knapp som läser upp
-  platsens namn och läge.
-- **Navigering.** Platsen och den orangea knappen ”Gå till trädgården” leder
-  båda till trädgården. Djuret i trädgårdens sidhuvud leder tillbaka till dalen
-  (”Till dalen”), och spelare byts i dalen. En ny spelare går som förut direkt
-  från startkollen in i trädgården. Inget annat i trädgården har ändrats.
+  platsernas lägen.
+- **Navigering.** Varje plats på kartan leder dit. Den orangea knappen föreslår
+  den första platsen som inte vilar (”Gå till trädgården”, ”Gå till bäcken”).
+  Barnets djur står vid den plats barnet besökte senast. Djuret i platsens
+  sidhuvud leder tillbaka till dalen (”Till dalen”), och spelare byts i dalen. En
+  ny spelare går som förut direkt från startkollen in i trädgården.
+- **Dagens tid** (passlängden i föräldravyn) delas lika mellan platserna, minst
+  5 minuter per plats.
 
 Dalen testas i `e2e/valley.spec.ts` och i testerna för smala telefoner och
 liggande telefon. Logiken utan DOM testas i `tests/game/valley.test.ts`.
@@ -90,6 +93,7 @@ src/
     screens/parent/         föräldravyn, med en del per plats
   places/
     tradgarden/             Trädgården: platsen, dess skärmar och dess del av föräldravyn
+    backen/                 Bäcken: bron, tallinjen, tiotalsramen, vågen, skärmarna och föräldradelen
 tests/
   engine/                   enhetstester för motorn (med ett glosor-paket)
   content/                  tester för innehållspaketen
@@ -341,7 +345,7 @@ Enligt [överlämningen](docs/OVERLAMNING-MATTEDALEN.md#ordning):
 
 1. ~~Nytt repo med Gångerträdgårdens historik, egen databas och import.~~
 2. ~~Skalet med dalens karta och Trädgården som första plats.~~
-3. **Bäcken:** addition och subtraktion inom 20 och sedan 100 som faktafamiljer,
+3. **Bäcken** (inom 20 är byggt, se [PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser)): addition och subtraktion inom 20 och sedan 100 som faktafamiljer,
    en linjär numrerad tallinje, tiokamrater, dubblor, övergång via tiotalet och
    likhetstecknet i varierade format från första veckan. Här byggs grafen över
    kunskapskomponenter.

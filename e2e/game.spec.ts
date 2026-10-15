@@ -80,9 +80,9 @@ test('an interrupted session continues later the same day: the time adds up', as
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   await answer(page);
   await expect(nextStep(page)).toBeVisible();
-  await page.clock.fastForward('03:00');
+  await page.clock.fastForward('01:30');
   await answer(page);
-  // The child leaves after about 3 of 12 minutes.
+  // The child leaves after about 1.5 of 6 minutes (the garden's half of 12).
   await page.getByRole('button', { name: 'Tillbaka till trädgården' }).click();
   await expect(page.getByRole('button', { name: 'Vattna trädgården' })).toBeVisible();
 
@@ -93,9 +93,9 @@ test('an interrupted session continues later the same day: the time adds up', as
   await expect(progress).toHaveAttribute('aria-valuenow', /^(2[5-9]|3\d)$/);
   await expect(page.locator('.drop.on')).toHaveCount(3);
 
-  // Another 9 minutes finishes the day's session.
+  // Another 5 minutes finishes the day's session.
   await expect(nextStep(page)).toBeVisible();
-  await page.clock.fastForward('09:00');
+  await page.clock.fastForward('05:00');
   await answer(page);
   await expect(page.getByRole('heading', { name: 'Bra jobbat!' })).toBeVisible();
 });

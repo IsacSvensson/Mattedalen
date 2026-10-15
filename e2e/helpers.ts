@@ -9,10 +9,10 @@ export async function createProfile(page: Page, name: string): Promise<void> {
   await expect(page.getByRole('heading', { name: new RegExp(`${name}s? trädgård`) })).toBeVisible();
 }
 
-/** From the valley (or the list of players) into the garden. */
+/** From the valley (or the list of players) into the garden, by the place on the map. */
 export async function enterGarden(page: Page, name?: string): Promise<void> {
   if (name) await page.locator('.profile-tile', { hasText: name }).click();
-  await page.getByRole('button', { name: 'Gå till trädgården' }).click();
+  await page.getByRole('button', { name: /^Trädgården\./ }).click();
   await expect(page.getByRole('heading', { name: /s? trädgård$/ })).toBeVisible();
 }
 
@@ -97,8 +97,16 @@ export async function answer(page: Page, correct = true): Promise<string> {
 /** Writes item states for the (only) profile straight into IndexedDB, then reloads. */
 export type SeedState = { status: string; box: number; dueDay?: string } & Record<string, unknown>;
 
-export async function seedStates(page: Page, states: Record<string, SeedState>): Promise<void> {
-  await page.evaluate(async (seed) => {
+/** Which pack the states belong to; the garden's by default. */
+export interface SeedPack {
+  packId: string;
+  unlockedUnitIds: string[];
+}
+
+const GARDEN_SEED: SeedPack = { packId: 'multiplication', unlockedUnitIds: ['u10'] };
+
+export async function seedStates(page: Page, states: Record<string, SeedState>, pack: SeedPack = GARDEN_SEED): Promise<void> {
+  await page.evaluate(async ({ seed, pack }) => {
     const db: IDBDatabase = await new Promise((r) => {
       const q = indexedDB.open('mattedalen');
       q.onsuccess = () => r(q.result);
@@ -129,16 +137,16 @@ export async function seedStates(page: Page, states: Record<string, SeedState>):
       const tx = db.transaction('progress', 'readwrite');
       tx.objectStore('progress').put({
         profileId: profiles[0]!.id,
-        packId: 'multiplication',
+        packId: pack.packId,
         packVersion: 1,
         states: full,
-        meta: { pacingGap: 8, unlockedUnitIds: ['u10'], accuracyEma: 0.85, sessionsCompleted: 3, lastSessionDay: '2026-02-01' },
+        meta: { pacingGap: 8, unlockedUnitIds: pack.unlockedUnitIds, accuracyEma: 0.85, sessionsCompleted: 3, lastSessionDay: '2026-02-01' },
         updatedAt: 1,
       });
       tx.oncomplete = r;
     });
     db.close();
-  }, states);
+  }, { seed: states, pack });
   await page.reload();
 }
 

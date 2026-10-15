@@ -49,7 +49,7 @@ export function additionNote(f: Fact, given: string): string | undefined {
   const g = Number(given);
   const { op, x, y, answer } = f;
   if (given.trim() === '' || !Number.isInteger(g) || g === answer) return undefined;
-  if (g === answer + 1 || g === answer - 1) return `${g} är ett ${g > answer ? 'för mycket' : 'för lite'} – nära! Titta var hoppen landar.`;
+  if (g === answer + 1 || g === answer - 1) return `${g} är ett ${g > answer ? 'för mycket' : 'för lite'} – nära!`;
   if (op === '+' && g === Math.abs(x - y)) return `${g} är ${formatFact('-', Math.max(x, y), Math.min(x, y))}. Här ska det vara plus.`;
   if (op === '-' && g === x + y) return `${g} är ${formatFact('+', x, y)}. Här ska det vara minus.`;
   if (op === '-' && x > 10 && y > x % 10 && g === 10 + (y - (x % 10)))

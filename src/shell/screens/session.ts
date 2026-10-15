@@ -7,7 +7,7 @@ import { numPad } from '../components/numPad';
 import { scene } from '../components/scene';
 import { h, prefersReducedMotion, wait } from '../dom';
 import { PlayController, type GameDeps } from '../play';
-import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../speech';
+import { hasSwedishVoice, speak, speechSupported, spokenText, stopSpeaking } from '../speech';
 
 /** One step on a derivation path ("räknestigen"). Only the last step is the answer to the question. */
 export interface PathStep {
@@ -55,6 +55,39 @@ export interface SessionPlace {
   /** A derivation path for a hard item, with a picture beside it, or null. */
   derivation(q: Question): { steps: PathStep[]; visual: Element } | null;
   help(q: Question, fb: Feedback): HelpParts;
+  /** A line above the prompt, e.g. "Stämmer det?". */
+  questionLabel?(q: Question): string | null;
+  /** How an option is shown, e.g. "Ja" for `ja`. */
+  choiceLabel?(value: string): string;
+  /** A fixed order for the choices (Ja before Nej), where shuffling them would only confuse. */
+  choiceOrder?(values: string[]): string[];
+  /** A picture beside the question while the item is new to the child (faded out later). */
+  askVisual?(q: Question): Element | null;
+  /** Time a typed answer to its first digit (J5), so 13 is not slower than 8 just to type. */
+  timeToFirstDigit?: boolean;
+}
+
+/**
+ * The prompt as shown: a blank (`__`) becomes an empty box, and long
+ * prompts (`7 + 5 = __ + 8`) get a smaller size.
+ */
+export function promptView(prompt: string): HTMLElement {
+  const parts = prompt.split('__');
+  const blank = parts.length > 1;
+  const content: (Node | string)[] = [];
+  parts.forEach((part, i) => {
+    if (i > 0) content.push(h('span', { class: 'blank', 'aria-hidden': 'true' }, '?'));
+    content.push(part);
+  });
+  return h(
+    'p',
+    {
+      class: `prompt${prompt.length > 7 ? ' long' : ''}${blank ? ' has-blank' : ''}`,
+      // A prompt with its own equal sign is read as it stands; "3 × 7" as "3 gånger 7 är lika med?".
+      'aria-label': prompt.includes('=') ? `${spokenText(prompt)}?` : `${prompt.replace('×', 'gånger')} är lika med?`,
+    },
+    content,
+  );
 }
 
 /** Pause after a correct answer before the next question. */
@@ -139,7 +172,7 @@ export async function runSession(
     if (q.kind === 'new') await introduce(stage, q, place, setKeys);
     if (finished) return;
     const path = q.kind === 'derive' ? place.derivation(q) : null;
-    const { given, rtMs } = path ? await derive(stage, path.steps, path.visual, setKeys) : await ask(stage, q, setKeys);
+    const { given, rtMs } = path ? await derive(stage, path.steps, path.visual, setKeys) : await ask(stage, q, place, setKeys);
     if (finished) return;
     const fb = await play.answer(given, rtMs);
     updateProgress();
@@ -170,10 +203,26 @@ function introduce(stage: HTMLElement, q: Question, place: SessionPlace, setKeys
     currentPrompt = q.prompt;
     if (voiceOn) void speak(parts.spoken);
     stage.replaceChildren(
-      h('div', { class: 'intro-card card' }, h('p', { class: 'intro-label' }, parts.label), h('p', { class: 'prompt' }, q.prompt), parts.body, after),
+      h('div', { class: 'intro-card card' }, h('p', { class: 'intro-label' }, parts.label), introPrompt(q.prompt), parts.body, after),
     );
     setKeys(undefined);
   });
+}
+
+/**
+ * The item with its answer: "3 × 7 = 21", the blank filled in
+ * ("5 + 3 = 4 + 4"), or a statement with its verdict ("3 + 4 = 4 + 3: Ja").
+ */
+export function helpAnswer(prompt: string, expected: string): string {
+  if (prompt.includes('__')) return prompt.replace('__', expected);
+  if (prompt.includes('=')) return `${prompt}: ${expected}`;
+  return `${prompt} = ${expected}`;
+}
+
+/** The prompt on the intro card (a blank stays a blank until the child answers). */
+function introPrompt(prompt: string): HTMLElement {
+  if (!prompt.includes('__')) return h('p', { class: 'prompt' }, prompt);
+  return promptView(prompt);
 }
 
 /**
@@ -228,7 +277,7 @@ async function derive(stage: HTMLElement, steps: PathStep[], visual: Element, se
 }
 
 /** Multiple choice or free answer on a number pad. Response time is measured but never shown. */
-function ask(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<{ given: string; rtMs: number }> {
+function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetKeys): Promise<{ given: string; rtMs: number }> {
   return new Promise((resolve) => {
     let answered = false;
     let shownAt = performance.now();
@@ -239,29 +288,33 @@ function ask(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<{ given
         if (!answered) shownAt = performance.now();
       });
     }
-    const done = (value: string) => {
+    const done = (value: string, firstDigitAt: number | null = null) => {
       if (answered) return false;
       answered = true;
-      resolve({ given: value, rtMs: Math.round(performance.now() - shownAt) });
+      const end = place.timeToFirstDigit && firstDigitAt !== null ? firstDigitAt : performance.now();
+      resolve({ given: value, rtMs: Math.round(Math.max(0, end - shownAt)) });
       return true;
     };
+    const label = place.questionLabel?.(q);
     const prompt = h(
       'div',
       { class: 'prompt-card card' },
-      h('p', { class: 'prompt', 'aria-label': `${q.prompt.replace('×', 'gånger')} är lika med?` }, q.prompt),
-      q.format === 'free' ? null : h('p', { class: 'eq', 'aria-hidden': 'true' }, '= ?'),
+      label ? h('p', { class: 'ask-label' }, label) : null,
+      promptView(q.prompt),
+      q.format === 'free' || q.prompt.includes('=') ? null : h('p', { class: 'eq', 'aria-hidden': 'true' }, '= ?'),
+      place.askVisual?.(q) ?? null,
     );
 
     if (q.format === 'free') {
-      const pad = numPad((value) => {
-        if (done(value)) pad.disable();
+      const pad = numPad((value, firstDigitAt) => {
+        if (done(value, firstDigitAt)) pad.disable();
       });
       stage.replaceChildren(h('div', { class: 'question free' }, prompt, pad.el));
       setKeys((e) => pad.onKey(e));
       return;
     }
 
-    const choices = q.choices ?? [];
+    const choices = place.choiceOrder?.(q.choices ?? []) ?? q.choices ?? [];
     const choose = (value: string, button: HTMLButtonElement) => {
       if (!done(value)) return;
       button.classList.add('chosen');
@@ -277,7 +330,7 @@ function ask(stage: HTMLElement, q: Question, setKeys: SetKeys): Promise<{ given
           'aria-keyshortcuts': String(i + 1),
           onclick: (e: Event) => choose(value, e.currentTarget as HTMLButtonElement),
         },
-        value,
+        place.choiceLabel?.(value) ?? value,
       ),
     );
     stage.replaceChildren(h('div', { class: 'question' }, prompt, h('div', { class: 'answer-area choices' }, buttons)));
@@ -302,14 +355,21 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place
     card?.classList.add('is-right');
     const eq = card?.querySelector('.eq');
     if (eq) eq.textContent = `= ${fb.expected}`;
+    const blank = card?.querySelector('.blank');
+    if (blank) {
+      blank.textContent = place.choiceLabel?.(fb.expected) ?? fb.expected;
+      blank.classList.add('filled');
+    }
     card?.append(h('span', { class: 'cheer-plant', 'aria-hidden': 'true' }, plantIcon('sprout')));
     await wait(prefersReducedMotion() ? 300 : CORRECT_PAUSE_MS);
     return;
   }
 
   const help = place.help(q, fb);
+  const label = (value: string) => place.choiceLabel?.(value) ?? value;
   // The help shows the item in its usual form, whatever form it was asked in.
-  if (voiceOn) void speak(`${q.item.prompt} = ${fb.expected}`);
+  const answer = helpAnswer(q.item.prompt, label(fb.expected));
+  if (voiceOn) void speak(answer);
   await new Promise<void>((resolve) => {
     const next = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Fortsätt', icon('arrow', 'on-primary'));
     // The help takes the place of the question: the answer is in it.
@@ -320,8 +380,8 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place
         h(
           'div',
           { class: 'help-card card' },
-          h('p', { class: 'you-said' }, fb.given ? `Du svarade ${fb.given}.` : 'Inget svar den här gången.', help.strategy ? ' Så här kan du tänka:' : ''),
-          h('p', { class: 'help-answer' }, `${q.item.prompt} = ${fb.expected}`),
+          h('p', { class: 'you-said' }, fb.given ? `Du svarade ${label(fb.given)}.` : 'Inget svar den här gången.', help.strategy ? ' Så här kan du tänka:' : ''),
+          h('p', { class: 'help-answer' }, answer),
           help.note ? h('p', { class: 'confusion-note' }, help.note) : null,
           help.strategy ? h('p', { class: 'strategy' }, help.strategy) : null,
           help.visual ?? null,

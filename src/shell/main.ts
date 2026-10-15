@@ -1,4 +1,5 @@
 import './styles.css';
+import { backen } from '../places/backen';
 import { tradgarden } from '../places/tradgarden';
 import { createProgressStore, importLegacyData, requestPersistence } from '../storage';
 import type { AppContext } from './app';
@@ -20,7 +21,8 @@ async function start(): Promise<void> {
   const ctx: AppContext = {
     root,
     store,
-    places: [tradgarden],
+    // In map order: the garden first, as before; then the brook.
+    places: [tradgarden, backen],
     storageKind: kind,
     persist,
   };

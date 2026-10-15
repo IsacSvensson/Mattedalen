@@ -30,12 +30,26 @@ export interface GameDeps {
   rng?: Rng;
   /** Free-input answers are introduced in a later phase of the build. */
   allowFree?: boolean;
+  /**
+   * This place's share of the child's daily session (1 when it is the only
+   * place). The day's time is shared between the places, so two places do
+   * not mean twice the screen time.
+   */
+  share?: number;
+}
+
+/** Shortest daily session at one place, in minutes. */
+export const MIN_PLACE_MINUTES = 5;
+
+/** Minutes of the daily session at a place with the given share of the day. */
+export function placeMinutes(sessionMinutes: number, share = 1): number {
+  return share >= 1 ? sessionMinutes : Math.max(MIN_PLACE_MINUTES, Math.round(sessionMinutes * share));
 }
 
 export function engineFor(profile: Profile, deps: GameDeps): Engine {
   // The pack's own settings first, then the child's.
   const config = makeConfig(deps.pack.config ?? {}, {
-    session: { durationMs: profile.settings.sessionMinutes * 60_000 },
+    session: { durationMs: placeMinutes(profile.settings.sessionMinutes, deps.share) * 60_000 },
     format: { allowFree: (deps.allowFree ?? true) && profile.settings.allowFree },
   });
   return createEngine({ pack: deps.pack, config, clock: deps.clock ?? systemClock, rng: deps.rng ?? mathRandomRng });

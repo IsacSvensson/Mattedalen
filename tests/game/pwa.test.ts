@@ -20,5 +20,7 @@ describe('read-aloud text', () => {
     expect(spokenText('3 × 7 = ?')).toBe('3 gånger 7');
     expect(spokenText('3 × 7 = 21')).toBe('3 gånger 7 är 21');
     expect(spokenText('9 × 6 = 10 × 6 − 6')).toBe('9 gånger 6 är 10 gånger 6 minus 6');
+    expect(spokenText('13 − 5 = __')).toBe('13 minus 5 är hur mycket');
+    expect(spokenText('5 + __ = 13')).toBe('5 plus hur mycket är 13');
   });
 });

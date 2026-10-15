@@ -52,6 +52,8 @@ export interface Question {
   choices?: string[];
   /** True if the item's mirrored twin is already known (useful for "turn it around" hints). */
   pairKnown: boolean;
+  /** How well the item was known when asked, e.g. to fade a picture out as it is learnt. */
+  state?: ItemState;
 }
 
 export interface Feedback {
@@ -218,6 +220,7 @@ export class Session {
       format,
       choices: format === 'choice' ? buildChoices(pack, item, state, rng, config.format.choiceCount) : undefined,
       pairKnown: item.pairId !== undefined && this.state(item.pairId).status !== 'new',
+      state,
     };
     return this.current;
   }

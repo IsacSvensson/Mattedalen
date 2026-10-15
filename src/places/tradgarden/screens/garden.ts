@@ -8,6 +8,7 @@ import { avatarIcon } from '../../../shell/components/avatars';
 import { icon } from '../../../shell/components/icons';
 import { scene } from '../../../shell/components/scene';
 import { h } from '../../../shell/dom';
+import { genitive } from '../../../shell/words';
 import { engineFor, loadProgress } from '../../../shell/play';
 import { showValley } from '../../../shell/screens/valley';
 import { showSession } from './session';
@@ -130,7 +131,4 @@ export function knownTables(pack: ContentPack, states: Record<ItemId, ItemState>
   return out;
 }
 
-/** Swedish genitive: "Alvas", but "Lars" and "Max" stay as they are. */
-export function genitive(name: string): string {
-  return /[sxz]$/i.test(name) ? name : `${name}s`;
-}
+export { genitive } from '../../../shell/words';

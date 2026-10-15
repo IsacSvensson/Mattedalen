@@ -54,8 +54,8 @@ export function familyOf({ op, x, y, answer }: Fact): { a: number; b: number; su
  * ten and the bridge over ten, which the pilot measures.
  */
 export const UNIT_DEFS = [
-  { id: 'noll', title: 'Noll', requires: [] },
   { id: 'ettmer', title: 'Ett mer, ett mindre', requires: [] },
+  { id: 'noll', title: 'Noll', requires: [] },
   { id: 'sma', title: 'Små summor', requires: ['ettmer'] },
   { id: 'tio', title: 'Tio och några', requires: ['ettmer'] },
   { id: 'tiokamrater', title: 'Tiokamrater', requires: ['sma'] },
@@ -172,12 +172,14 @@ export function strategyFor(f: Fact): { kind: string; text: string; from: ItemId
  */
 export function landings(f: Fact): { stops: number[]; up: boolean } {
   const { op, x, y, answer } = f;
+  // Adding or taking away zero is no hop at all.
+  const hops = (stops: number[], up: boolean) => ({ stops: stops.filter((n, i) => i === 0 || n !== stops[i - 1]), up });
   if (op === '+') {
     const big = Math.max(x, y);
-    return crossesTen(f) ? { stops: [big, 10, answer], up: true } : { stops: [big, answer], up: true };
+    return crossesTen(f) ? hops([big, 10, answer], true) : hops([big, answer], true);
   }
-  if (strategyFor(f).kind === 'countUp') return { stops: [y, 10, x], up: true };
-  return crossesTen(f) ? { stops: [x, 10, answer], up: false } : { stops: [x, answer], up: false };
+  if (strategyFor(f).kind === 'countUp') return hops([y, 10, x], true);
+  return crossesTen(f) ? hops([x, 10, answer], false) : hops([x, answer], false);
 }
 
 export function hintsFor(f: Fact): Hint[] {
@@ -224,7 +226,8 @@ export function buildFacts(): Item[] {
           derivedFrom: strategy.from,
           hints: hintsFor(f),
           ...(twin !== id ? { pairId: twin } : {}),
-          order: sum * 100 + a * 4 + i,
+          // 0 + 0 and 0 − 0 last: a first fact should be about something.
+          order: (sum === 0 ? 99 : sum) * 100 + a * 4 + i,
         });
       });
     }

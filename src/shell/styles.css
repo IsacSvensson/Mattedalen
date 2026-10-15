@@ -77,6 +77,9 @@
   --night-hill-front: #2f4b3a;
   --water: #7cc4e4;
   --path: #f6e3bd;
+  /* stepping stones (a tool) and bridge blocks (knowledge) look different */
+  --stepping-stone: #ddd6c8;
+  --bridge-block: #c99a62;
 
   /* plants */
   --seed: #f6dca8;
@@ -1086,6 +1089,17 @@ h1:focus {
   box-shadow: none;
 }
 
+.place-garden {
+  left: 70%;
+  top: 65%;
+}
+
+/* Bäcken: the small bridge over the brook. */
+.place-brook {
+  left: 26%;
+  top: 22%;
+}
+
 .valley-walker {
   position: absolute;
   left: 30%;
@@ -1143,6 +1157,361 @@ h1:focus {
   width: 46px;
   height: 46px;
   margin: -6px -4px;
+}
+
+/* The animal stands by the place the child went to last. */
+/* Left of the garden, between it and the brook, so it never covers the sign. */
+.valley-walker.at-place-garden {
+  left: 34%;
+  top: 88%;
+}
+
+.valley-walker.at-place-brook {
+  left: 60%;
+  top: 14%;
+}
+
+.place-statuses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* --- brook (Bäcken) --------------------------------------------------- */
+/*
+ * The same three channels:
+ * - availability: an open part has its place in the bridge (an outlined block)
+ * - knowledge: how full the block is
+ * - whole area: the bridge reaching the other bank
+ * The numbered stepping stones of the number line are round and grey: a tool,
+ * never knowledge.
+ */
+
+.bridge {
+  display: block;
+}
+
+.bridge-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bridge.mini {
+  width: clamp(130px, 40vw, 190px);
+}
+
+.br-water {
+  fill: var(--water);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.br-bank {
+  fill: var(--hill-front);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.br-arch {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.br-slot {
+  fill: color-mix(in srgb, var(--card) 70%, transparent);
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+
+.br-slot.laid {
+  stroke-dasharray: none;
+}
+
+.br-fill {
+  fill: var(--bridge-block);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.br-fill.laid {
+  stroke-width: 0;
+}
+
+.brook-bridge {
+  width: min(100%, 560px);
+  padding: 10px;
+  border: var(--outline);
+  border-radius: var(--r-card);
+  background: var(--sky);
+}
+
+.brook-parts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: min(100%, 460px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.brook-parts li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 10px;
+  font-weight: 700;
+}
+
+.brook-parts .part-count {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.brook-parts .part-bar {
+  grid-column: 1 / -1;
+  height: 8px;
+  border-radius: 4px;
+  border: 1.5px solid var(--ink);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.brook-parts .part-bar span {
+  display: block;
+  height: 100%;
+  background: var(--bridge-block);
+}
+
+.brook-parts.parent li.closed {
+  color: var(--ink-soft);
+}
+
+.asleep .brook-parts li,
+.asleep .brook-parts .part-count {
+  color: #f6efe0;
+}
+
+/* The number line: round numbered stepping stones on the water. */
+.number-line {
+  width: 100%;
+}
+
+.number-line-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 120px;
+}
+
+.nl-water {
+  fill: var(--water);
+  opacity: 0.55;
+}
+
+.nl-stone ellipse {
+  fill: var(--stepping-stone);
+  stroke: var(--ink);
+  stroke-width: 1.8;
+}
+
+.nl-stone text {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: var(--ink);
+}
+
+.nl-stone.landing ellipse {
+  fill: var(--card);
+  stroke-width: 2.6;
+}
+
+.nl-stone.landing text {
+  font-size: 17px;
+}
+
+.nl-hop {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.nl-hop.animate {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hop 0.6s ease-out forwards;
+}
+
+.nl-hop-label {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: var(--ink);
+}
+
+.nl-hop-label.animate {
+  opacity: 0;
+  animation: appear 0.3s 0.3s ease-out forwards;
+}
+
+@keyframes hop {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes appear {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Ten frames: the first part filled, the second as rings. */
+.ten-frame {
+  width: min(100%, 300px);
+}
+
+.ten-frame-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tf-frame {
+  fill: var(--card);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.tf-cell {
+  fill: none;
+  stroke: var(--divider);
+  stroke-width: 1;
+}
+
+.tf-dot.first {
+  fill: var(--i-red);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.tf-dot.second {
+  fill: var(--card);
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+/* Vågen: a level scale with both sides written on it. */
+.balance {
+  position: relative;
+  width: min(100%, 300px);
+}
+
+.balance-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bal-post,
+.bal-beam,
+.bal-string {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.bal-beam {
+  stroke: var(--wood);
+  stroke-width: 7;
+}
+
+.bal-pivot {
+  fill: var(--sun);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.bal-pan {
+  fill: var(--card);
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+
+.bal-side {
+  position: absolute;
+  /* In the pans, under the strings. */
+  top: 50%;
+  width: 26%;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.bal-side.left {
+  left: 5.5%;
+}
+
+.bal-side.right {
+  right: 5.5%;
+}
+
+.intro-pictures,
+.ask-pictures {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.ask-pictures {
+  margin-top: 12px;
+}
+
+.prompt-card .balance {
+  margin: 12px auto 0;
+}
+
+.intro-answer {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+}
+
+/* Prompts with a blank ("13 − 5 = __") and long ones ("7 + 5 = __ + 8"). */
+.prompt.long {
+  font-size: clamp(2.2rem, 10.5vw, 4rem);
+}
+
+.prompt .blank {
+  display: inline-block;
+  min-width: 1.3em;
+  padding: 0 0.12em;
+  border-bottom: 0.08em solid var(--ink);
+  color: var(--ink-soft);
+}
+
+.prompt .blank.filled {
+  color: var(--good-ink);
+  border-bottom-color: var(--good-ink);
+}
+
+.ask-label {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--ink-soft);
 }
 
 /* --- session: the top band ------------------------------------------- */

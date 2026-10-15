@@ -39,6 +39,8 @@ export function spokenText(text: string): string {
   return text
     .replace(/×/g, ' gånger ')
     .replace(/−/g, ' minus ')
+    .replace(/\+/g, ' plus ')
+    .replace(/__/g, ' hur mycket ')
     .replace(/=\s*\?/g, '')
     .replace(/=/g, ' är ')
     .replace(/\s+/g, ' ')

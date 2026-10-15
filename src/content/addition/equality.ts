@@ -114,6 +114,16 @@ export function equalityNote(e: Equality, given: string): string | undefined {
   return undefined;
 }
 
+/** How to see it: both sides worked out ("5 + 3 är 8, och 4 + 4 är 8."). */
+export function equalityExplanation(e: Equality): string {
+  const filled = (xs: (number | null)[]) => xs.map((x) => (x === null ? (e.kind === 'balance' ? e.answer : 0) : x));
+  const left = filled(e.left);
+  const right = filled(e.right);
+  const say = (xs: number[]) => (xs.length === 1 ? `${xs[0]}` : `${side(xs)} är ${sum(xs)}`);
+  const same = sum(left) === sum(right);
+  return `${say(left)}, och ${say(right)}. ${same ? 'Båda sidor är lika mycket.' : 'Det är inte lika mycket.'}`;
+}
+
 /** The equality tasks as items of the unit `vagen` (understanding). */
 export function buildEqualities(): Item[] {
   return EQUALITIES.map((e, order) => ({
@@ -123,7 +133,10 @@ export function buildEqualities(): Item[] {
     unitId: 'vagen',
     tags: [`equality:${e.kind}`],
     derivedFrom: [],
-    hints: [{ kind: 'equality', data: e }],
+    hints: [
+      { kind: 'equality', data: e },
+      { kind: 'strategy', text: equalityExplanation(e) },
+    ],
     // There is no number to type for "stämmer det?".
     ...(e.kind === 'truefalse' ? { formats: ['choice' as const] } : {}),
     order,

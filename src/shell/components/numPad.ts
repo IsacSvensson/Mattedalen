@@ -11,10 +11,16 @@ export interface NumPad {
   disable(): void;
 }
 
-/** Large number pad for free answers. */
-export function numPad(onSubmit: (value: string) => void): NumPad {
+/**
+ * Large number pad for free answers. `onSubmit` also gets the time
+ * (`performance.now()`) the first digit was typed, so a place can time the
+ * answer to the first digit: a two-digit answer then takes no longer than a
+ * one-digit one.
+ */
+export function numPad(onSubmit: (value: string, firstDigitAt: number | null) => void): NumPad {
   let value = '';
   let disabled = false;
+  let firstDigitAt: number | null = null;
   const display = h('output', { class: 'numpad-display', 'aria-live': 'polite', 'aria-label': 'Ditt svar' }, ' ');
   const ok = h('button', { class: 'numpad-key ok', type: 'button', 'aria-label': 'Svara', disabled: true, onclick: () => submit() }, icon('check'));
   const keys = [...'123456789'].map((d) => key(d));
@@ -30,6 +36,7 @@ export function numPad(onSubmit: (value: string) => void): NumPad {
   }
   function type(d: string) {
     if (disabled || value.length >= MAX_DIGITS) return;
+    firstDigitAt ??= performance.now();
     value = value === '0' ? d : value + d;
     update();
   }
@@ -40,7 +47,7 @@ export function numPad(onSubmit: (value: string) => void): NumPad {
   }
   function submit() {
     if (disabled || value === '') return;
-    onSubmit(value);
+    onSubmit(value, firstDigitAt);
   }
 
   return {

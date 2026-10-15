@@ -15,7 +15,7 @@ import { stageFor, STAGE_ORDER, type Stage } from '../../shell/components/plant'
 export type PlaceMood = 'new' | 'thirsty' | 'asleep';
 
 export const MOOD_TEXT: Record<PlaceMood, string> = {
-  new: 'Här väntar nya frön.',
+  new: 'Nya frön väntar i trädgården.',
   thirsty: 'Trädgården är törstig.',
   asleep: 'Trädgården sover. Kom tillbaka i morgon!',
 };
