@@ -17,6 +17,7 @@ import { showChallenge } from './challenge';
 import { showDuel } from './duel';
 import { showFocusPicker } from './focus';
 import { gardenDeps, pack } from '../pack';
+import { gardenOfferedKey, showPlacementOffer } from './placement';
 
 const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
   seed: 'frön',
@@ -28,6 +29,9 @@ const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
 export async function showGarden(ctx: AppContext, profile: Profile, highlight?: Set<ItemId>): Promise<void> {
   const engine = engineFor(profile, gardenDeps(ctx));
   const { states, meta } = await loadProgress(profile, gardenDeps(ctx), engine);
+  // The first time in the garden, with nothing planted yet: offer the start check (once).
+  const fresh = Object.values(states).every((s) => s.status === 'new');
+  if (fresh && !(await ctx.store.getSetting<boolean>(gardenOfferedKey(profile)))) return showPlacementOffer(ctx, profile);
   const unlockedUnits = new Set(engine.unlockedUnits(states, meta));
   const unlockedItemIds = new Set(pack.units.filter((u) => unlockedUnits.has(u.id)).flatMap((u) => u.itemIds));
   const asleep = engine.dailyDone(meta);

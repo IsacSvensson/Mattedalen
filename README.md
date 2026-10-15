@@ -7,11 +7,12 @@ bruk.
 
 > **Spela:** https://isacsvensson.github.io/Mattedalen/
 >
-> **Status:** Dalens karta är startsidan och har två platser: Trädgården
-> (multiplikation) och Bäcken (addition och subtraktion inom 20). Mattedalen
-> bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
-> med hela dess historik. Härnäst kommer dagens plan för flera platser (fas D),
-> se [PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser).
+> **Status:** Dalens karta är startsidan och har två platser: Bäcken (addition
+> och subtraktion inom 20), där ett nytt barn börjar, och Trädgården
+> (multiplikation), som öppnar senare. Dagens tid delas efter vad som väntar på
+> repetition. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
+> med hela dess historik. Härnäst kommer Bäckens koll (fas E), se
+> [PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser).
 
 Mer att läsa:
 
@@ -73,9 +74,20 @@ kommer då till dalens karta. Därifrån går barnet till platserna.
   den första platsen som inte vilar (”Gå till trädgården”, ”Gå till bäcken”).
   Barnets djur står vid den plats barnet besökte senast. Djuret i platsens
   sidhuvud leder tillbaka till dalen (”Till dalen”), och spelare byts i dalen. En
-  ny spelare går som förut direkt från startkollen in i trädgården.
-- **Dagens tid** (passlängden i föräldravyn) delas lika mellan platserna, minst
-  5 minuter per plats.
+  ny spelare börjar vid bäcken, där startkollen erbjuds.
+- **Dagens plan** (`src/shell/dayPlan.ts`). Passlängden i föräldravyn är hela
+  dagens tid. Barnet besöker högst två platser om dagen och väljer själv
+  ordningen. Varje plats får först 5 minuter, och resten delas efter hur mycket
+  som är förfallet till repetition där, inte rakt hälften. Planen görs vid
+  dagens första besök i dalen och står kvar hela dagen, så att andelarna inte
+  flyttar sig medan barnet arbetar. En öppen plats utanför dagens två vilar.
+- **Trädgårdens öppning** (`src/places/tradgarden/opening.ts`). Multiplikation
+  bygger på dubblor och övergången över tiotalet, så Trädgården öppnar när de
+  sitter vid bäcken, när barnet redan har framsteg i trädgården eller när en
+  vuxen öppnar den i föräldravyn. Barn från Gångerträdgården har den öppen. Innan
+  dess står den dämpad på kartan med texten ”Trädgården öppnar när du kan dubblor
+  och att gå över tiotalet vid bäcken.” Trädgårdens startkoll erbjuds första
+  gången barnet kommer dit.
 
 Dalen testas i `e2e/valley.spec.ts` och i testerna för smala telefoner och
 liggande telefon. Logiken utan DOM testas i `tests/game/valley.test.ts`.
@@ -210,11 +222,13 @@ webbläsaren (`e2e/legacy.spec.ts`).
 
 ## Flytta mellan enheter
 
-- **QR-kod** (`storage/qrCodec.ts`). Koden innehåller status per fakta i 3 bitar
-  (status plus ungefärlig Leitner-låda), namn, djur och passlängd, skyddat med
-  CRC-8. Datan base45-kodas, så att QR-kodens kompakta alfanumeriska läge kan
-  användas. Hela barnet ryms i cirka 90 tecken, vilket ger en QR-kod av version
-  5–6 som är lätt att skanna. På mottagande enhet väljer man ”Skanna QR-kod” och
+- **QR-kod** (`storage/qrCodec.ts`, formatet `MD1:`). Koden innehåller namn, djur,
+  passlängd, om Trädgården är öppen och ett block per plats: innehållspaketets id
+  och version och status per fakta i 3 bitar (status plus ungefärlig
+  Leitner-låda). Allt skyddas med CRC-8. Datan base45-kodas, så att QR-kodens
+  kompakta alfanumeriska läge kan användas. Båda platserna ryms i en QR-kod av
+  högst version 10, som en telefonkamera läser lätt. Koder från
+  Gångerträdgården (`GT1:`) läses som ett barn med Trädgården öppen. På mottagande enhet väljer man ”Skanna QR-kod” och
   använder kameran. Det går också att fotografera koden och välja bilden.
   Avläsningen använder `BarcodeDetector` där den finns, annars `jsqr`, som bara
   laddas när den behövs. Status, repetitionsschema och upplåsta enheter
@@ -249,6 +263,15 @@ Sedan kommer en del per plats. För **Trädgården**:
 - **svåra just nu**, med samma strategi som räknestigen använder
 - de **vanligaste förväxlingarna**, till exempel ”7 × 8 – svarade 48 (3 gånger)”
 - fritt svar av eller på, och att göra om startkollen
+- ”Öppna Trädgården nu” för ett barn där den inte har öppnat än
+
+För **Bäcken**:
+
+- en **värmekarta** över additionstabellen 0–10
+- delarna med hur många plus- och minusfakta som sitter i varje del
+- svåra just nu med strategin, de vanligaste förväxlingarna och Vågen per
+  uppgiftstyp (”Vad ska stå i rutan?” och ”Stämmer det?”)
+- att göra om startkollen vid bäcken
 
 Under ”Hämta ett barn från en annan enhet” finns hjälp för den som spelat
 Gångerträdgården. Där står också hur många barn som hämtades automatiskt och när.

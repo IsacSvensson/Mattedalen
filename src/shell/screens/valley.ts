@@ -1,10 +1,12 @@
+import { systemClock } from '../../engine';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { avatarIcon } from '../components/avatars';
 import { icon } from '../components/icons';
 import { scene } from '../components/scene';
 import { h, s } from '../dom';
-import type { Place } from '../place';
+import { dayPlanKey, planDay, planHolds, rememberPlan, type DayPlan, type PlaceLoad } from '../dayPlan';
+import { placeIsOpen, type Place } from '../place';
 import { hasSwedishVoice, speak, speechSupported } from '../speech';
 import { showProfiles } from './profiles';
 
@@ -15,10 +17,26 @@ import { showProfiles } from './profiles';
  * to; the main button suggests the first one that is not resting.
  */
 export async function showValley(ctx: AppContext, profile: Profile): Promise<void> {
-  const maps = await Promise.all(ctx.places.map(async (place) => ({ place, map: await place.onMap(ctx, profile) })));
+  const maps = await Promise.all(
+    ctx.places.map(async (place) => ({ place, map: await place.onMap(ctx, profile), open: await placeIsOpen(place, ctx, profile) })),
+  );
+  // The day's plan: at most two places, the time shared after what is due.
+  const plan = await ensureDayPlan(
+    ctx,
+    profile,
+    maps.filter((m) => m.open).map((m) => ({ id: m.place.pack.id, due: m.map.due })),
+  );
+  for (const m of maps) {
+    if (m.open && plan.minutes[m.place.pack.id] === undefined) {
+      // Open, but not one of today's places: it rests today.
+      m.map = { ...m.map, mood: 'asleep', moodText: `${m.place.name} vilar i dag.`, moodIcon: icon('moon'), nameIcon: icon('moon') };
+    }
+  }
   const lastId = await ctx.store.getSetting<string>(lastPlaceKey(profile));
-  const last = maps.find((m) => m.place.id === lastId) ?? maps[0]!;
-  const suggested = maps.find((m) => m.map.mood !== 'asleep') ?? maps[0]!;
+  const last = maps.find((m) => m.place.id === lastId) ?? maps.find((m) => m.open) ?? maps[0]!;
+  // The main button: the open place with the most to do today; the child may choose another.
+  const awake = maps.filter((m) => m.open && m.map.mood !== 'asleep');
+  const suggested = [...awake].sort((a, b) => b.map.due - a.map.due)[0] ?? maps.find((m) => m.open) ?? maps[0]!;
   const go = (place: Place) => async () => {
     await ctx.store.setSetting(lastPlaceKey(profile), place.id);
     await place.open(ctx, profile);
@@ -45,10 +63,17 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
         { class: 'valley-ground' },
         valleyLand(),
         pathStones(),
-        maps.map(({ place, map }) =>
+        maps.map(({ place, map, open }) =>
           h(
             'button',
-            { class: `place ${map.spot} mood-${map.mood}`, type: 'button', 'aria-label': `${place.name}. ${map.moodText}`, onclick: () => void go(place)() },
+            {
+              class: `place ${map.spot} mood-${map.mood}`,
+              type: 'button',
+              'aria-label': `${place.name}. ${map.moodText}`,
+              // A place that has not opened yet rests on the map; its line below says when it opens.
+              disabled: !open,
+              onclick: () => void go(place)(),
+            },
             map.art,
             h('span', { class: 'place-name' }, map.nameIcon, place.name),
           ),
@@ -78,6 +103,20 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
     ),
   );
   show(ctx, view);
+}
+
+/**
+ * Today's plan for a child: kept for the day once made, and made again only
+ * when the day, the session length or the open places change.
+ */
+async function ensureDayPlan(ctx: AppContext, profile: Profile, open: PlaceLoad[]): Promise<DayPlan> {
+  const today = systemClock.today();
+  const total = profile.settings.sessionMinutes;
+  const saved = await ctx.store.getSetting<DayPlan>(dayPlanKey(profile.id));
+  const plan = planHolds(saved, today, total, open.map((p) => p.id)) ? saved : planDay(today, total, open);
+  if (plan !== saved) await ctx.store.setSetting(dayPlanKey(profile.id), plan);
+  rememberPlan(profile.id, plan);
+  return plan;
 }
 
 /** Where a child went last, so their animal stands there (per child). */

@@ -18,6 +18,7 @@ import {
   type SessionMode,
   type SessionSummary,
 } from '../engine';
+import { MIN_PLACE_MINUTES, plannedMinutes } from './dayPlan';
 import { DEFAULT_LOG_KEEP, LOG_COMPACT_SLACK, maybeCompactLog, type Profile, type ProgressStore } from '../storage';
 
 /** Optional practice after the daily session is short and can be stopped any time. */
@@ -38,21 +39,23 @@ export interface GameDeps {
   share?: number;
 }
 
-/** Shortest daily session at one place, in minutes. */
-export const MIN_PLACE_MINUTES = 5;
+export { MIN_PLACE_MINUTES };
 
-/** Minutes of the daily session at a place with the given share of the day. */
+/** Minutes of the daily session at a place with the given share of the day (when the day has no plan yet). */
 export function placeMinutes(sessionMinutes: number, share = 1): number {
   return share >= 1 ? sessionMinutes : Math.max(MIN_PLACE_MINUTES, Math.round(sessionMinutes * share));
 }
 
 export function engineFor(profile: Profile, deps: GameDeps): Engine {
+  const clock = deps.clock ?? systemClock;
+  // The day's plan decides this place's minutes; before there is one, the day is shared evenly.
+  const minutes = plannedMinutes(profile.id, deps.pack.id, clock.today()) ?? placeMinutes(profile.settings.sessionMinutes, deps.share);
   // The pack's own settings first, then the child's.
   const config = makeConfig(deps.pack.config ?? {}, {
-    session: { durationMs: placeMinutes(profile.settings.sessionMinutes, deps.share) * 60_000 },
+    session: { durationMs: minutes * 60_000 },
     format: { allowFree: (deps.allowFree ?? true) && profile.settings.allowFree },
   });
-  return createEngine({ pack: deps.pack, config, clock: deps.clock ?? systemClock, rng: deps.rng ?? mathRandomRng });
+  return createEngine({ pack: deps.pack, config, clock, rng: deps.rng ?? mathRandomRng });
 }
 
 export interface LoadedProgress {

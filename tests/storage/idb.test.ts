@@ -132,7 +132,8 @@ describe('backup files', () => {
       progress: [{ packId: 'multiplication', states: { '3x7': { status: 'banana', box: -2, seen: 'x' } }, meta: {} }],
       attempts: [{ itemId: '3x7', ts: 1, id: 7 }, { nonsense: true }],
     });
-    expect(data.profile.settings).toEqual(DEFAULT_SETTINGS);
+    // A child from Gångerträdgården has the garden open.
+    expect(data.profile.settings).toEqual({ ...DEFAULT_SETTINGS, gardenOpen: true });
     expect(data.progress[0]!.states['3x7']).toMatchObject({ status: 'new', box: 0, seen: 0 });
     expect(data.progress[0]!.meta.pacingGap).toBe(8);
     expect(data.attempts).toHaveLength(1);

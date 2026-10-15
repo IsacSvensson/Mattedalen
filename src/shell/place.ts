@@ -26,6 +26,8 @@ export interface PlaceOnMap {
   landscapeText: string | null;
   /** The main button to the place, e.g. "Gå till trädgården". */
   go: { label: string; icon: IconName };
+  /** Items due for review today: the day's time is shared after this. */
+  due: number;
 }
 
 /**
@@ -39,8 +41,19 @@ export interface Place {
   /** The place's own screen. */
   open(ctx: AppContext, profile: Profile): Promise<void>;
   onMap(ctx: AppContext, profile: Profile): Promise<PlaceOnMap>;
-  /** What a new child meets first in this place, if anything (e.g. the start check). */
-  welcome?(ctx: AppContext, profile: Profile): void;
+  /**
+   * Whether the place is open to this child. A place that is not open yet is
+   * drawn resting on the map, with `closedText` saying when it opens. Without
+   * this, the place is always open.
+   */
+  isOpen?(ctx: AppContext, profile: Profile): Promise<boolean>;
+  /** When a closed place opens, in words for the child, e.g. "Trädgården öppnar när …". */
+  closedText?: string;
   /** The place's part of the parent view for one child. */
   parentSection(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement>;
+}
+
+/** Whether a place is open to a child (a place without a rule always is). */
+export function placeIsOpen(place: Place, ctx: AppContext, profile: Profile): Promise<boolean> {
+  return place.isOpen ? place.isOpen(ctx, profile) : Promise.resolve(true);
 }

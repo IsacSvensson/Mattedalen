@@ -1,6 +1,6 @@
 import qrcode from 'qrcode-generator';
 import { computeUnlocked, type ContentPack, type Engine, type ItemState, type LearnerMeta } from '../engine';
-import { DEFAULT_SETTINGS, levelOf, stateFromLevel, type Profile, type QrSnapshot } from '../storage';
+import { DEFAULT_SETTINGS, levelOf, stateFromLevel, type Profile, type QrSnapshot, type QrTransfer } from '../storage';
 
 /** Snapshot of a profile for the QR code (levels follow the pack's item order). */
 export function snapshotOf(profile: Profile, pack: ContentPack, states: Record<string, ItemState>): QrSnapshot {
@@ -12,8 +12,19 @@ export function snapshotOf(profile: Profile, pack: ContentPack, states: Record<s
   };
 }
 
+/** A child with every place for the QR code: one block of levels per pack. */
+export function transferOf(profile: Profile, packs: { pack: ContentPack; states: Record<string, ItemState> }[]): QrTransfer {
+  return {
+    name: profile.name,
+    avatar: profile.avatar,
+    sessionMinutes: profile.settings.sessionMinutes,
+    gardenOpen: profile.settings.gardenOpen === true,
+    packs: packs.map(({ pack, states }) => ({ packId: pack.id, packVersion: pack.version, levels: pack.items.map((it) => levelOf(states[it.id])) })),
+  };
+}
+
 /** Rebuilds item states and learner meta from a scanned snapshot. */
-export function progressFromSnapshot(snap: QrSnapshot, engine: Engine, today: string): { states: Record<string, ItemState>; meta: LearnerMeta } {
+export function progressFromSnapshot(snap: Pick<QrSnapshot, 'levels'>, engine: Engine, today: string): { states: Record<string, ItemState>; meta: LearnerMeta } {
   const { pack, config } = engine;
   if (snap.levels.length !== pack.items.length) throw new Error('QR-koden passar inte den här versionen av spelet.');
   const states = Object.fromEntries(
@@ -27,9 +38,15 @@ export function progressFromSnapshot(snap: QrSnapshot, engine: Engine, today: st
   return { states, meta };
 }
 
-export function profileFromSnapshot(snap: QrSnapshot, id: string, now: number): Profile {
+export function profileFromSnapshot(snap: Pick<QrSnapshot, 'name' | 'avatar' | 'sessionMinutes'> & { gardenOpen?: boolean }, id: string, now: number): Profile {
   const minutes = Math.min(15, Math.max(10, snap.sessionMinutes || DEFAULT_SETTINGS.sessionMinutes));
-  return { id, name: snap.name || 'Spelare', avatar: snap.avatar || '🌱', createdAt: now, settings: { ...DEFAULT_SETTINGS, sessionMinutes: minutes } };
+  return {
+    id,
+    name: snap.name || 'Spelare',
+    avatar: snap.avatar || '🌱',
+    createdAt: now,
+    settings: { ...DEFAULT_SETTINGS, sessionMinutes: minutes, ...(snap.gardenOpen ? { gardenOpen: true } : {}) },
+  };
 }
 
 /** QR code as a scalable SVG string (alphanumeric mode keeps it small). */

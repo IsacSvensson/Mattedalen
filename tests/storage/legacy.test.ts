@@ -98,7 +98,9 @@ describe('import from Gångerträdgården', () => {
 
     expect(await importLegacyData(store, indexedDB, 1234)).toEqual({ status: 'imported', profiles: 2 });
 
-    expect(await store.listProfiles()).toEqual([alva, bo]);
+    // The children come along unchanged, with the garden they played open in Mattedalen.
+    const open = (p: Profile) => ({ ...p, settings: { ...p.settings, gardenOpen: true } });
+    expect(await store.listProfiles()).toEqual([open(alva), open(bo)]);
     for (const p of [alva, bo]) {
       expect(await store.load(p.id, pack.id)).toEqual(await old.load(p.id, pack.id));
       expect(await store.listSessions(p.id)).toEqual(await old.listSessions(p.id));

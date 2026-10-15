@@ -4,6 +4,7 @@ import { h } from '../dom';
 import { choose } from '../components/modal';
 import { installGuide, isStandalone } from '../pwa';
 import { showPinGate } from './parent/pinGate';
+import { placeIsOpen } from '../place';
 import { showValley } from './valley';
 import { AVATAR_KEYS, avatarIcon, avatarName } from '../components/avatars';
 import { icon } from '../components/icons';
@@ -136,10 +137,12 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
     };
     await ctx.store.saveProfile(profile);
     await ctx.store.setSetting('lastProfileId', profile.id);
-    // A new child starts where a place welcomes them (Trädgården: the start check), otherwise in the valley.
-    const welcoming = ctx.places.find((place) => place.welcome);
-    if (welcoming?.welcome) welcoming.welcome(ctx, profile);
-    else await showValley(ctx, profile);
+    // A new child starts at the first place that is open to them (the brook:
+    // the garden opens later), where the place's start check is offered.
+    for (const place of ctx.places) {
+      if (await placeIsOpen(place, ctx, profile)) return place.open(ctx, profile);
+    }
+    await showValley(ctx, profile);
   }
 
   const view = h(

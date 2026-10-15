@@ -64,7 +64,7 @@ test('grown-ups see which facts are hard and how the game helps', async ({ page 
     '8x8': { status: 'learning', box: 1, wrongDays: 3, introducedDay: '2026-01-20' },
   });
   await openParent(page);
-  await expect(page.getByRole('heading', { name: 'Svåra just nu' })).toBeVisible();
+  await expect(page.getByRole('region', { name: /^Trädgården/ }).getByRole('heading', { name: 'Svåra just nu' })).toBeVisible();
   await expect(page.locator('.hard-list li')).toHaveCount(1);
   await expect(page.locator('.hard-list li')).toContainText('8 × 8 = 64 – 8 × 8 = dubbla 4 × 8 = 32 + 32 = 64');
 });

@@ -10,8 +10,12 @@ import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../../../
 import { showGarden } from './garden';
 import { gardenDeps, pack } from '../pack';
 
-/** Offered right after a new player is created (and from the parent view). */
-export function showPlacementOffer(ctx: AppContext, profile: Profile): void {
+/** Set once the garden's start check has been offered to a child, so it is offered only once. */
+export const gardenOfferedKey = (profile: Profile) => `gardenCheckOffered:${profile.id}`;
+
+/** Offered the first time a child comes to the garden (and from the parent view). */
+export async function showPlacementOffer(ctx: AppContext, profile: Profile): Promise<void> {
+  await ctx.store.setSetting(gardenOfferedKey(profile), true);
   const view = h(
     'main',
     { class: 'screen session-end placement-offer' },

@@ -3,11 +3,13 @@ import { factId, formatFact, MAX_FACTOR, MIN_FACTOR, parseFactId, strategyFor } 
 import type { Profile } from '../../storage';
 import type { AppContext } from '../../shell/app';
 import { plantIcon } from '../../shell/components/plant';
+import { heatmapView } from '../../shell/components/heatmap';
 import { h } from '../../shell/dom';
 import type { SaveProfile } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
 import { factStats, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
 import { gardenDeps, pack } from './pack';
+import { gardenIsOpen } from './isOpen';
 import { showPlacementOffer } from './screens/placement';
 
 /** Trädgården's part of the parent view: what the child knows of the tables, and the start check. */
@@ -28,12 +30,14 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
   );
   const today = systemClock.today();
   const lastPlayed = ownSessions.length ? ownSessions[ownSessions.length - 1]!.day : null;
+  const open = await gardenIsOpen(ctx, profile, states);
 
   return h(
     'section',
     { class: 'place-section', 'aria-labelledby': 'place-garden-heading' },
     h('h3', { id: 'place-garden-heading', class: 'place-heading' }, plantIcon('tree'), 'Trädgården'),
     h('p', { class: 'muted place-about' }, `${pack.title} 1–10.`),
+    open ? null : openingNote(save),
     h(
       'ul',
       { class: 'status-summary' },
@@ -71,8 +75,33 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
     ),
     h('h4', null, 'Startkoll'),
     h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
-    h('button', { class: 'soft-button', type: 'button', onclick: () => showPlacementOffer(ctx, profile) }, 'Gör om startkollen'),
+    h('button', { class: 'soft-button', type: 'button', onclick: () => void showPlacementOffer(ctx, profile) }, 'Gör om startkollen'),
   );
+}
+
+/**
+ * A new child starts at the brook. The garden opens by itself when doubles and
+ * going over ten sit there; a grown-up who knows the child is ready opens it here.
+ */
+function openingNote(save: SaveProfile): HTMLElement {
+  const note: HTMLElement = h(
+    'div',
+    { class: 'notice garden-opening' },
+    h('p', null, 'Trädgården är inte öppen än. Den öppnar av sig själv när dubblor och övergången över tiotalet sitter vid bäcken.'),
+    h(
+      'button',
+      {
+        class: 'soft-button',
+        type: 'button',
+        onclick: async () => {
+          await save({ settings: { gardenOpen: true } });
+          note.replaceChildren(h('p', null, 'Trädgården är öppen.'));
+        },
+      },
+      'Öppna Trädgården nu',
+    ),
+  );
+  return note;
 }
 
 /**
@@ -101,38 +130,15 @@ function hardList(states: Record<string, ItemState>, config: EngineConfig, today
   );
 }
 
-const HEAT_CLASS = (s: ItemState | undefined) => {
-  if (!s || s.status === 'new') return 'heat-new';
-  if (s.status === 'learning') return s.box === 0 ? 'heat-learning-0' : 'heat-learning-1';
-  return s.status === 'fluent' ? 'heat-fluent' : 'heat-automatic';
-};
-
 function heatmap(states: Record<string, ItemState>, stats: Map<string, FactStats>): HTMLElement {
-  const detail = h('p', { class: 'heat-detail', 'aria-live': 'polite' }, 'Tryck på en ruta för detaljer.');
-  const cells: HTMLElement[] = [h('div', { class: 'grid-corner' }, '×')];
-  for (let b = MIN_FACTOR; b <= MAX_FACTOR; b++) cells.push(h('div', { class: 'grid-head' }, b));
-  for (let a = MIN_FACTOR; a <= MAX_FACTOR; a++) {
-    cells.push(h('div', { class: 'grid-head' }, a));
-    for (let b = MIN_FACTOR; b <= MAX_FACTOR; b++) {
-      const id = factId(a, b);
-      const s = states[id];
-      const st = stats.get(id);
-      const text = describeFact(a, b, s, st);
-      cells.push(h('button', { class: `heat-cell ${HEAT_CLASS(s)}`, type: 'button', 'aria-label': text, onclick: () => (detail.textContent = text) }));
-    }
-  }
-  const legend = h(
-    'ul',
-    { class: 'heat-legend' },
-    [
-      ['heat-new', 'inte påbörjad'],
-      ['heat-learning-0', 'ny'],
-      ['heat-learning-1', 'övas'],
-      ['heat-fluent', 'flytande'],
-      ['heat-automatic', 'automatiserad'],
-    ].map(([cls, label]) => h('li', null, h('span', { class: `heat-swatch ${cls}` }), label)),
-  );
-  return h('div', { class: 'heatmap-wrap' }, h('div', { class: 'heatmap', role: 'group', 'aria-label': 'Värmekarta' }, cells), legend, detail);
+  const factors = Array.from({ length: MAX_FACTOR - MIN_FACTOR + 1 }, (_, i) => MIN_FACTOR + i);
+  return heatmapView({
+    corner: '×',
+    rows: factors,
+    cols: factors,
+    label: 'Värmekarta',
+    cell: (a, b) => ({ state: states[factId(a, b)], text: describeFact(a, b, states[factId(a, b)], stats.get(factId(a, b))) }),
+  });
 }
 
 function describeFact(a: number, b: number, s: ItemState | undefined, st: FactStats | undefined): string {

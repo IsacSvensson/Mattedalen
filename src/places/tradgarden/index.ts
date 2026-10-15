@@ -7,18 +7,20 @@ import type { Place, PlaceOnMap } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
 import { gardenDeps, pack } from './pack';
 import { gardenParentSection } from './parent';
+import { gardenIsOpen } from './isOpen';
+import { CLOSED_TEXT } from './opening';
 import { knownTables, showGarden } from './screens/garden';
-import { showPlacementOffer } from './screens/placement';
 import { gardenMood, miniBed, MOOD_TEXT, type PlaceMood } from './valley';
 
-/** Trädgården: the multiplication table as a garden bed. The valley's first place. */
+/** Trädgården: the multiplication table as a garden bed. */
 export const tradgarden: Place = {
   id: 'tradgarden',
   name: 'Trädgården',
   pack,
   open: (ctx, profile) => showGarden(ctx, profile),
-  welcome: (ctx, profile) => showPlacementOffer(ctx, profile),
   onMap: gardenOnMap,
+  isOpen: (ctx, profile) => gardenIsOpen(ctx, profile),
+  closedText: CLOSED_TEXT,
   parentSection: gardenParentSection,
 };
 
@@ -26,26 +28,28 @@ async function gardenOnMap(ctx: AppContext, profile: Profile): Promise<PlaceOnMa
   const deps = gardenDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
+  const open = await gardenIsOpen(ctx, profile, states);
   const mood = gardenMood(states, engine.dailyDone(meta));
   const known = knownTables(pack, states).size;
   return {
     spot: 'place-garden',
-    mood,
-    moodText: MOOD_TEXT[mood],
-    moodIcon: moodIcon(mood),
+    mood: open ? mood : 'closed',
+    moodText: open ? MOOD_TEXT[mood] : CLOSED_TEXT,
+    moodIcon: open ? moodIcon(mood) : icon('steps'),
     // The small bed: the child's furthest grown plants in dug earth, and new
     // seeds waiting in their packet until the first one is planted.
     art: h(
       'span',
       { class: 'mini-bed', 'aria-hidden': 'true' },
       miniBed(states).map((stage) => h('span', { class: 'mini-cell' }, plantIcon(stage))),
-      mood === 'new' ? seedPacket() : null,
+      open && mood === 'new' ? seedPacket() : null,
     ),
     nameIcon: mood === 'asleep' ? icon('moon') : null,
     // Whole areas: one sunflower on the hill per table the child knows, as in the garden.
     sunflowers: known,
     landscapeText: known ? `Solrosor på kullen: ${known}, en för varje tabell du kan.` : null,
     go: { label: 'Gå till trädgården', icon: 'can' },
+    due: engine.dueCount(states),
   };
 }
 

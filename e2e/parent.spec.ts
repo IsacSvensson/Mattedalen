@@ -50,7 +50,7 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   await expect(page.locator('.confusions li')).toContainText('svarade');
   await expect(page.getByText(/Senaste 7 dagarna: 1[23] minuter/)).toBeVisible();
   await page.locator('.heat-cell.heat-learning-0').first().click();
-  await expect(page.locator('.heat-detail')).toContainText('försök');
+  await expect(garden.locator('.heat-detail')).toContainText('försök');
 
   await page.getByRole('combobox', { name: 'Passlängd' }).selectOption('15');
   await expect(page.getByRole('combobox', { name: 'Passlängd' })).toHaveValue('15');
@@ -86,6 +86,12 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
   for (let n = 1; n <= 9; n++) states[`2x${n}`] = { status: 'fluent', box: 2 };
   states['5x3'] = { status: 'learning', box: 1 };
   await seedStates(page, states);
+  // The brook comes along in the same code.
+  await seedStates(
+    page,
+    { '1+1': { status: 'fluent', box: 3 }, '2-1': { status: 'fluent', box: 3 }, '2+1': { status: 'learning', box: 1 } },
+    { packId: 'addition', unlockedUnitIds: ['ettmer', 'noll'] },
+  );
   await openParent(page);
   await page.getByRole('button', { name: 'Visa QR-kod' }).click();
   const qrImage = await page.locator('.qr-code svg').screenshot();
@@ -97,6 +103,7 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
   await other.locator('input[type=file][accept="image/*"]').setInputFiles({ name: 'qr.png', mimeType: 'image/png', buffer: qrImage });
   await expect(other.getByRole('heading', { name: 'Hämta Alva?' })).toBeVisible();
   await expect(other.getByText('10 automatiserade, 9 flytande och 1 som övas.')).toBeVisible();
+  await expect(other.getByText('0 automatiserade, 2 flytande och 1 som övas.')).toBeVisible();
   await other.getByRole('button', { name: 'Lägg till', exact: true }).click();
   await expect(other.getByText('Alva är hämtad')).toBeVisible();
 
@@ -105,6 +112,9 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
   await expect(other.locator('.grid-cell.stage-tree')).toHaveCount(10);
   await expect(other.locator('.grid-cell.stage-bush')).toHaveCount(9);
   await expect(other.locator('.grid-cell.stage-sprout')).toHaveCount(1);
+  await other.getByRole('button', { name: 'Till dalen' }).click();
+  await other.getByRole('button', { name: /^Bäcken\./ }).click();
+  await expect(other.locator('.brook-parts')).toContainText('2 av 38');
   await other.close();
 });
 

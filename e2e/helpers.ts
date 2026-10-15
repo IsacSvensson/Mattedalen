@@ -1,12 +1,47 @@
 import { expect, type Page } from '@playwright/test';
 
-export async function createProfile(page: Page, name: string): Promise<void> {
+/**
+ * Creates a player. A new child starts at the brook, where the start check is
+ * offered (`'brook'` stops there). Most tests are about the garden, which opens
+ * for a new child later: like a grown-up in the parent view, `'garden'` (the
+ * default) opens it, goes there, and starts from scratch.
+ */
+export async function createProfile(page: Page, name: string, start: 'garden' | 'garden-check' | 'brook' = 'garden'): Promise<void> {
   await page.getByRole('textbox', { name: 'Namn' }).fill(name);
   await page.getByRole('button', { name: 'Välj sköldpadda' }).click();
   await page.getByRole('button', { name: 'Klar' }).click();
-  // New players are offered a placement check; most tests start from scratch.
+  await expect(page.getByRole('heading', { name: 'Kan du redan lite plus och minus?' })).toBeVisible();
+  if (start === 'brook') return;
+  await openGarden(page, name);
+  await page.locator('.profile-tile', { hasText: name }).click();
+  await page.getByRole('button', { name: /^Trädgården\./ }).click();
+  // The garden's own start check is offered the first time (`'garden-check'` stops there); most tests start from scratch.
+  await expect(page.getByRole('heading', { name: 'Kan du redan lite gånger?' })).toBeVisible();
+  if (start === 'garden-check') return;
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: new RegExp(`${name}s? trädgård`) })).toBeVisible();
+}
+
+/** Opens the garden for a child, as a grown-up does in the parent view, and reloads. */
+export async function openGarden(page: Page, name: string): Promise<void> {
+  await page.evaluate(async (who) => {
+    const db: IDBDatabase = await new Promise((r) => {
+      const q = indexedDB.open('mattedalen');
+      q.onsuccess = () => r(q.result);
+    });
+    const profiles: { name: string; settings: Record<string, unknown> }[] = await new Promise((r) => {
+      const q = db.transaction('profiles').objectStore('profiles').getAll();
+      q.onsuccess = () => r(q.result);
+    });
+    const profile = profiles.find((p) => p.name === who)!;
+    await new Promise((r) => {
+      const tx = db.transaction('profiles', 'readwrite');
+      tx.objectStore('profiles').put({ ...profile, settings: { ...profile.settings, gardenOpen: true } });
+      tx.oncomplete = r;
+    });
+    db.close();
+  }, name);
+  await page.reload();
 }
 
 /** From the valley (or the list of players) into the garden, by the place on the map. */

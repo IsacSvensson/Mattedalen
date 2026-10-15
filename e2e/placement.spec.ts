@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openParent, switchPlayer } from './helpers';
+import { createProfile, openParent, switchPlayer } from './helpers';
 
 /** Answers the check: right (and fast) for facts with a factor in `known`, otherwise "0". */
 async function answerCheck(page: import('@playwright/test').Page, known: number[], thinkMs = 0) {
@@ -17,9 +17,8 @@ async function answerCheck(page: import('@playwright/test').Page, known: number[
 
 test('a new player who knows ×10, ×2, ×5 and ×1 starts at ×4', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('textbox', { name: 'Namn' }).fill('Alva');
-  await page.getByRole('button', { name: 'Klar' }).click();
-  await expect(page.getByRole('heading', { name: 'Kan du redan lite gånger?' })).toBeVisible();
+  // A new child starts at the brook; the garden's start check comes on the first visit there.
+  await createProfile(page, 'Alva', 'garden-check');
   await page.getByRole('button', { name: 'Gör startkollen' }).click();
   await answerCheck(page, [10, 2, 5, 1]);
 
@@ -48,8 +47,8 @@ test('a new player who knows ×10, ×2, ×5 and ×1 starts at ×4', async ({ pag
 test('a child who knows ×10 but answers slowly still starts after it', async ({ page }) => {
   await page.clock.install();
   await page.goto('/');
-  await page.getByRole('textbox', { name: 'Namn' }).fill('Sixten');
-  await page.getByRole('button', { name: 'Klar' }).click();
+  // A new child starts at the brook; the garden's start check comes on the first visit there.
+  await createProfile(page, 'Sixten', 'garden-check');
   await page.getByRole('button', { name: 'Gör startkollen' }).click();
   await answerCheck(page, [10], 9000);
   await expect(page.getByText('Du kan ×10 – de blev plantor', { exact: false })).toBeVisible();
@@ -61,8 +60,8 @@ test('a child who knows ×10 but answers slowly still starts after it', async ({
 
 test('a beginner is told kindly and starts from the beginning', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('textbox', { name: 'Namn' }).fill('Bo');
-  await page.getByRole('button', { name: 'Klar' }).click();
+  // A new child starts at the brook; the garden's start check comes on the first visit there.
+  await createProfile(page, 'Bo', 'garden-check');
   await page.getByRole('button', { name: 'Gör startkollen' }).click();
   await answerCheck(page, []);
   await expect(page.getByText('Nu vet trädgården var vi ska börja', { exact: false })).toBeVisible();
@@ -72,8 +71,8 @@ test('a beginner is told kindly and starts from the beginning', async ({ page })
 
 test('the check can be redone from the parent view and never moves a child back', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('textbox', { name: 'Namn' }).fill('Alva');
-  await page.getByRole('button', { name: 'Klar' }).click();
+  // A new child starts at the brook; the garden's start check comes on the first visit there.
+  await createProfile(page, 'Alva', 'garden-check');
   await page.getByRole('button', { name: 'Gör startkollen' }).click();
   await answerCheck(page, [10, 2]);
   await page.getByRole('button', { name: 'Till trädgården' }).click();

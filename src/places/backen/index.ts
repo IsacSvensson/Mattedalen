@@ -38,6 +38,7 @@ async function brookOnMap(ctx: AppContext, profile: Profile): Promise<PlaceOnMap
     sunflowers: 0,
     landscapeText: laid ? `Bron över bäcken har ${laid} av ${stones.length} stenar på plats.` : null,
     go: { label: 'Gå till bäcken', icon: 'steps' },
+    due: engine.dueCount(states),
   };
 }
 

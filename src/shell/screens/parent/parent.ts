@@ -1,7 +1,7 @@
 import { formatDay as toDayKey, systemClock } from '../../../engine';
 import {
-  decodeSnapshot,
-  encodeSnapshot,
+  decodeTransfer,
+  encodeTransfer,
   exportFileName,
   ImportError,
   parseExport,
@@ -17,9 +17,9 @@ import { choose, toast } from '../../components/modal';
 import { cameraScanner, decodeImageFile } from '../../components/qrScanner';
 import { h } from '../../dom';
 import { formatDay, minutesPerDay } from '../../stats';
-import { engineFor, loadProgress, type GameDeps } from '../../play';
-import type { Place, SaveProfile } from '../../place';
-import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, snapshotOf } from '../../transfer';
+import { engineFor, loadProgress } from '../../play';
+import type { SaveProfile } from '../../place';
+import { profileFromSnapshot, progressFromSnapshot, qrSvgMarkup, transferOf } from '../../transfer';
 import { showProfiles } from '../profiles';
 import { AVATAR_KEYS, avatarIcon, avatarName } from '../../components/avatars';
 import { icon } from '../../components/icons';
@@ -191,16 +191,12 @@ function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
   );
 }
 
-/**
- * The QR code holds one place, Trädgården (the first), until the format with
- * one block per place (MD1) comes. The JSON backup holds every place.
- */
-const qrDeps = (ctx: AppContext): GameDeps => ({ store: ctx.store, pack: (ctx.places[0] as Place).pack });
-
+/** The QR code holds every place: one block of levels per content pack (MD1). The JSON backup holds the full history. */
 async function showQr(ctx: AppContext, profile: Profile): Promise<void> {
-  const deps = qrDeps(ctx);
-  const { states } = await loadProgress(profile, deps);
-  const text = encodeSnapshot(snapshotOf(profile, deps.pack, states));
+  const packs = await Promise.all(
+    ctx.places.map(async (place) => ({ pack: place.pack, states: (await loadProgress(profile, { store: ctx.store, pack: place.pack })).states })),
+  );
+  const text = encodeTransfer(transferOf(profile, packs));
   const qr = h('div', { class: 'qr-code', 'aria-label': `QR-kod för ${profile.name}` });
   qr.innerHTML = qrSvgMarkup(text).svg;
   void choose(
@@ -322,15 +318,23 @@ function importSection(ctx: AppContext, legacy: HTMLElement): HTMLElement {
 
 async function importQr(ctx: AppContext, text: string): Promise<void> {
   try {
-    const snap = decodeSnapshot(text);
-    const deps = qrDeps(ctx);
-    const engine = engineFor(profileFromSnapshot(snap, 'tmp', 0), deps);
-    const { states, meta } = progressFromSnapshot(snap, engine, systemClock.today());
-    const counts = engine.statusCounts(states);
+    const snap = decodeTransfer(text);
+    const tmp = profileFromSnapshot(snap, 'tmp', 0);
+    // Every place the code has a block for; a place it lacks starts from the beginning.
+    const restored = snap.packs.map((block) => {
+      const place = ctx.places.find((p) => p.pack.id === block.packId);
+      if (!place || place.pack.version !== block.packVersion) throw new ImportError('QR-koden passar inte den här versionen av appen.');
+      const engine = engineFor(tmp, { store: ctx.store, pack: place.pack });
+      return { place, engine, ...progressFromSnapshot(block, engine, systemClock.today()) };
+    });
+    const summary = restored.map(({ place, engine, states }) => {
+      const c = engine.statusCounts(states);
+      return h('li', null, h('strong', null, place.name), `: ${c.automatic} automatiserade, ${c.fluent} flytande och ${c.learning} som övas.`);
+    });
     const existing = (await ctx.store.listProfiles()).find((p) => p.name === snap.name);
     const answer = await choose(
       `Hämta ${snap.name}?`,
-      h('p', null, `${counts.automatic} automatiserade, ${counts.fluent} flytande och ${counts.learning} som övas.`),
+      h('ul', { class: 'qr-summary' }, summary),
       [
         ...(existing ? [{ value: 'replace' as const, label: `Ersätt ${existing.name} här`, primary: true }] : []),
         { value: 'new' as const, label: existing ? 'Lägg till som ny spelare' : 'Lägg till', primary: !existing },
@@ -339,10 +343,12 @@ async function importQr(ctx: AppContext, text: string): Promise<void> {
     if (!answer) return;
     const profile =
       answer === 'replace' && existing
-        ? { ...existing, avatar: snap.avatar || existing.avatar }
+        ? { ...existing, avatar: snap.avatar || existing.avatar, settings: { ...existing.settings, ...(snap.gardenOpen ? { gardenOpen: true } : {}) } }
         : profileFromSnapshot(snap, crypto.randomUUID(), Date.now());
     await ctx.store.saveProfile(profile);
-    await ctx.store.save({ profileId: profile.id, packId: deps.pack.id, packVersion: deps.pack.version, states, meta, updatedAt: Date.now() });
+    for (const { place, states, meta } of restored) {
+      await ctx.store.save({ profileId: profile.id, packId: place.pack.id, packVersion: place.pack.version, states, meta, updatedAt: Date.now() });
+    }
     toast(`${profile.name} är hämtad`);
     await showParent(ctx, profile.id);
   } catch (e) {

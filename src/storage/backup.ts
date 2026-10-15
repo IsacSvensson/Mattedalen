@@ -90,6 +90,7 @@ function sanitizeProfile(raw: unknown): Profile {
       sessionMinutes: num(settings.sessionMinutes, DEFAULT_SETTINGS.sessionMinutes),
       readAloud: typeof settings.readAloud === 'boolean' ? settings.readAloud : DEFAULT_SETTINGS.readAloud,
       allowFree: typeof settings.allowFree === 'boolean' ? settings.allowFree : DEFAULT_SETTINGS.allowFree,
+      ...(settings.gardenOpen === true ? { gardenOpen: true } : {}),
     },
   };
 }
@@ -117,6 +118,8 @@ export function parseExport(input: unknown): ProfileExport {
     version++;
   }
   const profile = sanitizeProfile(d.profile);
+  // Children from Gångerträdgården have the garden open from the start.
+  if (data.format === LEGACY_EXPORT_FORMAT) profile.settings.gardenOpen = true;
   const progress = (isArray(d.progress) ? d.progress : []).filter(isObject).map(
     (p): Progress => ({
       profileId: profile.id,

@@ -138,8 +138,13 @@ Utseendet bygger på några få regler. De står också överst i `styles.css`.
 ## Startkoll (placering)
 
 Ett barn som redan kan ×10, ×2, ×5 och ×1 ska inte behöva gå igenom dem igen.
-Därför erbjuds en frivillig **startkoll** när en ny spelare skapas, och den kan
-göras om från föräldravyn.
+Därför erbjuds en frivillig **startkoll** första gången barnet kommer till
+trädgården, och den kan göras om från föräldravyn.
+
+Ett nytt barn börjar vid Bäcken. Trädgården öppnar när dubblor och övergången
+över tiotalet sitter där, när barnet redan har framsteg i trädgården eller när
+en vuxen öppnar den i föräldravyn (`opening.ts`). Barn från Gångerträdgården har
+den öppen.
 
 - **Motorn** (`engine/placement.ts`) är innehållsneutral. Den går igenom
   enheterna i ordning och frågar 4 slumpade fakta ur varje.

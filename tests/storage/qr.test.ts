@@ -2,20 +2,23 @@ import jsQR from 'jsqr';
 import qrcode from 'qrcode-generator';
 import { describe, expect, it } from 'vitest';
 import { createEngine, emptyState, ManualClock, seededRng, type ItemState } from '../../src/engine';
+import { createAdditionPack } from '../../src/content/addition';
 import { createMultiplicationPack } from '../../src/content/multiplication';
 import {
   base45Decode,
   base45Encode,
   decodeSnapshot,
+  decodeTransfer,
   DEFAULT_SETTINGS,
   encodeSnapshot,
+  encodeTransfer,
   ImportError,
   levelOf,
   packLevels,
   unpackLevels,
   type Profile,
 } from '../../src/storage';
-import { progressFromSnapshot, qrSvgMarkup, snapshotOf } from '../../src/shell/transfer';
+import { progressFromSnapshot, qrSvgMarkup, snapshotOf, transferOf } from '../../src/shell/transfer';
 
 const pack = createMultiplicationPack();
 const profile: Profile = { id: 'p', name: 'Åsa', avatar: '🦊', createdAt: 0, settings: { ...DEFAULT_SETTINGS, sessionMinutes: 14 } };
@@ -126,5 +129,57 @@ describe('QR snapshot', () => {
     const snap = decodeSnapshot(encodeSnapshot({ name: 'Å'.repeat(40), avatar: '🐢', sessionMinutes: 12, levels: [1, 2, 3] }));
     expect(snap.name).toBe('Å'.repeat(20));
     expect(snap.levels).toEqual([1, 2, 3]);
+  });
+});
+
+describe('a child with every place (MD1)', () => {
+  const addition = createAdditionPack();
+  /** Every kind of level in a pack, as in `midway`. */
+  const mixed = (p: typeof addition) =>
+    Object.fromEntries(
+      p.items.map((it, i) => [it.id, { ...emptyState(it.id), ...([{}, { status: 'learning', box: 1 }, { status: 'fluent', box: 3 }, { status: 'automatic', box: 5 }] as Partial<ItemState>[])[i % 4] }]),
+    ) as Record<string, ItemState>;
+
+  it('holds one block per place and scans from a real QR image', () => {
+    const garden = midway();
+    const brook = mixed(addition);
+    const text = encodeTransfer(
+      transferOf({ ...profile, settings: { ...profile.settings, gardenOpen: true } }, [
+        { pack, states: garden },
+        { pack: addition, states: brook },
+      ]),
+    );
+    expect(text.startsWith('MD1:')).toBe(true);
+    expect(/^[0-9A-Z $%*+\-./:]+$/.test(text)).toBe(true);
+    // Both places, with a long name, still make a code a phone camera reads easily.
+    expect(qrSvgMarkup(text).version).toBeLessThanOrEqual(10);
+    const { data, size } = render(text);
+    const scanned = jsQR(data, size, size)!;
+    expect(scanned.data).toBe(text);
+
+    const t = decodeTransfer(scanned.data);
+    expect(t).toMatchObject({ name: 'Åsa', avatar: '🦊', sessionMinutes: 14, gardenOpen: true });
+    expect(t.packs.map((b) => [b.packId, b.packVersion, b.levels.length])).toEqual([
+      ['multiplication', pack.version, pack.items.length],
+      ['addition', addition.version, addition.items.length],
+    ]);
+    const clock = new ManualClock(Date.UTC(2026, 5, 1, 12));
+    const engine = createEngine({ pack: addition, clock, rng: seededRng(1) });
+    const restored = progressFromSnapshot(t.packs[1]!, engine, clock.today());
+    for (const it of addition.items) expect(levelOf(restored.states[it.id]), it.id).toBe(levelOf(brook[it.id]));
+  });
+
+  it('reads a code from Gångerträdgården as a child with the garden, open', () => {
+    const text = encodeSnapshot(snapshotOf(profile, pack, midway()));
+    const t = decodeTransfer(text);
+    expect(t.gardenOpen).toBe(true);
+    expect(t.packs).toEqual([{ packId: 'multiplication', packVersion: 1, levels: decodeSnapshot(text).levels }]);
+  });
+
+  it('rejects damaged codes', () => {
+    const text = encodeTransfer(transferOf(profile, [{ pack, states: midway() }]));
+    const broken = text.slice(0, -3) + (text.endsWith('A') ? 'B' : 'A') + text.slice(-2);
+    expect(() => decodeTransfer(broken)).toThrow(ImportError);
+    expect(() => decodeTransfer('XX1:ABC')).toThrow(ImportError);
   });
 });

@@ -1187,13 +1187,27 @@ h1:focus {
   fill: var(--leaf-light);
 }
 
-/* Resting: dimmed, darker and covered by a thin dusk, so it plainly sleeps. */
+/*
+ * Resting (today's session done) or not open yet: dimmed, darker and covered by
+ * a thin dusk, so it plainly rests. The line below the map says why.
+ */
 .place.mood-asleep .mini-bed,
-.place.mood-asleep .bridge {
+.place.mood-asleep .bridge,
+.place.mood-closed .mini-bed {
   filter: saturate(0.6) brightness(0.8);
 }
 
-.place.mood-asleep .mini-bed::after {
+/* Not open yet: nothing to press, so the sign has no press edge either. */
+.place:disabled {
+  cursor: default;
+}
+
+.place:disabled .place-name {
+  box-shadow: none;
+}
+
+.place.mood-asleep .mini-bed::after,
+.place.mood-closed .mini-bed::after {
   content: '';
   position: absolute;
   inset: calc(-1 * var(--frame));
@@ -1518,6 +1532,18 @@ h1:focus {
   display: block;
   height: 100%;
   background: var(--bridge-block);
+}
+
+/* In the parent view the count is longer ("plus 3 av 19 · minus 2 av 19"): it moves below the name when it does not fit. */
+.brook-parts.parent li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  column-gap: 10px;
+}
+
+.brook-parts.parent .part-count {
+  margin-left: auto;
 }
 
 .brook-parts.parent li.closed {
@@ -2561,9 +2587,11 @@ h1:focus {
 }
 
 .heatmap {
-  --cell: min(calc((100vw - 32px - 32px - 20px) / 11), 34px);
+  --cols: 11;
+  /* The parent view's side margins (68px) and the gaps between the cells. */
+  --cell: min(calc((100vw - 68px - (var(--cols) - 1) * 2px) / var(--cols)), 34px);
   display: grid;
-  grid-template-columns: repeat(11, var(--cell));
+  grid-template-columns: repeat(var(--cols), var(--cell));
   grid-auto-rows: var(--cell);
   gap: 2px;
 }

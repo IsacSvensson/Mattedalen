@@ -102,6 +102,102 @@ export function decodeSnapshot(text: string): QrSnapshot {
   return { name, avatar, sessionMinutes, levels };
 }
 
+/**
+ * A child with every place, for the QR code ("MD1:"): the profile, then one
+ * block per content pack with the pack's id and version and a level per item.
+ * Codes from Gångerträdgården ("GT1:") are read as a child with the garden.
+ *
+ * Layout (bytes): version, session minutes, flags (bit 0: the garden is open),
+ * name length, name, avatar length, avatar, block count, and per block: id
+ * length, id (UTF-8), pack version, item count (2 bytes), packed levels; CRC-8.
+ */
+export const TRANSFER_PREFIX = 'MD1:';
+const TRANSFER_VERSION = 1;
+
+export interface QrPackLevels {
+  packId: string;
+  packVersion: number;
+  /** One level per item, in the pack's canonical item order. */
+  levels: number[];
+}
+
+export interface QrTransfer {
+  name: string;
+  avatar: string;
+  sessionMinutes: number;
+  gardenOpen: boolean;
+  packs: QrPackLevels[];
+}
+
+export function encodeTransfer(t: QrTransfer): string {
+  const enc = new TextEncoder();
+  const name = truncateUtf8(t.name, MAX_NAME_BYTES);
+  const avatar = enc.encode(t.avatar).slice(0, 16);
+  if (t.packs.length > 255) throw new Error('Too many packs for a QR code');
+  const bytes = [
+    TRANSFER_VERSION,
+    Math.max(0, Math.min(255, Math.round(t.sessionMinutes))),
+    t.gardenOpen ? 1 : 0,
+    name.length,
+    ...name,
+    avatar.length,
+    ...avatar,
+    t.packs.length,
+  ];
+  for (const block of t.packs) {
+    const id = enc.encode(block.packId).slice(0, 32);
+    if (block.levels.length > 0xffff) throw new Error('Too many items for a QR code');
+    bytes.push(id.length, ...id, block.packVersion & 0xff, block.levels.length >> 8, block.levels.length & 0xff, ...packLevels(block.levels));
+  }
+  bytes.push(crc8(bytes));
+  return TRANSFER_PREFIX + base45Encode(Uint8Array.from(bytes));
+}
+
+/** Reads a code from Mattedalen (MD1) or Gångerträdgården (GT1). */
+export function decodeTransfer(text: string): QrTransfer {
+  const trimmed = text.trim();
+  if (trimmed.startsWith(QR_PREFIX)) {
+    const snap = decodeSnapshot(trimmed);
+    // A child from Gångerträdgården: the garden only, and open.
+    return { ...snap, gardenOpen: true, packs: [{ packId: 'multiplication', packVersion: 1, levels: snap.levels }] };
+  }
+  const fail = () => new ImportError('QR-koden gick inte att läsa. Den ska komma från Mattedalen eller Gångerträdgården.');
+  if (!trimmed.startsWith(TRANSFER_PREFIX)) throw fail();
+  let bytes: Uint8Array;
+  try {
+    bytes = base45Decode(trimmed.slice(TRANSFER_PREFIX.length));
+  } catch {
+    throw fail();
+  }
+  if (bytes.length < 7 || crc8([...bytes.subarray(0, -1)]) !== bytes[bytes.length - 1]) throw fail();
+  if (bytes[0] !== TRANSFER_VERSION) throw new ImportError('QR-koden kommer från en annan version av appen.');
+  const end = bytes.length - 1;
+  const dec = new TextDecoder();
+  let i = 1;
+  const take = (n: number) => {
+    if (i + n > end) throw fail();
+    const out = bytes.subarray(i, i + n);
+    i += n;
+    return out;
+  };
+  const byte = () => take(1)[0] as number;
+  const sessionMinutes = byte();
+  const flags = byte();
+  const name = dec.decode(take(byte()));
+  const avatar = dec.decode(take(byte()));
+  const packs: QrPackLevels[] = [];
+  for (let n = byte(); n > 0; n--) {
+    const packId = dec.decode(take(byte()));
+    const packVersion = byte();
+    const count = byte() * 256 + byte();
+    const levels = unpackLevels(take(Math.ceil((count * BITS) / 8)), count);
+    if (levels.some((l) => l >= LEVEL_STATE.length)) throw fail();
+    packs.push({ packId, packVersion, levels });
+  }
+  if (i !== end) throw fail();
+  return { name, avatar, sessionMinutes, gardenOpen: (flags & 1) === 1, packs };
+}
+
 function truncateUtf8(s: string, max: number): Uint8Array {
   const enc = new TextEncoder();
   let out = enc.encode(s);

@@ -7,6 +7,11 @@ export interface ProfileSettings {
   readAloud: boolean;
   /** Allow free-input answers (number pad) for fluent facts. */
   allowFree: boolean;
+  /**
+   * A grown-up has opened Trädgården, or the child came from Gångerträdgården.
+   * Otherwise the garden opens when doubles and going over ten sit at the brook.
+   */
+  gardenOpen?: boolean;
 }
 
 export const DEFAULT_SETTINGS: ProfileSettings = {

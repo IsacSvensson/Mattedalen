@@ -139,12 +139,14 @@ tillbaka till dalen.
   tallinjen med hoppen, eller vågen.
 - **Smal telefon.** Under 560 px visar tallinjen ett fönster med 11 stenar runt
   hoppen i stället för hela 0–20.
-- **Dagens tid** delas lika mellan dalens platser, minst 5 minuter per plats
-  (`placeMinutes`). Med två platser och 12 minuter får bäcken 6. I fas D delas
-  tiden i stället efter hur mycket som är förfallet.
-- **Föräldravyn** har en egen del för bäcken: antal fakta per status, varje del
-  med hur många som sitter eller ”inte öppen än”, och ”Gör om startkollen vid
-  bäcken”.
+- **Dagens tid** delas efter hur mycket som är förfallet till repetition på varje
+  plats, minst 5 minuter per plats (`dayPlan.ts`, se README).
+- **Ett nytt barn börjar här.** Startkollen vid bäcken är det första barnet
+  möter, och Trädgården öppnar när dubblor och övergången över tiotalet sitter.
+- **Föräldravyn** har en egen del för bäcken: antal fakta per status, en
+  värmekarta över additionstabellen 0–10, varje del med hur många plus- och
+  minusfakta som sitter, svåra just nu med strategin, de vanligaste
+  förväxlingarna, Vågen per uppgiftstyp och ”Gör om startkollen vid bäcken”.
 
 ## Simulering
 
