@@ -26,7 +26,8 @@ export function transferOf(profile: Profile, packs: { pack: ContentPack; states:
 /** Rebuilds item states and learner meta from a scanned snapshot. */
 export function progressFromSnapshot(snap: Pick<QrSnapshot, 'levels'>, engine: Engine, today: string): { states: Record<string, ItemState>; meta: LearnerMeta } {
   const { pack, config } = engine;
-  if (snap.levels.length !== pack.items.length) throw new Error('QR-koden passar inte den här versionen av spelet.');
+  // An older pack version holds the first items only (Gångerträdgården's codes: the 100 multiplications).
+  if (snap.levels.length > pack.items.length) throw new Error('QR-koden passar inte den här versionen av spelet.');
   const states = Object.fromEntries(
     pack.items.map((it, i) => [it.id, stateFromLevel(it.id, snap.levels[i] ?? 0, today, config.leitner.intervalsDays)]),
   );

@@ -326,7 +326,10 @@ async function importQr(ctx: AppContext, text: string): Promise<void> {
     // Every place the code has a block for; a place it lacks starts from the beginning.
     const restored = snap.packs.map((block) => {
       const place = ctx.places.find((p) => p.pack.id === block.packId);
-      if (!place || place.pack.version !== block.packVersion) throw new ImportError('QR-koden passar inte den här versionen av appen.');
+      // A block from an older version of a pack holds its first items, which keep their order.
+      if (!place || block.packVersion > place.pack.version || block.levels.length > place.pack.items.length) {
+        throw new ImportError('QR-koden passar inte den här versionen av appen.');
+      }
       const engine = engineFor(tmp, { store: ctx.store, pack: place.pack });
       return { place, engine, ...progressFromSnapshot(block, engine, systemClock.today()) };
     });

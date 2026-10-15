@@ -173,7 +173,7 @@ mognar den.” Det gör ändringen till något att se fram emot.
 - **Dagens pass** blandar gånger och delat med som i dag: nya fakta en i taget
   bland många kända, i grafens ordning.
 - **Öva en tabell** tar med tabellens divisioner när de är öppna.
-- **Slå rekord och Mot en vän** förblir gånger tills vidare (se öppna frågor).
+- **Slå rekord och Mot en vän** förblir gånger tills vidare.
 - **Startkollen** fortsätter efter gånger med delat med, men bara för familjer
   som kollen just har placerat som flytande. Den kan bara flytta fram barnet.
 - **Trädgårdens koll:** som Bäckens. Omkring 12 uppgifter efter samma mall
@@ -211,19 +211,29 @@ mognar den.” Det gör ändringen till något att se fram emot.
 
 | Fas | Innehåll |
 |---|---|
-| G1. Motor och paket | `requires` i motorn, paketversion 2 med fakta, delar och graf, läsning av gamla QR-koder och säkerhetskopior, simulering. Inget ändras för barnen än. |
+| G1. Motor och paket **(klar)** | `requires` i motorn, paketversion 2 med fakta, delar och graf, läsning av gamla QR-koder och säkerhetskopior, simulering. Inget ändras för barnen än: delat med ligger bakom `createMultiplicationPack({ division: true })`. |
 | G2. Innehåll | ”Dela lika”, format, räknestigar, felsvar och förklaringar, bråkstreck i frågan och inställningen för tecknet. |
 | G3. Trädgården | Blommor, kart och frukt, skördekorgen, introduktionen med delad rektangel, nyheten för barn som redan spelar, kartan i dalen. |
 | G4. Runtomkring | Öva en tabell, startkollen, Trädgårdens koll och föräldravyn. |
 | G5. Verifiering | e2e, skärmbilder vid 320 och 360 px, liggande telefon och surfplatta, dokumentation. |
 
-## Öppna frågor
+## Fynd från G1
 
-1. ~~**Tecknet.**~~ Avgjort: bråkstreck som standard, `÷` eller `/` som
-   inställning.
-2. **Bären som försvinner.** Godtar vi att buskar som i dag har bär blir gröna
-   tills delat med övas, med en nyhet som förklarar det? Alternativet är att
-   behålla bären som dekoration och visa delat med på annat sätt, men då blir
-   regeln för frukt otydlig.
-3. **Slå rekord och Mot en vän.** Ska de få delat med som ett eget val senare,
-   eller förbli gånger?
+- **Delarna vävs ihop.** Nya fakta introduceras i delarnas ordning. Med
+  divisionsdelarna sist hade all multiplikation kommit före den första
+  divisionen. Därför ligger varje divisionsdel direkt efter sin tabell: ×10,
+  Dela lika, Dela med 10, ×2, Dela med 2 och så vidare. Tabellerna öppnar efter
+  tabellen före dem, och divisionsdelarna efter divisionsdelen före dem.
+- **Simulering** (`tests/simulation/division.test.ts`, 26 veckor, sex dagar i
+  veckan): en genomsnittlig elev har 90–91 av 100 divisioner som sitter och
+  94–98 av 100 multiplikationer, mot 100 utan delat med. Andelen rätt ligger på
+  84–85 %. En svag elev har påbörjat 49 divisioner och har 22 som sitter.
+  Siffrorna är antaganden att pröva i piloten.
+
+## Avgjorda frågor
+
+1. **Tecknet:** bråkstreck som standard, `÷` eller `/` som inställning.
+2. **Bären:** buskar och träd blir gröna tills delat med övas. Barn som redan
+   spelar får en gång nyheten ”Nu kan dina buskar och träd få blommor och frukt!”.
+3. **Slå rekord och Mot en vän** förblir gånger tills vidare. Delat med kan bli
+   ett eget val där efter piloten.

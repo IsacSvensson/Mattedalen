@@ -90,7 +90,10 @@ export class Placement {
     private readonly cfg: PlacementConfig = DEFAULT_PLACEMENT,
   ) {
     this.ordered = sortedUnits(pack.units);
-    this.units = this.ordered.filter((u) => u.itemIds.length > 0 && u.kind !== 'understanding');
+    // Understanding is not checked, nor parts whose items wait for others to sit
+    // first (items with `requires`).
+    const waits = (u: Unit) => u.itemIds.some((id) => pack.items.find((it) => it.id === id)?.requires?.length);
+    this.units = this.ordered.filter((u) => u.itemIds.length > 0 && u.kind !== 'understanding' && !waits(u));
     this.itemById = new Map(pack.items.map((i) => [i.id, i]));
     this.loadUnit();
   }

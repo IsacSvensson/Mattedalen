@@ -571,6 +571,8 @@ export class Session {
         if (this.focus && !this.focus.has(id)) continue;
         if (this.excluded.has(id) || this.state(id).status !== 'new') continue;
         const item = this.item(id);
+        // Not yet: what it builds on must sit first.
+        if (item.requires?.some((r) => !atLeast(this.state(r).status, 'fluent'))) continue;
         // Prefer items whose mirrored twin is already known: an easy, meaningful step.
         const pairKnown = item.pairId !== undefined && this.state(item.pairId).status !== 'new';
         const key: [number, number, number] = [unit.order, pairKnown ? 0 : 1, item.order];

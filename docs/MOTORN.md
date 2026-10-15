@@ -37,6 +37,11 @@ förkunskaper som kanter i en graf. Se ordningen i
   kedja av delar (Trädgården) stannar kollen därför vid första missen, som förut.
   I en graf (Bäcken) hoppar en miss bara över det som bygger på den. Delar om
   förståelse ingår inte. Efter kollen räknas upplåsningen med samma graf.
+- **Fakta som kräver andra fakta.** En fakta kan ha `requires`: den introduceras
+  först när alla de fakta den kräver är minst flytande. Delat med i Trädgården
+  använder det, så att 21 ÷ 3 kommer först när både 3 × 7 och 7 × 3 sitter. Har
+  faktan väl introducerats stannar den, vad som än händer med de andra. Delar med
+  sådana fakta ingår inte i startkollen.
 - **Uteslutna fakta.** Ett pass kan få `excludedItemIds`. De frågas aldrig, inte
   ens som nya eller förfallna, och räknas inte heller när delar öppnas. En del
   där hälften hålls utanför (pilotens otränade halva) kan därför ändå öppna det

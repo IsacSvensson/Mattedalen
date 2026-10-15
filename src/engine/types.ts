@@ -42,6 +42,12 @@ export interface Item {
   hints: Hint[];
   /** Mirrored twin item (e.g. a reversed form), if any. */
   pairId?: ItemId;
+  /**
+   * Items that must be at least fluent before this one is introduced, e.g. an
+   * inverse fact after the facts of its family. Once introduced, the item
+   * stays, whatever happens to these later.
+   */
+  requires?: ItemId[];
   /** Answer formats the item can be asked in (default: any), e.g. only `choice` for a yes/no question. */
   formats?: AnswerFormat[];
   /** Introduction order within the unit; lower is introduced first. */
