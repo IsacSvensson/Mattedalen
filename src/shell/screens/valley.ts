@@ -86,8 +86,8 @@ const lastPlaceKey = (profile: Profile) => `lastPlace:${profile.id}`;
 /**
  * The brook, stretched to the ground's shape (the outlines keep their width).
  * It comes from far behind the hills, narrow, widens as it comes closer, runs
- * under the bridge and away to the left edge, so the bridge's sign stands on
- * dry land.
+ * under the bridge and down along the left side, so the bridge's sign and the
+ * garden stand on dry land.
  */
 function valleyLand(): SVGSVGElement {
   const svg = s('svg', { class: 'valley-land', viewBox: '0 0 100 100', preserveAspectRatio: 'none', 'aria-hidden': 'true' });
@@ -126,15 +126,15 @@ function bezier([p0, p1, p2, p3]: [Pt, Pt, Pt, Pt], t: number): Pt {
   return [f(0), f(1)];
 }
 
-/** The brook's middle line, in percent of the ground: from behind the hills, under the bridge, out to the left. */
+/** The brook's middle line, in percent of the ground: from behind the hills, under the bridge, down along the left side. */
 const BROOK: [Pt, Pt, Pt, Pt][] = [
-  [[28, 1], [27, 7], [28, 12], [26, 18]],
-  [[26, 18], [23, 28], [10, 34], [-8, 42]],
+  [[28, 1], [27, 8], [28, 14], [26, 21]],
+  [[26, 21], [24, 40], [12, 62], [15, 104]],
 ];
 
-/** The path from the left edge past the garden and out of the map, in percent of the ground. */
+/** The path from the brook past the garden and out of the map, in percent of the ground. */
 const PATH: [Pt, Pt, Pt, Pt][] = [
-  [[-2, 70], [18, 77], [42, 75], [58, 64]],
+  [[19, 74], [30, 79], [44, 76], [58, 64]],
   [[60, 60], [70, 70], [80, 82], [92, 102]],
 ];
 

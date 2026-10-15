@@ -1263,15 +1263,22 @@ h1:focus {
 
 /* Bäcken: the small bridge over the brook. */
 .place-brook {
+  --bridge-w: clamp(130px, 40vw, 190px);
   left: 26%;
-  top: 20%;
+  top: 15%;
+  align-items: flex-start;
+  /* Placed by the middle of the bridge, which stands over the brook; the sign reaches out to the right. */
+  transform: translate(calc(-0.5 * var(--bridge-w)), -50%);
 }
 
-/* The sign stands on the brook's right bank, beside the water, not across it. */
+/*
+ * The sign stands right beside the bridge's right foot, on the far bank and at
+ * the height of the bridge: plainly the bridge's sign, well away from the garden.
+ */
 .place-brook .place-name {
   align-self: flex-start;
-  margin-top: -6px;
-  margin-left: calc(50% + 14px);
+  margin-left: calc(var(--bridge-w) + 4px);
+  margin-top: calc(-0.05 * var(--bridge-w) - 28px);
 }
 
 /* The child's animal stands on the ground itself, with a soft green shadow. */
@@ -1352,9 +1359,10 @@ h1:focus {
   top: 88%;
 }
 
+/* By the brook: on its left bank, below the bridge. */
 .valley-walker.at-place-brook {
-  left: 78%;
-  top: 14%;
+  left: 7%;
+  top: 46%;
 }
 
 .place-statuses {
@@ -1384,7 +1392,7 @@ h1:focus {
 }
 
 .bridge.mini {
-  width: clamp(130px, 40vw, 190px);
+  width: var(--bridge-w, clamp(130px, 40vw, 190px));
 }
 
 /* The arch on the map: open stones outlined, laid stones solid, gaps for what is not open yet. */
@@ -3412,7 +3420,7 @@ h1:focus {
   }
 
   /* A lower map: a smaller arch, so the brook still runs under its middle. */
-  .bridge.mini {
-    width: clamp(110px, 40dvh, 150px);
+  .place-brook {
+    --bridge-w: clamp(110px, 40dvh, 150px);
   }
 }
