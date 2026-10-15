@@ -112,12 +112,21 @@ Utseendet bygger på några få regler. De står också överst i `styles.css`.
   solros växer på kullen i landskapet. Hela raden ändras inte, eftersom varje
   fakta hör till två tabeller.
 
-**Form.**
+**Form.** Stilen är en varm bilderbok, inte ett UI-kit.
 
-- Samma kontur överallt: `--outline` (2,5 px, mörkbrun).
-- Bara det man kan trycka på har en skugga under sig, och den är alltid lika djup
-  (`--press`, 4 px). Ytor som bara visar något har ingen skugga, till exempel
-  kort, odlingslådan och siffrorna under rutnätet.
+- Samma yttre kontur överallt: `--outline` (2 px, mörkbrun). Linjer inuti
+  teckningarna är tunnare, och landskapet har konturer i sina egna toner: mörkgrönt
+  på kullarna, mörkblått längs bäcken, varmt orange runt solen.
+- Bara det man kan trycka på har en tryckkant under sig, alltid lika djup
+  (3 px, `--press-depth`). Kanten är en mörkare ton av knappen själv
+  (`--press-tone`): rostbrun under den orange knappen, mörkt trä under
+  trätangenter, inte svart bläck. Den sjunker när man trycker.
+- Kort ligger mjukt på papper (`--paper`, en mjuk varm skugga, `--lie`). Det som
+  står i landskapet kastar en mjuk, färgtonad skugga på marken.
+- Material: knappsatsen och svarsknapparna är ljusa trätangenter med ådring, och
+  vid Bäcken släta stenar (`keys` i passets plats). Namnskyltarna i dalen är
+  trätavlor på stolpar, och odlingslådan är byggd av plankor med mörk jord
+  (`--soil`).
 - Tre hörnradier: `--r-card` för kort, `--r-tile` för rutor och svarsknappar,
   samt rund eller piller för knappar.
 - Typsnitt: Fredoka för rubriker och siffror, Nunito för text.

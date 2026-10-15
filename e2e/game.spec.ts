@@ -12,6 +12,8 @@ test('a first daily session: new profile, intro, questions, soft ending', async 
   await expect(page.locator('.grid-cell')).toHaveCount(100);
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
 
+  // In the garden the keys and answers are light wood.
+  await expect(page.locator('.screen.session.keys-wood')).toBeVisible();
   // The very first question introduces a new fact: the child builds its rectangle.
   await expect(page.getByText('Ett nytt frö')).toBeVisible();
   await expect(page.locator('.intro-card .builder-board')).toBeVisible();

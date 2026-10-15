@@ -141,6 +141,9 @@ test('a session: a new stone hops to its landing points, then a question, and he
   expect(await intro.locator('.nl-stone.landing').count()).toBeGreaterThanOrEqual(2);
   await page.getByRole('button', { name: 'Nu du!' }).click();
 
+  // At the brook the keys and answers are smooth stones, not the garden's wood.
+  await expect(page.locator('.screen.session.keys-stone')).toBeVisible();
+
   // While the fact is new, the stones stay beside the question, showing only where to start.
   await expect(page.locator('.question .number-line')).toBeVisible();
   await expect(page.locator('.question .nl-hop')).toHaveCount(0);

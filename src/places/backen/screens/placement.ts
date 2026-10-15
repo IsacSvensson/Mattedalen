@@ -54,7 +54,7 @@ export async function runBrookPlacement(ctx: AppContext, profile: Profile, back:
   const stage = h('section', { class: 'play-stage' });
   const view = h(
     'main',
-    { class: 'screen session placement-run' },
+    { class: 'screen session placement-run keys-stone' },
     h(
       'header',
       { class: 'top-bar' },

@@ -65,6 +65,8 @@ export interface SessionPlace {
   askVisual?(q: Question): Element | null;
   /** Time a typed answer to its first digit (J5), so 13 is not slower than 8 just to type. */
   timeToFirstDigit?: boolean;
+  /** What the keys and answer buttons are made of: light wood (the default) or smooth stones (the brook). */
+  keys?: 'wood' | 'stone';
 }
 
 /**
@@ -138,7 +140,7 @@ export async function runSession(
 
   const view = h(
     'main',
-    { class: `screen session has-scene mode-${mode}` },
+    { class: `screen session has-scene mode-${mode} keys-${place.keys ?? 'wood'}` },
     h(
       'header',
       { class: 'play-head' },

@@ -113,7 +113,12 @@ tillbaka till dalen.
   ordning. En öppen del har en streckad plats, blocket fylls med andelen fakta som
   är minst flytande och räknas som lagt vid 80 % (`LAID_AT`). Blocken är fyrkantiga
   och huggna, så att de inte förväxlas med tallinjens runda stenar (J7). Vågen är
-  inget block. På kartan är bron en liten valvbåge.
+  inget block.
+- **På kartan** är bron ett stenvalv över dalens egen bäck, en sten per del. En
+  öppen del har sin plats i valvet och fylls inifrån; en del som inte är öppen än
+  är en lucka. Tills alla stenar ligger står en byggställning av trä under valvet.
+  Skylten står vid brons högra fot, och bäcken rinner ner längs vänster sida.
+- **Tangenterna** vid bäcken är släta stenar, i trädgården trä.
 - **Delarna** står under bron med ”8 av 16” och en stapel. Bara öppna delar visas.
 - **Startkoll.** Första gången vid bäcken, innan något är övat, erbjuds startkollen
   en gång (`brookCheckOffered:<profil>`). Svaren ges på sifferknappsatsen, tiden

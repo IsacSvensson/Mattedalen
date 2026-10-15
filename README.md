@@ -41,10 +41,13 @@ Dalen visar vad barnet kan, inte vad barnet har förtjänat.
 
 **Världens bildspråk.** Tre begrepp har var sitt uttryck som aldrig blandas:
 tillgänglighet (marken eller platsen), kunskap (det som växer eller fylls) och
-hela områden (kanten och landskapet). Samma kontur (`--outline`) överallt,
-tryckskugga (`--press`) bara på det man kan trycka på, tre hörnradier, en orange
-huvudknapp per skärm, Fredoka för rubriker och siffror och Nunito för text. All
-grafik är ritad SVG och typsnitten följer med appen. Reglerna står överst i
+hela områden (kanten och landskapet). Stilen är en varm bilderbok: en kontur på
+2 px (`--outline`) runt allt, tunnare linjer inuti teckningarna, skuggor och
+landskapets linjer i sina egna toner i stället för svart. Bara det man kan trycka
+på har en tryckkant, i en mörkare ton av knappen själv. Tangenterna är trä (och
+stenar vid Bäcken), skyltarna trätavlor och korten papper. Tre hörnradier, en
+orange huvudknapp per skärm, Fredoka för rubriker och siffror och Nunito för
+text. All grafik är ritad SVG och typsnitten följer med appen. Reglerna står överst i
 `src/shell/styles.css`, och hur de används i trädgården beskrivs i
 [TRADGARDEN.md](docs/TRADGARDEN.md#designregler).
 

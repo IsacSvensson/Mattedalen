@@ -50,6 +50,8 @@ function brookSession(ctx: AppContext, profile: Profile): SessionPlace {
     end: (summary) => showBrookEnd(ctx, profile, summary),
     // Two-digit answers are timed to the first digit (J5).
     timeToFirstDigit: true,
+    // Smooth stones from the brook to press, instead of the garden's wooden keys.
+    keys: 'stone',
 
     /** A new fact: the animal hops to the landing points; a new equality: the scale. */
     intro(q, ready) {

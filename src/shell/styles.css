@@ -1897,12 +1897,35 @@ h1:focus {
   width: 100%;
 }
 
+/*
+ * Keys and answer buttons are things to press with a finger: light wooden keys
+ * with a little grain (the default), or smooth stones at the brook (.keys-stone).
+ * The edge underneath is the key's own darker side; it sinks when pressed.
+ */
+.choice,
+.numpad-key {
+  --press-tone: #b98d5c;
+  --key-face:
+    repeating-linear-gradient(100deg, transparent 0 9px, rgba(150, 105, 60, 0.07) 9px 10px, transparent 10px 19px),
+    radial-gradient(ellipse at 50% 28%, #fdf3df, var(--birch) 72%);
+  background: var(--key-face);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -3px 0 rgba(160, 115, 70, 0.16),
+    0 var(--press-depth) 0 var(--press-tone);
+}
+
+.keys-stone .choice,
+.keys-stone .numpad-key {
+  --press-tone: #9d9585;
+  --key-face: radial-gradient(ellipse at 42% 28%, #faf8f3, #e4dfd4 58%, #d5cfc2);
+  border-radius: 24px 20px 22px 18px / 20px 24px 18px 22px;
+}
+
 .choice {
   min-height: 96px;
   border-radius: var(--r-tile);
   border: var(--outline);
-  background: #fff;
-  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   font-family: var(--font-display);
   font-size: clamp(2.2rem, 10vw, 3rem);
   font-weight: 600;
@@ -1913,7 +1936,7 @@ h1:focus {
 .choice:active:not(:disabled),
 .choice.chosen {
   transform: translateY(var(--press-depth));
-  box-shadow: none;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5);
 }
 
 .choice:disabled {
@@ -1929,11 +1952,19 @@ h1:focus {
 /* Calm: no red, just a quieter, dashed button. */
 .choice.wrong {
   background: #f1e7d8;
+  box-shadow: none;
   color: var(--ink-soft);
   border-style: dashed;
 }
 
 /* --- session: new fact and help ------------------------------------- */
+
+/* Help and new facts on warm paper, a little lighter where the light falls. */
+.intro-card,
+.help-card,
+.derive-card {
+  background: radial-gradient(ellipse at 30% 15%, #fffdf7, var(--paper) 55%, #faf0dc);
+}
 
 .intro-card,
 .help-card {
@@ -2171,7 +2202,9 @@ h1:focus {
   padding: 0 18px;
   border-radius: var(--r-tile);
   border: var(--outline);
-  background: #fff;
+  /* A slot in the paper the number is written into. */
+  background: var(--paper);
+  box-shadow: inset 0 3px 5px -2px rgba(90, 60, 30, 0.25);
   font-family: var(--font-display);
   font-size: clamp(2.6rem, 11vw, 3.4rem);
   font-weight: 600;
@@ -2201,8 +2234,6 @@ h1:focus {
   place-items: center;
   border-radius: 18px;
   border: var(--outline);
-  background: #fff;
-  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 600;
@@ -2215,10 +2246,12 @@ h1:focus {
 
 .numpad-key:active:not(:disabled) {
   transform: translateY(var(--press-depth));
-  box-shadow: none;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5);
 }
 
-.numpad-key.ok {
+.numpad-key.ok,
+.keys-stone .numpad-key.ok {
+  --press-tone: #9b3a1b;
   background: var(--primary);
 }
 
