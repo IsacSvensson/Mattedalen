@@ -2,11 +2,13 @@ import type { ContentPack, FocusSet, Item, Unit } from '../../engine';
 import { buildDivisions, buildShareItems, DIVISION_UNIT_DEFS, divisionDistractors, isDivisionId, isShareId, parseDivisionId, SHARE_TASKS, shareId } from './division';
 import { multiplicationDistractors } from './distractors';
 import { buildFacts, MAX_FACTOR, MIN_FACTOR, parseFactId, UNIT_DEFS } from './facts';
+import { presentMultiplication } from './present';
 
 export * from './facts';
 export * from './derive';
 export * from './division';
 export { multiplicationDistractors } from './distractors';
+export { presentMultiplication, STANDARD_FIRST } from './present';
 
 /** A unit opens when ~80 % of the previous one is at least "fluent". */
 export const UNLOCK_FRACTION = 0.8;
@@ -98,6 +100,8 @@ export function createMultiplicationPack({ maxUnits = UNIT_DEFS.length, division
       return multiplicationDistractors(a, b);
     },
     focusSets: tableFocusSets(items),
+    // Divisions in three forms; without them, every item has one form.
+    ...(division ? { present: presentMultiplication } : {}),
   };
 }
 

@@ -100,14 +100,17 @@ men det betyder bråkstreck.
 Som vid Bäcken visas en ny division i standardform de första två gångerna. Sedan
 blandas formerna:
 
-| Form | Exempel | Andel |
-|---|---|---|
-| standard | `21 ÷ 3 = __` | 60 % |
-| saknad faktor | `3 × __ = 21` | 25 % |
-| omvänd | `__ = 21 ÷ 3` | 15 % |
+| Form | Exempel | Medan den övas | När den sitter |
+|---|---|---|---|
+| standard | `21 ÷ 3 = __` | 60 % | 80 % |
+| saknad faktor | `__ × 3 = 21` | 25 % | 10 % |
+| omvänd | `__ = 21 ÷ 3` | 15 % | 10 % |
 
-Den saknade faktorn är bron mellan räknesätten. Alla former räknas som bevis,
-men statusen automatiserad kräver snabba svar i standardform.
+Den saknade faktorn är bron mellan räknesätten. Den står i divisionens egen
+ruta: 21 ÷ 3 = 7 bor i rutan 7 × 3, så luckan är sjuan. Alla former räknas som
+bevis. När divisionen sitter visas den mest i standardform, så att det som
+avgör om den är automatiserad mest är snabba svar i den formen. Gånger och
+”Dela lika” har bara en form.
 
 ### Ny fakta
 
@@ -119,12 +122,15 @@ samma bild åt två håll. Därefter svarar barnet själv (”Nu du!”).
 
 | Strategi | Exempel |
 |---|---|
-| tänk gånger | 3 × 7 = 21 → 21 ÷ 3 = 7 |
-| hälften (÷2) | hälften av 16 = 8 |
-| via tio (÷5) | 40 ÷ 10 = 4 → dubbelt så många femmor: 8 |
+| räkna grupper från 2, 5 eller 10 | 5 × 6 = 30 → 30 + 6 + 6 = 42 → 42 ÷ 6 = 7 |
+| ta bort grupper från 10 | 10 × 6 = 60 → 60 − 6 = 54 → 54 ÷ 6 = 9 |
+| hälften (÷2) | hälften av 16 = 8 → 16 ÷ 2 = 8 |
+| via tio (÷5) | 40 ÷ 10 = 4 → 4 + 4 = 8 → 40 ÷ 5 = 8 |
 
-Stegen bygger bara på sådant barnet redan kan, och inget steg visar svaret i
-förväg.
+Stegen bygger bara på sådant barnet redan kan, och ingen uppgift visar svaret i
+förväg. Därför börjar stigen aldrig i divisionens egen gångerfakta (7 × 6 för
+42 ÷ 6). Där det första steget skulle avslöja svaret finns ingen stig: ÷1, ÷10
+och kvoterna 1, 2, 5 och 10.
 
 ### Felsvar
 
@@ -212,7 +218,7 @@ mognar den.” Det gör ändringen till något att se fram emot.
 | Fas | Innehåll |
 |---|---|
 | G1. Motor och paket **(klar)** | `requires` i motorn, paketversion 2 med fakta, delar och graf, läsning av gamla QR-koder och säkerhetskopior, simulering. Inget ändras för barnen än: delat med ligger bakom `createMultiplicationPack({ division: true })`. |
-| G2. Innehåll | ”Dela lika”, format, räknestigar, felsvar och förklaringar, bråkstreck i frågan och inställningen för tecknet. |
+| G2. Innehåll **(klar)** | ”Dela lika”, format, räknestigar, felsvar och förklaringar, bråkstreck i frågan och inställningen för tecknet. |
 | G3. Trädgården | Blommor, kart och frukt, skördekorgen, introduktionen med delad rektangel, nyheten för barn som redan spelar, kartan i dalen. |
 | G4. Runtomkring | Öva en tabell, startkollen, Trädgårdens koll och föräldravyn. |
 | G5. Verifiering | e2e, skärmbilder vid 320 och 360 px, liggande telefon och surfplatta, dokumentation. |
@@ -229,6 +235,17 @@ mognar den.” Det gör ändringen till något att se fram emot.
   94–98 av 100 multiplikationer, mot 100 utan delat med. Andelen rätt ligger på
   84–85 %. En svag elev har påbörjat 49 divisioner och har 22 som sitter.
   Siffrorna är antaganden att pröva i piloten.
+
+## Fynd från G2
+
+- **Tecknet ritas, texten står kvar.** Alla uppgifter skrivs som `21 ÷ 3`.
+  Skärmen ritar dem med barnets tecken (`mathNodes` i
+  `src/shell/divisionSign.ts`), i frågan, i räknestigen och i
+  förklaringarna. Uppläsningen säger ”delat med” oavsett tecken.
+- **Bråkstrecket** ligger i höjd med likhetstecknet. En fråga med bråk har
+  något mindre siffror, så att kortet behåller sin höjd.
+- **Inställningen** syns i föräldravyn under Trädgården först när paketet har
+  delat med (G3).
 
 ## Avgjorda frågor
 

@@ -38,6 +38,7 @@ export async function hasSwedishVoice(): Promise<boolean> {
 export function spokenText(text: string): string {
   return text
     .replace(/×/g, ' gånger ')
+    .replace(/÷/g, ' delat med ')
     .replace(/−/g, ' minus ')
     .replace(/\+/g, ' plus ')
     .replace(/__/g, ' hur mycket ')

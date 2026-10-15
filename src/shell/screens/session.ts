@@ -7,6 +7,7 @@ import { numPad } from '../components/numPad';
 import { scene } from '../components/scene';
 import { h, prefersReducedMotion, wait } from '../dom';
 import { PlayController, type GameDeps } from '../play';
+import { DEFAULT_DIVISION_SIGN, mathNodes, type DivisionSign } from '../divisionSign';
 import { hasSwedishVoice, speak, speechSupported, spokenText, stopSpeaking } from '../speech';
 
 /** One step on a derivation path ("räknestigen"). Only the last step is the answer to the question. */
@@ -73,24 +74,31 @@ export interface SessionPlace {
  * The prompt as shown: a blank (`__`) becomes an empty box, and long
  * prompts (`7 + 5 = __ + 8`) get a smaller size.
  */
-export function promptView(prompt: string): HTMLElement {
+export function promptView(prompt: string, sign: DivisionSign = divisionSign): HTMLElement {
   const parts = prompt.split('__');
   const blank = parts.length > 1;
   const content: (Node | string)[] = [];
   parts.forEach((part, i) => {
     if (i > 0) content.push(h('span', { class: 'blank', 'aria-hidden': 'true' }, '?'));
-    content.push(part);
+    // Divisions in the child's sign: a stacked fraction by default.
+    content.push(...mathNodes(part, sign));
   });
+  const stacked = sign === 'fraction' && prompt.includes('÷');
   return h(
     'p',
     {
-      class: `prompt${prompt.length > 7 ? ' long' : ''}${blank ? ' has-blank' : ''}`,
+      class: `prompt${prompt.length > 7 ? ' long' : ''}${blank ? ' has-blank' : ''}${stacked ? ' has-frac' : ''}`,
+      // The prompt as written, whatever the sign (for tests and tools).
+      'data-prompt': prompt,
       // A prompt with its own equal sign is read as it stands; "3 × 7" as "3 gånger 7 är lika med?".
-      'aria-label': prompt.includes('=') ? `${spokenText(prompt)}?` : `${prompt.replace('×', 'gånger')} är lika med?`,
+      'aria-label': prompt.includes('=') ? `${spokenText(prompt)}?` : `${spokenText(prompt)} är lika med?`,
     },
     content,
   );
 }
+
+/** How the child writes "delat med" (profile setting), for this session. */
+let divisionSign: DivisionSign = DEFAULT_DIVISION_SIGN;
 
 /** Pause after a correct answer before the next question. */
 const CORRECT_PAUSE_MS = 650;
@@ -112,6 +120,7 @@ export async function runSession(
 ): Promise<void> {
   const play = await PlayController.start(profile, place.deps, mode, focus);
   voiceOn = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
+  divisionSign = profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN;
   const stage = h('section', { class: 'play-stage', 'aria-live': 'polite' });
   let keyHandler: ((e: KeyboardEvent) => void) | undefined;
   let finished = false;
@@ -247,7 +256,7 @@ async function derive(stage: HTMLElement, steps: PathStep[], visual: Element, se
       'li',
       { class: `derive-step current${last ? ' target' : ''}` },
       h('span', { class: 'derive-label' }, step.label),
-      h('span', { class: 'derive-prompt' }, step.prompt),
+      h('span', { class: 'derive-prompt', 'data-prompt': step.prompt }, mathNodes(step.prompt, divisionSign)),
       h('span', { class: 'derive-eq' }, ' = ?'),
     );
     list.replaceChildren(...done, current);
@@ -383,9 +392,9 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place
           'div',
           { class: 'help-card card' },
           h('p', { class: 'you-said' }, fb.given ? `Du svarade ${label(fb.given)}.` : 'Inget svar den här gången.', help.strategy ? ' Så här kan du tänka:' : ''),
-          h('p', { class: 'help-answer' }, answer),
+          h('p', { class: 'help-answer', 'data-prompt': answer }, mathNodes(answer, divisionSign)),
           help.note ? h('p', { class: 'confusion-note' }, help.note) : null,
-          help.strategy ? h('p', { class: 'strategy' }, help.strategy) : null,
+          help.strategy ? h('p', { class: 'strategy' }, mathNodes(help.strategy, divisionSign)) : null,
           help.visual ?? null,
         ),
         next,

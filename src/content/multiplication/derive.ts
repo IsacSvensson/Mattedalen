@@ -1,5 +1,6 @@
 import type { ItemId } from '../../engine';
-import { formatFact, parseFactId, strategyFor } from './facts';
+import { anchorGivesAway, divisionId, divisionStrategy, formatDivision, isDivisionId, parseDivisionId, pathAnchor } from './division';
+import { factId, formatFact, parseFactId, strategyFor } from './facts';
 
 /**
  * A derivation path ("räknestig") for a hard fact: start from facts the child
@@ -41,4 +42,43 @@ export function derivationSteps(a: number, b: number): DeriveStep[] | null {
   if (!step) return null;
   if (known.length > 1) known[1] = { ...(known[1] as DeriveStep), label: 'Och det här kan du också' };
   return [...known, { kind: 'combine', ...step, answer }, { kind: 'target', label: 'Alltså', prompt: formatFact(a, b), answer }];
+}
+
+/**
+ * A derivation path for ab ÷ b: count groups of b from a fact the child knows,
+ * e.g. for 42 ÷ 6: 5 × 6 = 30 → 30 + 6 + 6 = 42 → 42 ÷ 6 = 7 (two more than
+ * five groups). No prompt shows the answer before the last step. Null when the known
+ * fact would give the answer away (÷ 1, ÷ 10, quotient 1, 2, 5 or 10).
+ */
+export function divisionDerivationSteps(id: ItemId): DeriveStep[] | null {
+  const { dividend: ab, divisor: b, quotient: a } = parseDivisionId(id);
+  const target: DeriveStep = { kind: 'target', label: 'Alltså, hur många grupper?', prompt: formatDivision(ab, b), answer: a };
+  const strategy = divisionStrategy(a, b).kind;
+
+  if (strategy === 'half') return [{ kind: 'combine', label: 'Ta hälften', prompt: `hälften av ${ab}`, answer: a }, { ...target, label: 'Alltså' }];
+  if (strategy === 'viaTen') {
+    const tens = ab / 10;
+    return [
+      { kind: 'known', label: 'Börja med det du kan', prompt: formatDivision(ab, 10), answer: tens, itemId: divisionId(ab, 10) },
+      { kind: 'combine', label: 'Femmorna är dubbelt så många', prompt: `${tens} + ${tens}`, answer: a },
+      { ...target, label: 'Alltså' },
+    ];
+  }
+  if (strategy !== 'thinkTimes' || anchorGivesAway(a)) return null;
+
+  // From 2, 5 or 10 groups, add or take away one group at a time.
+  const from = pathAnchor(a);
+  const groups = Math.abs(a - from);
+  const sign = a > from ? '+' : '−';
+  const known: DeriveStep = { kind: 'known', label: 'Börja med det du kan', prompt: formatFact(from, b), answer: from * b, itemId: factId(from, b) };
+  const label = a > from ? (groups === 1 ? 'Lägg till en grupp till' : 'Lägg till två grupper till') : groups === 1 ? 'Ta bort en grupp' : 'Ta bort två grupper';
+  return [known, { kind: 'combine', label, prompt: [from * b, ...Array<number>(groups).fill(b)].join(` ${sign} `), answer: ab }, target];
+}
+
+/** The path for any item of the pack: a multiplication or a division. */
+export function derivationStepsFor(id: ItemId): DeriveStep[] | null {
+  if (isDivisionId(id)) return divisionDerivationSteps(id);
+  if (!/^\d+x\d+$/.test(id)) return null;
+  const { a, b } = parseFactId(id);
+  return derivationSteps(a, b);
 }

@@ -79,7 +79,13 @@ describe('delat med in the garden pack', () => {
     expect(divisionStrategy(8, 2).kind).toBe('half');
     expect(divisionStrategy(8, 5).kind).toBe('viaTen');
     expect(divisionStrategy(4, 10).kind).toBe('ten');
-    for (const it of divisions) for (const src of it.derivedFrom) expect(isDivisionId(src)).toBe(false);
+    // A path starts from multiplications, or for ÷5 from the same number ÷10 (an earlier part).
+    for (const it of divisions)
+      for (const src of it.derivedFrom) {
+        if (!isDivisionId(src)) continue;
+        expect(parseDivisionId(src)).toMatchObject({ dividend: parseDivisionId(it.id).dividend, divisor: 10 });
+        expect(parseDivisionId(it.id).divisor).toBe(5);
+      }
   });
 
   it('offers the typical wrong answers and a friendly word for them', () => {

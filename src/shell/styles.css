@@ -1799,6 +1799,36 @@ h1:focus {
   border-bottom-color: var(--good-ink);
 }
 
+/* Delat med as a fraction bar (the default sign): 21 over 3, the bar at the height of the equal sign. */
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  vertical-align: middle;
+  margin: 0 0.08em;
+  font-size: 0.8em;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.frac-num {
+  padding: 0 0.15em 0.04em;
+}
+
+.frac-den {
+  padding: 0.04em 0.15em 0;
+  border-top: max(2px, 0.07em) solid currentColor;
+}
+
+/* A stacked prompt is taller: a little smaller, so the card keeps its height. */
+.prompt.has-frac {
+  font-size: clamp(2.8rem, 15vw, 4.8rem);
+}
+
+.prompt.has-frac.long {
+  font-size: clamp(2.2rem, 10.5vw, 4rem);
+}
+
 .ask-label {
   margin: 0 0 10px;
   font-family: var(--font-display);

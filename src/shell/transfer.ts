@@ -19,6 +19,7 @@ export function transferOf(profile: Profile, packs: { pack: ContentPack; states:
     avatar: profile.avatar,
     sessionMinutes: profile.settings.sessionMinutes,
     gardenOpen: profile.settings.gardenOpen === true,
+    ...(profile.settings.divisionSign && profile.settings.divisionSign !== 'fraction' ? { divisionSign: profile.settings.divisionSign } : {}),
     packs: packs.map(({ pack, states }) => ({ packId: pack.id, packVersion: pack.version, levels: pack.items.map((it) => levelOf(states[it.id])) })),
   };
 }
@@ -49,14 +50,23 @@ export function progressFromSnapshot(snap: Pick<QrSnapshot, 'levels'>, engine: E
   return { states, meta };
 }
 
-export function profileFromSnapshot(snap: Pick<QrSnapshot, 'name' | 'avatar' | 'sessionMinutes'> & { gardenOpen?: boolean }, id: string, now: number): Profile {
+export function profileFromSnapshot(
+  snap: Pick<QrSnapshot, 'name' | 'avatar' | 'sessionMinutes'> & Pick<Partial<QrTransfer>, 'gardenOpen' | 'divisionSign'>,
+  id: string,
+  now: number,
+): Profile {
   const minutes = Math.min(15, Math.max(10, snap.sessionMinutes || DEFAULT_SETTINGS.sessionMinutes));
   return {
     id,
     name: snap.name || 'Spelare',
     avatar: snap.avatar || '🌱',
     createdAt: now,
-    settings: { ...DEFAULT_SETTINGS, sessionMinutes: minutes, ...(snap.gardenOpen ? { gardenOpen: true } : {}) },
+    settings: {
+      ...DEFAULT_SETTINGS,
+      sessionMinutes: minutes,
+      ...(snap.gardenOpen ? { gardenOpen: true } : {}),
+      ...(snap.divisionSign && snap.divisionSign !== 'fraction' ? { divisionSign: snap.divisionSign } : {}),
+    },
   };
 }
 

@@ -12,6 +12,8 @@ export interface ProfileSettings {
    * Otherwise the garden opens when doubles and going over ten sit at the brook.
    */
   gardenOpen?: boolean;
+  /** How "delat med" is written: a fraction bar (default), `÷` or `/`. */
+  divisionSign?: 'fraction' | 'obelus' | 'slash';
 }
 
 export const DEFAULT_SETTINGS: ProfileSettings = {

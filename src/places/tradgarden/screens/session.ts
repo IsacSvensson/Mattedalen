@@ -1,5 +1,5 @@
 import type { FocusSet, Question, SessionMode } from '../../../engine';
-import { confusionNote, derivationSteps, parseFactId } from '../../../content/multiplication';
+import { confusionNote, derivationStepsFor, divisionNote, isDivisionId, parseDivisionId, parseFactId } from '../../../content/multiplication';
 import type { Profile } from '../../../storage';
 import type { AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
@@ -12,6 +12,13 @@ import { gardenDeps } from '../pack';
 import { showGarden } from './garden';
 import { showSessionEnd } from './sessionEnd';
 
+/** The square an item belongs to: a × b, or for ab ÷ b the rectangle of a rows of b. */
+function square(id: string): { a: number; b: number } {
+  if (!isDivisionId(id)) return parseFactId(id);
+  const { quotient, divisor } = parseDivisionId(id);
+  return { a: quotient, b: divisor };
+}
+
 /** A session in the garden: watering it is answering questions. */
 export function showSession(ctx: AppContext, profile: Profile, mode: SessionMode, focus?: FocusSet): Promise<void> {
   return runSession(ctx, profile, gardenSession(ctx, profile), mode, focus);
@@ -19,7 +26,7 @@ export function showSession(ctx: AppContext, profile: Profile, mode: SessionMode
 
 function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
   const picture = (q: Question) => {
-    const { a, b } = parseFactId(q.item.id);
+    const { a, b } = square(q.item.id);
     return arrayView(a, b, { size: 'small', parts: partsOf(q.item.hints) });
   };
   return {
@@ -48,15 +55,14 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
     },
 
     derivation(q) {
-      const { a, b } = parseFactId(q.item.id);
-      const steps = derivationSteps(a, b);
+      const steps = derivationStepsFor(q.item.id);
       return steps ? { steps, visual: picture(q) } : null;
     },
 
     help(q, fb) {
-      const { a, b } = parseFactId(q.item.id);
+      const { a, b } = square(q.item.id);
       return {
-        note: confusionNote(a, b, fb.given),
+        note: isDivisionId(q.item.id) ? divisionNote(a * b, b, fb.given) : confusionNote(a, b, fb.given),
         strategy: q.item.hints.find((x) => x.kind === 'strategy')?.text,
         visual: picture(q),
       };

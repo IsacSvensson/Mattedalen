@@ -1,5 +1,6 @@
 import { isStruggling, systemClock, type EngineConfig, type ItemState } from '../../engine';
-import { factId, formatFact, MAX_FACTOR, MIN_FACTOR, parseFactId, strategyFor } from '../../content/multiplication';
+import { factId, formatFact, isDivisionId, MAX_FACTOR, MIN_FACTOR, parseFactId, strategyFor } from '../../content/multiplication';
+import { DEFAULT_DIVISION_SIGN, DIVISION_SIGNS, type DivisionSign } from '../../shell/divisionSign';
 import type { Profile } from '../../storage';
 import type { AppContext } from '../../shell/app';
 import { plantIcon } from '../../shell/components/plant';
@@ -11,6 +12,25 @@ import { factStats, formatDay, STATUS_TEXT, topConfusions, type FactStats } from
 import { gardenDeps, pack } from './pack';
 import { gardenIsOpen } from './isOpen';
 import { showPlacementOffer } from './screens/placement';
+
+/** How delat med is written for this child; only once the garden has delat med. */
+function divisionSignSetting(profile: Profile, save: SaveProfile): HTMLElement | null {
+  if (!pack.items.some((it) => isDivisionId(it.id))) return null;
+  const current = profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN;
+  return h(
+    'label',
+    null,
+    'Skriv delat med som ',
+    h(
+      'select',
+      {
+        'aria-label': 'Skriv delat med som',
+        onchange: (e: Event) => void save({ settings: { divisionSign: (e.target as HTMLSelectElement).value as DivisionSign } }),
+      },
+      DIVISION_SIGNS.map((s) => h('option', { value: s.value, selected: s.value === current }, s.label)),
+    ),
+  );
+}
 
 /** Trädgården's part of the parent view: what the child knows of the tables, and the start check. */
 export async function gardenParentSection(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement> {
@@ -72,6 +92,7 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
         }),
         ' Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)',
       ),
+      divisionSignSetting(profile, save),
     ),
     h('h4', null, 'Startkoll'),
     h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),

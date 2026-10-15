@@ -68,7 +68,8 @@ inget hämtas utifrån.
   sifferknappsats (siffror, sudda och bock, eller tangentbordet). Fritt svar krävs för
   statusen ”automatiserad”. Svarstiden mäts men visas aldrig, och ingen klocka
   syns.
-- **Räknestigen** (`derivationSteps` i `content/multiplication/derive.ts`). Stegen
+- **Räknestigen** (`derivationStepsFor` i `content/multiplication/derive.ts`, för
+  delat med se `docs/PLAN-DELAT-MED.md`). Stegen
   följer faktans strategi: en grupp till (6 × 7 från 5 × 7), dela upp och lägg
   ihop (7 × 7 = 5 × 7 + 2 × 7), dubbla (8 × 7 från 4 × 7), ta bort en grupp
   (9 × 6 från 10 × 6) och hälften (5 × 8 från 10 × 8). Varje steg besvaras på

@@ -91,6 +91,7 @@ function sanitizeProfile(raw: unknown): Profile {
       readAloud: typeof settings.readAloud === 'boolean' ? settings.readAloud : DEFAULT_SETTINGS.readAloud,
       allowFree: typeof settings.allowFree === 'boolean' ? settings.allowFree : DEFAULT_SETTINGS.allowFree,
       ...(settings.gardenOpen === true ? { gardenOpen: true } : {}),
+      ...(settings.divisionSign === 'obelus' || settings.divisionSign === 'slash' ? { divisionSign: settings.divisionSign } : {}),
     },
   };
 }

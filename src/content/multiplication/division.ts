@@ -67,6 +67,20 @@ export function divisionStrategy(a: number, b: number): { kind: string; text: st
   return { kind: 'thinkTimes', text: `${div} = ${a}: tänk gånger. ${a} × ${b} = ${ab}.`, from: [factId(a, b)] };
 }
 
+/** Where a derivation path for ab ÷ b counts groups from: 2, 5 or 10 groups of b. */
+export const pathAnchor = (a: number) => (a < 5 ? 2 : a < 8 ? 5 : 10);
+
+/** Whether the path's known fact would give the answer away (quotient 1, 2, 5 or 10). */
+export const anchorGivesAway = (a: number) => [1, 2, 5, 10].includes(a);
+
+/** The facts a derivation path for ab ÷ b starts from (see `divisionDerivationSteps`). */
+export function divisionPathFrom(a: number, b: number): ItemId[] {
+  const s = divisionStrategy(a, b);
+  if (s.kind === 'viaTen') return [divisionId(a * b, 10)];
+  if (s.kind === 'thinkTimes' && !anchorGivesAway(a)) return [factId(pathAnchor(a), b)];
+  return s.from;
+}
+
 function divisionHints(a: number, b: number): Hint[] {
   const s = divisionStrategy(a, b);
   return [
@@ -89,7 +103,7 @@ export function buildDivisions(): Item[] {
         answer: String(a),
         unitId: divisionUnitOf(unitFor(a, b).id),
         tags: ['division', `divisor:${b}`, `a:${a}`, `b:${b}`],
-        derivedFrom: divisionStrategy(a, b).from,
+        derivedFrom: divisionPathFrom(a, b),
         hints: divisionHints(a, b),
         // 21 ÷ 3 and 21 ÷ 7 are twins, as 3 × 7 and 7 × 3 are.
         pairId: a === b ? undefined : divisionInSquare(b, a),
