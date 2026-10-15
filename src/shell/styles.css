@@ -1042,14 +1042,11 @@ h1:focus {
   stroke-linecap: round;
 }
 
-.brook-bank {
+.valley-land .brook-water {
+  fill: var(--water);
   stroke: var(--water-shade);
-  stroke-width: 26px;
-}
-
-.brook-water {
-  stroke: var(--water);
-  stroke-width: 22px;
+  stroke-width: 2px;
+  stroke-linejoin: round;
 }
 
 /* A thin light glint along the water. */
@@ -1261,13 +1258,20 @@ h1:focus {
 
 .place-garden {
   left: 70%;
-  top: 65%;
+  top: 70%;
 }
 
 /* Bäcken: the small bridge over the brook. */
 .place-brook {
   left: 26%;
-  top: 22%;
+  top: 20%;
+}
+
+/* The sign stands on the brook's right bank, beside the water, not across it. */
+.place-brook .place-name {
+  align-self: flex-start;
+  margin-top: -6px;
+  margin-left: calc(50% + 14px);
 }
 
 /* The child's animal stands on the ground itself, with a soft green shadow. */
@@ -1349,7 +1353,7 @@ h1:focus {
 }
 
 .valley-walker.at-place-brook {
-  left: 60%;
+  left: 78%;
   top: 14%;
 }
 
@@ -1381,6 +1385,39 @@ h1:focus {
 
 .bridge.mini {
   width: clamp(130px, 40vw, 190px);
+}
+
+/* The arch on the map: open stones outlined, laid stones solid, gaps for what is not open yet. */
+.bridge.mini .br-slot {
+  fill: rgba(255, 250, 240, 0.8);
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-dasharray: 4 3;
+  stroke-linejoin: round;
+}
+
+.bridge.mini .br-slot.laid {
+  fill: var(--bridge-block);
+  stroke-dasharray: none;
+}
+
+.bridge.mini .br-fill {
+  fill: var(--bridge-block);
+  stroke: none;
+}
+
+/* The wooden centering the arch is built on, until it carries itself. */
+.br-centering {
+  fill: none;
+  stroke: var(--plank-edge);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.br-pier {
+  fill: #c7b89c;
+  stroke: var(--ink);
+  stroke-width: 1.6;
 }
 
 .br-water {
@@ -3372,5 +3409,10 @@ h1:focus {
 
   .place-name {
     font-size: 1.1rem;
+  }
+
+  /* A lower map: a smaller arch, so the brook still runs under its middle. */
+  .bridge.mini {
+    width: clamp(110px, 40dvh, 150px);
   }
 }

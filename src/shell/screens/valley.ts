@@ -83,12 +83,37 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
 /** Where a child went last, so their animal stands there (per child). */
 const lastPlaceKey = (profile: Profile) => `lastPlace:${profile.id}`;
 
-/** The brook, stretched to the ground's shape (the outlines keep their width). */
+/**
+ * The brook, stretched to the ground's shape (the outlines keep their width).
+ * It comes from far behind the hills, narrow, widens as it comes closer, runs
+ * under the bridge and away to the left edge, so the bridge's sign stands on
+ * dry land.
+ */
 function valleyLand(): SVGSVGElement {
   const svg = s('svg', { class: 'valley-land', viewBox: '0 0 100 100', preserveAspectRatio: 'none', 'aria-hidden': 'true' });
-  // In from the left edge and out at the bottom: the brook runs on beyond the frame.
-  const brook = 'M-6 16 C10 18 30 28 26 48 S10 76 22 104';
-  svg.innerHTML = `<path d="${brook}" class="brook-bank"/>` + `<path d="${brook}" class="brook-water"/>` + `<path d="${brook}" class="brook-glint"/>`;
+  const centre = BROOK.flatMap((curve, i) => Array.from({ length: 24 }, (_, k) => bezier(curve, (k + (i ? 1 : 0)) / 24)));
+  // Width in percent of the ground's width: narrow far away, full width from the bridge on.
+  const width = (i: number) => 0.2 + 6.8 * Math.min(1, i / 20) ** 0.75;
+  // The ground is wider than it is high: offsets are worked out in its own proportions
+  // (units of its height), so the water keeps its width whichever way it runs.
+  const aspect = 1.4;
+  const left: string[] = [];
+  const right: string[] = [];
+  centre.forEach(([x, y], i) => {
+    const [nx, ny] = centre[Math.min(i + 1, centre.length - 1)]!;
+    const [px, py] = centre[Math.max(i - 1, 0)]!;
+    const tx = (nx - px) * aspect;
+    const ty = ny - py;
+    const len = Math.hypot(tx, ty) || 1;
+    const half = (width(i) * aspect) / 2;
+    const ox = ((-ty / len) * half) / aspect;
+    const oy = (tx / len) * half;
+    left.push(`${(x + ox).toFixed(2)} ${(y + oy).toFixed(2)}`);
+    right.push(`${(x - ox).toFixed(2)} ${(y - oy).toFixed(2)}`);
+  });
+  const water = `M${left.join(' L')} L${right.reverse().join(' L')} Z`;
+  const glint = `M${centre.slice(14).map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join(' L')}`;
+  svg.innerHTML = `<path d="${water}" class="brook-water"/>` + `<path d="${glint}" class="brook-glint"/>`;
   return svg;
 }
 
@@ -101,9 +126,15 @@ function bezier([p0, p1, p2, p3]: [Pt, Pt, Pt, Pt], t: number): Pt {
   return [f(0), f(1)];
 }
 
-/** The path from the brook past the garden and out of the map, in percent of the ground. */
+/** The brook's middle line, in percent of the ground: from behind the hills, under the bridge, out to the left. */
+const BROOK: [Pt, Pt, Pt, Pt][] = [
+  [[28, 1], [27, 7], [28, 12], [26, 18]],
+  [[26, 18], [23, 28], [10, 34], [-8, 42]],
+];
+
+/** The path from the left edge past the garden and out of the map, in percent of the ground. */
 const PATH: [Pt, Pt, Pt, Pt][] = [
-  [[24, 64], [40, 74], [52, 70], [60, 60]],
+  [[-2, 70], [18, 77], [42, 75], [58, 64]],
   [[60, 60], [70, 70], [80, 82], [92, 102]],
 ];
 
