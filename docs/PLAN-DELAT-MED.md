@@ -22,6 +22,9 @@ koll.
    sitter.
 4. **Det som öppnats stängs aldrig.** Tappar 3 × 7 ett steg fortsätter 21 ÷ 3
    ändå.
+5. **Delat med skrivs med bråkstreck som standard,** 21 över 3, som i många
+   svenska läroböcker. En vuxen kan ändra till `÷` eller `/` i föräldravyn. Se
+   [Hur delat med skrivs](#hur-delat-med-skrivs).
 
 ## Innehåll
 
@@ -67,6 +70,30 @@ sorter som båda behövs:
 
 Barn möter oftast bara den första sorten. Bilderna är trädgårdens egna: bär,
 korgar och rader i odlingslådan.
+
+### Hur delat med skrivs
+
+Delat med visas med bråkstreck som standard: täljaren över strecket och nämnaren
+under, med `= __` bredvid. Planen skriver `21 ÷ 3` för att det ryms på en rad,
+men det betyder bråkstreck.
+
+- **Inställning per barn** i föräldravyn: ”Skriv delat med som: bråkstreck
+  (standard) · ÷ · /”. Den följer det barnet möter i skolan.
+- **Samma tecken överallt** där barnet ser delat med: frågan, introduktionen,
+  hjälpkortet, räknestigen och kollen. Föräldravyn använder samma tecken, så att
+  vuxna ser det barnet ser.
+- **Uppläsning och skärmläsare** säger alltid ”21 delat med 3”, oavsett tecken.
+- **Formatet med saknad faktor** (`3 × __ = 21`) och svaren på sifferknappsatsen
+  påverkas inte.
+- **Bråkstrecket tar två rader.** Frågekortet, hjälpkortet och räknestigen
+  ritas om för det. Skärmbilder vid 320 px och liggande telefon visar att det
+  ryms.
+- **Längre fram:** när bråken kommer har barnet redan läst bråkstrecket som
+  ”delat med”. Det stämmer matematiskt (5 över 6 är 5 delat med 6) och är en
+  bra grund för bråk.
+- **Lagring och flytt:** inställningen sparas i profilen (`divisionSign:
+  'fraction' | 'obelus' | 'slash'`) och följer med i säkerhetskopian och i
+  QR-koden (`MD1:`).
 
 ### Format
 
@@ -185,15 +212,15 @@ mognar den.” Det gör ändringen till något att se fram emot.
 | Fas | Innehåll |
 |---|---|
 | G1. Motor och paket | `requires` i motorn, paketversion 2 med fakta, delar och graf, läsning av gamla QR-koder och säkerhetskopior, simulering. Inget ändras för barnen än. |
-| G2. Innehåll | ”Dela lika”, format, räknestigar, felsvar och förklaringar. |
+| G2. Innehåll | ”Dela lika”, format, räknestigar, felsvar och förklaringar, bråkstreck i frågan och inställningen för tecknet. |
 | G3. Trädgården | Blommor, kart och frukt, skördekorgen, introduktionen med delad rektangel, nyheten för barn som redan spelar, kartan i dalen. |
 | G4. Runtomkring | Öva en tabell, startkollen, Trädgårdens koll och föräldravyn. |
 | G5. Verifiering | e2e, skärmbilder vid 320 och 360 px, liggande telefon och surfplatta, dokumentation. |
 
 ## Öppna frågor
 
-1. **Tecknet.** Ska delat med skrivas med `÷`, `/` eller `:`? Det bör följa det
-   barnen möter i skolan. `÷` är tydligt men ovanligt i svenska läroböcker.
+1. ~~**Tecknet.**~~ Avgjort: bråkstreck som standard, `÷` eller `/` som
+   inställning.
 2. **Bären som försvinner.** Godtar vi att buskar som i dag har bär blir gröna
    tills delat med övas, med en nyhet som förklarar det? Alternativet är att
    behålla bären som dekoration och visa delat med på annat sätt, men då blir
