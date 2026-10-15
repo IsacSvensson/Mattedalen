@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, enterGarden, openParent, seedStates, switchPlayer } from './helpers';
+import { answer, createProfile, enterGarden, openParent, seedStates, switchPlayer, untilIntro } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -22,8 +22,9 @@ test('the parent view is behind a PIN', async ({ page }) => {
 });
 
 test('shows heatmap, confusions and practised minutes; settings can be changed', async ({ page }) => {
-  await createProfile(page, 'Alva');
+  await createProfile(page, 'Alva', 'garden-times');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  await untilIntro(page);
   await answer(page);
   await answer(page, false);
   await page.getByRole('button', { name: 'Fortsätt' }).click();

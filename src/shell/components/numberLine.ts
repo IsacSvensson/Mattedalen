@@ -1,4 +1,4 @@
-import { h, prefersReducedMotion, s } from '../../../shell/dom';
+import { h, prefersReducedMotion, s } from '../dom';
 
 /**
  * The stepping stones over the brook: a linear, numbered number line with

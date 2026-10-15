@@ -19,10 +19,10 @@ const pack = createMultiplicationPack({ division: true });
 const divisions = pack.items.filter((it) => isDivisionId(it.id));
 
 describe('delat med in the garden pack', () => {
-  it('is off by default, and version 2 with it', () => {
+  it('is off by default, and version 3 with it', () => {
     expect(v1.version).toBe(1);
     expect(v1.items.some((it) => isDivisionId(it.id) || isShareId(it.id))).toBe(false);
-    expect(pack.version).toBe(2);
+    expect(pack.version).toBe(3);
     expect(() => validatePack(pack)).not.toThrow();
   });
 
@@ -56,15 +56,15 @@ describe('delat med in the garden pack', () => {
     const share = pack.units.find((u) => u.id === 'delalika')!;
     expect(share.kind).toBe('understanding');
     expect(share.itemIds).toHaveLength(SHARE_TASKS.length);
-    expect(share.unlockRule).toMatchObject({ kind: 'after', requires: ['u10'] });
-    expect(pack.units.find((u) => u.id === 'd10')!.unlockRule).toMatchObject({ kind: 'after', requires: ['delalika'] });
+    expect(share.unlockRule).toMatchObject({ kind: 'after', requires: ['u2'] });
+    expect(pack.units.find((u) => u.id === 'd2')!.unlockRule).toMatchObject({ kind: 'after', requires: ['delalika'] });
   });
 
   it('weaves the division parts in after their tables, so a division comes soon after its family sits', () => {
     const order = [...pack.units].sort((a, b) => a.order - b.order).map((u) => u.id);
-    expect(order.slice(0, 7)).toEqual(['u10', 'delalika', 'd10', 'u2', 'd2', 'u5', 'd5']);
-    expect(pack.units.find((u) => u.id === 'u2')!.unlockRule).toMatchObject({ kind: 'after', requires: ['u10'] });
-    expect(pack.units.find((u) => u.id === 'd2')!.unlockRule).toMatchObject({ kind: 'after', requires: ['d10'] });
+    expect(order.slice(0, 8)).toEqual(['lika', 'u2', 'delalika', 'd2', 'u10', 'd10', 'u5', 'd5']);
+    expect(pack.units.find((u) => u.id === 'u10')!.unlockRule).toMatchObject({ kind: 'after', requires: ['u2'] });
+    expect(pack.units.find((u) => u.id === 'd10')!.unlockRule).toMatchObject({ kind: 'after', requires: ['d2'] });
     // Without delat med, the tables are as they always were.
     expect(v1.units.map((u) => u.unlockRule.kind)).toEqual(['always', ...new Array(9).fill('previous')]);
   });
@@ -105,12 +105,11 @@ describe('the engine with delat med', () => {
   it('introduces a division only when both multiplications of its family sit', () => {
     const engine = createEngine({ pack, clock, rng: seededRng(1) });
     const states = engine.initialStates();
-    // Every ×10 fact sits, and "Dela lika" too; so does 2 × 10, but only one way of 3 × 10.
-    for (const id of pack.units.find((u) => u.id === 'u10')!.itemIds) states[id] = fluent(id);
-    for (const id of pack.units.find((u) => u.id === 'delalika')!.itemIds) states[id] = fluent(id);
-    states['10x3'] = { ...states['10x3']!, status: 'learning', box: 1 };
+    // Every ×2 fact sits, and "Lika stora grupper" and "Dela lika" too; but only one way of 3 × 2.
+    for (const u of ['lika', 'u2', 'delalika']) for (const id of pack.units.find((x) => x.id === u)!.itemIds) states[id] = fluent(id);
+    states['3x2'] = { ...states['3x2']!, status: 'learning', box: 1 };
     const meta = { ...engine.initialMeta(), unlockedUnitIds: engine.unlockedUnits(states, engine.initialMeta()) };
-    expect(meta.unlockedUnitIds).toEqual(expect.arrayContaining(['u10', 'delalika', 'd10']));
+    expect(meta.unlockedUnitIds).toEqual(expect.arrayContaining(['u2', 'delalika', 'd2']));
     const session = engine.startSession({ states, meta, mode: 'daily' });
     const introduced = new Set<string>();
     for (let i = 0; i < 80 && !session.isOver(); i++) {
@@ -122,9 +121,9 @@ describe('the engine with delat med', () => {
     }
     const newDivisions = [...introduced].filter(isDivisionId);
     expect(newDivisions.length).toBeGreaterThan(0);
-    // 30 ÷ 3 and 30 ÷ 10 wait: 10 × 3 does not sit yet.
-    expect(newDivisions).not.toContain('30/3');
-    expect(newDivisions).not.toContain('30/10');
+    // 6 ÷ 2 and 6 ÷ 3 wait: 3 × 2 does not sit yet.
+    expect(newDivisions).not.toContain('6/2');
+    expect(newDivisions).not.toContain('6/3');
     for (const id of newDivisions) for (const r of pack.items.find((it) => it.id === id)!.requires!) expect(atLeast(states[r]!.status, 'fluent'), `${id} needs ${r}`).toBe(true);
   });
 
@@ -132,9 +131,9 @@ describe('the engine with delat med', () => {
     const engine = createEngine({ pack, clock, rng: seededRng(3) });
     const states = engine.initialStates();
     // A child who already knows ×10, ×2, ×5 and ×1, and "Dela lika": ×4 and many divisions are open.
-    for (const u of ['u10', 'u2', 'u5', 'u1', 'delalika']) for (const id of pack.units.find((x) => x.id === u)!.itemIds) states[id] = fluent(id);
+    for (const u of ['lika', 'u10', 'u2', 'u5', 'u1', 'delalika']) for (const id of pack.units.find((x) => x.id === u)!.itemIds) states[id] = fluent(id);
     const meta = { ...engine.initialMeta(), unlockedUnitIds: engine.unlockedUnits(states, engine.initialMeta()) };
-    expect(meta.unlockedUnitIds).toEqual(expect.arrayContaining(['u4', 'd10']));
+    expect(meta.unlockedUnitIds).toEqual(expect.arrayContaining(['u4', 'd2']));
     const session = engine.startSession({ states, meta, mode: 'daily' });
     const introduced: string[] = [];
     for (let i = 0; i < 120 && !session.isOver(); i++) {

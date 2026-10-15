@@ -114,7 +114,7 @@ describe('QR snapshot', () => {
     const states = Object.fromEntries(pack.items.map((it) => [it.id, emptyState(it.id)]));
     states['3x7'] = { ...emptyState('3x7'), status: 'learning', box: 1 }; // ×3 is unit 6
     const { meta } = progressFromSnapshot(decodeSnapshot(encodeSnapshot(snapshotOf(profile, pack, states))), engine, '2026-06-01');
-    expect(meta.unlockedUnitIds).toEqual(['u10', 'u2', 'u5', 'u1', 'u4', 'u3']);
+    expect(meta.unlockedUnitIds).toEqual(['u2', 'u10', 'u5', 'u1', 'u4', 'u3']);
   });
 
   it('rejects damaged or foreign codes', () => {

@@ -15,7 +15,7 @@ import { icon } from '../../../shell/components/icons';
 import { h } from '../../../shell/dom';
 import { runSession, type SessionPlace } from '../../../shell/screens/session';
 import { balance } from '../components/balance';
-import { numberLine } from '../components/numberLine';
+import { numberLine } from '../../../shell/components/numberLine';
 import { tenFrame } from '../components/tenFrame';
 import { brookDeps } from '../pack';
 import { showBrook } from './brook';

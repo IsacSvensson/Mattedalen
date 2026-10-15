@@ -3,11 +3,13 @@ import { buildDivisions, buildShareItems, DIVISION_UNIT_DEFS, divisionDistractor
 import { multiplicationDistractors } from './distractors';
 import { buildFacts, isFactId, MAX_FACTOR, MIN_FACTOR, parseFactId, UNIT_DEFS } from './facts';
 import { presentMultiplication } from './present';
+import { buildGroupItems, GROUP_TASKS, groupDistractors, groupId, isGroupId } from './groups';
 
 export * from './facts';
 export * from './derive';
 export * from './division';
 export * from './check';
+export * from './groups';
 export { multiplicationDistractors } from './distractors';
 export { presentMultiplication, STANDARD_FIRST } from './present';
 
@@ -53,8 +55,9 @@ export interface PackOptions {
   /** Only include the first N units (the game can release units gradually). */
   maxUnits?: number;
   /**
-   * Include delat med (version 2): the divisions, one per square, and the
-   * understanding part "Dela lika". Off until the garden can show it.
+   * The whole garden (version 3): "Lika stora grupper" first, the tables as a
+   * graph with ×2 first, and delat med (the divisions, one per square, and
+   * "Dela lika"). Without it, the tables in a chain as in Gångerträdgården.
    */
   division?: boolean;
 }
@@ -66,15 +69,38 @@ export interface PackOptions {
  */
 export const DIVISION_LANE = 'division';
 
-/** "Dela lika" opens when about one family sits (2 of the 19 facts of ×10). */
+/** "Dela lika" opens when about one family sits (2 of the 19 facts of ×2). */
 export const SHARE_OPENS_AT = 0.1;
+
+/** ×2 opens when about half of "Lika stora grupper" sits: the idea is there, the rest is practised alongside. */
+export const GROUPS_OPEN_AT = 0.5;
+
+/**
+ * What each table builds on in the garden (docs/PLAN-HUNDRA.md): ×2 on the idea
+ * of equal groups, ×10 and ×4, ×3 and ×1 on ×2, ×5 as half of ×10, ×9 as ×10
+ * minus a group, ×6 as ×5 plus a group, the squares on ×4 and ×3, and ×7 and
+ * ×8 on ×6 and ×4. The order in which new facts come is still `UNIT_DEFS`.
+ */
+export const TABLE_AFTER: Record<string, string[]> = {
+  u2: ['lika'],
+  u10: ['u2'],
+  u5: ['u10'],
+  u1: ['u2'],
+  u4: ['u2'],
+  u3: ['u2'],
+  usq: ['u4', 'u3'],
+  u9: ['u10'],
+  u6: ['u5'],
+  u78: ['u6', 'u4'],
+};
 
 export function createMultiplicationPack({ maxUnits = UNIT_DEFS.length, division = false }: PackOptions = {}): ContentPack {
   const defs = UNIT_DEFS.slice(0, maxUnits);
   const unitIds = new Set<string>(defs.map((d) => d.id));
   // The multiplications first, always in the same order: old QR codes and backups hold just these.
+  // What came later is added at the end (delat med in version 2, the groups in version 3).
   const facts = buildFacts().filter((it) => unitIds.has(it.unitId));
-  const items = division ? [...facts, ...buildShareItems(), ...buildDivisions()] : facts;
+  const items = division ? [...facts, ...buildShareItems(), ...buildDivisions(), ...buildGroupItems()] : facts;
   const units: Unit[] = defs.map((def, i) => ({
     id: def.id,
     title: def.title,
@@ -86,11 +112,11 @@ export function createMultiplicationPack({ maxUnits = UNIT_DEFS.length, division
     unlockRule: i === 0 ? { kind: 'always' } : { kind: 'previous', fraction: UNLOCK_FRACTION, minStatus: 'fluent' },
   }));
 
-  if (division) units.splice(0, units.length, ...withDivision(units, items));
+  if (division) units.splice(0, units.length, ...wholeGarden(units, items));
 
   return {
     id: 'multiplication',
-    version: division ? 2 : 1,
+    version: division ? 3 : 1,
     title: 'Multiplikationstabellen',
     items,
     units,
@@ -104,6 +130,7 @@ export function createMultiplicationPack({ maxUnits = UNIT_DEFS.length, division
         const n = Number(item.answer);
         return [n - 1, n + 1, n + 2, n * 2].filter((v) => v > 0).map((v) => ({ value: String(v), weight: 1 }));
       }
+      if (isGroupId(item.id)) return groupDistractors(GROUP_TASKS.find((t) => groupId(t) === item.id)!);
       const { a, b } = parseFactId(item.id);
       return multiplicationDistractors(a, b);
     },
@@ -113,22 +140,35 @@ export function createMultiplicationPack({ maxUnits = UNIT_DEFS.length, division
   };
 }
 
+/** Understanding, as "Dela lika" and Vågen: right answers on different days, never on time. */
+const UNDERSTANDING_STATUS = { fluentRtMs: Number.MAX_SAFE_INTEGER, automaticRtMs: Number.MAX_SAFE_INTEGER, automaticFormats: ['choice', 'free'] } as const;
+
 /**
- * The tables with delat med woven in: ×10, "Dela lika", Dela med 10, ×2, Dela
- * med 2, and so on, so that a family's division comes soon after its
- * multiplication sits, not after the whole table. Each part opens after the one
- * before it of its own kind; within an open part a division waits for both
- * multiplications of its family (`requires`).
+ * The whole garden: "Lika stora grupper", then the tables with delat med woven
+ * in: ×2, "Dela lika", Dela med 2, ×10, Dela med 10, and so on, so that a
+ * family's division comes soon after its multiplication sits. The tables open
+ * by `TABLE_AFTER`; each division part opens after the one before it, and
+ * within an open part a division waits for both multiplications of its family
+ * (`requires`).
  */
-function withDivision(tables: readonly Unit[], items: readonly Item[]): Unit[] {
-  const [first, ...rest] = divisionUnits(items);
-  const share = first!;
-  const out: Unit[] = [];
+function wholeGarden(tables: readonly Unit[], items: readonly Item[]): Unit[] {
+  const groups: Unit = {
+    id: 'lika',
+    title: 'Lika stora grupper',
+    order: 0,
+    kind: 'understanding',
+    itemIds: GROUP_TASKS.map(groupId),
+    status: { ...UNDERSTANDING_STATUS, automaticFormats: [...UNDERSTANDING_STATUS.automaticFormats] },
+    unlockRule: { kind: 'always' },
+  };
+  const [share, ...parts] = divisionUnits(items);
+  const out: Unit[] = [groups];
   tables.forEach((table, i) => {
-    // Tables open after the table before them (named, since the order now has division parts in between).
-    out.push(i === 0 ? table : { ...table, unlockRule: { kind: 'after', requires: [tables[i - 1]!.id], fraction: UNLOCK_FRACTION, minStatus: 'fluent' } });
-    if (i === 0) out.push(share);
-    const part = rest.find((u) => DIVISION_UNIT_DEFS.find((d) => d.id === u.id)?.of === table.id);
+    const after = TABLE_AFTER[table.id] ?? [];
+    const fraction = table.id === 'u2' ? GROUPS_OPEN_AT : UNLOCK_FRACTION;
+    out.push({ ...table, unlockRule: { kind: 'after', requires: after, fraction, minStatus: 'fluent' } });
+    if (i === 0) out.push(share!);
+    const part = parts.find((u) => DIVISION_UNIT_DEFS.find((d) => d.id === u.id)?.of === table.id);
     if (part) out.push(part);
   });
   return out.map((u, order) => ({ ...u, order }));
@@ -143,9 +183,8 @@ function divisionUnits(items: readonly Item[]): Unit[] {
     kind: 'understanding',
     lane: DIVISION_LANE,
     itemIds: SHARE_TASKS.map(shareId),
-    // Understanding: judged on right answers on different days, never on time.
-    status: { fluentRtMs: Number.MAX_SAFE_INTEGER, automaticRtMs: Number.MAX_SAFE_INTEGER, automaticFormats: ['choice', 'free'] },
-    unlockRule: { kind: 'after', requires: ['u10'], fraction: SHARE_OPENS_AT, minStatus: 'fluent' },
+    status: { ...UNDERSTANDING_STATUS, automaticFormats: [...UNDERSTANDING_STATUS.automaticFormats] },
+    unlockRule: { kind: 'after', requires: [UNIT_DEFS[0].id], fraction: SHARE_OPENS_AT, minStatus: 'fluent' },
   };
   const parts = DIVISION_UNIT_DEFS.map(
     (def, i): Unit => ({

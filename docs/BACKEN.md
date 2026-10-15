@@ -145,7 +145,7 @@ tillbaka till dalen.
 - **Dagens tid** delas efter hur mycket som är förfallet till repetition på varje
   plats, minst 5 minuter per plats (`dayPlan.ts`, se README).
 - **Ett nytt barn börjar här.** Startkollen vid bäcken är det första barnet
-  möter, och Trädgården öppnar när dubblor och övergången över tiotalet sitter.
+  möter, och Trädgården öppnar när dubblorna sitter.
 - **Föräldravyn** har en egen del för bäcken: antal fakta per status, en
   värmekarta över additionstabellen 0–10, varje del med hur många plus- och
   minusfakta som sitter, svåra just nu med strategin, de vanligaste

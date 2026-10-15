@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
 });
 
-const CLOSED = 'Trädgården öppnar när du kan dubblor och att gå över tiotalet vid bäcken.';
+const CLOSED = 'Trädgården öppnar när du kan dubblorna vid bäcken.';
 
 /** Every addition and subtraction fact within 20. */
 function allBrookFacts(state: SeedState): Record<string, SeedState> {

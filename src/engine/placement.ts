@@ -168,7 +168,8 @@ export class Placement {
   private testable(unit: Unit): boolean {
     const rule = unit.unlockRule;
     if (rule.kind === 'always') return true;
-    if (rule.kind === 'after') return rule.requires.every((id) => this.passed.includes(id));
+    // Prerequisites the check does not test (understanding) do not hold a unit back.
+    if (rule.kind === 'after') return rule.requires.every((id) => this.passed.includes(id) || !this.units.some((u) => u.id === id));
     const before = this.ordered[this.ordered.indexOf(unit) - 1];
     return before !== undefined && this.passed.includes(before.id);
   }

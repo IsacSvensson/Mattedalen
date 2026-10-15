@@ -227,7 +227,7 @@ med dubblorna, villkoret för att Trädgården ska öppna.
 
 | Fas | Innehåll |
 |---|---|
-| H1. Trädgårdens ordning | Lika stora grupper, ×2 först, tabellerna som graf, Trädgården öppnar efter dubblor. Fungerar utan Stigen. |
+| H1. Trädgårdens ordning **(klar)** | Lika stora grupper, ×2 först, tabellerna som graf, Trädgården öppnar efter dubblor. Fungerar utan Stigen. |
 | H2. Motorn | `heldUnitIds`, tester och simulering. |
 | H3. Stigens innehåll | Paketet: delar, fakta, former, räknestigar, felsvar. Bakom en flagga. |
 | H4. Stigen som plats | Skärmen med stolpar och lyktor, bilderna (stavar och kuber, tom tallinje, hundraplatta), kartan, föräldradelen. |
@@ -237,14 +237,41 @@ med dubblorna, villkoret för att Trädgården ska öppna.
 H1 kan byggas och släppas för sig. Den löser luckan om förståelse för gånger
 direkt, även om Stigen dröjer.
 
-## Att ta ställning till
+## Fynd från H1
 
-1. **Namnet och bilden:** Stigen med stolpar och lyktor, eller något annat?
-2. **Hårda eller mjuka spärrar:** ska nya tabeller vänta på Stigen (förslaget),
-   eller bara komma senare i ordningen när Stigen inte sitter?
-3. **Trädgården tidigare:** ska den öppna efter dubblor (förslaget), eller som i
-   dag efter Över tiotalet?
-4. **×2 före ×10** (förslaget), eller ×10 kvar först?
-5. **Talområdet:** till 100 nu, och 200 eller 1000 senare som en egen del?
-6. **×0:** fortfarande utanför, eller med som en egen liten del efter ×1? Skolan
-   brukar ta med 0 · n.
+- **Ordningen och grafen.** ×2 kommer först, och tabellerna öppnar efter det
+  deras strategier bygger på (`TABLE_AFTER`). Nya fakta kommer i samma ordning
+  som förut, med ×2 och ×10 bytta. Paketet är version 3; de 100 multiplikationerna
+  ligger kvar först och de nya uppgifterna sist, så gamla QR-koder och
+  säkerhetskopior läses som förut.
+- **Startkollen** prövar nu tabellerna som en graf. En förkunskap som kollen inte
+  prövar (förståelse) håller inte tillbaka. Efter kollen är allt öppet som bygger
+  på det barnet kan: ett barn som kan ×2, ×10, ×5 och ×1 får ×4, ×3, ×9 och ×6
+  som grävd jord, men de nya fakta kommer ändå från ×4 först.
+- **Barn som redan spelar** och kan minst hälften av ×2 räknar Lika stora grupper
+  som klar (`knowsGroupsAlready`, via `GameDeps.prepare`), så uppgifterna inte
+  står före nästa tabell.
+- **En ny trädgård** är äng tills ×2 öppnar. En rad under lådan säger varför:
+  ”Först: lika stora grupper. Sedan planterar vi ×2.”
+- **Simulering:** den genomsnittliga eleven har ungefär som förut 89–90 av 100
+  divisioner och 94–95 av 100 multiplikationer som sitter efter 26 veckor. Den
+  svaga eleven har 12 divisioner som sitter mot 22 förut: de 16 uppgifterna i Lika
+  stora grupper tar plats bland de första nya fakta. Det är priset för att
+  begreppet kommer först.
+- **Mot en vuxen** drog kort från den första delen när barnet kunde för lite. Den
+  delen är nu Lika stora grupper, så den drar nu från den första tabellen.
+
+## Avgjorda frågor
+
+Avgjort enligt förslagen:
+
+1. **Namnet och bilden:** Stigen, med en stolpe vid varje tiotal och lyktor som
+   tänds för delar som sitter.
+2. **Hårda spärrar:** nya tabeller väntar på sina delar på Stigen. Det som är
+   påbörjat stängs aldrig, och en vuxen kan öppna en tabell.
+3. **Trädgården öppnar efter dubblorna** vid bäcken.
+4. **×2 kommer före ×10.**
+5. **Talområdet är 0–100 nu.** 200 och 1000 kan bli en egen del senare.
+6. **×0 stannar utanför tabellerna**, eftersom rutnätet, QR-koderna och
+   plantorna bygger på 1–10. Nollan kommer in som begrepp i Lika stora grupper i
+   stället: 3 tomma korgar är 0 jordgubbar.

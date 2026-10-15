@@ -92,12 +92,12 @@ kommer då till dalens karta. Därifrån går barnet till platserna.
   som är förfallet till repetition där, inte rakt hälften. Planen görs vid
   dagens första besök i dalen och står kvar hela dagen, så att andelarna inte
   flyttar sig medan barnet arbetar. En öppen plats utanför dagens två vilar.
-- **Trädgårdens öppning** (`src/places/tradgarden/opening.ts`). Multiplikation
-  bygger på dubblor och övergången över tiotalet, så Trädgården öppnar när de
-  sitter vid bäcken, när barnet redan har framsteg i trädgården eller när en
-  vuxen öppnar den i föräldravyn. Barn från Gångerträdgården har den öppen. Innan
-  dess står den dämpad på kartan med texten ”Trädgården öppnar när du kan dubblor
-  och att gå över tiotalet vid bäcken.” Trädgårdens startkoll erbjuds första
+- **Trädgårdens öppning** (`src/places/tradgarden/opening.ts`). Gånger börjar
+  med dubblorna (×2 är att dubbla), så Trädgården öppnar när dubblorna sitter vid
+  bäcken, när barnet redan har framsteg i trädgården eller när en vuxen öppnar den
+  i föräldravyn. Barn från Gångerträdgården har den öppen. Innan dess står den
+  dämpad på kartan med texten ”Trädgården öppnar när du kan dubblorna vid
+  bäcken.” Trädgårdens startkoll erbjuds första
   gången barnet kommer dit.
 
 Dalen testas i `e2e/valley.spec.ts` och i testerna för smala telefoner och

@@ -38,6 +38,12 @@ export interface GameDeps {
    * not mean twice the screen time.
    */
   share?: number;
+  /**
+   * Adjusts loaded progress before use, e.g. counts a new understanding part
+   * as known for a child who already knows what builds on it. Saved with the
+   * next session.
+   */
+  prepare?: (states: Record<string, ItemState>) => Record<string, ItemState>;
 }
 
 export { MIN_PLACE_MINUTES };
@@ -73,7 +79,7 @@ export async function loadProgress(profile: Profile, deps: GameDeps, engine = en
     const s = saved.states[id];
     if (s) states[id] = { ...s, itemId: id };
   }
-  return { states, meta: saved.meta };
+  return { states: deps.prepare ? deps.prepare(states) : states, meta: saved.meta };
 }
 
 /**

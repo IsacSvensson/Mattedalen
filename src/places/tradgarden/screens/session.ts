@@ -10,6 +10,7 @@ import { runSession, type SessionPlace } from '../../../shell/screens/session';
 import { arrayBuilder } from '../components/arrayBuilder';
 import { divisionBuilder } from '../components/divisionBuilder';
 import { shareBuilder, shareTaskOf } from '../components/shareBuilder';
+import { groupsView, skipView } from '../components/groupsView';
 import { arrayView, partsOf } from '../components/arrayView';
 import { gardenDeps } from '../pack';
 import { showGarden } from './garden';
@@ -20,6 +21,17 @@ function square(id: string): { a: number; b: number } {
   if (!isDivisionId(id)) return parseFactId(id);
   const { quotient, divisor } = parseDivisionId(id);
   return { a: quotient, b: divisor };
+}
+
+/**
+ * The picture of a "Lika stora grupper" task: baskets, or hops on the number
+ * line (null when the hops go past 20). Undefined for every other item.
+ */
+function groupsPicture(q: Question): HTMLElement | null | undefined {
+  const groups = q.item.hints.find((x) => x.kind === 'groups')?.data as { groups: number; each: number } | undefined;
+  if (groups) return groupsView(groups.groups, groups.each);
+  const skip = q.item.hints.find((x) => x.kind === 'skip')?.data as { stops: number[] } | undefined;
+  return skip ? skipView(skip.stops) : undefined;
 }
 
 /** A session in the garden: watering it is answering questions. */
@@ -57,6 +69,17 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
      * task is dealt out into baskets.
      */
     intro(q, ready) {
+      const groups = groupsPicture(q);
+      if (groups !== undefined) {
+        // Nothing to do with the hands here: the picture and the way to think, then the child answers.
+        setTimeout(ready, 0);
+        return {
+          label: [icon('basket'), 'Lika stora grupper'],
+          spoken: q.item.prompt,
+          body: groups ?? h('span'),
+          after: [strategyLine(q)],
+        };
+      }
       const share = shareTaskOf(q.item.hints);
       if (share) {
         return {
@@ -105,11 +128,15 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
 
     /** "Dela lika": the berries and baskets beside the question, to deal out if the child wants to. */
     askVisual(q) {
+      const groups = groupsPicture(q);
+      if (groups !== undefined) return groups;
       const share = shareTaskOf(q.item.hints);
       return share ? shareBuilder({ task: share, reveal: false }) : null;
     },
 
     help(q, fb) {
+      const groups = groupsPicture(q);
+      if (groups !== undefined) return { strategy: strategyText(q), visual: groups ?? undefined };
       const share = shareTaskOf(q.item.hints);
       if (share) return { strategy: strategyText(q), visual: shareBuilder({ task: share }) };
       const { a, b } = square(q.item.id);

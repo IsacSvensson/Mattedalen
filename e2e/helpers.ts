@@ -6,7 +6,7 @@ import { expect, type Page } from '@playwright/test';
  * for a new child later: like a grown-up in the parent view, `'garden'` (the
  * default) opens it, goes there, and starts from scratch.
  */
-export async function createProfile(page: Page, name: string, start: 'garden' | 'garden-check' | 'brook' = 'garden'): Promise<void> {
+export async function createProfile(page: Page, name: string, start: 'garden' | 'garden-times' | 'garden-check' | 'brook' = 'garden'): Promise<void> {
   await page.getByRole('textbox', { name: 'Namn' }).fill(name);
   await page.getByRole('button', { name: 'Välj sköldpadda' }).click();
   await page.getByRole('button', { name: 'Klar' }).click();
@@ -20,7 +20,20 @@ export async function createProfile(page: Page, name: string, start: 'garden' | 
   if (start === 'garden-check') return;
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: new RegExp(`${name}s? trädgård`) })).toBeVisible();
+  if (start !== 'garden-times') return;
+  // As a child who has done "Lika stora grupper": the tables start, with ×2.
+  await seedStates(page, GROUPS_KNOWN, { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
+  await enterGarden(page, name);
 }
+
+/** Every "Lika stora grupper" task known (docs/PLAN-HUNDRA.md). */
+export const GROUPS_KNOWN: Record<string, SeedState> = Object.fromEntries(
+  [
+    'lika:groups:2x3', 'lika:groups:3x2', 'lika:groups:4x2', 'lika:groups:2x5', 'lika:groups:3x4', 'lika:groups:5x2',
+    'lika:repeat:3x4:groups', 'lika:repeat:2x5:groups', 'lika:repeat:4x2:groups', 'lika:repeat:3x4:each',
+    'lika:skip:2', 'lika:skip:5', 'lika:skip:3', 'lika:skip:10', 'lika:groups:3x0', 'lika:groups:4x1',
+  ].map((id) => [id, { status: 'fluent', box: 3 }]),
+);
 
 /** Opens the garden for a child, as a grown-up does in the parent view, and reloads. */
 export async function openGarden(page: Page, name: string): Promise<void> {
@@ -66,6 +79,16 @@ export function nextStep(page: Page) {
     .or(page.locator('.numpad-key:not([disabled])').first());
 }
 
+/** Answers the warm-up (known items) until a new fact is introduced. */
+export async function untilIntro(page: Page, max = 12): Promise<void> {
+  for (let i = 0; i < max; i++) {
+    await expect(nextStep(page)).toBeVisible();
+    if (await page.locator('.intro-card').isVisible()) return;
+    await answer(page);
+  }
+  await expect(page.locator('.intro-card')).toBeVisible();
+}
+
 /** Passes the introduction of a new fact with the "Visa mig" shortcut, if one is showing. */
 export async function passIntro(page: Page): Promise<void> {
   if (!(await page.locator('.intro-card').isVisible())) return;
@@ -75,7 +98,8 @@ export async function passIntro(page: Page): Promise<void> {
     const go = page.getByRole('button', { name: 'Nu du!' });
     while (!(await go.isVisible())) await page.locator('.intro-card .share-pile').click();
   } else if (await showMe.isVisible()) await showMe.click();
-  else await page.getByRole('button', { name: 'Vrid' }).click();
+  else if (await page.getByRole('button', { name: 'Vrid' }).isVisible()) await page.getByRole('button', { name: 'Vrid' }).click();
+  // "Lika stora grupper" has nothing to build: "Nu du!" is there at once.
   await page.getByRole('button', { name: 'Nu du!' }).click();
 }
 
@@ -84,6 +108,16 @@ export async function passIntro(page: Page): Promise<void> {
  * __ = 21 ÷ 3, or a "Dela lika" task in words.
  */
 export function solve(prompt: string): number {
+  // "Lika stora grupper": baskets, repeated addition and hopping in steps.
+  if (/utan några jordgubbar/.test(prompt)) return 0;
+  const baskets = /(\d+) korgar med (\d+) jordgubb/.exec(prompt);
+  if (baskets) return Number(baskets[1]) * Number(baskets[2]);
+  const hops = /Hoppa (\d+) i taget: ([\d, ]+), __/.exec(prompt);
+  if (hops) return Number(hops[2]!.split(', ').at(-1)) + Number(hops[1]);
+  const groupsOf = /^([\d + ]+) = __ × (\d+)$/.exec(prompt);
+  if (groupsOf) return groupsOf[1]!.split(' + ').length;
+  const lastAddend = /^\d+ × (\d+) = [\d + ]+ \+ __$/.exec(prompt);
+  if (lastAddend) return Number(lastAddend[1]);
   const share = /(\d+) jordgubbar delas lika i (\d+) korgar/.exec(prompt) ?? /(\d+) jordgubbar, (\d+) i varje korg/.exec(prompt);
   if (share) return Number(share[1]) / Number(share[2]);
   const missing = /__ × (\d+) = (\d+)/.exec(prompt);

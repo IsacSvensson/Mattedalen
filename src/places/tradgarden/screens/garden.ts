@@ -129,6 +129,8 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
       'div',
       { class: 'garden-side' },
       info,
+      // Before the first table: what comes first, so a bed of meadow is not a puzzle.
+      unlockedUnits.has('u2') ? null : h('p', { class: 'garden-next' }, icon('basket'), 'Först: lika stora grupper. Sedan planterar vi ×2.'),
       h(
         'ul',
         { class: 'garden-counts', 'aria-label': 'Så här växer det' },

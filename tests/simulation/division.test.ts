@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { atLeast, createEngine, ManualClock, seededRng, type ItemId } from '../../src/engine';
-import { createMultiplicationPack, isDivisionId, isShareId, parseDivisionId, parseFactId } from '../../src/content/multiplication';
+import { createMultiplicationPack, isDivisionId, isGroupId, isShareId, parseDivisionId, parseFactId } from '../../src/content/multiplication';
 import { AVERAGE, WEAK, SimulatedLearner, simulate, type LearnerProfile } from './learner';
 
 /**
@@ -14,7 +14,7 @@ const WEEKS = 26;
 const hard = (n: number) => (n <= 2 || n === 5 || n === 10 ? 0 : n <= 4 ? 0.4 : 0.9);
 
 function difficulty(id: ItemId): number {
-  if (isShareId(id)) return 0.2;
+  if (isShareId(id) || isGroupId(id)) return 0.2;
   if (isDivisionId(id)) {
     const { divisor, quotient } = parseDivisionId(id);
     return Math.min(1, Math.max(hard(divisor), hard(quotient)) + 0.25);
@@ -44,7 +44,7 @@ describe('delat med, simulated over 26 weeks', () => {
       const divisions = states.filter((s) => isDivisionId(s.itemId));
       const sitting = divisions.filter(sits).length;
       const accuracy = r.with.result.correctTotal / r.with.result.questionsTotal;
-      console.log(`genomsnittlig seed ${r.seed}: delat med som sitter ${sitting}/100, gånger ${states.filter((s) => /x/.test(s.itemId) && sits(s)).length}/100, rätt ${(accuracy * 100).toFixed(0)} %`);
+      console.log(`genomsnittlig seed ${r.seed}: delat med som sitter ${sitting}/100, gånger ${states.filter((s) => /^\d+x\d+$/.test(s.itemId) && sits(s)).length}/100, rätt ${(accuracy * 100).toFixed(0)} %`);
       expect(sitting).toBeGreaterThanOrEqual(40);
       expect(accuracy).toBeGreaterThan(0.75);
       expect(accuracy).toBeLessThan(0.95);

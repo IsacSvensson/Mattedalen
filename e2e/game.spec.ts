@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, enterGarden, nextStep, switchPlayer } from './helpers';
+import { answer, createProfile, enterGarden, nextStep, passIntro, switchPlayer, untilIntro } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -14,9 +14,9 @@ test('a first daily session: new profile, intro, questions, soft ending', async 
 
   // In the garden the keys and answers are light wood.
   await expect(page.locator('.screen.session.keys-wood')).toBeVisible();
-  // The very first question introduces a new fact: the child builds its rectangle.
-  await expect(page.getByText('Ett nytt frö')).toBeVisible();
-  await expect(page.locator('.intro-card .builder-board')).toBeVisible();
+  // The very first thing is what multiplying means: equal groups, before the first table.
+  await expect(page.locator('.intro-label', { hasText: 'Lika stora grupper' })).toBeVisible();
+  await expect(page.locator('.intro-card .groups-view')).toBeVisible();
   for (let i = 0; i < 8; i++) {
     await answer(page);
     await expect(page.locator('.choice.correct')).toBeVisible();
@@ -34,7 +34,6 @@ test('a first daily session: new profile, intro, questions, soft ending', async 
   await page.getByRole('button', { name: 'Till trädgården' }).click();
   await expect(page.getByText('Trädgården sover.', { exact: false })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Öva lite till (frivilligt)' })).toBeVisible();
-  await expect(page.locator('.grid-cell.stage-seed, .grid-cell.stage-sprout').first()).toBeVisible();
 
   // Everything survives a reload.
   await page.reload();
@@ -45,8 +44,11 @@ test('a first daily session: new profile, intro, questions, soft ending', async 
 });
 
 test('a wrong answer shows the right answer and a strategy, never just "fel"', async ({ page }) => {
-  await createProfile(page, 'Bo');
+  await createProfile(page, 'Bo', 'garden-times');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  // Past the warm-up and the first new fact, which is then asked.
+  await untilIntro(page);
+  await passIntro(page);
   const fact = await answer(page, false);
   const [a, b] = fact.split('×').map(Number) as [number, number];
   await expect(page.locator('.help-answer')).toHaveText(`${a} × ${b} = ${a * b}`);
@@ -57,8 +59,9 @@ test('a wrong answer shows the right answer and a strategy, never just "fel"', a
 });
 
 test('leaving early keeps progress but does not end the day', async ({ page }) => {
-  await createProfile(page, 'Max');
+  await createProfile(page, 'Max', 'garden-times');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  await untilIntro(page);
   await answer(page);
   await page.getByRole('button', { name: 'Tillbaka till trädgården' }).click();
   await expect(page.getByRole('heading', { name: 'Max trädgård' })).toBeVisible();

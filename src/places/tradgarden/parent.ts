@@ -4,6 +4,9 @@ import {
   divisionStrategy,
   factId,
   GARDEN_CHECK_CATEGORIES,
+  GROUP_TASKS,
+  groupId,
+  groupText,
   formatDivision,
   formatFact,
   isDivisionId,
@@ -77,6 +80,9 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
     h('h3', { id: 'place-garden-heading', class: 'place-heading' }, plantIcon('tree'), 'Trädgården'),
     h('p', { class: 'muted place-about' }, `${pack.title} 1–10, och delat med.`),
     open ? null : openingNote(save),
+    h('h4', null, 'Lika stora grupper'),
+    h('p', { class: 'muted' }, 'Vad gånger betyder, före ×2: grupper, upprepad addition och att hoppa i steg.'),
+    groupSummary(states),
     h('h4', null, 'Gånger'),
     statusSummary(states, facts),
     h(
@@ -138,7 +144,7 @@ function openingNote(save: SaveProfile): HTMLElement {
   const note: HTMLElement = h(
     'div',
     { class: 'notice garden-opening' },
-    h('p', null, 'Trädgården är inte öppen än. Den öppnar av sig själv när dubblor och övergången över tiotalet sitter vid bäcken.'),
+    h('p', null, 'Trädgården är inte öppen än. Den öppnar av sig själv när dubblorna sitter vid bäcken.'),
     h(
       'button',
       {
@@ -201,6 +207,8 @@ function factLabel(id: string): string {
     const { dividend, divisor } = parseDivisionId(id);
     return formatDivision(dividend, divisor);
   }
+  const group = GROUP_TASKS.find((t) => groupId(t) === id);
+  if (group) return `Lika stora grupper: ${groupText(group).replace('__', '?')}`;
   const task = SHARE_TASKS.find((t) => shareId(t) === id);
   if (!task) return id;
   return task.kind === 'share' ? `Dela lika: ${task.total} i ${task.by} korgar` : `Dela lika: ${task.total}, ${task.by} i varje korg`;
@@ -260,6 +268,24 @@ function statusSummary(states: Record<string, ItemState>, ids: readonly string[]
     'ul',
     { class: 'status-summary' },
     (['automatic', 'fluent', 'learning', 'new'] as const).map((s) => h('li', { class: `status-${s}` }, h('strong', null, counts[s]), ` ${STATUS_TEXT[s]}`)),
+  );
+}
+
+/** "Lika stora grupper" by kind of task. */
+function groupSummary(states: Record<string, ItemState>): HTMLElement {
+  const kinds = [
+    { kind: 'groups', text: 'Korgar med lika många' },
+    { kind: 'repeat', text: '4 + 4 + 4 = 3 × 4' },
+    { kind: 'skip', text: 'Hoppa i steg' },
+  ] as const;
+  return h(
+    'ul',
+    { class: 'brook-parts parent' },
+    kinds.map(({ kind, text }) => {
+      const ids = GROUP_TASKS.filter((t) => t.kind === kind).map(groupId);
+      const known = ids.filter((id) => atLeast(states[id]?.status ?? 'new', 'fluent')).length;
+      return h('li', null, h('span', { class: 'part-name' }, text), h('span', { class: 'part-count' }, `${known} av ${ids.length} sitter`));
+    }),
   );
 }
 

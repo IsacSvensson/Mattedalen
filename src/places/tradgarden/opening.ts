@@ -1,22 +1,23 @@
 import { atLeast, type ContentPack, type ItemId, type ItemState } from '../../engine';
 
 /**
- * When Trädgården opens for a child. Multiplication builds on doubles and on
- * going over ten, so a new child starts at the brook, and the garden opens
+ * When Trädgården opens for a child. Multiplication starts from doubles (×2 is
+ * doubling, after "Lika stora grupper"), so a new child starts at the brook,
+ * and the garden opens
  *
  * - when the child already has progress in the garden (children who come from
  *   Gångerträdgården have it open from the start),
- * - when doubles and going over ten sit at the brook, or
+ * - when doubles sit at the brook, or
  * - when a grown-up opens it in the parent view.
  */
 
 /** The brook's parts that open the garden. */
-export const OPENS_AFTER = ['dubblor', 'overtio'] as const;
+export const OPENS_AFTER = ['dubblor'] as const;
 
 /** A part sits when about as much as opens what comes after it is fluent or better. */
 export const SITS_AT = 0.8;
 
-export const CLOSED_TEXT = 'Trädgården öppnar när du kan dubblor och att gå över tiotalet vid bäcken.';
+export const CLOSED_TEXT = 'Trädgården öppnar när du kan dubblorna vid bäcken.';
 
 export interface GardenOpening {
   gardenStates: Record<ItemId, ItemState>;

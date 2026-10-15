@@ -39,8 +39,8 @@ describe('multiplication facts', () => {
 });
 
 describe('unit progression', () => {
-  it('follows ×10, ×2, ×5, ×1 → ×4, ×3, squares → ×9, ×6 → ×7/×8', () => {
-    expect(pack.units.map((u) => u.title)).toEqual(['×10', '×2', '×5', '×1', '×4', '×3', 'Kvadrattal', '×9', '×6', '×7 och ×8']);
+  it('follows ×2, ×10, ×5, ×1 → ×4, ×3, squares → ×9, ×6 → ×7/×8', () => {
+    expect(pack.units.map((u) => u.title)).toEqual(['×2', '×10', '×5', '×1', '×4', '×3', 'Kvadrattal', '×9', '×6', '×7 och ×8']);
     expect(pack.units.map((u) => u.itemIds.length)).toEqual([19, 17, 15, 13, 11, 9, 4, 6, 4, 2]);
   });
 
@@ -56,7 +56,7 @@ describe('unit progression', () => {
 
   it('can be limited to the first units', () => {
     const small = createMultiplicationPack({ maxUnits: 6 });
-    expect(small.units.map((u) => u.title)).toEqual(['×10', '×2', '×5', '×1', '×4', '×3']);
+    expect(small.units.map((u) => u.title)).toEqual(['×2', '×10', '×5', '×1', '×4', '×3']);
     expect(small.items).toHaveLength(84);
     expect(() => validatePack(small)).not.toThrow();
   });

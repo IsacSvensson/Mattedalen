@@ -9,7 +9,7 @@ export interface ShareBuilderOptions {
   onDone?: () => void;
 }
 
-const berry = () =>
+export const berry = () =>
   s(
     'svg',
     { class: 'berry', viewBox: '0 0 20 20', 'aria-hidden': 'true' },
@@ -17,7 +17,7 @@ const berry = () =>
     s('path', { d: 'M10 6.5 7 3.5M10 6.5l3-3M10 6.5V2.5', class: 'berry-leaf' }),
   );
 
-const basketIcon = () =>
+export const basketIcon = () =>
   s(
     'svg',
     { class: 'basket-shape', viewBox: '0 0 60 30', 'aria-hidden': 'true' },

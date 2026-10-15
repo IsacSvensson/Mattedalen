@@ -18,9 +18,9 @@ function take(knownUnits: string[], seed = 1, slowMs?: number) {
 }
 
 describe('placement check', () => {
-  it('places a learner who knows ×10, ×2, ×5 and ×1 at ×4', () => {
+  it('places a learner who knows ×2, ×10, ×5 and ×1 at ×4', () => {
     const r = take(['u10', 'u2', 'u5', 'u1']);
-    expect(r.passedUnitIds).toEqual(['u10', 'u2', 'u5', 'u1']);
+    expect(r.passedUnitIds).toEqual(['u2', 'u10', 'u5', 'u1']);
     expect(r.stoppedAt).toBe('u4');
     expect(r.asked).toBeLessThanOrEqual(4 * 4 + 3);
   });
@@ -28,7 +28,7 @@ describe('placement check', () => {
   it('stops quickly for a beginner', () => {
     const r = take([]);
     expect(r.passedUnitIds).toEqual([]);
-    expect(r.stoppedAt).toBe('u10');
+    expect(r.stoppedAt).toBe('u2');
     expect(r.asked).toBe(3); // two misses, a second chance, a third miss
   });
 
@@ -40,10 +40,10 @@ describe('placement check', () => {
 
   it('passes known units on slow answers too, but only fast ones make them fluent', () => {
     const fast = take(['u10', 'u2']);
-    expect(fast.passedUnitIds).toEqual(['u10', 'u2']);
-    expect(fast.fluentUnitIds).toEqual(['u10', 'u2']);
+    expect(fast.passedUnitIds).toEqual(['u2', 'u10']);
+    expect(fast.fluentUnitIds).toEqual(['u2', 'u10']);
     const slow = take(['u10', 'u2'], 1, 9000);
-    expect(slow.passedUnitIds).toEqual(['u10', 'u2']);
+    expect(slow.passedUnitIds).toEqual(['u2', 'u10']);
     expect(slow.fluentUnitIds).toEqual([]);
     expect(slow.stoppedAt).toBe('u5');
   });
@@ -60,7 +60,7 @@ describe('placement check', () => {
       p.submit(item.answer, first ? 12_000 : 3000);
       first = false;
     }
-    expect(p.result().fluentUnitIds).toEqual(['u10']);
+    expect(p.result().fluentUnitIds).toEqual(['u2']);
   });
 
   it('allows one slip per unit of four', () => {
@@ -72,7 +72,7 @@ describe('placement check', () => {
       p.submit(first ? '0' : item.answer, 1500);
       first = false;
     }
-    expect(p.result().passedUnitIds).toEqual(['u10']);
+    expect(p.result().passedUnitIds).toEqual(['u2']);
   });
 
   it('gives a second chance after one slip too many, but not a third', () => {
@@ -85,7 +85,7 @@ describe('placement check', () => {
       return { passed: p.result().passedUnitIds, asked: i };
     };
     // Two misses out of four, then both extra items right: 4 of 6 passes.
-    expect(run([false, true, false, true, true, true])).toEqual({ passed: ['u10'], asked: 6 });
+    expect(run([false, true, false, true, true, true])).toEqual({ passed: ['u2'], asked: 6 });
     // A miss among the extra items stops the check.
     expect(run([false, true, false, true, false])).toEqual({ passed: [], asked: 5 });
   });
@@ -108,8 +108,8 @@ describe('applying a placement', () => {
 
   it('makes passed units fluent, spreads their reviews over a week and unlocks the next unit', () => {
     const states = Object.fromEntries(pack.items.map((i) => [i.id, emptyState(i.id)]));
-    const meta = { pacingGap: 8, unlockedUnitIds: ['u10'], accuracyEma: null, sessionsCompleted: 0, lastSessionDay: null };
-    const result = { passedUnitIds: ['u10', 'u2'], fluentUnitIds: ['u10', 'u2'], stoppedAt: 'u5', answers: [] };
+    const meta = { pacingGap: 8, unlockedUnitIds: ['u2'], accuracyEma: null, sessionsCompleted: 0, lastSessionDay: null };
+    const result = { passedUnitIds: ['u2', 'u10'], fluentUnitIds: ['u2', 'u10'], stoppedAt: 'u5', answers: [] };
     const out = applyPlacement(pack, DEFAULT_CONFIG, result, states, meta, today);
     const placed = pack.units.filter((u) => ['u10', 'u2'].includes(u.id)).flatMap((u) => u.itemIds);
     for (const id of placed) expect(out.states[id]!.status).toBe('fluent');
@@ -117,13 +117,13 @@ describe('applying a placement', () => {
     const dueDays = new Set(placed.map((id) => out.states[id]!.dueDay));
     expect(dueDays.size).toBe(7);
     expect([...dueDays].sort()[0]).toBe('2026-03-03');
-    expect(out.meta.unlockedUnitIds).toEqual(['u10', 'u2', 'u5']);
+    expect(out.meta.unlockedUnitIds).toEqual(['u2', 'u10', 'u5']);
   });
 
   it('makes units passed with slow answers learning, due within a few days', () => {
     const states = Object.fromEntries(pack.items.map((i) => [i.id, emptyState(i.id)]));
-    const meta = { pacingGap: 8, unlockedUnitIds: ['u10'], accuracyEma: null, sessionsCompleted: 0, lastSessionDay: null };
-    const result = { passedUnitIds: ['u10', 'u2'], fluentUnitIds: ['u10'], stoppedAt: 'u5', answers: [] };
+    const meta = { pacingGap: 8, unlockedUnitIds: ['u2'], accuracyEma: null, sessionsCompleted: 0, lastSessionDay: null };
+    const result = { passedUnitIds: ['u2', 'u10'], fluentUnitIds: ['u10'], stoppedAt: 'u5', answers: [] };
     const out = applyPlacement(pack, DEFAULT_CONFIG, result, states, meta, today);
     const two = pack.units.find((u) => u.id === 'u2')!.itemIds;
     for (const id of two) {
@@ -132,7 +132,7 @@ describe('applying a placement', () => {
       expect(['2026-03-03', '2026-03-04', '2026-03-05']).toContain(out.states[id]!.dueDay);
     }
     expect(out.states['10x3']!.status).toBe('fluent');
-    expect(out.meta.unlockedUnitIds).toEqual(['u10', 'u2', 'u5']);
+    expect(out.meta.unlockedUnitIds).toEqual(['u2', 'u10', 'u5']);
   });
 
   it('never lowers existing progress', () => {
@@ -140,7 +140,7 @@ describe('applying a placement', () => {
     const meta = { pacingGap: 8, unlockedUnitIds: ['u10', 'u2', 'u5'], accuracyEma: 0.9, sessionsCompleted: 9, lastSessionDay: null };
     const out = applyPlacement(pack, DEFAULT_CONFIG, { passedUnitIds: ['u10'], fluentUnitIds: ['u10'], stoppedAt: 'u2', answers: [] }, states, meta, today);
     expect(out.states['10x3']).toEqual(states['10x3']);
-    expect(out.meta.unlockedUnitIds).toEqual(['u10', 'u2', 'u5']);
+    expect(out.meta.unlockedUnitIds).toEqual(['u2', 'u10', 'u5']);
     expect(out.meta.sessionsCompleted).toBe(9);
   });
 });

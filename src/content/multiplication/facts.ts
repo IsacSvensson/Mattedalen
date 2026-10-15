@@ -32,8 +32,8 @@ export function formatFact(a: number, b: number): string {
  * 3×7 is learnt with ×3 and 7×9 with ×9.
  */
 export const UNIT_DEFS = [
-  { id: 'u10', title: '×10', table: 10 },
   { id: 'u2', title: '×2', table: 2 },
+  { id: 'u10', title: '×10', table: 10 },
   { id: 'u5', title: '×5', table: 5 },
   { id: 'u1', title: '×1', table: 1 },
   { id: 'u4', title: '×4', table: 4 },

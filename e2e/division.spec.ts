@@ -1,9 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, createProfile, nextStep, openParent, seedStates, type SeedState } from './helpers';
+import { GROUPS_KNOWN, answer, createProfile, nextStep, openParent, seedStates, type SeedState } from './helpers';
 
 /** Every ×10 fact sits (bushes), so "Dela lika" is open. */
 function tens(): Record<string, SeedState> {
-  const s: Record<string, SeedState> = {};
+  // A child past "Lika stora grupper".
+  const s: Record<string, SeedState> = { ...GROUPS_KNOWN };
   for (let n = 1; n <= 10; n++) for (const id of [`10x${n}`, `${n}x10`]) s[id] = { status: 'fluent', box: 4 };
   return s;
 }

@@ -62,7 +62,7 @@ describe('the start check with delat med', () => {
     for (const t of [10, 2]) for (let n = 1; n <= 10; n++) for (const id of [`${t}x${n}`, `${n}x${t}`]) states[id] = at(id, 'fluent');
     const part = divisionPlacementPack(pack, states)!;
     expect(() => validatePack(part)).not.toThrow();
-    expect(part.units.map((u) => u.id)).toEqual(['d10', 'd2']);
+    expect(part.units.map((u) => u.id)).toEqual(['d2', 'd10']);
     expect(part.units[1]!.unlockRule).toMatchObject({ kind: 'previous' });
     const ids = part.units.flatMap((u) => u.itemIds);
     expect(ids).toContain('30/10');
@@ -75,7 +75,7 @@ describe('the start check with delat med', () => {
     // The engine's check runs on it like on any pack.
     const placement = new Placement(part, seededRng(1));
     for (let item = placement.next(); item; item = placement.next()) placement.submit(item.answer, 1500);
-    expect(placement.result().passedUnitIds).toEqual(['d10', 'd2']);
+    expect(placement.result().passedUnitIds).toEqual(['d2', 'd10']);
   });
 });
 
@@ -90,9 +90,10 @@ describe('Öva en tabell with delat med', () => {
     const withOpen = focusWithDivisions(set, {}, ['u10', 'delalika', 'd10', 'u2', 'd2']);
     expect(withOpen.itemIds.slice(0, set.itemIds.length)).toEqual(set.itemIds);
     expect(withOpen.itemIds).toEqual(expect.arrayContaining(['20/10', '20/2', '4/2', '14/2', '14/7']));
-    // Dela med 2 not open yet: only the family {2, 10, 20}, which belongs to Dela med 10.
-    const tensOnly = focusWithDivisions(set, {}, ['u10', 'delalika', 'd10', 'u2']);
-    expect(tensOnly.itemIds.filter(isDivisionId).sort()).toEqual(['20/10', '20/2']);
+    // ×10 while Dela med 10 is not open yet: only the family {2, 10, 20}, which belongs to Dela med 2.
+    const ten = pack.focusSets!.find((s) => s.id === tableFocusId(10))!;
+    const twosOnly = focusWithDivisions(ten, {}, ['u2', 'delalika', 'd2', 'u10']);
+    expect(twosOnly.itemIds.filter(isDivisionId).sort()).toEqual(['20/10', '20/2']);
     const met = focusWithDivisions(set, { '14/7': at('14/7', 'learning') }, ['u10', 'u2']);
     expect(met.itemIds.filter(isDivisionId)).toEqual(['14/7']);
   });

@@ -1,5 +1,5 @@
 import { buildChoices, mathRandomRng, systemClock } from '../../../engine';
-import { factId, formatFact, parseFactId } from '../../../content/multiplication';
+import { factId, formatFact, isFactId, parseFactId } from '../../../content/multiplication';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { numPad } from '../../../shell/components/numPad';
@@ -42,8 +42,9 @@ async function runDuel(ctx: AppContext, profile: Profile): Promise<void> {
   const engine = engineFor(profile, gardenDeps(ctx));
   const { states } = await loadProgress(profile, gardenDeps(ctx), engine);
   let ids = duelPool(states);
-  // Too few known facts: play with the first unit (×10), which every child starts with.
-  if (ids.length < MIN_CARDS) ids = [...new Set([...ids, ...(pack.units[0]?.itemIds ?? [])])];
+  // Too few known facts: play with the first table (×2), which every child starts with.
+  const firstTable = pack.units.find((u) => u.itemIds.some(isFactId))?.itemIds.filter(isFactId) ?? [];
+  if (ids.length < MIN_CARDS) ids = [...new Set([...ids, ...firstTable])];
   const cards: DuelCard[] = ids.map(parseFactId);
   const voice = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
   const startedAt = systemClock.now();

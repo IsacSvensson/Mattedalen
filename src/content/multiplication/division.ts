@@ -46,8 +46,8 @@ export function divisionsOfTable(t: number): ItemId[] {
 
 /** The division units follow the multiplication units: a family belongs to the first table it is in. */
 export const DIVISION_UNIT_DEFS = [
-  { id: 'd10', title: 'Dela med 10', of: 'u10' },
   { id: 'd2', title: 'Dela med 2', of: 'u2' },
+  { id: 'd10', title: 'Dela med 10', of: 'u10' },
   { id: 'd5', title: 'Dela med 5', of: 'u5' },
   { id: 'd1', title: 'Dela med 1', of: 'u1' },
   { id: 'd4', title: 'Dela med 4', of: 'u4' },

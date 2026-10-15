@@ -3929,3 +3929,29 @@ h1:focus {
   width: 44px;
   height: 44px;
 }
+
+/* "Lika stora grupper": the same baskets, only to look at. */
+.share-basket.still {
+  cursor: default;
+}
+
+.garden-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.garden-next .icon {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+
+/* A long number sentence on the intro card ("4 + 4 + 4 = __ × 4") stays on one line on a phone. */
+.intro-card .prompt.long {
+  font-size: clamp(1.8rem, 8.6vw, 3.4rem);
+}

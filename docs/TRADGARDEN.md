@@ -14,21 +14,31 @@ Paketet innehåller 100 fakta (1–10 × 1–10). **×0 är utelämnat**, efters
 ligger utanför 10×10-kartan. Speglade fakta som 3×7 och 7×3 är separata items
 kopplade med `pairId`.
 
-| Ordning | Enhet | Antal fakta | Strategi |
-|---|---|---|---|
-| 1 | ×10 | 19 | ”7 tiotal = 70” |
-| 2 | ×2 | 17 | 7 + 7 |
-| 3 | ×5 | 15 | hälften av ×10 |
-| 4 | ×1 | 13 | en grupp med … |
-| 5 | ×4 | 11 | dubbla ×2 |
-| 6 | ×3 | 9 | ×2 + ett gäng |
-| 7 | Kvadrattal (6², 7², 8², 9²) | 4 | t.ex. 7×7 = 5×7 + 2×7 |
-| 8 | ×9 | 6 | ×10 − ett gäng |
-| 9 | ×6 | 4 | ×5 + ett gäng |
-| 10 | ×7 och ×8 | 2 | 8×7 = dubbla 4×7 |
+| Ordning | Enhet | Antal fakta | Strategi | Öppnar efter |
+|---|---|---|---|---|
+| 0 | Lika stora grupper (förståelse) | 16 uppgifter | grupper, upprepad addition, hoppa i steg | – |
+| 1 | ×2 | 19 | 7 + 7 | Lika stora grupper (hälften) |
+| 2 | ×10 | 17 | ”7 tiotal = 70” | ×2 |
+| 3 | ×5 | 15 | hälften av ×10 | ×10 |
+| 4 | ×1 | 13 | en grupp med … | ×2 |
+| 5 | ×4 | 11 | dubbla ×2 | ×2 |
+| 6 | ×3 | 9 | ×2 + ett gäng | ×2 |
+| 7 | Kvadrattal (6², 7², 8², 9²) | 4 | t.ex. 7×7 = 5×7 + 2×7 | ×4 och ×3 |
+| 8 | ×9 | 6 | ×10 − ett gäng | ×10 |
+| 9 | ×6 | 4 | ×5 + ett gäng | ×5 |
+| 10 | ×7 och ×8 | 2 | 8×7 = dubbla 4×7 | ×6 och ×4 |
 
-Varje fakta hör till den första enhet vars tabell den ingår i, så 3×7 lärs in med
-×3 och 7×9 med ×9. `derivedFrom` pekar alltid på fakta i tidigare enheter. Varje
+Tabellerna är en graf (`TABLE_AFTER`): varje tabell öppnar när det dess
+strategier bygger på sitter. Nya fakta kommer ändå i ordningen ovan. ×2 kommer
+först eftersom det är dubblorna från bäcken; ×10 bygger på tiotal, som Stigen
+ska träna (se [PLAN-HUNDRA.md](PLAN-HUNDRA.md)). Varje fakta hör till den första
+enhet vars tabell den ingår i, så 2×10 lärs in med ×2, 3×7 med ×3 och 7×9 med ×9.
+
+**Lika stora grupper** är en förståelsedel före ×2, som Dela lika och Vågen:
+korgar med lika många bär, upprepad addition (4 + 4 + 4 = 3 × 4), att hoppa i
+steg på tallinjen och tomma korgar (noll). Den bedöms på rätt svar på olika
+dagar, aldrig på tid. Ett barn som redan kan minst hälften av ×2 räknar den som
+klar (`knowsGroupsAlready`). `derivedFrom` pekar alltid på fakta i tidigare enheter. Varje
 fakta har tre ledtrådar:
 
 - `strategy`, till exempel ”8 × 7 = dubbla 4 × 7 = 28 + 28 = 56”
@@ -150,12 +160,12 @@ Utseendet bygger på några få regler. De står också överst i `styles.css`.
 
 ## Startkoll (placering)
 
-Ett barn som redan kan ×10, ×2, ×5 och ×1 ska inte behöva gå igenom dem igen.
+Ett barn som redan kan ×2, ×10, ×5 och ×1 ska inte behöva gå igenom dem igen.
 Därför erbjuds en frivillig **startkoll** första gången barnet kommer till
 trädgården, och den kan göras om från föräldravyn.
 
-Ett nytt barn börjar vid Bäcken. Trädgården öppnar när dubblor och övergången
-över tiotalet sitter där, när barnet redan har framsteg i trädgården eller när
+Ett nytt barn börjar vid Bäcken. Trädgården öppnar när dubblorna sitter där,
+när barnet redan har framsteg i trädgården eller när
 en vuxen öppnar den i föräldravyn (`opening.ts`). Barn från Gångerträdgården har
 den öppen.
 

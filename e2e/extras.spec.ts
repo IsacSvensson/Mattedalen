@@ -96,7 +96,8 @@ test('questions can be read aloud in Swedish', async ({ page }) => {
   await expect(nextStep(page)).toBeVisible();
   await answer(page);
   await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual(
-    expect.arrayContaining([expect.stringMatching(/^sv-SE: Ett nytt frö\. \d+ gånger \d+$/), expect.stringMatching(/^sv-SE: \d+ gånger \d+$/)]),
+    // A new child starts with "Lika stora grupper", read as it stands.
+    expect.arrayContaining([expect.stringMatching(/^sv-SE: \d+ korgar med \d+ jordgubbar i varje\. Hur många jordgubbar\?$/)]),
   );
   await expect(page.getByRole('button', { name: 'Läs upp igen' })).toBeVisible();
 });

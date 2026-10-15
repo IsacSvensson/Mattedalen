@@ -1,10 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, createProfile, enterGarden, nextStep, seedStates } from './helpers';
+import { answer, createProfile, enterGarden, GROUPS_KNOWN, nextStep, seedStates, untilIntro } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
   await page.goto('/');
-  await createProfile(page, 'Alva');
+  // A child who has done "Lika stora grupper": the tables start with ×2.
+  await createProfile(page, 'Alva', 'garden-times');
 });
 
 /** Drags on the 10 × 10 board from the top-left dot to the dot at (rows, cols). */
@@ -23,6 +24,7 @@ async function drag(page: Page, rows: number, cols: number) {
 
 test('a new fact is built by dragging out its rectangle', async ({ page }) => {
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  await untilIntro(page);
   const prompt = await page.locator('.intro-card .prompt').textContent();
   const [a, b] = prompt!.match(/\d+/g)!.map(Number) as [number, number];
   await expect(page.getByText(`Dra ut ${a} ${a === 1 ? 'rad' : 'rader'} med ${b} i varje`)).toBeVisible();
@@ -46,19 +48,19 @@ test('a new fact is built by dragging out its rectangle', async ({ page }) => {
 });
 
 test('a fact whose twin is known starts from the twin and is turned around', async ({ page }) => {
-  await seedStates(page, { '1x10': { status: 'fluent', box: 2, dueDay: '2026-02-09' } });
+  await seedStates(page, { ...GROUPS_KNOWN, '1x2': { status: 'fluent', box: 2, dueDay: '2026-02-09' } }, { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
   await enterGarden(page, 'Alva');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
-  // Warm-up first, then the twin 10 × 1 is the preferred new fact.
+  // Warm-up first, then the twin 2 × 1 is the preferred new fact.
   for (let i = 0; i < 6; i++) {
     await expect(nextStep(page)).toBeVisible();
     if (await page.locator('.intro-card').isVisible()) break;
     await answer(page);
   }
-  await expect(page.locator('.intro-card .prompt')).toHaveText('10 × 1');
-  await expect(page.getByText('Du kan redan 1 × 10. Vrid den!')).toBeVisible();
+  await expect(page.locator('.intro-card .prompt')).toHaveText('2 × 1');
+  await expect(page.getByText('Du kan redan 1 × 2. Vrid den!')).toBeVisible();
   await page.getByRole('button', { name: 'Vrid' }).click();
-  await expect(page.getByText('10 × 1 är lika mycket som 1 × 10', { exact: false })).toBeVisible();
+  await expect(page.getByText('2 × 1 är lika mycket som 1 × 2', { exact: false })).toBeVisible();
 });
 
 test('fluent facts are answered freely on a number pad', async ({ page }) => {
