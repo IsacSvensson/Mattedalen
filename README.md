@@ -28,6 +28,8 @@ Mer att läsa:
   Bäcken, addition och subtraktion inom 20: innehållet, platsen och planen.
 - [docs/PLAN-DELAT-MED.md](docs/PLAN-DELAT-MED.md): delat med i Trädgården,
   med blommor och frukt på plantorna: beslut, design och fynd från varje fas.
+- [docs/PLAN-HUNDRA.md](docs/PLAN-HUNDRA.md): förslag om talen till 100
+  (Stigen) och en tydligare väg in i gånger, jämfört med hur skolan gör.
 
 ## Principer
 
