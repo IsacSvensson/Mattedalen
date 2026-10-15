@@ -70,15 +70,43 @@ export function nextStep(page: Page) {
 export async function passIntro(page: Page): Promise<void> {
   if (!(await page.locator('.intro-card').isVisible())) return;
   const showMe = page.getByRole('button', { name: 'Visa mig' });
-  if (await showMe.isVisible()) await showMe.click();
+  if (await page.locator('.intro-card .share-builder').isVisible()) {
+    // "Dela lika": deal the berries out, one tap on the pile at a time.
+    const go = page.getByRole('button', { name: 'Nu du!' });
+    while (!(await go.isVisible())) await page.locator('.intro-card .share-pile').click();
+  } else if (await showMe.isVisible()) await showMe.click();
   else await page.getByRole('button', { name: 'Vrid' }).click();
   await page.getByRole('button', { name: 'Nu du!' }).click();
+}
+
+/**
+ * The answer to a prompt as written (`data-prompt`): 3 × 7, 21 ÷ 3, __ × 3 = 21,
+ * __ = 21 ÷ 3, or a "Dela lika" task in words.
+ */
+export function solve(prompt: string): number {
+  const share = /(\d+) jordgubbar delas lika i (\d+) korgar/.exec(prompt) ?? /(\d+) jordgubbar, (\d+) i varje korg/.exec(prompt);
+  if (share) return Number(share[1]) / Number(share[2]);
+  const missing = /__ × (\d+) = (\d+)/.exec(prompt);
+  if (missing) return Number(missing[2]) / Number(missing[1]);
+  const div = /(\d+) ÷ (\d+)/.exec(prompt);
+  if (div) return Number(div[1]) / Number(div[2]);
+  const [a, b] = prompt.match(/\d+/g)!.map(Number) as [number, number];
+  return a * b;
 }
 
 /** Value of a step on the derivation path: "5 × 7", "35 + 7", "60 − 6" or "hälften av 70". */
 function evaluate(prompt: string): number {
   const half = /hälften av (\d+)/.exec(prompt);
   if (half) return Number(half[1]) / 2;
+  const div = /^(\d+) ÷ (\d+)$/.exec(prompt);
+  if (div) return Number(div[1]) / Number(div[2]);
+  // Sums and differences, also of several terms: "35 + 7", "30 + 6 + 6", "60 − 6 − 6".
+  if (/^\d+( [+−] \d+)+$/.test(prompt)) {
+    const t = prompt.split(' ');
+    let value = Number(t[0]);
+    for (let i = 1; i < t.length; i += 2) value += (t[i] === '+' ? 1 : -1) * Number(t[i + 1]);
+    return value;
+  }
   const [x, op, y] = prompt.match(/\d+|[+−×]/g)! as [string, string, string];
   return op === '+' ? Number(x) + Number(y) : op === '−' ? Number(x) - Number(y) : Number(x) * Number(y);
 }
@@ -94,7 +122,7 @@ export async function answerDerive(page: Page, correct = true): Promise<string> 
   for (;;) {
     const current = page.locator('.derive-step.current .derive-prompt');
     await expect(current).toBeVisible();
-    const prompt = (await current.textContent())!;
+    const prompt = (await current.getAttribute('data-prompt'))!;
     const target = await page.locator('.derive-step.current.target').isVisible();
     const done = await steps.count();
     await typeOnPad(page, String(evaluate(prompt) + (target && !correct ? 1 : 0)));
@@ -110,15 +138,19 @@ export async function answer(page: Page, correct = true): Promise<string> {
   if (await page.locator('.question.derive').isVisible()) return answerDerive(page, correct);
   const prompt = page.locator('.question .prompt');
   await expect(prompt).toBeVisible();
-  const text = (await prompt.textContent()) ?? '';
-  const [a, b] = text.match(/\d+/g)!.map(Number) as [number, number];
-  const right = String(a * b);
+  // As written, not as drawn: a fraction bar shows 21 ÷ 3 as "213".
+  const text = (await prompt.getAttribute('data-prompt')) ?? '';
+  const solved = solve(text);
+  const right = String(solved);
+  // A multiplication is reported as "3×7"; anything else as its prompt.
+  const times = /^(\d+) × (\d+)$/.exec(text);
+  const asked = times ? `${times[1]}×${times[2]}` : text;
 
   if (await page.locator('.numpad').isVisible()) {
-    const value = correct ? right : String(a * b + 1);
+    const value = correct ? right : String(solved + 1);
     for (const d of value) await page.locator('.numpad-key', { hasText: new RegExp(`^${d}$`) }).click();
     await page.getByRole('button', { name: 'Svara' }).click();
-    return `${a}×${b}`;
+    return asked;
   }
 
   const choices = page.locator('.choice:not([disabled])');
@@ -126,7 +158,7 @@ export async function answer(page: Page, correct = true): Promise<string> {
   const values = await choices.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.value!));
   const pick = correct ? right : values.find((v) => v !== right)!;
   await page.locator(`.choice[data-value="${pick}"]`).click();
-  return `${a}×${b}`;
+  return asked;
 }
 
 /** Writes item states for the (only) profile straight into IndexedDB, then reloads. */

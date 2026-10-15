@@ -29,6 +29,9 @@ export interface IntroParts {
   after: (Node | null)[];
 }
 
+/** Support for a hard item: steps from known items, or something the child builds before answering. */
+export type Support = { steps: PathStep[]; visual: Element } | { build: (q: Question, ready: () => void) => IntroParts };
+
 /** Help after a wrong answer, as the place shows it. */
 export interface HelpParts {
   /** A friendly word about a typical mix-up, e.g. "48 är 8 × 6 – nära!". */
@@ -53,8 +56,11 @@ export interface SessionPlace {
   /** The ending after a whole session. */
   end(summary: SessionSummary, focus?: FocusSet): void;
   intro(q: Question, ready: () => void): IntroParts;
-  /** A derivation path for a hard item, with a picture beside it, or null. */
-  derivation(q: Question): { steps: PathStep[]; visual: Element } | null;
+  /**
+   * Support for a hard item: a derivation path with a picture beside it, or
+   * something to build first (then the item is asked), or null for none.
+   */
+  derivation(q: Question): Support | null;
   help(q: Question, fb: Feedback): HelpParts;
   /** A line above the prompt, e.g. "Stämmer det?". */
   questionLabel?(q: Question): string | null;
@@ -84,14 +90,15 @@ export function promptView(prompt: string, sign: DivisionSign = divisionSign): H
     content.push(...mathNodes(part, sign));
   });
   const stacked = sign === 'fraction' && prompt.includes('÷');
+  const words = isWords(prompt);
   return h(
     'p',
     {
-      class: `prompt${prompt.length > 7 ? ' long' : ''}${blank ? ' has-blank' : ''}${stacked ? ' has-frac' : ''}`,
+      class: `prompt${words ? ' words' : prompt.length > 7 ? ' long' : ''}${blank ? ' has-blank' : ''}${stacked ? ' has-frac' : ''}`,
       // The prompt as written, whatever the sign (for tests and tools).
       'data-prompt': prompt,
-      // A prompt with its own equal sign is read as it stands; "3 × 7" as "3 gånger 7 är lika med?".
-      'aria-label': prompt.includes('=') ? `${spokenText(prompt)}?` : `${spokenText(prompt)} är lika med?`,
+      // A question in words is read as it stands; one with its own equal sign too; "3 × 7" as "3 gånger 7 är lika med?".
+      'aria-label': words ? prompt : prompt.includes('=') ? `${spokenText(prompt)}?` : `${spokenText(prompt)} är lika med?`,
     },
     content,
   );
@@ -180,10 +187,13 @@ export async function runSession(
   while (!finished) {
     const q = play.question();
     if (!q) break;
-    if (q.kind === 'new') await introduce(stage, q, place, setKeys);
+    if (q.kind === 'new') await introduce(stage, q, (ready) => place.intro(q, ready), setKeys);
     if (finished) return;
-    const path = q.kind === 'derive' ? place.derivation(q) : null;
-    const { given, rtMs } = path ? await derive(stage, path.steps, path.visual, setKeys) : await ask(stage, q, place, setKeys);
+    const support = q.kind === 'derive' ? place.derivation(q) : null;
+    // Something to build first: then the item itself, still with support (no evidence).
+    if (support && 'build' in support) await introduce(stage, q, (ready) => support.build(q, ready), setKeys);
+    if (finished) return;
+    const { given, rtMs } = support && 'steps' in support ? await derive(stage, support.steps, support.visual, setKeys) : await ask(stage, q, place, setKeys);
     if (finished) return;
     const fb = await play.answer(given, rtMs);
     updateProgress();
@@ -196,11 +206,11 @@ export async function runSession(
 type SetKeys = (handler?: (e: KeyboardEvent) => void) => void;
 
 /** A new item: the place shows how it works, then the child answers it themselves ("Nu du!"). */
-function introduce(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetKeys): Promise<void> {
+function introduce(stage: HTMLElement, q: Question, intro: (ready: () => void) => IntroParts, setKeys: SetKeys): Promise<void> {
   return new Promise((resolve) => {
     const go = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Nu du!', icon('arrow', 'on-primary'));
     const after = h('div', { class: 'intro-after', hidden: true });
-    const parts = place.intro(q, () => {
+    const parts = intro(() => {
       after.hidden = false;
       go.focus();
       setKeys((e) => {
@@ -225,6 +235,7 @@ function introduce(stage: HTMLElement, q: Question, place: SessionPlace, setKeys
  * ("5 + 3 = 4 + 4"), or a statement with its verdict ("3 + 4 = 4 + 3: Ja").
  */
 export function helpAnswer(prompt: string, expected: string): string {
+  if (isWords(prompt)) return `${prompt} Svaret är ${expected}.`;
   if (prompt.includes('__')) return prompt.replace('__', expected);
   if (prompt.includes('=')) return `${prompt}: ${expected}`;
   return `${prompt} = ${expected}`;
@@ -232,9 +243,13 @@ export function helpAnswer(prompt: string, expected: string): string {
 
 /** The prompt on the intro card (a blank stays a blank until the child answers). */
 function introPrompt(prompt: string): HTMLElement {
-  if (!prompt.includes('__')) return h('p', { class: 'prompt' }, prompt);
-  return promptView(prompt);
+  if (prompt.includes('__')) return promptView(prompt);
+  const stacked = divisionSign === 'fraction' && prompt.includes('÷');
+  return h('p', { class: `prompt${stacked ? ' has-frac' : ''}${isWords(prompt) ? ' words' : ''}`, 'data-prompt': prompt }, mathNodes(prompt, divisionSign));
 }
+
+/** A prompt in words ("12 jordgubbar delas lika i 3 korgar …") rather than a number sentence. */
+const isWords = (prompt: string) => /[a-zåäö]{3}/i.test(prompt);
 
 /**
  * "Räknestigen": an item the child finds hard, reached in steps from items it
@@ -312,7 +327,7 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
       { class: 'prompt-card card' },
       label ? h('p', { class: 'ask-label' }, label) : null,
       promptView(q.prompt),
-      q.format === 'free' || q.prompt.includes('=') ? null : h('p', { class: 'eq', 'aria-hidden': 'true' }, '= ?'),
+      q.format === 'free' || q.prompt.includes('=') || isWords(q.prompt) ? null : h('p', { class: 'eq', 'aria-hidden': 'true' }, '= ?'),
       place.askVisual?.(q) ?? null,
     );
 
@@ -392,7 +407,7 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place
           'div',
           { class: 'help-card card' },
           h('p', { class: 'you-said' }, fb.given ? `Du svarade ${label(fb.given)}.` : 'Inget svar den här gången.', help.strategy ? ' Så här kan du tänka:' : ''),
-          h('p', { class: 'help-answer', 'data-prompt': answer }, mathNodes(answer, divisionSign)),
+          h('p', { class: `help-answer${isWords(answer) ? ' words' : ''}`, 'data-prompt': answer }, mathNodes(answer, divisionSign)),
           help.note ? h('p', { class: 'confusion-note' }, help.note) : null,
           help.strategy ? h('p', { class: 'strategy' }, mathNodes(help.strategy, divisionSign)) : null,
           help.visual ?? null,

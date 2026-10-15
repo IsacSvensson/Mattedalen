@@ -3,10 +3,13 @@ import { confusionNote, derivationStepsFor, divisionNote, isDivisionId, parseDiv
 import type { Profile } from '../../../storage';
 import type { AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
-import { plantIcon } from '../../../shell/components/plant';
+import { bloomIcon, plantIcon } from '../../../shell/components/plant';
+import { DEFAULT_DIVISION_SIGN, mathNodes } from '../../../shell/divisionSign';
 import { h } from '../../../shell/dom';
 import { runSession, type SessionPlace } from '../../../shell/screens/session';
 import { arrayBuilder } from '../components/arrayBuilder';
+import { divisionBuilder } from '../components/divisionBuilder';
+import { shareBuilder, shareTaskOf } from '../components/shareBuilder';
 import { arrayView, partsOf } from '../components/arrayView';
 import { gardenDeps } from '../pack';
 import { showGarden } from './garden';
@@ -29,6 +32,18 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
     const { a, b } = square(q.item.id);
     return arrayView(a, b, { size: 'small', parts: partsOf(q.item.hints) });
   };
+  const strategyText = (q: Question) => q.item.hints.find((x) => x.kind === 'strategy')?.text;
+  /** The strategy, with delat med in the child's sign. */
+  const strategyLine = (q: Question) => {
+    const text = strategyText(q);
+    return text ? h('p', { class: 'strategy' }, mathNodes(text, profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN)) : null;
+  };
+  /** A division as its rectangle, built with fixed rows: 42 ÷ 6 is 6 in each row, how many rows? */
+  const buildDivision = (q: Question, ready: () => void) => {
+    const { dividend, divisor } = parseDivisionId(q.item.id);
+    return divisionBuilder({ dividend, divisor, onDone: ready });
+  };
+
   return {
     deps: gardenDeps(ctx),
     homeLabel: 'Tillbaka till trädgården',
@@ -38,32 +53,69 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
     /**
      * A new fact: the child builds it as a rectangle of dots (or turns the
      * known mirrored fact around) and sees how it splits into known parts.
+     * A new division is built with rows of a given length; a "Dela lika"
+     * task is dealt out into baskets.
      */
     intro(q, ready) {
+      const share = shareTaskOf(q.item.hints);
+      if (share) {
+        return {
+          label: [icon('basket'), 'Dela lika'],
+          spoken: q.item.prompt,
+          body: shareBuilder({ task: share, onDone: ready }),
+          after: [strategyLine(q)],
+        };
+      }
+      if (isDivisionId(q.item.id)) {
+        return {
+          label: [bloomIcon('blossom'), 'En ny blomma'],
+          spoken: `En ny blomma. ${q.item.prompt}`,
+          body: buildDivision(q, ready),
+          after: [strategyLine(q)],
+        };
+      }
       const { a, b } = parseFactId(q.item.id);
-      const strategy = q.item.hints.find((x) => x.kind === 'strategy')?.text;
       const swap = q.pairKnown ? q.item.hints.find((x) => x.kind === 'swap')?.text : undefined;
       return {
         label: [plantIcon('seed'), 'Ett nytt frö'],
         spoken: `Ett nytt frö. ${q.prompt}`,
         body: arrayBuilder({ rows: a, cols: b, parts: partsOf(q.item.hints), startRotated: q.pairKnown, onDone: ready }),
-        after: [
-          strategy ? h('p', { class: 'strategy' }, strategy) : null,
-          swap ? h('p', { class: 'strategy swap' }, icon('rotate'), swap) : null,
-        ],
+        after: [strategyLine(q), swap ? h('p', { class: 'strategy swap' }, icon('rotate'), swap) : null],
       };
     },
 
+    /**
+     * A hard fact: räknestigen. A hard division is built as its rectangle
+     * where it has no path, and otherwise every other time.
+     */
     derivation(q) {
       const steps = derivationStepsFor(q.item.id);
+      if (isDivisionId(q.item.id) && (!steps || (q.state?.seen ?? 0) % 2 === 0)) {
+        return {
+          build: (q, ready) => ({
+            label: [icon('steps'), 'Bygg den först'],
+            spoken: `Bygg den först. ${q.item.prompt}`,
+            body: buildDivision(q, ready),
+            after: [],
+          }),
+        };
+      }
       return steps ? { steps, visual: picture(q) } : null;
     },
 
+    /** "Dela lika": the berries and baskets beside the question, to deal out if the child wants to. */
+    askVisual(q) {
+      const share = shareTaskOf(q.item.hints);
+      return share ? shareBuilder({ task: share, reveal: false }) : null;
+    },
+
     help(q, fb) {
+      const share = shareTaskOf(q.item.hints);
+      if (share) return { strategy: strategyText(q), visual: shareBuilder({ task: share }) };
       const { a, b } = square(q.item.id);
       return {
         note: isDivisionId(q.item.id) ? divisionNote(a * b, b, fb.given) : confusionNote(a, b, fb.given),
-        strategy: q.item.hints.find((x) => x.kind === 'strategy')?.text,
+        strategy: strategyText(q),
         visual: picture(q),
       };
     },

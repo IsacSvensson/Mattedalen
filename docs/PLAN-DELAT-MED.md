@@ -112,11 +112,40 @@ bevis. När divisionen sitter visas den mest i standardform, så att det som
 avgör om den är automatiserad mest är snabba svar i den formen. Gånger och
 ”Dela lika” har bara en form.
 
-### Ny fakta
+### Ny fakta: bygg rektangeln
 
-Samma rektangel som när barnet lärde sig 3 × 7, nu uppdelad: 21 prickar i
-3 rader, hur många i varje? Sedan samma 21 i 7 rader. Familjen syns som en och
-samma bild åt två håll. Därefter svarar barnet själv (”Nu du!”).
+Samma bräde med 10 × 10 prickar som när barnet lärde sig gånger, men nu är
+radens längd given. Vid 42 ÷ 6 är varje rad 6 prickar lång, och barnet drar
+nedåt tills det är 42 prickar: antalet rader är svaret. Under brädet räknas
+prickarna (”36 prickar”, ”42 prickar – där!”). Blir det för många visar texten
+det, och barnet drar tillbaka. Rektangeln är densamma som för 7 × 6, så familjen
+syns som en och samma bild. Därefter svarar barnet själv (”Nu du!”). ”Visa mig”
+finns, som för gånger.
+
+## Dra och bygg när det är svårt
+
+Gånger har redan ett grepp att ta i: barnet drar ut rektangeln. Delat med får
+samma sorts grepp, i tre lägen:
+
+1. **Dela lika: dela ut bären.** I introduktionen ligger bären i en hög ovanför
+   korgarna. Vid delning (”12 jordgubbar delas lika i 3 korgar”) drar barnet
+   bären till korgarna, eller trycker på en korg för att lägga ett bär i den,
+   tills högen är tom. Vid innehållsdivision (”12 jordgubbar, 4 i varje korg”)
+   fylls en korg i taget, och en ny korg kommer fram när den förra är full.
+   Sedan räknar barnet i en korg, eller korgarna, och svarar med flerval. Efter
+   ett fel svar finns samma utdelning i hjälpkortet. Talen är högst 20, så det
+   går fort.
+2. **Ny division: bygg rektangeln** (se ovan).
+3. **Svår division: bygg den som stöd.** En division barnet har svårt med (fel
+   på flera dagar) tas med stöd, som räknestigen för gånger. Där det inte finns
+   någon räknestig (÷1, ÷10 och kvoterna 1, 2, 5 och 10) är stödet att bygga
+   rektangeln. Annars växlar det: varannan gång räknestigen, varannan gång
+   bygget. Ett svar med stöd är inget bevis för status, och divisionen frågas
+   igen ur minnet senare, som i dag.
+
+Allt går att göra med tryck i stället för att dra: tryck på en korg, eller på
+den rad där rektangeln ska sluta. Det fungerar också på en liten telefon och
+med tangentbord (piltangenterna flyttar raden, Enter bekräftar).
 
 ### Räknestigar
 
@@ -219,7 +248,7 @@ mognar den.” Det gör ändringen till något att se fram emot.
 |---|---|
 | G1. Motor och paket **(klar)** | `requires` i motorn, paketversion 2 med fakta, delar och graf, läsning av gamla QR-koder och säkerhetskopior, simulering. Inget ändras för barnen än: delat med ligger bakom `createMultiplicationPack({ division: true })`. |
 | G2. Innehåll **(klar)** | ”Dela lika”, format, räknestigar, felsvar och förklaringar, bråkstreck i frågan och inställningen för tecknet. |
-| G3. Trädgården | Blommor, kart och frukt, skördekorgen, introduktionen med delad rektangel, nyheten för barn som redan spelar, kartan i dalen. |
+| G3. Trädgården **(klar)** | Blommor, kart och frukt, skördekorgen, bygg rektangeln (ny fakta och stöd), dela ut bären i Dela lika, nyheten för barn som redan spelar, kartan i dalen. Delat med slås på. |
 | G4. Runtomkring | Öva en tabell, startkollen, Trädgårdens koll och föräldravyn. |
 | G5. Verifiering | e2e, skärmbilder vid 320 och 360 px, liggande telefon och surfplatta, dokumentation. |
 
@@ -246,6 +275,25 @@ mognar den.” Det gör ändringen till något att se fram emot.
   något mindre siffror, så att kortet behåller sin höjd.
 - **Inställningen** syns i föräldravyn under Trädgården först när paketet har
   delat med (G3).
+
+## Fynd från G3
+
+- **Spår för nya fakta.** Nya fakta kom i delarnas ordning. Ett barn som redan
+  kan ×10 till ×5 skulle då få Dela lika och alla öppna divisioner före nästa
+  tabell, och gånger skulle stå still i veckor. Därför har delat med ett eget
+  spår (`Unit.lane`), och spåren turas om att ge nya fakta i ett pass. Gånger går
+  först. Simuleringen visar ungefär samma resultat som förut: 90–94 av 100
+  divisioner och 97 av 100 multiplikationer sitter efter 26 veckor.
+- **Kart syns dåligt** mot ljusgröna buskar. De är därför ljusgula med tydlig
+  kontur och lite större än blommorna.
+- **Nyheten** ligger överst i trädgården på telefon och i sidokolumnen på
+  surfplatta. På liggande telefon är den en lapp längst ned tills barnet
+  trycker ”Vad roligt!”, annars får varken lådan eller knappen plats.
+- **Enter i byggrutan** gjorde först bygget klart och tryckte sedan på ”Nu du!”
+  i samma tryck. Byggrutan stoppar nu sina egna tangenttryck.
+- **Föräldravyn** visar divisioner under ”Svåra just nu” och bland
+  förväxlingarna, med `÷`. Värmekartan för delat med och barnets eget tecken i
+  föräldravyn kommer i G4.
 
 ## Avgjorda frågor
 

@@ -1,4 +1,5 @@
 import { atLeast, randInt, type ItemId, type ItemState, type Rng } from '../../engine';
+import { isFactId } from '../../content/multiplication';
 import type { SessionRecord } from '../../storage';
 
 /** "Beat your own record": short, timed, only with facts the child already knows well. */
@@ -8,11 +9,11 @@ export const CHALLENGE_MIN_FACTS = 5;
 /** A challenge for one table opens once this many of its facts are at least fluent. */
 export const CHALLENGE_MIN_FOCUS_FACTS = 4;
 
-/** Facts the child knows well, optionally only those in one focus set (e.g. ×7). */
+/** Multiplications the child knows well, optionally only those in one focus set (e.g. ×7). Delat med stays out for now. */
 export function challengePool(states: Record<ItemId, ItemState>, focusItemIds?: readonly ItemId[]): ItemId[] {
   const only = focusItemIds ? new Set(focusItemIds) : null;
   return Object.values(states)
-    .filter((s) => atLeast(s.status, 'fluent') && (!only || only.has(s.itemId)))
+    .filter((s) => isFactId(s.itemId) && atLeast(s.status, 'fluent') && (!only || only.has(s.itemId)))
     .map((s) => s.itemId);
 }
 
@@ -66,7 +67,7 @@ export interface DuelRound {
 
 export function duelPool(states: Record<ItemId, ItemState>): ItemId[] {
   const known = Object.values(states)
-    .filter((s) => s.status !== 'new')
+    .filter((s) => isFactId(s.itemId) && s.status !== 'new')
     .map((s) => s.itemId);
   return known;
 }

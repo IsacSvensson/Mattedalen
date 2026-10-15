@@ -2,7 +2,8 @@ import type { FocusSet, SessionSummary } from '../../../engine';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
-import { plantIcon } from '../../../shell/components/plant';
+import { isDivisionId, isFactId, isShareId } from '../../../content/multiplication';
+import { bloomIcon, plantIcon } from '../../../shell/components/plant';
 import { h } from '../../../shell/dom';
 import { showGarden } from './garden';
 import { showSession } from './session';
@@ -10,11 +11,16 @@ import { showSession } from './session';
 /** The soft ending: no score, just what grew today. */
 export function showSessionEnd(ctx: AppContext, profile: Profile, summary: SessionSummary, focus?: FocusSet): void {
   const daily = summary.mode === 'daily';
-  const planted = summary.introduced.length;
-  const grew = summary.promoted.length;
+  // Multiplications are plants; divisions and "Dela lika" are blossoms and fruit on them.
+  const planted = summary.introduced.filter(isFactId).length;
+  const blossomed = summary.introduced.filter((id) => isDivisionId(id) || isShareId(id)).length;
+  const grew = summary.promoted.filter(isFactId).length;
+  const ripened = summary.promoted.filter(isDivisionId).length;
   const lines = [
     planted > 0 ? h('li', null, plantIcon('seed'), planted === 1 ? '1 nytt frö planterat' : `${planted} nya frön planterade`) : null,
+    blossomed > 0 ? h('li', null, bloomIcon('blossom'), blossomed === 1 ? '1 ny blomma' : `${blossomed} nya blommor`) : null,
     grew > 0 ? h('li', null, plantIcon('bush'), grew === 1 ? '1 planta växte' : `${grew} plantor växte`) : null,
+    ripened > 0 ? h('li', null, bloomIcon('fruit'), ripened === 1 ? '1 frukt mognade' : `${ripened} frukter mognade`) : null,
     h('li', null, plantIcon('sprout'), `${summary.answered} gånger vattnat`),
   ];
   const highlight = new Set([...summary.introduced, ...summary.promoted]);

@@ -16,6 +16,7 @@ import type {
   LearnerMeta,
   QuestionKind,
   Status,
+  Unit,
 } from './types';
 
 export type SessionMode = 'daily' | 'extra' | 'focus';
@@ -142,6 +143,8 @@ export class Session {
   private daysUntilCache = new Map<string, number>();
   private retries = new Map<ItemId, number>();
   private introduced: ItemId[] = [];
+  /** The lane of each item's unit (`Unit.lane`). */
+  private readonly laneOfItem = new Map<ItemId, string>();
   private supported = 0;
   private promoted = new Set<ItemId>();
   private sinceNew: number;
@@ -167,6 +170,7 @@ export class Session {
     this.priorMs = Math.max(0, earlier?.practisedMs ?? 0);
     this.priorNew = Math.max(0, earlier?.introduced ?? 0);
     this.states = new Map(pack.items.map((it) => [it.id, opts.states[it.id] ?? emptyState(it.id)]));
+    for (const unit of pack.units) for (const id of unit.itemIds) this.laneOfItem.set(id, laneOf(unit));
     this.pacing = new PacingController(config.pacing, meta.pacingGap);
     this.excluded = new Set(opts.excludedItemIds ?? []);
     this.unlocked = computeUnlocked(pack.units, this.stateRecord(), meta.unlockedUnitIds, this.relaxedUnlock(), this.excluded);
@@ -559,12 +563,14 @@ export class Session {
   private nextNewCandidate(): ItemId | undefined {
     // Unit first, then items whose twin is known, then the item's own order.
     // Compared in turn, so a pack's `order` values may be of any size.
-    let best: { id: ItemId; key: [number, number, number] } | undefined;
+    // One candidate per lane; the lanes take turns (see `Unit.lane`).
+    const best = new Map<string, { id: ItemId; key: [number, number, number] }>();
     const before = (a: readonly number[], b: readonly number[]) => {
       for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i]! < b[i]!;
       return false;
     };
-    for (const unit of sortedUnits(this.deps.pack.units)) {
+    const units = sortedUnits(this.deps.pack.units);
+    for (const unit of units) {
       // Focus practice may open items of a unit that is not unlocked yet.
       if (!this.focus && !this.unlocked.includes(unit.id)) continue;
       for (const id of unit.itemIds) {
@@ -576,10 +582,16 @@ export class Session {
         // Prefer items whose mirrored twin is already known: an easy, meaningful step.
         const pairKnown = item.pairId !== undefined && this.state(item.pairId).status !== 'new';
         const key: [number, number, number] = [unit.order, pairKnown ? 0 : 1, item.order];
-        if (!best || before(key, best.key)) best = { id, key };
+        const lane = laneOf(unit);
+        const current = best.get(lane);
+        if (!current || before(key, current.key)) best.set(lane, { id, key });
       }
     }
-    return best?.id;
+    // The lane with the fewest new items in this session; on a tie, the lanes in the order of their first unit.
+    const lanes = [...new Set(units.map(laneOf))].filter((lane) => best.has(lane));
+    const introducedIn = (lane: string) => this.introduced.filter((id) => this.laneOfItem.get(id) === lane).length;
+    const lane = lanes.reduce<string | undefined>((pick, l) => (pick === undefined || introducedIn(l) < introducedIn(pick) ? l : pick), undefined);
+    return lane === undefined ? undefined : best.get(lane)!.id;
   }
 
   private pickWarmup(known: ItemState[]): ItemId[] {
@@ -634,3 +646,6 @@ export class Session {
     return this.states.get(id) ?? emptyState(id);
   }
 }
+
+/** The lane a unit's new items come in (see `Unit.lane`). */
+const laneOf = (unit: Unit) => unit.lane ?? '';

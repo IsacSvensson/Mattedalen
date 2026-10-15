@@ -1,9 +1,11 @@
 import { atLeast, type ContentPack, type ItemId, type ItemState } from '../../../engine';
-import { focusTable, formatFact } from '../../../content/multiplication';
+import { focusTable, formatDivision, formatFact, isDivisionId, isFactId } from '../../../content/multiplication';
+import { harvestTables } from '../harvest';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { gardenGrid } from '../components/grid';
-import { plantIcon, stageFor, type Stage } from '../../../shell/components/plant';
+import { BLOOM_LABEL, bloomFor, bloomIcon, plantIcon, stageFor, type Bloom, type Stage } from '../../../shell/components/plant';
+import { DEFAULT_DIVISION_SIGN, mathNodes } from '../../../shell/divisionSign';
 import { avatarIcon } from '../../../shell/components/avatars';
 import { icon } from '../../../shell/components/icons';
 import { scene } from '../../../shell/components/scene';
@@ -36,22 +38,32 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
   const unlockedItemIds = new Set(pack.units.filter((u) => unlockedUnits.has(u.id)).flatMap((u) => u.itemIds));
   const asleep = engine.dailyDone(meta);
 
+  // The plants are the multiplications; the divisions grow on them as blossoms and fruit.
   const counts: Record<Stage, number> = { locked: 0, soil: 0, seed: 0, sprout: 0, bush: 0, tree: 0 };
-  for (const id of Object.keys(states)) counts[stageFor(states[id], unlockedItemIds.has(id))]++;
+  const blooms: Record<Bloom, number> = { none: 0, blossom: 0, kart: 0, fruit: 0 };
+  for (const id of Object.keys(states)) {
+    if (isFactId(id)) counts[stageFor(states[id], unlockedItemIds.has(id))]++;
+    else if (isDivisionId(id)) blooms[bloomFor(states[id])]++;
+  }
 
+  const sign = profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN;
   const info = h('p', { class: 'grid-info', 'aria-live': 'polite' }, ' ');
+  const harvest = harvestTables(states);
   const grid = gardenGrid({
     states,
     unlockedItemIds,
     highlight,
     masteredTables: knownTables(pack, states),
-    onSelect: ({ a, b, stage }) => {
+    harvestTables: harvest,
+    onSelect: ({ a, b, stage, bloom }) => {
       // Only facts the child has met show their answer.
-      info.textContent = ['seed', 'sprout', 'bush', 'tree'].includes(stage)
-        ? `${formatFact(a, b)} = ${a * b}`
-        : stage === 'soil'
-          ? `${formatFact(a, b)} – ett frö väntar här`
-          : `${formatFact(a, b)} – kommer senare`;
+      const fact = formatFact(a, b);
+      if (!['seed', 'sprout', 'bush', 'tree'].includes(stage)) {
+        info.textContent = stage === 'soil' ? `${fact} – ett frö väntar här` : `${fact} – kommer senare`;
+        return;
+      }
+      const division = bloom !== 'none' ? [' · ', ...mathNodes(`${formatDivision(a * b, b)} = ${a}`, sign)] : [];
+      info.replaceChildren(`${fact} = ${a * b}`, ...division);
     },
   });
 
@@ -92,7 +104,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
     h(
       'header',
       { class: 'garden-head' },
-      scene({ height: 150, sunflowers: known.size, cloud: false }),
+      scene({ height: 150, sunflowers: known.size, baskets: [...harvest].filter((t) => known.has(t)).length, cloud: false }),
       h(
         'div',
         { class: 'scene-title' },
@@ -101,6 +113,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} trädgård`),
       ),
     ),
+    await bloomNews(ctx, profile, states),
     h('div', { class: 'garden-bed' }, grid),
     known.size
       ? h('p', { class: 'sr-only' }, `Tabeller du kan: ${[...known].map((t) => `×${t}`).join(', ')}.`)
@@ -117,12 +130,47 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
           h('li', { 'aria-label': `${counts[stage]} ${STAGE_PLURAL[stage]}` }, plantIcon(stage), h('span', { 'aria-hidden': 'true' }, counts[stage])),
         ),
       ),
+      blooms.blossom + blooms.kart + blooms.fruit
+        ? h(
+            'ul',
+            { class: 'garden-counts blooms', 'aria-label': 'Delat med' },
+            (['blossom', 'kart', 'fruit'] as const).map((bloom) =>
+              h('li', { 'aria-label': `${blooms[bloom]} med ${BLOOM_LABEL[bloom]}` }, bloomIcon(bloom), h('span', { 'aria-hidden': 'true' }, blooms[bloom])),
+            ),
+          )
+        : null,
       actions,
       extras,
       canChallenge ? null : h('p', { class: 'extras-note' }, `Rekordjakten öppnar när ${CHALLENGE_MIN_FACTS} plantor blivit buskar.`),
     ),
   );
   show(ctx, view);
+}
+
+export const bloomNewsKey = (profile: Profile) => `bloomNews:${profile.id}`;
+
+/**
+ * Bushes and trees used to carry berries and flowers as decoration; now they
+ * are green until delat med grows on them. A child who already has bushes
+ * is told once, so the change is something to look forward to.
+ */
+async function bloomNews(ctx: AppContext, profile: Profile, states: Record<ItemId, ItemState>): Promise<HTMLElement | null> {
+  const hasBush = Object.values(states).some((s) => isFactId(s.itemId) && atLeast(s.status, 'fluent'));
+  if (!hasBush || (await ctx.store.getSetting<boolean>(bloomNewsKey(profile)))) return null;
+  await ctx.store.setSetting(bloomNewsKey(profile), true);
+  const card: HTMLElement = h(
+    'aside',
+    { class: 'bloom-news card', role: 'status' },
+    h('span', { class: 'bloom-news-icons', 'aria-hidden': 'true' }, bloomIcon('blossom'), bloomIcon('fruit', 'tree')),
+    h(
+      'div',
+      { class: 'bloom-news-text' },
+      h('p', { class: 'bloom-news-title' }, 'Nyhet i trädgården!'),
+      h('p', null, 'Nu kan dina buskar och träd få blommor och frukt! Dela lika med frukten, så mognar den.'),
+      h('button', { class: 'soft-button', type: 'button', onclick: () => card.remove() }, 'Vad roligt!'),
+    ),
+  );
+  return card;
 }
 
 /** Tables (e.g. 7 for ×7) where every fact is at least fluent. */

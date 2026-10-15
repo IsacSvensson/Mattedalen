@@ -31,6 +31,11 @@ test('the garden fits beside its buttons, with readable squares', async ({ page 
   // The whole bed and the main button are on screen without scrolling.
   const bed = (await page.locator('.garden-bed').boundingBox())!;
   expect(bed.y + bed.height).toBeLessThanOrEqual(360);
+  // The news about blossoms and fruit (once, for a child with bushes) is a note at the bottom until it is read.
+  const news = (await page.locator('.bloom-news').boundingBox())!;
+  expect(news.y + news.height).toBeLessThanOrEqual(360);
+  await page.getByRole('button', { name: 'Vad roligt!' }).click();
+  await expect(page.locator('.bloom-news')).toHaveCount(0);
   const button = (await page.getByRole('button', { name: 'Vattna trädgården' }).boundingBox())!;
   expect(button.y + button.height).toBeLessThanOrEqual(360);
   expect(button.x).toBeGreaterThan(bed.x + bed.width);

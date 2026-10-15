@@ -15,6 +15,29 @@ export const STAGE_LABEL: Record<Stage, string> = {
 
 export const STAGE_ORDER: Stage[] = ['locked', 'soil', 'seed', 'sprout', 'bush', 'tree'];
 
+/**
+ * Delat med on a bush or tree (docs/PLAN-DELAT-MED.md): blossoms while the
+ * square's division is practised, small green fruit (kart) once it sits,
+ * ripe fruit once it is automatic. Drawn on top of the plant, so the plant
+ * still says only how well the multiplication is known.
+ */
+export type Bloom = 'none' | 'blossom' | 'kart' | 'fruit';
+
+export const BLOOM_LABEL: Record<Exclude<Bloom, 'none'>, string> = {
+  blossom: 'blommor',
+  kart: 'kart',
+  fruit: 'mogen frukt',
+};
+
+export function bloomFor(state: ItemState | undefined): Bloom {
+  if (!state || state.status === 'new') return 'none';
+  if (state.status === 'learning') return 'blossom';
+  return state.status === 'fluent' ? 'kart' : 'fruit';
+}
+
+/** Blossoms and fruit grow only on a bush or a tree. */
+export const bears = (stage: Stage) => stage === 'bush' || stage === 'tree';
+
 export function stageFor(state: ItemState | undefined, unitUnlocked: boolean): Stage {
   if (!state || state.status === 'new') return unitUnlocked ? 'soil' : 'locked';
   if (state.status === 'learning') return state.box === 0 ? 'seed' : 'sprout';
@@ -55,22 +78,66 @@ export function plantSprite(): SVGSVGElement {
       symbol(
         'bush',
         s('path', { d: 'M11 31a6.5 6.5 0 0 1-1.5-11.5A9 9 0 0 1 20 9a9 9 0 0 1 10.5 10.5A6.5 6.5 0 0 1 29 31Z', fill: 'var(--leaf-light)', ...outline }),
-        s('circle', { cx: 15.5, cy: 22, r: 2.2, fill: 'var(--berry)' }),
-        s('circle', { cx: 23, cy: 17, r: 2.2, fill: 'var(--berry)' }),
-        s('circle', { cx: 25, cy: 25, r: 2.2, fill: 'var(--berry)' }),
+        s('path', { d: 'M15 22.5c2 1.5 4 1.5 6 0M22 16c1.2.8 2.5.8 3.5 0', stroke: 'var(--leaf)', 'stroke-width': 1.6, 'stroke-linecap': 'round', fill: 'none' }),
       ),
       symbol(
         'tree',
         s('path', { d: 'M18 33V22h4v11Z', fill: 'var(--trunk)', ...outline }),
         s('circle', { cx: 20, cy: 15, r: 10.5, fill: 'var(--leaf)', ...outline }),
-        s('circle', { cx: 15.5, cy: 13, r: 2.2, fill: 'var(--flower)', ...outline, 'stroke-width': 1.2 }),
-        s('circle', { cx: 24, cy: 11, r: 2.2, fill: 'var(--flower)', ...outline, 'stroke-width': 1.2 }),
-        s('circle', { cx: 23, cy: 19, r: 2.2, fill: 'var(--flower)', ...outline, 'stroke-width': 1.2 }),
+        s('path', { d: 'M14 15c1.5 1.2 3.5 1.2 5 0M21 10c1.2 1 3 1 4.2 0', stroke: '#3f7f3a', 'stroke-width': 1.6, 'stroke-linecap': 'round', fill: 'none' }),
       ),
+      ...(['bush', 'tree'] as const).flatMap((on) => (['blossom', 'kart', 'fruit'] as const).map((bloom) => bloomSymbol(on, bloom))),
     ),
   );
 }
 
-export function plantIcon(stage: Stage, extraClass = ''): SVGSVGElement {
-  return s('svg', { class: `plant plant-${stage} ${extraClass}`, viewBox: '0 0 40 40', 'aria-hidden': 'true' }, s('use', { href: `#plant-${stage}` }));
+/** Where blossoms and fruit sit: on the bush's leaves, or in the tree's crown. */
+const SPOTS: Record<'bush' | 'tree', [number, number][]> = {
+  bush: [
+    [15, 22],
+    [23.5, 16.5],
+    [25, 25],
+  ],
+  tree: [
+    [15, 13],
+    [24, 10.5],
+    [23.5, 19],
+  ],
+};
+
+/** Shapes differ, not just colours: five-petalled white flowers, small green balls, red berries or apples with a stem. */
+function bloomSymbol(on: 'bush' | 'tree', bloom: Exclude<Bloom, 'none'>): SVGElement {
+  const ink = { stroke: 'var(--ink)', 'stroke-width': 1.1, 'stroke-linejoin': 'round' };
+  const one = ([x, y]: [number, number]): SVGElement[] => {
+    if (bloom === 'blossom') {
+      const petals = [0, 72, 144, 216, 288].map((deg) => {
+        const r = (deg * Math.PI) / 180;
+        return s('circle', { cx: x + Math.sin(r) * 1.7, cy: y - Math.cos(r) * 1.7, r: 1.45, fill: 'var(--blossom)', ...ink, 'stroke-width': 0.8 });
+      });
+      return [...petals, s('circle', { cx: x, cy: y, r: 1.1, fill: 'var(--flower)' })];
+    }
+    if (bloom === 'kart') return [s('circle', { cx: x, cy: y, r: 2, fill: 'var(--kart)', ...ink, 'stroke-width': 1.3 })];
+    if (on === 'bush') return [s('circle', { cx: x, cy: y, r: 2.5, fill: 'var(--berry)', ...ink }), s('circle', { cx: x - 0.8, cy: y - 0.8, r: 0.6, fill: '#fff', opacity: 0.8 })];
+    return [
+      s('path', { d: `M${x} ${y - 2.2}l.8-1.6`, stroke: 'var(--trunk)', 'stroke-width': 1.1, 'stroke-linecap': 'round' }),
+      s('circle', { cx: x, cy: y, r: 2.7, fill: 'var(--apple)', ...ink }),
+      s('circle', { cx: x - 0.9, cy: y - 0.9, r: 0.65, fill: '#fff', opacity: 0.8 }),
+    ];
+  };
+  return s('symbol', { id: `bloom-${on}-${bloom}`, viewBox: '0 0 40 40' }, ...SPOTS[on].flatMap(one));
+}
+
+export function plantIcon(stage: Stage, extraClass = '', bloom: Bloom = 'none'): SVGSVGElement {
+  const shown = bears(stage) && bloom !== 'none';
+  return s(
+    'svg',
+    { class: `plant plant-${stage}${shown ? ` bloom-${bloom}` : ''} ${extraClass}`, viewBox: '0 0 40 40', 'aria-hidden': 'true' },
+    s('use', { href: `#plant-${stage}` }),
+    shown ? s('use', { href: `#bloom-${stage}-${bloom}`, class: 'bloom' }) : null,
+  );
+}
+
+/** A bush with blossoms, kart or fruit: delat med as the child sees it. */
+export function bloomIcon(bloom: Exclude<Bloom, 'none'>, on: 'bush' | 'tree' = 'bush'): SVGSVGElement {
+  return plantIcon(on, '', bloom);
 }

@@ -34,6 +34,16 @@ export function formatDivision(dividend: number, divisor: number): string {
 /** The division in square a × b: ab ÷ b = a. */
 export const divisionInSquare = (a: number, b: number) => divisionId(a * b, b);
 
+/** The divisions in the squares of one table (row t and column t of the bed): 7 ÷ 1 … 70 ÷ 10 and 7 ÷ 7 … 70 ÷ 7. */
+export function divisionsOfTable(t: number): ItemId[] {
+  const ids = new Set<ItemId>();
+  for (let n = MIN_FACTOR; n <= MAX_FACTOR; n++) {
+    ids.add(divisionInSquare(t, n));
+    ids.add(divisionInSquare(n, t));
+  }
+  return [...ids];
+}
+
 /** The division units follow the multiplication units: a family belongs to the first table it is in. */
 export const DIVISION_UNIT_DEFS = [
   { id: 'd10', title: 'Dela med 10', of: 'u10' },

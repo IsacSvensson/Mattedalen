@@ -42,6 +42,11 @@ förkunskaper som kanter i en graf. Se ordningen i
   använder det, så att 21 ÷ 3 kommer först när både 3 × 7 och 7 × 3 sitter. Har
   faktan väl introducerats stannar den, vad som än händer med de andra. Delar med
   sådana fakta ingår inte i startkollen.
+- **Spår för nya fakta.** En del kan ha ett spår (`lane`). Delar i olika spår
+  turas om att ge nya fakta i ett pass: det spår som fått minst nya i passet går
+  före, och vid lika går spåret med den första delen före. Delat med i Trädgården
+  har ett eget spår. Ett barn som redan kan många tabeller får därför nästa
+  tabell och de öppna divisionerna omväxlande, inte alla divisioner först.
 - **Uteslutna fakta.** Ett pass kan få `excludedItemIds`. De frågas aldrig, inte
   ens som nya eller förfallna, och räknas inte heller när delar öppnas. En del
   där hälften hålls utanför (pilotens otränade halva) kan därför ändå öppna det

@@ -10,7 +10,7 @@ import { gardenParentSection } from './parent';
 import { gardenIsOpen } from './isOpen';
 import { CLOSED_TEXT } from './opening';
 import { knownTables, showGarden } from './screens/garden';
-import { gardenMood, miniBed, MOOD_TEXT, type PlaceMood } from './valley';
+import { gardenMood, miniBedPlants, MOOD_TEXT, type PlaceMood } from './valley';
 
 /** Trädgården: the multiplication table as a garden bed. */
 export const tradgarden: Place = {
@@ -41,7 +41,7 @@ async function gardenOnMap(ctx: AppContext, profile: Profile): Promise<PlaceOnMa
     art: h(
       'span',
       { class: 'mini-bed', 'aria-hidden': 'true' },
-      miniBed(states).map((stage) => h('span', { class: 'mini-cell' }, plantIcon(stage))),
+      miniBedPlants(states).map(({ stage, bloom }) => h('span', { class: 'mini-cell' }, plantIcon(stage, '', bloom))),
       open && mood === 'new' ? seedPacket() : null,
     ),
     nameIcon: mood === 'asleep' ? icon('moon') : null,

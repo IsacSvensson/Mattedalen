@@ -81,6 +81,12 @@ export interface Unit {
   kind?: 'fact' | 'understanding';
   /** Status rules for this unit's items, over the pack's (e.g. no time limits for understanding). */
   status?: Partial<StatusConfig>;
+  /**
+   * Units in different lanes take turns introducing new items within a
+   * session, so one lane never waits until the other is done. Units without
+   * a lane share the default lane.
+   */
+  lane?: string;
 }
 
 /**

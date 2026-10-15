@@ -128,6 +128,28 @@ describe('the engine with delat med', () => {
     for (const id of newDivisions) for (const r of pack.items.find((it) => it.id === id)!.requires!) expect(atLeast(states[r]!.status, 'fluent'), `${id} needs ${r}`).toBe(true);
   });
 
+  it('takes turns between new multiplications and new divisions, multiplications first', () => {
+    const engine = createEngine({ pack, clock, rng: seededRng(3) });
+    const states = engine.initialStates();
+    // A child who already knows ×10, ×2, ×5 and ×1, and "Dela lika": ×4 and many divisions are open.
+    for (const u of ['u10', 'u2', 'u5', 'u1', 'delalika']) for (const id of pack.units.find((x) => x.id === u)!.itemIds) states[id] = fluent(id);
+    const meta = { ...engine.initialMeta(), unlockedUnitIds: engine.unlockedUnits(states, engine.initialMeta()) };
+    expect(meta.unlockedUnitIds).toEqual(expect.arrayContaining(['u4', 'd10']));
+    const session = engine.startSession({ states, meta, mode: 'daily' });
+    const introduced: string[] = [];
+    for (let i = 0; i < 120 && !session.isOver(); i++) {
+      const q = session.next();
+      if (!q) break;
+      if (q.kind === 'new') introduced.push(q.item.id);
+      session.submit(q.item.answer, 1500);
+      clock.advance(8000);
+    }
+    expect(introduced.length).toBeGreaterThanOrEqual(2);
+    // ×4 does not wait for every open division, nor the divisions for ×4.
+    expect(isDivisionId(introduced[0]!)).toBe(false);
+    expect(introduced.slice(0, 2).some(isDivisionId)).toBe(true);
+  });
+
   it('keeps the start check to the multiplications', () => {
     const placement = new Placement(pack, seededRng(2));
     const asked = new Set<string>();

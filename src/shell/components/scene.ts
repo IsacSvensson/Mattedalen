@@ -1,4 +1,5 @@
 import { h, s } from '../dom';
+import { icon } from './icons';
 
 /**
  * The landscape band at the top of the child's screens: sky, sun (or moon),
@@ -47,11 +48,13 @@ export interface SceneOptions {
   height: number;
   /** One sunflower per table the child knows (0–10). */
   sunflowers?: number;
+  /** How many of the sunflowers have a harvest basket at their foot (tables whose delat med the child knows). */
+  baskets?: number;
   sun?: boolean;
   cloud?: boolean;
 }
 
-export function scene({ height, sunflowers = 0, sun = true, cloud = true }: SceneOptions): HTMLElement {
+export function scene({ height, sunflowers = 0, baskets = 0, sun = true, cloud = true }: SceneOptions): HTMLElement {
   const hills = s('svg', { class: 'scene-hills', viewBox: `0 0 100 ${height}`, preserveAspectRatio: 'none', 'aria-hidden': 'true' });
   hills.innerHTML =
     `<path d="${hillPath(backHill, height)}" class="hill-back"/>` +
@@ -69,7 +72,12 @@ export function scene({ height, sunflowers = 0, sun = true, cloud = true }: Scen
     el.style.top = `calc(${(frontHill(x) * 100).toFixed(2)}% + 0.18 * var(--sf-head) - ${tall.toFixed(3)} * var(--sf-head))`;
     el.style.width = 'var(--sf-head)';
     el.style.height = `calc(${tall.toFixed(3)} * var(--sf-head))`;
-    return el;
+    if (i >= baskets) return [el];
+    // A harvest basket at the flower's foot, on the hill.
+    const basket = icon('basket', 'scene-basket');
+    basket.style.left = `${x * 100}%`;
+    basket.style.top = `${(frontHill(x) * 100).toFixed(2)}%`;
+    return [el, basket];
   });
 
   const sky = s('svg', { class: 'scene-sky', viewBox: '0 0 120 60', 'aria-hidden': 'true' });
@@ -81,5 +89,5 @@ export function scene({ height, sunflowers = 0, sun = true, cloud = true }: Scen
           .join('')}</g><path class="moon" d="M100 37a14 14 0 1 1-12-24 11 11 0 0 0 12 24Z"/>`
       : '');
 
-  return h('div', { class: 'scene', style: `height:${height}px` }, sky, hills, flowers);
+  return h('div', { class: 'scene', style: `height:${height}px` }, sky, hills, flowers.flat());
 }

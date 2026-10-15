@@ -9,6 +9,9 @@ export function factId(a: number, b: number): ItemId {
   return `${a}x${b}`;
 }
 
+/** A multiplication fact (`3x7`), not a division or a "Dela lika" task. */
+export const isFactId = (id: ItemId) => /^\d+x\d+$/.test(id);
+
 export function parseFactId(id: ItemId): { a: number; b: number } {
   const m = /^(\d+)x(\d+)$/.exec(id);
   if (!m) throw new Error(`Not a multiplication fact id: ${id}`);

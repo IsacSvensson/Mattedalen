@@ -1,5 +1,19 @@
 import { isStruggling, systemClock, type EngineConfig, type ItemState } from '../../engine';
-import { factId, formatFact, isDivisionId, MAX_FACTOR, MIN_FACTOR, parseFactId, strategyFor } from '../../content/multiplication';
+import {
+  divisionStrategy,
+  factId,
+  formatDivision,
+  formatFact,
+  isDivisionId,
+  isFactId,
+  MAX_FACTOR,
+  MIN_FACTOR,
+  parseDivisionId,
+  parseFactId,
+  SHARE_TASKS,
+  shareId,
+  strategyFor,
+} from '../../content/multiplication';
 import { DEFAULT_DIVISION_SIGN, DIVISION_SIGNS, type DivisionSign } from '../../shell/divisionSign';
 import type { Profile } from '../../storage';
 import type { AppContext } from '../../shell/app';
@@ -130,10 +144,11 @@ function openingNote(save: SaveProfile): HTMLElement {
  * ("räknestigen"): grown-ups can use the same idea when talking about it.
  */
 function hardList(states: Record<string, ItemState>, config: EngineConfig, today: string): HTMLElement {
+  // Multiplications and divisions, by the size of the number (a "Dela lika" task is never timed, so never hard this way).
   const hard = Object.values(states)
-    .filter((s) => isStruggling(s, today, config.support))
-    .map((s) => parseFactId(s.itemId))
-    .sort((x, y) => x.a * x.b - y.a * y.b || x.a - y.a);
+    .filter((s) => (isFactId(s.itemId) || isDivisionId(s.itemId)) && isStruggling(s, today, config.support))
+    .map((s) => hardFact(s.itemId))
+    .sort((x, y) => x.size - y.size || x.text.localeCompare(y.text));
   if (hard.length === 0) return h('p', { class: 'muted' }, 'Inga just nu.');
   return h(
     'div',
@@ -146,9 +161,33 @@ function hardList(states: Record<string, ItemState>, config: EngineConfig, today
     h(
       'ul',
       { class: 'hard-list' },
-      hard.map(({ a, b }) => h('li', null, h('strong', null, `${formatFact(a, b)} = ${a * b}`), ' – ', strategyFor(a, b).text)),
+      hard.map(({ text, strategy }) => h('li', null, h('strong', null, text), ' – ', strategy)),
     ),
   );
+}
+
+function hardFact(id: string): { text: string; strategy: string; size: number } {
+  if (isDivisionId(id)) {
+    const { dividend, divisor, quotient } = parseDivisionId(id);
+    return { text: `${formatDivision(dividend, divisor)} = ${quotient}`, strategy: divisionStrategy(quotient, divisor).text, size: dividend };
+  }
+  const { a, b } = parseFactId(id);
+  return { text: `${formatFact(a, b)} = ${a * b}`, strategy: strategyFor(a, b).text, size: a * b };
+}
+
+/** How a fact is written for grown-ups: 3 × 7, 21 ÷ 3, or a "Dela lika" task in short. */
+function factLabel(id: string): string {
+  if (isFactId(id)) {
+    const { a, b } = parseFactId(id);
+    return formatFact(a, b);
+  }
+  if (isDivisionId(id)) {
+    const { dividend, divisor } = parseDivisionId(id);
+    return formatDivision(dividend, divisor);
+  }
+  const task = SHARE_TASKS.find((t) => shareId(t) === id);
+  if (!task) return id;
+  return task.kind === 'share' ? `Dela lika: ${task.total} i ${task.by} korgar` : `Dela lika: ${task.total}, ${task.by} i varje korg`;
 }
 
 function heatmap(states: Record<string, ItemState>, stats: Map<string, FactStats>): HTMLElement {
@@ -174,10 +213,7 @@ function describeFact(a: number, b: number, s: ItemState | undefined, st: FactSt
 }
 
 function confusionList(states: Record<string, ItemState>): HTMLElement {
-  const list = topConfusions(states, 8, (id) => {
-    const { a, b } = parseFactId(id);
-    return formatFact(a, b);
-  });
+  const list = topConfusions(states, 8, factLabel);
   if (!list.length) return h('p', { class: 'muted' }, 'Inga förväxlingar ännu.');
   return h(
     'ol',

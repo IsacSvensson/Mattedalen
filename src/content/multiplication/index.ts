@@ -1,7 +1,7 @@
 import type { ContentPack, FocusSet, Item, Unit } from '../../engine';
 import { buildDivisions, buildShareItems, DIVISION_UNIT_DEFS, divisionDistractors, isDivisionId, isShareId, parseDivisionId, SHARE_TASKS, shareId } from './division';
 import { multiplicationDistractors } from './distractors';
-import { buildFacts, MAX_FACTOR, MIN_FACTOR, parseFactId, UNIT_DEFS } from './facts';
+import { buildFacts, isFactId, MAX_FACTOR, MIN_FACTOR, parseFactId, UNIT_DEFS } from './facts';
 import { presentMultiplication } from './present';
 
 export * from './facts';
@@ -35,7 +35,7 @@ export function focusTable(id: string): number | null {
  */
 export function tableFocusSets(items: readonly Item[]): FocusSet[] {
   const sets: FocusSet[] = [];
-  const facts = items.filter((it) => /^\d+x\d+$/.test(it.id));
+  const facts = items.filter((it) => isFactId(it.id));
   for (let t = MIN_FACTOR; t <= MAX_FACTOR; t++) {
     const itemIds = facts
       .filter((it) => {
@@ -57,6 +57,13 @@ export interface PackOptions {
    */
   division?: boolean;
 }
+
+/**
+ * Delat med has its own lane: new divisions and new multiplications take
+ * turns, so a child who already knows many tables does not get every open
+ * division before the next table.
+ */
+export const DIVISION_LANE = 'division';
 
 /** "Dela lika" opens when about one family sits (2 of the 19 facts of ×10). */
 export const SHARE_OPENS_AT = 0.1;
@@ -133,6 +140,7 @@ function divisionUnits(items: readonly Item[]): Unit[] {
     title: 'Dela lika',
     order: 0,
     kind: 'understanding',
+    lane: DIVISION_LANE,
     itemIds: SHARE_TASKS.map(shareId),
     // Understanding: judged on right answers on different days, never on time.
     status: { fluentRtMs: Number.MAX_SAFE_INTEGER, automaticRtMs: Number.MAX_SAFE_INTEGER, automaticFormats: ['choice', 'free'] },
@@ -143,6 +151,7 @@ function divisionUnits(items: readonly Item[]): Unit[] {
       id: def.id,
       title: def.title,
       order: 0,
+      lane: DIVISION_LANE,
       itemIds: items
         .filter((it) => it.unitId === def.id)
         .sort((x, y) => x.order - y.order)

@@ -63,6 +63,18 @@ inget hämtas utifrån.
   bygger rektangeln åt barnet. När den är rätt visas strategin som färgade delar,
   till exempel 8 × 7 som två 4 × 7-halvor eller 9 × 6 som 10 × 6 där sista raden
   är struken. Sedan svarar barnet själv (”Nu du!”).
+- **Delat med** (se `docs/PLAN-DELAT-MED.md`). Divisionen i ruta *a × b* är
+  *ab ÷ b = a*. Den växer på plantan som blommor (övas), kart (flytande) och mogen
+  frukt (automatiserad), men bara på buske och träd (`Bloom` i
+  `shell/components/plant.ts`). Plantan visar fortfarande bara gånger. En ny
+  division byggs som en rektangel där radens längd är given: barnet drar nedåt
+  (eller trycker, eller använder piltangenterna och Enter) tills prickarna räcker
+  (`components/divisionBuilder.ts`). ”Dela lika” delas ut som bär i korgar, genom
+  att dra eller trycka (`components/shareBuilder.ts`). Utdelningen finns också
+  bredvid frågan och i hjälpkortet. En division barnet har svårt med byggs först
+  och besvaras sedan: alltid där räknestig saknas, annars varannan gång. Är hela
+  delat med i en tabell flytande får tabellens siffra och solros en skördekorg.
+  Barn som redan har buskar får en gång nyheten om blommor och frukt.
 - **Svarsformat.** Fakta under inlärning frågas med flerval: fyra stora knappar,
   och tangenterna 1–4 fungerar. Flytande fakta frågas med fritt svar på en stor
   sifferknappsats (siffror, sudda och bock, eller tangentbordet). Fritt svar krävs för
