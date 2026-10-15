@@ -961,6 +961,11 @@ h1:focus {
   color: var(--ink);
 }
 
+/* Cards stay paper at night, so their text stays ink (the night's light text is for the sky). */
+.asleep .card {
+  color: var(--ink);
+}
+
 .asleep .garden-bed {
   filter: saturate(0.75) brightness(0.92);
 }

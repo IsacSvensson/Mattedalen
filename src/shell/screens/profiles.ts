@@ -169,7 +169,7 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
     ),
     first
       ? parentLink(ctx, 'Har barnet spelat på en annan enhet? Hämta i föräldravyn')
-      : h('button', { class: 'link-button', type: 'button', onclick: () => void showProfiles(ctx) }, 'Tillbaka'),
+      : h('button', { class: 'link-button', type: 'button', 'data-back': '', onclick: () => void showProfiles(ctx) }, 'Tillbaka'),
   );
   show(ctx, view);
 }

@@ -74,6 +74,10 @@ kommer då till dalens karta. Därifrån går barnet till platserna.
   passet är klart. Inget vissnar, och inga dagar räknas.
 - **Uppläsning.** Har barnet uppläsning påslagen finns en knapp som läser upp
   platsernas lägen.
+- **Bakåtknappen** (telefonens eller webbläsarens) går ett steg tillbaka i
+  stället för att stänga appen: den trycker på skärmens egen väg tillbaka, som
+  hemknappen i ett pass eller djuret som går till dalen (`backTarget` i
+  `src/shell/app.ts`). Först på ”Vem spelar?” stängs appen.
 - **Navigering.** Varje plats på kartan leder dit. Den orangea knappen föreslår
   den plats som inte vilar och har mest att repetera i dag, vid lika den första
   (”Gå till trädgården”, ”Gå till bäcken”).
