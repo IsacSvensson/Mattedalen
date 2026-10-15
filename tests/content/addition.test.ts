@@ -269,3 +269,30 @@ describe('answers and the start check', () => {
     expect(buildFacts().map((i) => i.id)).toEqual(buildFacts().map((i) => i.id));
   });
 });
+
+describe('new facts at the brook', () => {
+  it('come part by part, in the order of the parts, though the facts are ordered by their sum', () => {
+    const clock = new ManualClock(Date.UTC(2026, 1, 2, 12));
+    const engine = createEngine({ pack, clock, rng: seededRng(4) });
+    const states = engine.initialStates();
+    const known = (id: string): ItemState => ({ ...emptyState(id), status: 'fluent', box: 3, dueDay: '2026-03-01' });
+    for (const unit of pack.units) {
+      if (['ettmer', 'noll', 'sma', 'tio', 'tiokamrater'].includes(unit.id)) for (const id of unit.itemIds) states[id] = known(id);
+    }
+    // Doubles nearly done: 8 + 8 and 9 + 9 are left, while Inom 10 is open too.
+    const doubles = pack.units.find((u) => u.id === 'dubblor')!.itemIds;
+    doubles.slice(0, -4).forEach((id) => (states[id] = known(id)));
+    const session = engine.startSession({ states, meta: engine.initialMeta() });
+    const introduced: string[] = [];
+    for (let q = session.next(); q; q = session.next()) {
+      if (q.kind === 'new') introduced.push(q.item.id);
+      clock.advance(5000);
+      session.submit(q.item.answer, 1500);
+    }
+    const unitOrder = (id: string) => pack.units.find((u) => u.itemIds.includes(id))!.order;
+    expect(introduced.length).toBeGreaterThan(1);
+    expect(doubles).toContain(introduced[0]);
+    const orders = introduced.map(unitOrder);
+    expect(orders).toEqual([...orders].sort((a, b) => a - b));
+  });
+});

@@ -44,8 +44,14 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    // Single-page app: every navigation inside the scope gets the cached shell.
-    event.respondWith(caches.match(SHELL, { cacheName: CACHE }).then((cached) => cached ?? fetch(request)));
+    // Single-page app: a navigation gets the cached shell, unless it opens one
+    // of the app's own files (e.g. the licence texts in a new tab).
+    event.respondWith(
+      caches
+        .match(request, { cacheName: CACHE, ignoreSearch: true })
+        .then((file) => file ?? caches.match(SHELL, { cacheName: CACHE }))
+        .then((cached) => cached ?? fetch(request)),
+    );
     return;
   }
   event.respondWith(

@@ -1,5 +1,5 @@
 import qrcode from 'qrcode-generator';
-import { computeUnlocked, type ContentPack, type Engine, type ItemState, type LearnerMeta } from '../engine';
+import { computeUnlocked, sortedUnits, type ContentPack, type Engine, type ItemState, type LearnerMeta, type Unit } from '../engine';
 import { DEFAULT_SETTINGS, levelOf, stateFromLevel, type Profile, type QrSnapshot, type QrTransfer } from '../storage';
 
 /** Snapshot of a profile for the QR code (levels follow the pack's item order). */
@@ -30,11 +30,21 @@ export function progressFromSnapshot(snap: Pick<QrSnapshot, 'levels'>, engine: E
   const states = Object.fromEntries(
     pack.items.map((it, i) => [it.id, stateFromLevel(it.id, snap.levels[i] ?? 0, today, config.leitner.intervalsDays)]),
   );
-  const meta = { ...engine.initialMeta(), unlockedUnitIds: computeUnlocked(pack.units, states, []) };
-  // A unit that has started keeps the units before it open as well.
-  const started = pack.units.filter((u) => u.itemIds.some((id) => states[id]?.status !== 'new'));
-  const lastStarted = Math.max(-1, ...started.map((u) => u.order));
-  meta.unlockedUnitIds = pack.units.filter((u) => u.order <= lastStarted || meta.unlockedUnitIds.includes(u.id)).map((u) => u.id);
+  // A unit that has started stays open, and so do the units it builds on (its
+  // prerequisites, and theirs), but not every unit that merely comes earlier:
+  // in a knowledge graph an earlier unit may still be waiting for its own.
+  const sorted = sortedUnits(pack.units);
+  const byId = new Map(pack.units.map((u) => [u.id, u]));
+  const reached = new Set<string>();
+  const keep = (unit: Unit | undefined): void => {
+    if (!unit || reached.has(unit.id)) return;
+    reached.add(unit.id);
+    const rule = unit.unlockRule;
+    if (rule.kind === 'previous') keep(sorted[sorted.indexOf(unit) - 1]);
+    else if (rule.kind === 'after') rule.requires.forEach((id) => keep(byId.get(id)));
+  };
+  for (const unit of pack.units) if (unit.itemIds.some((id) => states[id]?.status !== 'new')) keep(unit);
+  const meta = { ...engine.initialMeta(), unlockedUnitIds: computeUnlocked(pack.units, states, [...reached]) };
   return { states, meta };
 }
 

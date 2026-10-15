@@ -74,3 +74,22 @@ test('shows how to add the app to the home screen', async ({ page }) => {
   await expect(page.locator('.profile-tile', { hasText: 'Alva' })).toBeVisible();
   await expect(page.locator('.install-banner')).toHaveCount(0);
 });
+
+test('the licence link shows the licence texts, also offline', async ({ page, context }) => {
+  await page.goto('/');
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  await context.setOffline(true);
+
+  await createProfile(page, 'Alva', 'brook');
+  await page.getByRole('button', { name: 'Börja från början' }).click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await openParent(page);
+  const [tab] = await Promise.all([context.waitForEvent('page'), page.getByRole('link', { name: 'Licenser för ingående delar' }).click()]);
+  await expect(tab.locator('body')).toContainText('Open Font License');
+  await expect(tab.getByRole('heading', { name: 'Vem spelar?' })).toHaveCount(0);
+});

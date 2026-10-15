@@ -169,6 +169,24 @@ describe('a child with every place (MD1)', () => {
     for (const it of addition.items) expect(levelOf(restored.states[it.id]), it.id).toBe(levelOf(brook[it.id]));
   });
 
+  it('opens a started unit and what it builds on, not every earlier unit', () => {
+    const unitOf = (id: string) => addition.units.find((u) => u.id === id)!;
+    const states = Object.fromEntries(addition.items.map((it) => [it.id, emptyState(it.id)])) as Record<string, ItemState>;
+    const set = (id: string, status: ItemState['status']) => (states[id] = { ...emptyState(id), status, box: 3 });
+    for (const u of ['ettmer', 'sma', 'dubblor']) for (const id of unitOf(u).itemIds) set(id, 'fluent');
+    // Tiokamrater only half fluent: Inom 10, which builds on it, is still closed.
+    const pairs = unitOf('tiokamrater').itemIds;
+    pairs.forEach((id, i) => set(id, i < pairs.length / 2 ? 'fluent' : 'learning'));
+    // A started fact in Nära dubblor, which comes after Inom 10 but builds on Dubblor.
+    set(unitOf('naradubblor').itemIds[0]!, 'learning');
+    const engine = createEngine({ pack: addition, clock: new ManualClock(0), rng: seededRng(1) });
+    const block = decodeTransfer(encodeTransfer(transferOf(profile, [{ pack: addition, states }]))).packs[0]!;
+    const { meta } = progressFromSnapshot(block, engine, '2026-06-01');
+    expect(meta.unlockedUnitIds).toEqual(expect.arrayContaining(['ettmer', 'noll', 'sma', 'tio', 'tiokamrater', 'dubblor', 'naradubblor']));
+    expect(meta.unlockedUnitIds).not.toContain('inom10');
+    expect(meta.unlockedUnitIds).not.toContain('overtio');
+  });
+
   it('reads a code from Gångerträdgården as a child with the garden, open', () => {
     const text = encodeSnapshot(snapshotOf(profile, pack, midway()));
     const t = decodeTransfer(text);

@@ -62,8 +62,8 @@ export const UNIT_DEFS = [
   { id: 'dubblor', title: 'Dubblor och hälften', requires: ['sma'] },
   { id: 'inom10', title: 'Inom 10', requires: ['tiokamrater'] },
   { id: 'naradubblor', title: 'Nära dubblor', requires: ['dubblor'] },
-  { id: 'overtio', title: 'Över tiotalet', requires: ['tiokamrater', 'tio'] },
   { id: 'vagen', title: 'Likhetstecknet', requires: ['tiokamrater'], understanding: true },
+  { id: 'overtio', title: 'Över tiotalet', requires: ['tiokamrater', 'tio'] },
 ] as const;
 
 export type UnitId = (typeof UNIT_DEFS)[number]['id'];

@@ -32,6 +32,31 @@ async function storedSetting<T>(page: Page, key: string): Promise<T> {
   }, key);
 }
 
+test("a new child's first day at the brook gets the whole day's time", async ({ page }) => {
+  await createProfile(page, 'Alva', 'brook');
+  const plans = await page.evaluate(async () => {
+    const db: IDBDatabase = await new Promise((r) => {
+      const q = indexedDB.open('mattedalen');
+      q.onsuccess = () => r(q.result);
+    });
+    const keys: IDBValidKey[] = await new Promise((r) => {
+      const q = db.transaction('settings').objectStore('settings').getAllKeys();
+      q.onsuccess = () => r(q.result);
+    });
+    const plans = await Promise.all(
+      keys
+        .filter((k) => String(k).startsWith('dayPlan:'))
+        .map((k) => new Promise((r) => {
+          const q = db.transaction('settings').objectStore('settings').get(k);
+          q.onsuccess = () => r(q.result);
+        })),
+    );
+    db.close();
+    return plans;
+  });
+  expect(plans).toEqual([{ day: '2026-02-02', total: 12, minutes: { addition: 12 } }]);
+});
+
 test('a new child starts at the brook; the garden rests until a grown-up opens it', async ({ page }) => {
   await createProfile(page, 'Alva', 'brook');
   await page.getByRole('button', { name: 'Börja från början' }).click();

@@ -350,6 +350,25 @@ describe('an interrupted daily session', () => {
     expect(done.meta.today?.practisedMs).toBe(60_000);
   });
 
+  it('finishes the day when a part starts with the time already used up', () => {
+    const { engine } = setup({ session: { durationMs: 60_000 } });
+    const meta = { ...engine.initialMeta(), today: { day: TODAY, practisedMs: 60_000, introduced: 2 } };
+    const s = engine.startSession({ states: engine.initialStates(), meta });
+    expect(s.next()).toBeNull();
+    const summary = s.summary();
+    expect(summary.answered).toBe(0);
+    expect(summary.completed).toBe(true);
+    expect(summary.meta.lastSessionDay).toBe(TODAY);
+    expect(summary.meta.sessionsCompleted).toBe(1);
+  });
+
+  it('does not finish the day when nothing was asked and no time was used', () => {
+    const { engine } = setup({ session: { durationMs: 60_000 } });
+    const s = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta() });
+    s.end();
+    expect(s.summary().meta.lastSessionDay).toBeNull();
+  });
+
   it('does not give extra new items for starting again', () => {
     const { engine, clock } = setup({ pacing: { bootstrapNew: 2, maxNewPerSession: 2 } });
     const s1 = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta() });

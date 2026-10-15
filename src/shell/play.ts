@@ -80,6 +80,9 @@ export async function loadProgress(profile: Profile, deps: GameDeps, engine = en
  * answer, so nothing is lost if the tab is closed mid-session.
  */
 export class PlayController {
+  /** The latest answer's saves, so finishing never lands before them. */
+  private saving: Promise<void> = Promise.resolve();
+
   private constructor(
     readonly profile: Profile,
     readonly engine: Engine,
@@ -120,19 +123,29 @@ export class PlayController {
   async answer(given: string, rtMs: number): Promise<Feedback> {
     const fb = this.session.submit(given, rtMs);
     const { store, pack } = this.deps;
-    await store.appendAttempt({ ...fb.attempt, profileId: this.profile.id, packId: pack.id });
-    // Item states are saved right away; learner meta (day done, pacing) only at
-    // the end – except today's practised time, so it adds up even if the app
-    // is simply closed in the middle of a session.
-    await this.saveProgress({ ...this.metaBefore, today: this.session.summary().meta.today });
+    this.saving = (async () => {
+      await store.appendAttempt({ ...fb.attempt, profileId: this.profile.id, packId: pack.id });
+      // Item states are saved right away; learner meta (day done, pacing) only at
+      // the end – except today's practised time, so it adds up even if the app
+      // is simply closed in the middle of a session.
+      await this.saveProgress({ ...this.metaBefore, today: this.session.summary().meta.today });
+    })();
+    await this.saving;
     return fb;
   }
 
   /** Ends the session (normally after the time is up, or early if the child leaves). */
   async finish(): Promise<SessionSummary> {
     if (!this.session.isOver()) this.session.end();
+    // The child may leave while the last answer is still being saved; that save
+    // holds the meta from before the session, so it must not land last.
+    await this.saving.catch(() => undefined);
     const summary = this.session.summary();
-    if (summary.answered === 0) return summary;
+    if (summary.answered === 0) {
+      // Nothing asked, but today's time was already full: the day is done now.
+      if (summary.meta.lastSessionDay !== this.metaBefore.lastSessionDay) await this.saveProgress(summary.meta);
+      return summary;
+    }
     const { store, pack } = this.deps;
     await this.saveProgress(summary.meta);
     await store.saveSession({

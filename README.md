@@ -72,7 +72,8 @@ kommer då till dalens karta. Därifrån går barnet till platserna.
 - **Uppläsning.** Har barnet uppläsning påslagen finns en knapp som läser upp
   platsernas lägen.
 - **Navigering.** Varje plats på kartan leder dit. Den orangea knappen föreslår
-  den första platsen som inte vilar (”Gå till trädgården”, ”Gå till bäcken”).
+  den plats som inte vilar och har mest att repetera i dag, vid lika den första
+  (”Gå till trädgården”, ”Gå till bäcken”).
   Barnets djur står vid den plats barnet besökte senast. Djuret i platsens
   sidhuvud leder tillbaka till dalen (”Till dalen”), och spelare byts i dalen. En
   ny spelare börjar vid bäcken, där startkollen erbjuds.

@@ -339,7 +339,9 @@ export class Session {
   summary(): SessionSummary {
     const accuracy = this.answered ? this.correctCount / this.answered : null;
     const prevEma = this.meta.accuracyEma;
-    const countsAsDaily = this.mode === 'daily' && this.answered > 0 && this.completed();
+    // A part that starts with the day's time already used up (the app was closed
+    // after the last answer) still finishes the day, though nothing is asked.
+    const countsAsDaily = this.mode === 'daily' && (this.answered > 0 || this.priorMs > 0) && this.completed();
     const meta: LearnerMeta = {
       ...this.meta,
       pacingGap: this.pacing.gap,
@@ -555,7 +557,13 @@ export class Session {
   }
 
   private nextNewCandidate(): ItemId | undefined {
-    let best: { id: ItemId; score: number } | undefined;
+    // Unit first, then items whose twin is known, then the item's own order.
+    // Compared in turn, so a pack's `order` values may be of any size.
+    let best: { id: ItemId; key: [number, number, number] } | undefined;
+    const before = (a: readonly number[], b: readonly number[]) => {
+      for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i]! < b[i]!;
+      return false;
+    };
     for (const unit of sortedUnits(this.deps.pack.units)) {
       // Focus practice may open items of a unit that is not unlocked yet.
       if (!this.focus && !this.unlocked.includes(unit.id)) continue;
@@ -565,8 +573,8 @@ export class Session {
         const item = this.item(id);
         // Prefer items whose mirrored twin is already known: an easy, meaningful step.
         const pairKnown = item.pairId !== undefined && this.state(item.pairId).status !== 'new';
-        const score = unit.order * 1000 + item.order - (pairKnown ? 500 : 0);
-        if (!best || score < best.score) best = { id, score };
+        const key: [number, number, number] = [unit.order, pairKnown ? 0 : 1, item.order];
+        if (!best || before(key, best.key)) best = { id, key };
       }
     }
     return best?.id;

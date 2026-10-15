@@ -26,10 +26,13 @@ familjen ligger i samma del. Varje fakta har en tvilling åt andra hållet:
 | 6 | Dubblor och hälften | 16 | små summor |
 | 7 | Inom 10 | 24 | tiokamrater |
 | 8 | Nära dubblor | 24 | dubblor |
-| 9 | Över tiotalet | 48 | tiokamrater, tio och några |
-| 10 | Likhetstecknet (Vågen, förståelse) | 24 | tiokamrater |
+| 9 | Likhetstecknet (Vågen, förståelse) | 24 | tiokamrater |
+| 10 | Över tiotalet | 48 | tiokamrater, tio och några |
 
-En del öppnas när cirka 80 % av varje förkunskap är flytande. En familj hamnar i
+En del öppnas när cirka 80 % av varje förkunskap är flytande. Nya fakta kommer
+del för del i den här ordningen bland de delar som är öppna. Vågen står före Över
+tiotalet så att likhetstecknet i nya former kommer tidigt och inte först efter
+alla 48 fakta över tiotalet. En familj hamnar i
 den första del som passar: noll, ett mer, tio, dubblor, tiokamrater, små summor
 (summa högst 5), nära dubblor, inom 10 och sist över tiotalet.
 

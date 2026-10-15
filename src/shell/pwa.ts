@@ -29,13 +29,17 @@ export const APP_BUILD: string = typeof __APP_BUILD__ === 'string' ? __APP_BUILD
  */
 export async function registerServiceWorker(): Promise<void> {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
-  const hadController = !!navigator.serviceWorker.controller;
+  let hadController = !!navigator.serviceWorker.controller;
   try {
     const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
     registration = reg;
-    // The first install takes control without a reload; later versions reload the page.
+    // The first install takes control without a reload; later versions reload
+    // the page (also in a page that was opened before the first install).
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!hadController) return;
+      if (!hadController && !waiting) {
+        hadController = true;
+        return;
+      }
       if (busy) reloadWhenFree = true;
       else location.reload();
     });

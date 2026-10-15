@@ -14,18 +14,13 @@ import { showProfiles } from './profiles';
  * The valley: the child's start page and the map of the places. Only places
  * that exist are drawn; the rest of the valley is landscape until a place is
  * built, so nothing waits to be unlocked. The child chooses which place to go
- * to; the main button suggests the first one that is not resting.
+ * to; the main button suggests the awake place with the most due today (ties:
+ * the first on the map).
  */
 export async function showValley(ctx: AppContext, profile: Profile): Promise<void> {
-  const maps = await Promise.all(
-    ctx.places.map(async (place) => ({ place, map: await place.onMap(ctx, profile), open: await placeIsOpen(place, ctx, profile) })),
-  );
+  const maps = await placeMaps(ctx, profile);
   // The day's plan: at most two places, the time shared after what is due.
-  const plan = await ensureDayPlan(
-    ctx,
-    profile,
-    maps.filter((m) => m.open).map((m) => ({ id: m.place.pack.id, due: m.map.due })),
-  );
+  const plan = await ensureDayPlan(ctx, profile, openLoads(maps));
   for (const m of maps) {
     if (m.open && plan.minutes[m.place.pack.id] === undefined) {
       // Open, but not one of today's places: it rests today.
@@ -103,6 +98,20 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
     ),
   );
   show(ctx, view);
+}
+
+const placeMaps = (ctx: AppContext, profile: Profile) =>
+  Promise.all(ctx.places.map(async (place) => ({ place, map: await place.onMap(ctx, profile), open: await placeIsOpen(place, ctx, profile) })));
+
+const openLoads = (maps: Awaited<ReturnType<typeof placeMaps>>): PlaceLoad[] =>
+  maps.filter((m) => m.open).map((m) => ({ id: m.place.pack.id, due: m.map.due }));
+
+/**
+ * Makes today's plan without showing the valley, for a way into a place that
+ * does not pass it (a new child goes straight to their first place).
+ */
+export async function prepareDayPlan(ctx: AppContext, profile: Profile): Promise<DayPlan> {
+  return ensureDayPlan(ctx, profile, openLoads(await placeMaps(ctx, profile)));
 }
 
 /**

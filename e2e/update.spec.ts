@@ -94,3 +94,20 @@ test('grown-ups can look for an update and see the version', async ({ page }) =>
   await look.click();
   await expect.poll(async () => (await cacheNames(page)).join()).toBe('mattedalen-cccccccccccc');
 });
+
+test('a page open since the very first visit also starts the new version', async ({ page }) => {
+  // No reload after the first install: the worker took over the open page by itself.
+  await page.goto('/');
+  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  await page.evaluate(() => ((window as unknown as { before: boolean }).before = true));
+
+  publish('dddddddddddd');
+  await lookForUpdate(page);
+  const update = page.getByRole('button', { name: 'Ny version finns – uppdatera' });
+  await expect(update).toBeVisible();
+  await update.click();
+  await expect.poll(async () => (await cacheNames(page)).join()).toBe('mattedalen-dddddddddddd');
+  // The page was reloaded into the new version, and the button is gone.
+  await expect.poll(() => page.evaluate(() => (window as unknown as { before?: boolean }).before ?? false).catch(() => true)).toBe(false);
+  await expect(page.locator('#update-bar')).toHaveCount(0);
+});

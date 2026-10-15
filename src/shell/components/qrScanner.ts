@@ -68,12 +68,15 @@ export function cameraScanner(onResult: (text: string) => void, onError: (messag
     try {
       if (!navigator.mediaDevices?.getUserMedia) throw new Error('no camera');
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-      if (stopped) return stop();
+      // The screen may have changed while the camera was being allowed.
+      if (stopped || !el.isConnected) return stop();
       video.srcObject = stream;
       await video.play();
       const detect = await createDetector();
       const tick = async () => {
         if (stopped) return;
+        // Gone from the page (another screen, or a new scan): turn the camera off.
+        if (!el.isConnected) return stop();
         try {
           const text = video.readyState >= 2 ? await detect(video) : null;
           if (text && !stopped) {

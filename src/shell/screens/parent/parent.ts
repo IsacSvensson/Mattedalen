@@ -14,7 +14,7 @@ import {
 } from '../../../storage';
 import { show, type AppContext } from '../../app';
 import { choose, toast } from '../../components/modal';
-import { cameraScanner, decodeImageFile } from '../../components/qrScanner';
+import { cameraScanner, decodeImageFile, type Scanner } from '../../components/qrScanner';
 import { h } from '../../dom';
 import { formatDay, minutesPerDay } from '../../stats';
 import { engineFor, loadProgress } from '../../play';
@@ -285,17 +285,20 @@ function importSection(ctx: AppContext, legacy: HTMLElement): HTMLElement {
       if (file) await importJson(ctx, await file.text());
     },
   });
+  let scanner: Scanner | undefined;
   const startScan = () => {
-    const scanner = cameraScanner(
+    scanner?.stop();
+    const current = cameraScanner(
       (text) => {
         scanArea.replaceChildren();
         void importQr(ctx, text);
       },
       (message) => scanArea.replaceChildren(h('p', { class: 'notice' }, message)),
     );
+    scanner = current;
     scanArea.replaceChildren(
-      scanner.el,
-      h('button', { class: 'link-button', type: 'button', onclick: () => (scanner.stop(), scanArea.replaceChildren()) }, 'Avbryt skanning'),
+      current.el,
+      h('button', { class: 'link-button', type: 'button', onclick: () => (current.stop(), scanArea.replaceChildren()) }, 'Avbryt skanning'),
     );
   };
   return h(

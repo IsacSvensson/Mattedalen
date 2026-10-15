@@ -5,7 +5,7 @@ import { choose } from '../components/modal';
 import { installGuide, isStandalone } from '../pwa';
 import { showPinGate } from './parent/pinGate';
 import { placeIsOpen } from '../place';
-import { showValley } from './valley';
+import { prepareDayPlan, showValley } from './valley';
 import { AVATAR_KEYS, avatarIcon, avatarName } from '../components/avatars';
 import { icon } from '../components/icons';
 import { plantIcon } from '../components/plant';
@@ -138,7 +138,10 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
     await ctx.store.saveProfile(profile);
     await ctx.store.setSetting('lastProfileId', profile.id);
     // A new child starts at the first place that is open to them (the brook:
-    // the garden opens later), where the place's start check is offered.
+    // the garden opens later), where the place's start check is offered. The
+    // day's plan is made first, as the valley would, so that place gets the
+    // whole day's time and not an even share with a place that is not open.
+    await prepareDayPlan(ctx, profile);
     for (const place of ctx.places) {
       if (await placeIsOpen(place, ctx, profile)) return place.open(ctx, profile);
     }

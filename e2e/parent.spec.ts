@@ -130,3 +130,44 @@ test('a profile can be deleted', async ({ page }) => {
   await expect(page.getByText('Alva är borttagen')).toBeVisible();
   await expect(page.locator('.parent-tab')).toHaveCount(1);
 });
+
+test('the camera is turned off when a scan is replaced or the parent view is left', async ({ page }) => {
+  // A stand-in camera that counts its live tracks.
+  await page.addInitScript(() => {
+    const live = new Set<MediaStreamTrack>();
+    (window as unknown as { liveTracks: () => number }).liveTracks = () => live.size;
+    navigator.mediaDevices.getUserMedia = async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      canvas.getContext('2d')!.fillRect(0, 0, 64, 64);
+      const stream = canvas.captureStream();
+      for (const track of stream.getTracks()) {
+        live.add(track);
+        const stop = track.stop.bind(track);
+        track.stop = () => {
+          live.delete(track);
+          stop();
+        };
+      }
+      return stream;
+    };
+  });
+  await page.reload();
+  const liveTracks = () => page.evaluate(() => (window as unknown as { liveTracks: () => number }).liveTracks());
+
+  await createProfile(page, 'Alva', 'brook');
+  await page.getByRole('button', { name: 'Börja från början' }).click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await openParent(page);
+  await page.getByRole('button', { name: 'Skanna QR-kod' }).click();
+  await expect.poll(liveTracks).toBe(1);
+  // Scanning again replaces the first camera instead of adding a second.
+  await page.getByRole('button', { name: 'Skanna QR-kod' }).click();
+  await expect.poll(liveTracks).toBe(1);
+  // Leaving the parent view mid-scan turns the camera off.
+  await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+  await page.clock.runFor(1000);
+  await expect.poll(liveTracks).toBe(0);
+});

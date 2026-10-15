@@ -12,6 +12,12 @@ export async function gardenIsOpen(ctx: AppContext, profile: Profile, gardenStat
   if (Object.values(states).some((s) => s.status !== 'new')) return true;
   const brookPlace = ctx.places.find((p) => p.pack.id === 'addition');
   const brook = brookPlace ? { pack: brookPlace.pack, states: (await loadProgress(profile, { store: ctx.store, pack: brookPlace.pack })).states } : undefined;
-  return gardenOpens({ gardenStates: states, brook, openedByAdult: false });
+  if (!gardenOpens({ gardenStates: states, brook, openedByAdult: false })) return false;
+  // Once open, the garden stays open: a fact that slips back at the brook must
+  // not close a place the child could already go to.
+  const stored = (await ctx.store.getProfile(profile.id)) ?? profile;
+  await ctx.store.saveProfile({ ...stored, settings: { ...stored.settings, gardenOpen: true } });
+  profile.settings.gardenOpen = true;
+  return true;
 }
 

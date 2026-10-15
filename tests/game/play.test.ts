@@ -67,6 +67,38 @@ describe('PlayController', () => {
     expect(meta.lastSessionDay).toBeNull();
   });
 
+  it('finishes the day if the app was closed right after the last answer', async () => {
+    const { clock, store, deps } = setup();
+    const play = await PlayController.start(profile, deps);
+    for (let q = play.question(); q; q = play.question()) {
+      clock.advance(6000);
+      await play.answer(q.item.answer, 2000);
+    }
+    // The app is closed here: finish() never runs.
+    expect((await store.load('p1', 'multiplication'))!.meta.lastSessionDay).toBeNull();
+    clock.advance(60_000);
+    const again = await PlayController.start(profile, deps);
+    expect(again.question()).toBeNull();
+    const summary = await again.finish();
+    expect(summary.answered).toBe(0);
+    const { meta } = await loadProgress(profile, deps);
+    expect(meta.lastSessionDay).toBe('2026-02-02');
+    expect(meta.sessionsCompleted).toBe(1);
+  });
+
+  it('keeps the end-of-session meta when the child leaves while an answer is being saved', async () => {
+    const { clock, deps } = setup();
+    const play = await PlayController.start(profile, deps);
+    const q = play.question()!;
+    clock.advance(5000);
+    const answering = play.answer(q.item.answer, 2000);
+    const summary = await play.finish();
+    await answering;
+    const { meta } = await loadProgress(profile, deps);
+    expect(summary.meta.accuracyEma).toBe(1);
+    expect(meta.accuracyEma).toBe(1);
+  });
+
   it('offers short, optional extra practice without new facts', async () => {
     const { clock, deps } = setup();
     await playAll(await PlayController.start(profile, deps), clock);
