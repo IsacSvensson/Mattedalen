@@ -84,14 +84,14 @@ automatik är målet. Tal upp till 100, inga negativa tal och inga svar över 10
 |---|---|---|---|
 | Hela tiotal | 3 tiotal = 30, 70 = __ tiotal, 40 + 30, 90 − 20 | Bäcken: Tio och några | fakta |
 | Tiotal och ental | 47 = 4 tiotal och 7 ental, vilket tal är 6 tiotal och 3 ental? | Hela tiotal | förståelse |
-| Hoppa tio | 34 + 10, 58 − 20, 26 + 30 | Tiotal och ental | fakta |
 | Ental utan att gå över | 34 + 5, 47 − 3 (som 4 + 5 och 7 − 3) | Tiotal och ental | fakta |
-| Till nästa tiotal | 37 + __ = 40, 60 − __ = 56 | Bäcken: Tiokamrater, och Ental utan att gå över | fakta |
-| Över tiotalet | 47 + 8, 52 − 6, 35 + 7, 60 − 6 | Till nästa tiotal, och Bäcken: Över tiotalet | fakta |
-| Dubbla och halvera | dubbla 14, dubbla 28, hälften av 70, hälften av 56 | Hela tiotal, och Bäcken: Dubblor och hälften | fakta |
-| Tvåsiffrigt plus tvåsiffrigt | 34 + 25, 35 + 14, 28 + 28 | Hoppa tio, och Över tiotalet | fakta |
+| Till nästa tiotal | 37 + __ = 40, 60 − 4 | Tiotal och ental, och Bäcken: Tiokamrater | fakta |
+| Över tiotalet | 47 + 8, 52 − 6, 35 + 7 | Ental utan att gå över och Till nästa tiotal, och Bäcken: Över tiotalet | fakta |
+| Hoppa tio | 34 + 10, 58 − 20, 26 + 30 | Tiotal och ental | fakta |
+| Dubbla och halvera | dubbla 14, dubbla 28, hälften av 70, hälften av 56 | Tiotal och ental, och Bäcken: Dubblor och hälften | fakta |
+| Tvåsiffrigt plus tvåsiffrigt | 34 + 25, 35 + 14, 47 + 36 | Hoppa tio, och Över tiotalet | fakta |
 
-Några hundra fakta; det exakta antalet bestäms i H3. Uppgifterna väljs så att de täcker det som räknestigarna i
+224 uppgifter (H3, se [STIGEN.md](STIGEN.md)). Uppgifterna väljs så att de täcker det som räknestigarna i
 trädgården använder, och lite till. Det är inte hela talområdet, eftersom 100 ×
 100 kombinationer varken går att träna eller behövs.
 
@@ -229,7 +229,7 @@ med dubblorna, villkoret för att Trädgården ska öppna.
 |---|---|
 | H1. Trädgårdens ordning **(klar)** | Lika stora grupper, ×2 först, tabellerna som graf, Trädgården öppnar efter dubblor. Fungerar utan Stigen. |
 | H2. Motorn **(klar)** | `heldUnitIds`, tester och simulering. |
-| H3. Stigens innehåll | Paketet: delar, fakta, former, räknestigar, felsvar. Bakom en flagga. |
+| H3. Stigens innehåll **(klar)** | Paketet: delar, fakta, former, räknestigar, felsvar. Bakom en flagga. |
 | H4. Stigen som plats | Skärmen med stolpar och lyktor, bilderna (stavar och kuber, tom tallinje, hundraplatta), kartan, föräldradelen. |
 | H5. Kopplingen | Tabellerna väntar på Stigen, raden i trädgården, startkoll, koll, QR och säkerhetskopior. Stigen slås på. |
 | H6. Verifiering | e2e, skärmbilder i alla storlekar, dokumentation. |
@@ -273,6 +273,32 @@ direkt, även om Stigen dröjer.
   mot 99 utan väntan.
 - **Kopplingen** till skalet (`GameDeps`) görs i H5, när Stigen finns att räkna
   från.
+
+## Fynd från H3
+
+- **Paketet** är `src/content/hundred` med 224 uppgifter i åtta delar. Det
+  beskrivs i [STIGEN.md](STIGEN.md). Ingen plats använder det än: det är flaggan
+  tills Stigen slås på i H5.
+- **Färre uppgifter än först tänkt.** Med drygt 300 uppgifter kom ett
+  genomsnittligt simulerat barn till Över tiotalet först efter 16 veckor. Med 224
+  och den nya grafen tar det ungefär tio veckor. Varje steg i trädgårdens
+  räknestigar finns fortfarande med, och ett test kontrollerar det.
+- **Grafen ändrades lite mot förslaget.** Till nästa tiotal kräver inte
+  längre Ental utan att gå över, men Över tiotalet kräver båda, eftersom dess
+  räknestigar använder båda (47 + 3, sedan 50 + 5). Dubbla och halvera kräver
+  Tiotal och ental, eftersom 14 + 14 är 10 + 10 och 4 + 4.
+- **Hoppa tio** står efter Över tiotalet i ordningen. Den öppnar lika tidigt,
+  men dess nya uppgifter kommer medan barnet väntar på att Över tiotalet ska
+  öppna. **Dubbla och halvera** har ett eget spår, så att trädgårdens ×5 och ×4
+  inte väntar på bron över tiotalet.
+- **60 − __ = 56** blev `60 − 4 = __` med formen `4 + __ = 60`. En form måste ha
+  samma svar som uppgiften. Vägen upp är egna uppgifter: `37 + __ = 40`, med
+  formen `40 − 37 = __`.
+- **Ett svagt barn** når inte Över tiotalet på ett halvår i simuleringen, och
+  modellen räknar inte med att 40 + 30 bygger på 4 + 3. I H5 behöver vi se hur
+  länge trädgårdens tabeller då väntar. En vuxen kan öppna en tabell.
+- **Subtraktion med två tvåsiffriga tal** (75 − 23) finns inte med, som i planen.
+  Den kan bli en egen del senare.
 
 ## Avgjorda frågor
 
