@@ -566,7 +566,8 @@ h1:focus {
   position: relative;
   box-sizing: content-box;
   width: 100vw;
-  margin-left: calc(50% - 50vw);
+  /* Out to both edges, so it also sits right in a centring flex column. */
+  margin-inline: calc(50% - 50vw);
   padding-top: env(safe-area-inset-top);
   background: var(--sky);
   border-bottom: var(--stroke) solid var(--hill-front-line);
@@ -681,7 +682,8 @@ h1:focus {
 .scene-title {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 16px);
-  left: max(16px, calc(50vw - 364px));
+  /* In the head, which can be wider than the column (the garden beside its controls): line up with the column. */
+  left: max(16px, calc(50% - 364px));
   right: clamp(64px, 18vw, 92px);
   display: flex;
   align-items: center;
@@ -1001,7 +1003,7 @@ h1:focus {
 /* The landscape band, here inside the map's frame instead of edge to edge. */
 .valley-map .scene {
   width: 100%;
-  margin-left: 0;
+  margin-inline: 0;
   padding-top: 0;
   border-bottom: none;
 }
@@ -1814,8 +1816,8 @@ h1:focus {
 .scene-controls {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 14px);
-  left: max(16px, calc(50vw - 364px));
-  right: max(16px, calc(50vw - 364px));
+  left: max(16px, calc(50% - 364px));
+  right: max(16px, calc(50% - 364px));
   display: flex;
   align-items: center;
   justify-content: space-between;
