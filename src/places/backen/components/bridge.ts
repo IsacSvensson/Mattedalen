@@ -37,8 +37,11 @@ export function bridge(stones: BridgeStone[], size: 'large' | 'mini' = 'large'):
     `<rect class="br-water" x="0" y="${height - 26}" width="${width}" height="26" rx="10"/>` +
     `<path class="br-bank" d="M0 ${height - 30} H14 V${height} H0 Z"/>` +
     `<path class="br-bank" d="M${width - 14} ${height - 30} H${width} V${height} H${width - 14} Z"/>` +
-    // The arch the blocks rest on, from bank to bank.
-    (mini ? `<path class="br-arch" d="M14 ${height - 28} Q${width / 2} ${top - arch * 2 + blockH * 2} ${width - 14} ${height - 28}"/>` : '');
+    // The bridge's shade on the water, then the arch the blocks rest on, from bank to bank.
+    (mini
+      ? `<ellipse class="br-shade" cx="${width / 2}" cy="${height - 12}" rx="${width * 0.34}" ry="6"/>` +
+        `<path class="br-arch" d="M14 ${height - 28} Q${width / 2} ${top - arch * 2 + blockH * 2} ${width - 14} ${height - 28}"/>`
+      : '');
   stones.forEach((stone, i) => {
     if (!stone.open) return;
     const x = 12 + gap + i * (w + gap);

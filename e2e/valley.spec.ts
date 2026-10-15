@@ -13,7 +13,9 @@ test('a child chooses their name and lands in the valley, and walks to the garde
   await expect(page.getByRole('button', { name: 'Trädgården. Nya frön väntar i trädgården.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Bäcken. Nya stenar väntar vid bäcken.' })).toBeVisible();
   await expect(page.locator('.valley-walker')).toHaveClass(/at-place-garden/);
-  await expect(page.locator('.mini-cell .plant')).toHaveCount(0);
+  // Nothing planted yet: dug earth, and the new seeds wait in their packet.
+  await expect(page.locator('.mini-cell .plant:not(.plant-soil)')).toHaveCount(0);
+  await expect(page.locator('.place-garden .seed-packet')).toHaveCount(1);
 
   // The place itself leads to the garden …
   await page.getByRole('button', { name: /^Trädgården\./ }).click();
@@ -53,7 +55,8 @@ test('the valley shows what the child knows: plants in the bed and a sunflower p
   await expect(thirsty).toBeVisible();
   await expect(page.locator('.place-status')).toHaveText(['Trädgården är törstig.', 'Nya stenar väntar vid bäcken.']);
   // The furthest grown plants first: one tree, then bushes.
-  await expect(page.locator('.mini-cell .plant')).toHaveCount(8);
+  await expect(page.locator('.mini-cell .plant:not(.plant-soil)')).toHaveCount(8);
+  await expect(page.locator('.place-garden .seed-packet')).toHaveCount(0);
   await expect(page.locator('.mini-cell').first().locator('.plant-tree')).toHaveCount(1);
   await expect(page.locator('.mini-cell .plant-bush')).toHaveCount(7);
   // ×10 is known: one sunflower on the hill, said in words as well.

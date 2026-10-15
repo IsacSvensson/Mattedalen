@@ -1,8 +1,10 @@
 /*
  * Mattedalen – visual rules (see README, "Principer", and docs/TRADGARDEN.md, "Designregler"):
- * - One outline for every surface: var(--outline).
- * - Only things you can tap have the "press" shadow, always the same depth.
- *   Passive surfaces (cards, the garden bed, chips) have no shadow.
+ * - A warm picture book, not a UI kit: 2 px outer outlines (var(--outline)),
+ *   thinner lines inside drawings, shadows toned in the colour they fall on.
+ * - Only things you can tap have the "press" edge, always the same depth, in a
+ *   darker tone of the thing itself (--press-tone). Passive surfaces (cards,
+ *   the garden bed, chips) have no press edge; cards may lie softly on the page.
  * - Three radii: --r-card (cards), --r-tile (tiles, answers), pill/round (buttons).
  * - Fredoka for headings and numbers, Nunito for text.
  */
@@ -77,6 +79,24 @@
   --night-hill-front: #2f4b3a;
   --water: #7cc4e4;
   --path: #f6e3bd;
+  --path-stone: #ecd1a0;
+  --path-edge: #c9a46c;
+  /* toned shadows and lines in the landscape (never the plain ink) */
+  --hill-back-line: #5f9a46;
+  --hill-front-line: #3f7434;
+  --hill-shade: #4f9a46;
+  --water-shade: #3f86ad;
+  --ground-shadow: rgba(47, 82, 35, 0.35);
+  /* wood: signs, the garden bed, keys */
+  --plank: #c48a52;
+  --plank-light: #d9a46b;
+  --plank-edge: #8a5a30;
+  --soil: #4f3420;
+  --birch: #f6e4c4;
+  --birch-edge: #c79e6c;
+  /* paper: cards and help */
+  --paper: #fffaf0;
+  --paper-edge: rgba(122, 86, 52, 0.18);
   /* stepping stones (a tool) and bridge blocks (knowledge) look different */
   --stepping-stone: #ddd6c8;
   --bridge-block: #c99a62;
@@ -98,9 +118,14 @@
   --i-green: #8fd06c;
 
   /* rules */
-  --stroke: 2.5px;
+  --stroke: 2px;
   --outline: var(--stroke) solid var(--ink);
-  --press: 0 4px 0 var(--ink);
+  /* the press edge: a darker tone of the button itself, not black */
+  --press-depth: 3px;
+  --press-tone: #c3a27c;
+  /* use as: box-shadow: 0 var(--press-depth) 0 var(--press-tone), so a button's own tone applies */
+  /* a card lying on the page: soft and warm */
+  --lie: 0 2px 0 var(--paper-edge), 0 8px 18px -10px rgba(90, 60, 30, 0.35);
   --r-card: 24px;
   --r-tile: 20px;
   --tap: 72px;
@@ -194,7 +219,7 @@ h1:focus {
 .icon path {
   fill: var(--f, none);
   stroke: var(--ink);
-  stroke-width: 2;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -205,15 +230,15 @@ h1:focus {
 .soft-button,
 .icon-button {
   border: var(--outline);
-  box-shadow: var(--press);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   transition: transform 0.08s, box-shadow 0.08s;
 }
 
 .big-button:active:not(:disabled),
 .soft-button:active:not(:disabled),
 .icon-button:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 0 0 var(--ink);
+  transform: translateY(var(--press-depth));
+  box-shadow: 0 0 0 var(--press-tone);
 }
 
 .big-button:disabled,
@@ -221,7 +246,7 @@ h1:focus {
 .icon-button:disabled {
   opacity: 0.5;
   box-shadow: none;
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   cursor: default;
 }
 
@@ -244,6 +269,7 @@ h1:focus {
 }
 
 .big-button {
+  --press-tone: #9b3a1b;
   min-height: var(--tap);
   min-width: 220px;
   padding: 0 32px;
@@ -310,9 +336,10 @@ h1:focus {
 /* --- passive surfaces: outline, no shadow ------------------------------- */
 
 .card {
-  background: var(--card);
+  background: var(--paper);
   border: var(--outline);
   border-radius: var(--r-card);
+  box-shadow: var(--lie);
 }
 
 .notice {
@@ -339,7 +366,7 @@ h1:focus {
 .avatar-art .a-light,
 .avatar-art .a-white {
   stroke: var(--ink);
-  stroke-width: 2.5;
+  stroke-width: 2.2;
   stroke-linejoin: round;
 }
 
@@ -367,7 +394,7 @@ h1:focus {
 .avatar-art .a-line {
   fill: none;
   stroke: var(--ink);
-  stroke-width: 2.5;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -405,7 +432,7 @@ h1:focus {
   border-radius: var(--r-tile);
   border: var(--outline);
   background: var(--card);
-  box-shadow: var(--press);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -415,7 +442,7 @@ h1:focus {
 }
 
 .profile-tile:active {
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   box-shadow: none;
 }
 
@@ -542,7 +569,7 @@ h1:focus {
   margin-left: calc(50% - 50vw);
   padding-top: env(safe-area-inset-top);
   background: var(--sky);
-  border-bottom: var(--outline);
+  border-bottom: var(--stroke) solid var(--hill-front-line);
   overflow: hidden;
   flex: none;
 }
@@ -556,18 +583,27 @@ h1:focus {
 }
 
 .scene-hills path {
-  stroke: var(--ink);
   stroke-width: var(--stroke);
   vector-effect: non-scaling-stroke;
   stroke-linejoin: round;
 }
 
+/* Hills are drawn in their own darker green, not in ink. */
 .hill-back {
   fill: var(--hill-back);
+  stroke: var(--hill-back-line);
 }
 
 .hill-front {
   fill: var(--hill-front);
+  stroke: var(--hill-front-line);
+}
+
+/* The foot of the front hill lies in its own soft shade. */
+.scene-hills .hill-shade {
+  fill: var(--hill-shade);
+  stroke: none;
+  opacity: 0.55;
 }
 
 .scene-sky {
@@ -581,19 +617,19 @@ h1:focus {
 
 .scene-sky .cloud {
   fill: #fff;
-  stroke: var(--ink);
+  stroke: #8fb4c4;
   stroke-width: var(--stroke);
   stroke-linejoin: round;
 }
 
 .scene-sky .sun circle {
   fill: var(--sun);
-  stroke: var(--ink);
+  stroke: #c98a1e;
   stroke-width: var(--stroke);
 }
 
 .scene-sky .sun path {
-  stroke: var(--ink);
+  stroke: #d9962a;
   stroke-width: var(--stroke);
   stroke-linecap: round;
 }
@@ -614,14 +650,14 @@ h1:focus {
 
 .sf-petal {
   fill: var(--petal);
-  stroke: var(--ink);
-  stroke-width: 1.8;
+  stroke: #a8741c;
+  stroke-width: 1.3;
 }
 
 .sf-centre {
   fill: var(--sunflower-center);
   stroke: var(--ink);
-  stroke-width: 2;
+  stroke-width: 1.6;
 }
 
 .sf-seed {
@@ -629,15 +665,15 @@ h1:focus {
 }
 
 .sf-stem {
-  stroke: var(--ink);
-  stroke-width: 3;
+  stroke: #2f5e2a;
+  stroke-width: 2.6;
   stroke-linecap: round;
 }
 
 .sf-leaf {
   fill: var(--leaf);
-  stroke: var(--ink);
-  stroke-width: 1.8;
+  stroke: #2f5e2a;
+  stroke-width: 1.4;
   stroke-linejoin: round;
 }
 
@@ -675,12 +711,12 @@ h1:focus {
 .avatar-button {
   width: 56px;
   height: 56px;
-  box-shadow: var(--press);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   cursor: pointer;
 }
 
 .avatar-button:active {
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   box-shadow: none;
 }
 
@@ -696,7 +732,13 @@ h1:focus {
   padding: 8px;
   border-radius: var(--r-card);
   border: var(--outline);
-  background: var(--wood);
+  /* Boards with a little grain, lying softly on the page. */
+  background:
+    repeating-linear-gradient(0deg, transparent 0 5px, rgba(90, 56, 26, 0.13) 5px 6px, transparent 6px 13px),
+    linear-gradient(#b98250, var(--wood) 60%, #a6713f);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 230, 190, 0.35),
+    0 10px 16px -10px rgba(90, 60, 30, 0.5);
 }
 
 .garden-grid {
@@ -861,7 +903,7 @@ h1:focus {
   border: var(--outline);
   border-radius: var(--r-tile);
   background: var(--card);
-  box-shadow: var(--press);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   font-size: 0.95rem;
   font-weight: 800;
   transition: transform 0.08s, box-shadow 0.08s;
@@ -873,14 +915,14 @@ h1:focus {
 }
 
 .extra-tile:active:not(:disabled) {
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   box-shadow: none;
 }
 
 .extra-tile:disabled {
   opacity: 0.5;
   box-shadow: none;
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   cursor: default;
 }
 
@@ -889,6 +931,9 @@ h1:focus {
   --sky: var(--night);
   --hill-back: var(--night-hill-back);
   --hill-front: var(--night-hill-front);
+  --hill-back-line: #22382c;
+  --hill-front-line: #1b2d23;
+  --hill-shade: #263f31;
   background: linear-gradient(var(--night-soft), #2a3a57 60%);
   color: #f6efe0;
   max-width: none;
@@ -966,6 +1011,11 @@ h1:focus {
   right: 8px;
 }
 
+/* On the map the ground goes on below the hills, so no shade band there. */
+.valley-map .hill-shade {
+  display: none;
+}
+
 /* The hills' outline runs down their sides; keep those ends outside the frame. */
 .valley-map .scene-hills {
   left: -4px;
@@ -993,8 +1043,8 @@ h1:focus {
 }
 
 .brook-bank {
-  stroke: var(--ink);
-  stroke-width: 27px;
+  stroke: var(--water-shade);
+  stroke-width: 26px;
 }
 
 .brook-water {
@@ -1002,10 +1052,29 @@ h1:focus {
   stroke-width: 22px;
 }
 
+/* A thin light glint along the water. */
+.brook-glint {
+  stroke: #c4e6f4;
+  stroke-width: 2px;
+  stroke-dasharray: 14 22;
+  opacity: 0.9;
+}
+
+/* The path: worn stepping stones of warm sand, each a little different. */
 .valley-path {
-  stroke: var(--path);
-  stroke-width: 10px;
-  stroke-dasharray: 2 16;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.path-stone {
+  position: absolute;
+  width: calc(var(--s, 1) * clamp(8px, 2.8vw, 13px));
+  height: calc(var(--s, 1) * clamp(6px, 2.1vw, 10px));
+  transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+  border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%;
+  background: radial-gradient(circle at 40% 35%, #f7e3bb, var(--path-stone) 70%);
+  box-shadow: 0 1.5px 0 var(--path-edge);
 }
 
 /* A place: what grows there, and its name on a pill you can press. */
@@ -1035,24 +1104,43 @@ h1:focus {
   outline-offset: 3px;
 }
 
+/*
+ * The garden on the map: a wooden planter of boards with dark earth inside,
+ * not a grid of tiles. The squares are only marked in the soil.
+ */
 .mini-bed {
+  --frame: clamp(6px, 1.8vw, 9px);
+  --furrow: #2a1a0e;
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, var(--mini-cell));
-  gap: 4px;
-  padding: 6px;
-  border: var(--outline);
-  border-radius: 16px;
-  background: var(--wood);
+  gap: 3px;
+  padding: 3px;
+  border: var(--frame) solid transparent;
+  border-radius: 10px;
+  background:
+    linear-gradient(var(--soil), var(--soil)) padding-box,
+    radial-gradient(circle at 5px 5px, var(--plank-edge) 1.5px, transparent 2.2px) border-box,
+    radial-gradient(circle at calc(100% - 5px) 5px, var(--plank-edge) 1.5px, transparent 2.2px) border-box,
+    radial-gradient(circle at 5px calc(100% - 5px), var(--plank-edge) 1.5px, transparent 2.2px) border-box,
+    radial-gradient(circle at calc(100% - 5px) calc(100% - 5px), var(--plank-edge) 1.5px, transparent 2.2px) border-box,
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(122, 78, 40, 0.22) 3px 4px) border-box,
+    linear-gradient(var(--plank-light), var(--plank)) border-box;
+  box-shadow:
+    0 0 0 var(--stroke) var(--ink),
+    inset 0 2px 0 rgba(0, 0, 0, 0.35),
+    0 9px 10px -6px var(--ground-shadow);
 }
 
+/* A planting square: a slightly raised mound of earth with its furrows. */
 .mini-cell {
   width: var(--mini-cell);
   height: var(--mini-cell);
   display: grid;
   place-items: center;
-  border: 2px solid var(--ink);
-  border-radius: 8px;
-  background: var(--earth);
+  border-radius: 6px;
+  background: radial-gradient(ellipse at 50% 38%, #654328, #573923 70%);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.28);
 }
 
 .mini-cell .plant {
@@ -1060,23 +1148,105 @@ h1:focus {
   height: 100%;
 }
 
-.mood-asleep .mini-bed {
-  filter: saturate(0.75) brightness(0.92);
+/* New seeds wait in their packet on the edge of the bed: nothing is planted yet. */
+.seed-packet {
+  position: absolute;
+  right: calc(-1 * var(--frame) - 10px);
+  bottom: calc(-1 * var(--frame) - 8px);
+  width: calc(var(--mini-cell) * 0.75);
+  height: calc(var(--mini-cell) * 0.95);
+  transform: rotate(9deg);
+  overflow: visible;
+  filter: drop-shadow(0 3px 2px var(--ground-shadow));
 }
 
+.sp-bag {
+  fill: #f6e6c4;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.sp-fold {
+  fill: #e8cf9d;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.sp-stem {
+  stroke: #2f5e2a;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.sp-leaf {
+  fill: var(--leaf);
+  stroke: #2f5e2a;
+  stroke-width: 1.1;
+}
+
+.sp-leaf.light {
+  fill: var(--leaf-light);
+}
+
+/* Resting: dimmed, darker and covered by a thin dusk, so it plainly sleeps. */
+.place.mood-asleep .mini-bed,
+.place.mood-asleep .bridge {
+  filter: saturate(0.6) brightness(0.8);
+}
+
+.place.mood-asleep .mini-bed::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--frame));
+  border-radius: 10px;
+  background: linear-gradient(rgba(36, 50, 74, 0.28), rgba(36, 50, 74, 0.42));
+  pointer-events: none;
+}
+
+/* The name on a small wooden sign on two posts, part of the landscape. */
 .place-name {
+  --press-tone: var(--plank-edge);
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 18px 6px;
+  padding: 3px 16px 5px;
   border: var(--outline);
-  border-radius: 999px;
-  background: var(--card);
-  box-shadow: var(--press);
+  border-radius: 7px 9px 8px 6px;
+  background:
+    radial-gradient(circle at 7px 50%, var(--plank-edge) 1.6px, transparent 2.2px),
+    radial-gradient(circle at calc(100% - 7px) 50%, var(--plank-edge) 1.6px, transparent 2.2px),
+    repeating-linear-gradient(176deg, transparent 0 7px, rgba(138, 90, 48, 0.12) 7px 8px, transparent 8px 15px),
+    linear-gradient(var(--plank-light), #cf975e);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 600;
   transition: transform 0.08s, box-shadow 0.08s;
+}
+
+/* The posts, standing in the grass behind the sign. */
+.place-name::before,
+.place-name::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 60%;
+  width: 5px;
+  height: calc(50% + 10px);
+  border: 1.5px solid var(--plank-edge);
+  border-radius: 2px;
+  background: #a8723f;
+}
+
+.place-name::before {
+  left: 22%;
+}
+
+.place-name::after {
+  right: 22%;
 }
 
 .place-name .icon {
@@ -1085,7 +1255,7 @@ h1:focus {
 }
 
 .place:active .place-name {
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   box-shadow: none;
 }
 
@@ -1100,6 +1270,7 @@ h1:focus {
   top: 22%;
 }
 
+/* The child's animal stands on the ground itself, with a soft green shadow. */
 .valley-walker {
   position: absolute;
   left: 30%;
@@ -1107,12 +1278,23 @@ h1:focus {
   transform: translate(-50%, -50%);
   width: clamp(44px, 12vw, 56px);
   height: clamp(44px, 12vw, 56px);
-  padding: 4px;
   display: grid;
   place-items: center;
-  border: var(--outline);
+}
+
+.valley-walker::before {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -6%;
+  height: 26%;
   border-radius: 50%;
-  background: var(--card);
+  background: radial-gradient(closest-side, var(--ground-shadow), transparent);
+}
+
+.valley-walker svg {
+  position: relative;
 }
 
 .valley-walker svg {
@@ -1203,20 +1385,27 @@ h1:focus {
 
 .br-water {
   fill: var(--water);
-  stroke: var(--ink);
+  stroke: var(--water-shade);
   stroke-width: 2;
 }
 
 .br-bank {
   fill: var(--hill-front);
-  stroke: var(--ink);
+  stroke: var(--hill-front-line);
   stroke-width: 2;
+}
+
+/* The bridge's shade lies on the water in dark blue, not in ink. */
+.br-shade {
+  fill: var(--water-shade);
+  opacity: 0.55;
 }
 
 .br-arch {
   fill: none;
-  stroke: var(--ink);
-  stroke-width: 3;
+  stroke: var(--plank-edge);
+  stroke-width: 2.6;
+  stroke-linecap: round;
 }
 
 .br-slot {
@@ -1668,7 +1857,7 @@ h1:focus {
   border-radius: var(--r-tile);
   border: var(--outline);
   background: #fff;
-  box-shadow: var(--press);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   font-family: var(--font-display);
   font-size: clamp(2.2rem, 10vw, 3rem);
   font-weight: 600;
@@ -1678,7 +1867,7 @@ h1:focus {
 
 .choice:active:not(:disabled),
 .choice.chosen {
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   box-shadow: none;
 }
 
@@ -1688,7 +1877,7 @@ h1:focus {
 
 .choice.correct {
   background: var(--good);
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   box-shadow: none;
 }
 
@@ -1968,7 +2157,7 @@ h1:focus {
   border-radius: 18px;
   border: var(--outline);
   background: #fff;
-  box-shadow: var(--press);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 600;
@@ -1980,7 +2169,7 @@ h1:focus {
 }
 
 .numpad-key:active:not(:disabled) {
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   box-shadow: none;
 }
 
@@ -1996,7 +2185,7 @@ h1:focus {
 .numpad-key:disabled {
   opacity: 0.5;
   box-shadow: none;
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   cursor: default;
 }
 
@@ -2242,7 +2431,7 @@ h1:focus {
   border-radius: 999px;
   border: var(--outline);
   background: var(--card);
-  box-shadow: var(--press);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   font-size: 1.05rem;
   font-weight: 700;
 }
@@ -2250,7 +2439,7 @@ h1:focus {
 .parent-tab.active {
   background: var(--selected);
   box-shadow: none;
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
 }
 
 .avatar-badge.small {
@@ -2735,7 +2924,7 @@ h1:focus {
   border-radius: var(--r-tile);
   border: var(--outline);
   background: var(--card);
-  box-shadow: var(--press);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -2745,7 +2934,7 @@ h1:focus {
 
 .focus-tile[aria-pressed='true'] {
   background: var(--selected);
-  transform: translateY(4px);
+  transform: translateY(var(--press-depth));
   box-shadow: none;
 }
 

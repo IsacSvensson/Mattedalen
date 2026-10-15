@@ -54,7 +54,10 @@ export interface SceneOptions {
 export function scene({ height, sunflowers = 0, sun = true, cloud = true }: SceneOptions): HTMLElement {
   const hills = s('svg', { class: 'scene-hills', viewBox: `0 0 100 ${height}`, preserveAspectRatio: 'none', 'aria-hidden': 'true' });
   hills.innerHTML =
-    `<path d="${hillPath(backHill, height)}" class="hill-back"/>` + `<path d="${hillPath(frontHill, height)}" class="hill-front"/>`;
+    `<path d="${hillPath(backHill, height)}" class="hill-back"/>` +
+    `<path d="${hillPath(frontHill, height)}" class="hill-front"/>` +
+    // A soft band of shade along the foot of the front hill (no outline).
+    `<path d="${hillPath((x) => frontHill(x) + 0.1, height)}" class="hill-shade"/>`;
 
   const flowers = SPOTS.slice(0, Math.max(0, Math.min(sunflowers, SPOTS.length))).map((x, i) => {
     const stem = 10 + ((i * 7) % 3) * 4;
