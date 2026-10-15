@@ -39,7 +39,8 @@ export function shareBuilder({ task, reveal = true, onDone }: ShareBuilderOption
   const counts: number[] = task.kind === 'share' ? Array<number>(task.by).fill(0) : [0];
 
   const pileEl = h('div', { class: 'share-pile', 'aria-hidden': 'true' });
-  const basketsEl = h('div', { class: `share-baskets ${task.kind}` });
+  // As many baskets as there will be, so they share one row however narrow the screen.
+  const basketsEl = h('div', { class: `share-baskets ${task.kind}`, style: `--n:${task.kind === 'share' ? task.by : task.answer}` });
   const status = h('p', { class: 'share-status', 'aria-live': 'polite' });
   const root = h('div', { class: 'share-builder' }, pileEl, basketsEl, status);
 

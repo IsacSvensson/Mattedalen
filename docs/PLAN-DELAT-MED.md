@@ -250,7 +250,7 @@ mognar den.” Det gör ändringen till något att se fram emot.
 | G2. Innehåll **(klar)** | ”Dela lika”, format, räknestigar, felsvar och förklaringar, bråkstreck i frågan och inställningen för tecknet. |
 | G3. Trädgården **(klar)** | Blommor, kart och frukt, skördekorgen, bygg rektangeln (ny fakta och stöd), dela ut bären i Dela lika, nyheten för barn som redan spelar, kartan i dalen. Delat med slås på. |
 | G4. Runtomkring **(klar)** | Öva en tabell, startkollen, Trädgårdens koll och föräldravyn. |
-| G5. Verifiering | e2e, skärmbilder vid 320 och 360 px, liggande telefon och surfplatta, dokumentation. |
+| G5. Verifiering **(klar)** | e2e, skärmbilder vid 320 och 360 px, liggande telefon och surfplatta, dokumentation. |
 
 ## Fynd från G1
 
@@ -311,6 +311,27 @@ mognar den.” Det gör ändringen till något att se fram emot.
   kolumn per svar. Svåra just nu och förväxlingar skrivs med barnets tecken.
 - **Regeln för när kollen kommer** ligger nu i skalet (`shell/check.ts`) och
   delas av Bäcken och Trädgården.
+
+## Fynd från G5
+
+Alla skärmar med delat med är genomgångna i 320 och 360 px, på liggande
+telefon (800 × 360), surfplatta (1080 × 810) och dator (1920 × 1040): dalen,
+trädgården med nyheten, Öva en tabell, Dela lika (introduktion, fråga och
+hjälp), alla former av delat med (flerval och fritt svar), räknestigen,
+byggstödet, hjälpkorten, startkollen och Trädgårdens koll, och föräldravyn.
+Ingen skärm går att scrolla i sidled och inget sticker ut över kanten.
+
+- **Korgarna** i Dela lika bröts på flera rader på smal telefon, så att
+  svaren hamnade nedanför skärmen. Nu ligger de alltid på en rad och krymper
+  efter antalet. På liggande telefon är utdelningen tätare, så att den ryms
+  bredvid svaren.
+- **Grodden vid rätt svar** täckte texten i en fråga med ord. Den sitter nu på
+  kortets hörn.
+- **Trädgården på dator** hade en remsa ovanför himlen, eftersom rutnätets rader
+  fördelade den lediga höjden. Raderna ligger nu mot toppen, och datortestet
+  kontrollerar att bandet börjar i överkanten.
+- **Nyhetslappen på liggande telefon** täcker knappen tills barnet trycker
+  ”Vad roligt!”. Den visas en gång.
 
 ## Avgjorda frågor
 

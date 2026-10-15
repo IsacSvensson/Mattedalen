@@ -9,9 +9,10 @@ bruk.
 >
 > **Status:** Dalens karta är startsidan och har två platser: Bäcken (addition
 > och subtraktion inom 20), där ett nytt barn börjar, och Trädgården
-> (multiplikation), som öppnar senare. Dagens tid delas efter vad som väntar på
-> repetition, och Bäckens koll mäter ungefär var sjunde speldag vad barnet kan
-> utan stöd. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
+> (multiplikation och delat med), som öppnar senare. Delat med växer som
+> blommor och frukt på plantorna. Dagens tid delas efter vad som väntar på
+> repetition, och Bäckens koll och Trädgårdens koll mäter ungefär var sjunde
+> speldag vad barnet kan utan stöd. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
 > med hela dess historik. Härnäst kommer piloten, och inom 100 efter den, se
 > [PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser).
 
@@ -22,11 +23,11 @@ Mer att läsa:
 - [docs/MOTORN.md](docs/MOTORN.md): faktamotorn (pass, takt, repetition,
   räknestigar, startkoll) och de simulerade eleverna.
 - [docs/TRADGARDEN.md](docs/TRADGARDEN.md): Trädgården, multiplikationspaketet
-  och dess spel.
+  med delat med och dess spel.
 - [docs/PLAN-BACKEN.md](docs/PLAN-BACKEN.md) och [docs/BACKEN.md](docs/BACKEN.md):
   Bäcken, addition och subtraktion inom 20: innehållet, platsen och planen.
-- [docs/PLAN-DELAT-MED.md](docs/PLAN-DELAT-MED.md): plan för delat med i
-  Trädgården, med blommor och frukt på plantorna.
+- [docs/PLAN-DELAT-MED.md](docs/PLAN-DELAT-MED.md): delat med i Trädgården,
+  med blommor och frukt på plantorna: beslut, design och fynd från varje fas.
 
 ## Principer
 
@@ -101,7 +102,7 @@ liggande telefon. Logiken utan DOM testas i `tests/game/valley.test.ts`.
 ```
 src/
   engine/                   innehållsneutral faktamotor (ren logik), se docs/MOTORN.md
-  content/multiplication/   Trädgårdens innehållspaket: fakta, enheter, strategier, distraktorer
+  content/multiplication/   Trädgårdens innehållspaket: gånger och delat med, Dela lika, former, räknestigar, koll
   content/addition/         Bäckens innehållspaket: faktafamiljer, graf, format, Vågen, räknestigar
   storage/                  ProgressStore, IndexedDB, säkerhetskopior, import från Gångerträdgården
   sw/                       service workerns mall

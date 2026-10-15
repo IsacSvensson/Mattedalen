@@ -6,9 +6,10 @@ test.use({ viewport: { width: 1920, height: 1040 }, isMobile: false, hasTouch: f
 // The same computer in both projects: run it once.
 test.beforeEach(({}, info) => test.skip(info.project.name !== 'tablet', 'Run once'));
 
-/** The landscape band runs from edge to edge. */
+/** The landscape band runs from edge to edge, at the very top. */
 async function expectFullBand(page: Page): Promise<void> {
   const band = (await page.locator('.scene').first().boundingBox())!;
+  expect(Math.round(band.y)).toBe(0);
   expect(Math.round(band.x)).toBe(0);
   expect(Math.round(band.width)).toBe(1920);
 }
@@ -29,6 +30,8 @@ test('the band runs edge to edge and the name fits on wide screens', async ({ pa
   await expectReadableTitle(page);
 
   await page.getByRole('button', { name: 'Hoppa på stenarna' }).click();
+  // Measured once the session's screen is there, not while the screens change.
+  await expect(page.locator('.play-head .scene')).toBeVisible();
   await expectFullBand(page);
   const home = (await page.locator('.scene-controls').first().boundingBox())!;
   expect(home.x).toBeGreaterThan(400);
@@ -43,5 +46,6 @@ test('the garden and the list of players on wide screens', async ({ page }) => {
   await switchPlayer(page);
   await expectFullBand(page);
   await enterGarden(page, 'Bo');
+  await expectFullBand(page);
   await expectReadableTitle(page);
 });
