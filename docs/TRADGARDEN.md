@@ -181,11 +181,28 @@ den öppen.
   fram till den första som inte klarades. En för generös placering rättas därför av den vanliga
   repetitionen, eftersom ett fel svar sänker faktan ett steg. Startkollen kan
   bara flytta fram ett barn, aldrig bakåt.
+- **Delat med:** efter gånger fortsätter kollen med delat med, men bara för
+  familjer som kollen just placerade som flytande (`divisionPlacementPack`). En
+  divisionsdel i taget, i samma ordning som tabellerna, med samma regler. Den
+  stannar vid första del som inte klaras. Klarar barnet någon del räknas också
+  ”Dela lika” som förstått. Slutskärmen säger till exempel ”Du kan dela med 10
+  och 2 också – buskarna fick kart!”.
 - **Simulering:** genomsnittliga elever som redan övat de fyra lätta tabellerna
   placeras vid ×4 (7 av 8 frön) efter cirka 20 frågor. Den åttonde räknar ut
   ×4 långsamt genom att dubbla, och får ×4 som plantor. Efter placeringen ligger
   andelen rätt på 80–93 %, och efter sex veckor är minst 8 av 10 enheter
   upplåsta.
+
+## Trädgårdens koll
+
+Som Bäckens koll (`shell/check.ts` avgör när): ungefär var sjunde speldag i
+trädgården, första gången andra speldagen, före dagens pass, och den kan vänta
+till i morgon (”Inte nu”). Tolv uppgifter efter samma mall varje gång, utan
+anpassning (`content/multiplication/check.ts`): 4 gånger, 3 delat med, 2 med
+saknad faktor (`__ × 3 = 21`) och 3 ”Dela lika” med bär och korgar. Faktorerna
+är 2–9, och en familj förekommer högst en gång per koll, så att en uppgift inte
+avslöjar en annan. Svaren ges på sifferknappsatsen utan markeringar. Resultatet
+visas bara i föräldravyn, per sort och med hur många som kom snabbt.
 
 ## Extralägen
 
@@ -198,6 +215,9 @@ De påverkar inte schemaläggningen.
   omfattar båda ordningarna (×7 är 1 × 7 … 10 × 7 och 7 × 1 … 7 × 10, 19 fakta)
   och går därför över flera enheter. Barnet får själv välja en tabell som inte
   är upplåst än, eftersom passet ändå bara planterar några få nya fakta åt gången.
+  Tabellens delat med (divisionerna i tabellens rutor) övas också, när deras del
+  är öppen eller barnet redan har mött dem (`focusWithDivisions`). Stapeln och
+  rekordjakten gäller bara gånger. Slå rekord och Gångerkrig är också bara gånger.
   Från samma vy finns **rekordjakt på en tabell**. Den öppnas när 4 av tabellens
   fakta är buskar och har ett eget rekord per tabell (`focusId` på passet).
 - **Slå rekord** (`screens/challenge.ts`). Barnet har 90 sekunder och

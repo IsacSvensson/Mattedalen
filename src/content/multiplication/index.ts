@@ -1,4 +1,4 @@
-import type { ContentPack, FocusSet, Item, Unit } from '../../engine';
+import { atLeast, type ContentPack, type FocusSet, type Item, type Status, type Unit } from '../../engine';
 import { buildDivisions, buildShareItems, DIVISION_UNIT_DEFS, divisionDistractors, isDivisionId, isShareId, parseDivisionId, SHARE_TASKS, shareId } from './division';
 import { multiplicationDistractors } from './distractors';
 import { buildFacts, isFactId, MAX_FACTOR, MIN_FACTOR, parseFactId, UNIT_DEFS } from './facts';
@@ -7,6 +7,7 @@ import { presentMultiplication } from './present';
 export * from './facts';
 export * from './derive';
 export * from './division';
+export * from './check';
 export { multiplicationDistractors } from './distractors';
 export { presentMultiplication, STANDARD_FIRST } from './present';
 
@@ -160,4 +161,36 @@ function divisionUnits(items: readonly Item[]): Unit[] {
     }),
   );
   return [share, ...parts];
+}
+
+/**
+ * The start check's part about delat med (see docs/PLAN-DELAT-MED.md): the
+ * division parts in order, each with only the divisions whose family already
+ * sits (just placed by the multiplication part). The divisions no longer wait
+ * for anything here, and each part is tested only if the one before passed.
+ * Empty parts are left out. Returns null if there is nothing to test.
+ */
+export function divisionPlacementPack(pack: ContentPack, states: Record<string, { status: Status }>): ContentPack | null {
+  const sits = (id: string) => atLeast(states[id]?.status ?? 'new', 'fluent');
+  const byId = new Map(pack.items.map((it) => [it.id, it]));
+  const parts = DIVISION_UNIT_DEFS.map((def) => ({
+    def,
+    itemIds: (pack.units.find((u) => u.id === def.id)?.itemIds ?? []).filter((id) => byId.get(id)?.requires?.every(sits)),
+  })).filter((p) => p.itemIds.length > 0);
+  if (!parts.length) return null;
+  const ids = new Set(parts.flatMap((p) => p.itemIds));
+  return {
+    ...pack,
+    // Nothing to wait for or derive from here: the check asks only these.
+    items: pack.items
+      .filter((it) => ids.has(it.id))
+      .map(({ requires: _sat, pairId, ...it }) => ({ ...it, derivedFrom: [], ...(pairId && ids.has(pairId) ? { pairId } : {}) })),
+    units: parts.map(({ def, itemIds }, i) => ({
+      id: def.id,
+      title: def.title,
+      order: i,
+      itemIds,
+      unlockRule: i === 0 ? { kind: 'always' } : { kind: 'previous', fraction: UNLOCK_FRACTION, minStatus: 'fluent' },
+    })),
+  };
 }

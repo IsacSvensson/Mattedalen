@@ -249,7 +249,7 @@ mognar den.” Det gör ändringen till något att se fram emot.
 | G1. Motor och paket **(klar)** | `requires` i motorn, paketversion 2 med fakta, delar och graf, läsning av gamla QR-koder och säkerhetskopior, simulering. Inget ändras för barnen än: delat med ligger bakom `createMultiplicationPack({ division: true })`. |
 | G2. Innehåll **(klar)** | ”Dela lika”, format, räknestigar, felsvar och förklaringar, bråkstreck i frågan och inställningen för tecknet. |
 | G3. Trädgården **(klar)** | Blommor, kart och frukt, skördekorgen, bygg rektangeln (ny fakta och stöd), dela ut bären i Dela lika, nyheten för barn som redan spelar, kartan i dalen. Delat med slås på. |
-| G4. Runtomkring | Öva en tabell, startkollen, Trädgårdens koll och föräldravyn. |
+| G4. Runtomkring **(klar)** | Öva en tabell, startkollen, Trädgårdens koll och föräldravyn. |
 | G5. Verifiering | e2e, skärmbilder vid 320 och 360 px, liggande telefon och surfplatta, dokumentation. |
 
 ## Fynd från G1
@@ -294,6 +294,23 @@ mognar den.” Det gör ändringen till något att se fram emot.
 - **Föräldravyn** visar divisioner under ”Svåra just nu” och bland
   förväxlingarna, med `÷`. Värmekartan för delat med och barnets eget tecken i
   föräldravyn kommer i G4.
+
+## Fynd från G4
+
+- **Öva en tabell** tar med divisionerna i tabellens rutor. Varje tabell möter
+  ×10 och ×2, så ×3 får till exempel 30 ÷ 10 och 6 ÷ 2 så snart Dela med 10 och
+  2 är öppna. Delar som inte är öppna hålls utanför, så att ”Dela lika” ändå
+  kommer först.
+- **Startkollen** prövar delat med med motorns vanliga kontroll, på ett utsnitt
+  av paketet med bara familjer som sitter. Klarar barnet en del räknas också
+  ”Dela lika” som förstått.
+- **Trädgårdens koll** drar aldrig samma familj två gånger, inte heller inom
+  samma sort (3 × 7 och 7 × 3). Annars kunde en uppgift avslöja en annan.
+- **Föräldravyn** har räkningar och en värmekarta för gånger och för delat med
+  var för sig. Värmekartan för delat med har en rad per tal man delar med och en
+  kolumn per svar. Svåra just nu och förväxlingar skrivs med barnets tecken.
+- **Regeln för när kollen kommer** ligger nu i skalet (`shell/check.ts`) och
+  delas av Bäcken och Trädgården.
 
 ## Avgjorda frågor
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { emptyState, type ItemState } from '../../src/engine';
 import { divisionsOfTable } from '../../src/content/multiplication';
 import { bloomFor } from '../../src/shell/components/plant';
-import { harvestTables } from '../../src/places/tradgarden/harvest';
+import { harvestTables } from '../../src/places/tradgarden/division';
 import { canChallenge, challengePool, duelPool } from '../../src/places/tradgarden/challenge';
 
 const at = (itemId: string, status: ItemState['status']): ItemState => ({ ...emptyState(itemId), status, box: 3 });

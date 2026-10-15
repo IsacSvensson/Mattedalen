@@ -2,8 +2,10 @@ import { atLeast, type FocusSet, type ItemId, type ItemState } from '../../../en
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
+import { bloomIcon } from '../../../shell/components/plant';
 import { h } from '../../../shell/dom';
 import { canChallenge, CHALLENGE_MIN_FOCUS_FACTS } from '../challenge';
+import { focusWithDivisions } from '../division';
 import { engineFor, EXTRA_PRACTICE_MINUTES, loadProgress } from '../../../shell/play';
 import { showChallenge } from './challenge';
 import { showGarden } from './garden';
@@ -36,7 +38,8 @@ export function focusProgress(set: FocusSet, states: Record<ItemId, ItemState>):
 export async function showFocusPicker(ctx: AppContext, profile: Profile, selectedId?: string): Promise<void> {
   const sets = pack.focusSets ?? [];
   const engine = engineFor(profile, gardenDeps(ctx));
-  const { states } = await loadProgress(profile, gardenDeps(ctx), engine);
+  const { states, meta } = await loadProgress(profile, gardenDeps(ctx), engine);
+  const unlocked = engine.unlockedUnits(states, meta);
 
   const panel = h('section', { class: 'focus-panel', 'aria-live': 'polite' }, h('p', { class: 'end-text' }, 'Tryck på en tabell.'));
   const tiles = sets.map((set) => {
@@ -72,6 +75,9 @@ export async function showFocusPicker(ctx: AppContext, profile: Profile, selecte
     const p = focusProgress(set, states);
     const fresh = p.total - p.known - p.growing;
     const challengeOpen = canChallenge(states, set.itemIds);
+    // Practice takes the table's open delat med along; the meter and the record stay with the multiplications.
+    const practice = focusWithDivisions(set, states, unlocked);
+    const withDivisions = practice.itemIds.length > set.itemIds.length;
     panel.replaceChildren(
       h(
         'div',
@@ -79,6 +85,7 @@ export async function showFocusPicker(ctx: AppContext, profile: Profile, selecte
         h('h2', null, set.title),
         h('p', { class: 'end-text' }, p.known === 0 ? `Du har inga buskar i ${set.title} än.` : `Du kan ${p.known} av ${p.total} bra.`),
         fresh > 0 ? h('p', { class: 'extras-note' }, 'Du får plantera några nya frön också.') : null,
+        withDivisions ? h('p', { class: 'extras-note focus-division' }, bloomIcon('blossom'), `Delat med i ${set.title} övas också.`) : null,
         h(
           'div',
           { class: 'garden-actions' },
@@ -87,7 +94,7 @@ export async function showFocusPicker(ctx: AppContext, profile: Profile, selecte
             {
               class: 'big-button',
               type: 'button',
-              onclick: () => void showSession(ctx, profile, 'focus', set),
+              onclick: () => void showSession(ctx, profile, 'focus', practice),
             },
             `Öva ${set.title}`,
           icon('arrow', 'on-primary'),

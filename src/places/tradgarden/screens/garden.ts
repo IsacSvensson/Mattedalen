@@ -1,6 +1,8 @@
-import { atLeast, type ContentPack, type ItemId, type ItemState } from '../../../engine';
+import { atLeast, systemClock, type ContentPack, type ItemId, type ItemState } from '../../../engine';
+import { checkDue } from '../../../shell/check';
+import { gardenCheckLaterKey, showGardenCheckOffer } from './check';
 import { focusTable, formatDivision, formatFact, isDivisionId, isFactId } from '../../../content/multiplication';
-import { harvestTables } from '../harvest';
+import { harvestTables } from '../division';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { gardenGrid } from '../components/grid';
@@ -37,6 +39,10 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
   const unlockedUnits = new Set(engine.unlockedUnits(states, meta));
   const unlockedItemIds = new Set(pack.units.filter((u) => unlockedUnits.has(u.id)).flatMap((u) => u.itemIds));
   const asleep = engine.dailyDone(meta);
+  // Trädgårdens koll comes first on the days it is due (about every seventh play day in the garden).
+  const checkFirst =
+    !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(gardenCheckLaterKey(profile.id)));
+  const play = () => showSession(ctx, profile, 'daily');
 
   // The plants are the multiplications; the divisions grow on them as blossoms and fruit.
   const counts: Record<Stage, number> = { locked: 0, soil: 0, seed: 0, sprout: 0, bush: 0, tree: 0 };
@@ -79,7 +85,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
         { class: 'garden-actions' },
         h(
           'button',
-          { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showSession(ctx, profile, 'daily') },
+          { class: 'big-button', type: 'button', autofocus: true, onclick: () => void (checkFirst ? showGardenCheckOffer(ctx, profile, play) : play()) },
           icon('can'),
           'Vattna trädgården',
         ),

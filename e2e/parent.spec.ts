@@ -35,8 +35,10 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
 
   // What is shared by every place, then one part per place: the garden's statistics are in its own part.
   const garden = page.getByRole('region', { name: /^Trädgården/ });
-  await expect(garden.getByRole('heading', { name: /^Trädgården/ })).toBeVisible();
-  await expect(garden.locator('.heat-cell')).toHaveCount(100);
+  await expect(garden.getByRole('heading', { name: 'Trädgården', exact: true })).toBeVisible();
+  // One heat map for the multiplications and one for delat med.
+  await expect(garden.getByRole('group', { name: 'Värmekarta över gångertabellen' }).locator('.heat-cell')).toHaveCount(100);
+  await expect(garden.getByRole('group', { name: 'Värmekarta över delat med' }).locator('.heat-cell')).toHaveCount(100);
   await expect(garden.getByRole('checkbox', { name: /Fritt svar/ })).toBeChecked();
   await expect(garden.getByRole('button', { name: 'Gör om startkollen' })).toBeVisible();
   await expect(garden.getByRole('combobox', { name: 'Passlängd' })).toHaveCount(0);
@@ -50,7 +52,7 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   await expect(page.locator('.confusions li')).toContainText('svarade');
   await expect(page.getByText(/Senaste 7 dagarna: 1[23] minuter/)).toBeVisible();
   await page.locator('.heat-cell.heat-learning-0').first().click();
-  await expect(garden.locator('.heat-detail')).toContainText('försök');
+  await expect(garden.locator('.heat-detail').first()).toContainText('försök');
 
   await page.getByRole('combobox', { name: 'Passlängd' }).selectOption('15');
   await expect(page.getByRole('combobox', { name: 'Passlängd' })).toHaveValue('15');

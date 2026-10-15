@@ -1,5 +1,6 @@
 import {
   applyPlacement,
+  computeUnlocked,
   createEngine,
   makeConfig,
   mathRandomRng,
@@ -183,16 +184,30 @@ export class PlayController {
  * learning if the answers were slow (never lowering earlier progress), the
  * answers go into the log and the check is kept as a session record.
  */
+export interface PlacementPart {
+  /** The pack the check was run on, when it is a part of the place's pack (its units and items are the place's). */
+  from: ContentPack;
+  /** Further changes from what passed, before the open units are worked out. */
+  adjust?: (states: Record<string, ItemState>) => Record<string, ItemState>;
+}
+
 export async function savePlacement(
   profile: Profile,
   deps: GameDeps,
   result: PlacementResult,
   startedAt: number,
+  part?: PlacementPart,
 ): Promise<{ states: Record<string, ItemState>; meta: LearnerMeta }> {
   const clock = deps.clock ?? systemClock;
   const engine = engineFor(profile, deps);
   const loaded = await loadProgress(profile, deps, engine);
-  const placed = applyPlacement(deps.pack, engine.config, result, loaded.states, loaded.meta, clock.today());
+  let placed = applyPlacement(part?.from ?? deps.pack, engine.config, result, loaded.states, loaded.meta, clock.today());
+  if (part) {
+    // A part of the pack: the open units are worked out on the whole pack.
+    const states = part.adjust ? part.adjust(placed.states) : placed.states;
+    const reached = [...loaded.meta.unlockedUnitIds, ...result.passedUnitIds, ...(result.failedUnitIds ?? [])];
+    placed = { states, meta: { ...loaded.meta, unlockedUnitIds: computeUnlocked(deps.pack.units, states, reached) } };
+  }
   const now = clock.now();
   const sessionId = `placement-${now}`;
   for (const a of result.answers) {

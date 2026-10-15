@@ -2,6 +2,7 @@ import { atLeast, isStruggling, systemClock, type Engine, type ItemId, type Item
 import { CHECK_CATEGORIES, EQUALITIES, equalityId, formatEquality, formatFact, isEqualityId, parseFactId } from '../../content/addition';
 import type { Profile, SessionRecord } from '../../storage';
 import type { AppContext } from '../../shell/app';
+import { checkResultsView } from '../../shell/components/checkResults';
 import { heatmapView } from '../../shell/components/heatmap';
 import { icon } from '../../shell/components/icons';
 import { h } from '../../shell/dom';
@@ -83,38 +84,13 @@ export async function brookParentSection(ctx: AppContext, profile: Profile): Pro
   );
 }
 
-/**
- * The checks, newest first: right answers per kind of task (and how many of
- * them came quickly). The same kinds of tasks every time, not adapted to the
- * child, so the results can be compared over time.
- */
+/** Bäckens koll, newest first (see `checkResultsView`). */
 function checkResults(checks: SessionRecord[]): HTMLElement {
-  const about = h(
-    'p',
-    { class: 'muted' },
+  return checkResultsView(
+    checks,
+    CHECK_CATEGORIES,
     'Samma sorts uppgifter ungefär var sjunde speldag, utan anpassning, så att det går att jämföra över tid. Likhetstecknet prövas i former barnet inte har övat.',
-  );
-  if (!checks.length) return h('div', null, about, h('p', { class: 'muted' }, 'Ingen koll än. Den första kommer andra dagen barnet är vid bäcken.'));
-  const rows = [...checks].sort((a, b) => b.startedAt - a.startedAt);
-  const cell = (c: SessionRecord, id: string) => {
-    const right = c.extra?.[`${id}:right`] ?? 0;
-    const quick = c.extra?.[`${id}:quick`] ?? 0;
-    return h('td', null, `${right} av ${c.extra?.[`${id}:total`] ?? 0}`, quick ? h('span', { class: 'muted quick' }, `${quick} snabbt`) : null);
-  };
-  return h(
-    'div',
-    null,
-    about,
-    h(
-      'table',
-      { class: 'check-results' },
-      h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Dag'), CHECK_CATEGORIES.map((c) => h('th', { scope: 'col', title: c.title }, c.short)))),
-      h(
-        'tbody',
-        null,
-        rows.map((c) => h('tr', null, h('th', { scope: 'row' }, formatDay(c.day)), CHECK_CATEGORIES.map((cat) => cell(c, cat.id)))),
-      ),
-    ),
+    'Ingen koll än. Den första kommer andra dagen barnet är vid bäcken.',
   );
 }
 

@@ -3842,3 +3842,22 @@ h1:focus {
   font-size: clamp(1.25rem, 5vw, 1.5rem);
   line-height: 1.3;
 }
+
+/* A question in words stays in its own size, also above the number pad (Trädgårdens koll). */
+.question.free .prompt.words {
+  font-size: clamp(1.3rem, 5.4vw, 1.7rem);
+}
+
+/* "Delat med i ×2 övas också." with a small bush in blossom. */
+.focus-division {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.focus-division .plant {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
