@@ -47,6 +47,12 @@ förkunskaper som kanter i en graf. Se ordningen i
   före, och vid lika går spåret med den första delen före. Delat med i Trädgården
   har ett eget spår. Ett barn som redan kan många tabeller får därför nästa
   tabell och de öppna divisionerna omväxlande, inte alla divisioner först.
+- **Delar som väntar på något utanför paketet** (`heldUnitIds` i passet,
+  `Held` i `unlock.ts`). En sådan del öppnar inte av sin egen regel, inte heller
+  i ett fokuspass, som annars får öppna delar tidigt. En del som redan är öppen,
+  eller där någon fakta är påbörjad, hålls aldrig: det som är påbörjat stängs
+  aldrig. Startkollen öppnar en hållen del bara om den klaras. Motorn vet inget om
+  vad som håller; det räknar platsen ut, till exempel från en annan plats framsteg.
 - **Uteslutna fakta.** Ett pass kan få `excludedItemIds`. De frågas aldrig, inte
   ens som nya eller förfallna, och räknas inte heller när delar öppnas. En del
   där hälften hålls utanför (pilotens otränade halva) kan därför ändå öppna det

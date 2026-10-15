@@ -9,6 +9,20 @@ export function sortedUnits(units: readonly Unit[]): Unit[] {
 export type Excluded = ReadonlySet<ItemId>;
 const NONE: Excluded = new Set();
 
+/**
+ * Units held back by something outside the pack (e.g. another place the
+ * learner has not got far enough in yet). A held unit does not open by its own
+ * rule; one that is already open, or has an item already started, is never
+ * held: what has been started is never closed.
+ */
+export type Held = ReadonlySet<UnitId>;
+const NOT_HELD: Held = new Set();
+
+/** True if some item of the unit is past `new`. */
+export function unitStarted(unit: Unit, states: Record<ItemId, ItemState>, excluded: Excluded = NONE): boolean {
+  return counted(unit, excluded).some((id) => (states[id]?.status ?? 'new') !== 'new');
+}
+
 const counted = (unit: Unit, excluded: Excluded) => unit.itemIds.filter((id) => !excluded.has(id));
 
 export function countAtLeast(unit: Unit, states: Record<ItemId, ItemState>, minStatus: ItemState['status'], excluded: Excluded = NONE): number {
@@ -47,6 +61,7 @@ export function computeUnlocked(
   /** Lower fraction to use instead of the rule's (when the learner finds it too easy). */
   relaxedFraction?: number,
   excluded: Excluded = NONE,
+  held: Held = NOT_HELD,
 ): UnitId[] {
   const out: UnitId[] = [];
   const byId = new Map(units.map((u) => [u.id, u]));
@@ -57,7 +72,8 @@ export function computeUnlocked(
   let prev: Unit | undefined;
   for (const unit of sortedUnits(units)) {
     let open = previouslyUnlocked.includes(unit.id);
-    if (!open) {
+    const waits = !open && held.has(unit.id) && !unitStarted(unit, states, excluded);
+    if (!open && !waits) {
       const rule = unit.unlockRule;
       if (rule.kind === 'always') open = true;
       else if (rule.kind === 'previous') open = known(prev, rule.fraction, rule.minStatus);

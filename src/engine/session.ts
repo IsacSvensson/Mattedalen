@@ -4,7 +4,7 @@ import { applyLeitner, isDue } from './leitner';
 import { PacingController } from './pacing';
 import { applyStatus, atLeast, emptyState } from './status';
 import { isStruggling } from './support';
-import { computeUnlocked, sortedUnits } from './unlock';
+import { computeUnlocked, sortedUnits, unitStarted } from './unlock';
 import type {
   AnswerFormat,
   Attempt,
@@ -17,6 +17,7 @@ import type {
   QuestionKind,
   Status,
   Unit,
+  UnitId,
 } from './types';
 
 export type SessionMode = 'daily' | 'extra' | 'focus';
@@ -38,6 +39,8 @@ export interface SessionOptions {
    * They are not counted when units unlock either.
    */
   excludedItemIds?: ItemId[];
+  /** Units held back by something outside the pack (see `Held` in unlock.ts). */
+  heldUnitIds?: UnitId[];
 }
 
 export interface Question {
@@ -129,6 +132,7 @@ export class Session {
   private readonly maxNew: number;
   private readonly focus: Set<ItemId> | null;
   private readonly excluded: Set<ItemId>;
+  private readonly held: ReadonlySet<UnitId>;
   /** Status rules per unit: the config's, with the unit's own on top. */
   private readonly statusRules = new Map<string, EngineConfig['status']>();
   /** False when the current question's form gives no status evidence. */
@@ -173,7 +177,8 @@ export class Session {
     for (const unit of pack.units) for (const id of unit.itemIds) this.laneOfItem.set(id, laneOf(unit));
     this.pacing = new PacingController(config.pacing, meta.pacingGap);
     this.excluded = new Set(opts.excludedItemIds ?? []);
-    this.unlocked = computeUnlocked(pack.units, this.stateRecord(), meta.unlockedUnitIds, this.relaxedUnlock(), this.excluded);
+    this.held = new Set(opts.heldUnitIds ?? []);
+    this.unlocked = computeUnlocked(pack.units, this.stateRecord(), meta.unlockedUnitIds, this.relaxedUnlock(), this.excluded, this.held);
     if (this.mode === 'focus') {
       const ids = (opts.focusItemIds ?? []).filter((id) => this.states.has(id) && !this.excluded.has(id));
       if (ids.length === 0) throw new Error('A focus session needs focusItemIds');
@@ -288,7 +293,7 @@ export class Session {
 
     // Fluency can be reached mid-session, which may open the next unit.
     if (next.status !== prev.status || this.answered % 10 === 0) {
-      this.unlocked = computeUnlocked(pack.units, this.stateRecord(), this.unlocked, this.relaxedUnlock(), this.excluded);
+      this.unlocked = computeUnlocked(pack.units, this.stateRecord(), this.unlocked, this.relaxedUnlock(), this.excluded, this.held);
     }
     this.current = null;
 
@@ -570,9 +575,10 @@ export class Session {
       return false;
     };
     const units = sortedUnits(this.deps.pack.units);
+    const record = this.held.size ? this.stateRecord() : {};
     for (const unit of units) {
-      // Focus practice may open items of a unit that is not unlocked yet.
-      if (!this.focus && !this.unlocked.includes(unit.id)) continue;
+      // Focus practice may open items of a unit that is not unlocked yet, but not of one that is held.
+      if (!this.unlocked.includes(unit.id) && (!this.focus || (this.held.has(unit.id) && !unitStarted(unit, record, this.excluded)))) continue;
       for (const id of unit.itemIds) {
         if (this.focus && !this.focus.has(id)) continue;
         if (this.excluded.has(id) || this.state(id).status !== 'new') continue;

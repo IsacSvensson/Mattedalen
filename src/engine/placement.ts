@@ -207,6 +207,8 @@ export function applyPlacement(
   states: Record<ItemId, ItemState>,
   meta: LearnerMeta,
   today: DayKey,
+  /** Units held back by something outside the pack: a passed one opens, a failed one waits (see `Held`). */
+  held: readonly UnitId[] = [],
 ): { states: Record<ItemId, ItemState>; meta: LearnerMeta } {
   const out: Record<ItemId, ItemState> = { ...states };
   const lastBox = config.leitner.intervalsDays.length - 1;
@@ -231,8 +233,10 @@ export function applyPlacement(
   }
   // Units passed or where learning starts are open, and so is whatever the
   // new knowledge opens. In a chain of units this is a prefix of the order.
-  const reached = [...meta.unlockedUnitIds, ...result.passedUnitIds, ...(result.failedUnitIds ?? [])];
-  if (result.stoppedAt) reached.push(result.stoppedAt);
-  const unlockedUnitIds = computeUnlocked(pack.units, out, reached);
+  // A held unit that was not passed waits, as it would without the check.
+  const waits = (id: UnitId) => held.includes(id);
+  const reached = [...meta.unlockedUnitIds, ...result.passedUnitIds, ...(result.failedUnitIds ?? []).filter((id) => !waits(id))];
+  if (result.stoppedAt && !waits(result.stoppedAt)) reached.push(result.stoppedAt);
+  const unlockedUnitIds = computeUnlocked(pack.units, out, reached, undefined, undefined, new Set(held));
   return { states: out, meta: { ...meta, unlockedUnitIds } };
 }

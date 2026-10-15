@@ -223,6 +223,8 @@ export interface SimulationOptions {
   startMs?: number;
   /** Start from existing progress (e.g. after a placement check). */
   initial?: { states: Record<ItemId, ItemState>; meta: LearnerMeta };
+  /** Units held back on a given day by something outside the pack (`heldUnitIds`). */
+  held?: (day: number) => string[];
 }
 
 const DAY_MS = 86_400_000;
@@ -246,7 +248,7 @@ export function simulate(
   for (let day = 0; day < opts.days; day++) {
     if (rng.next() > (opts.practiceRate ?? 6 / 7)) continue;
     clock.set(start + day * DAY_MS + Math.floor(rng.next() * 3 * 3_600_000));
-    const session = engine.startSession({ states, meta });
+    const session = engine.startSession({ states, meta, heldUnitIds: opts.held?.(day) });
     let lastId: ItemId | undefined;
     let run = 1;
     for (let q = session.next(); q; q = session.next()) {

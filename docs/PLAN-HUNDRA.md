@@ -228,7 +228,7 @@ med dubblorna, villkoret för att Trädgården ska öppna.
 | Fas | Innehåll |
 |---|---|
 | H1. Trädgårdens ordning **(klar)** | Lika stora grupper, ×2 först, tabellerna som graf, Trädgården öppnar efter dubblor. Fungerar utan Stigen. |
-| H2. Motorn | `heldUnitIds`, tester och simulering. |
+| H2. Motorn **(klar)** | `heldUnitIds`, tester och simulering. |
 | H3. Stigens innehåll | Paketet: delar, fakta, former, räknestigar, felsvar. Bakom en flagga. |
 | H4. Stigen som plats | Skärmen med stolpar och lyktor, bilderna (stavar och kuber, tom tallinje, hundraplatta), kartan, föräldradelen. |
 | H5. Kopplingen | Tabellerna väntar på Stigen, raden i trädgården, startkoll, koll, QR och säkerhetskopior. Stigen slås på. |
@@ -260,6 +260,19 @@ direkt, även om Stigen dröjer.
   begreppet kommer först.
 - **Mot en vuxen** drog kort från den första delen när barnet kunde för lite. Den
   delen är nu Lika stora grupper, så den drar nu från den första tabellen.
+
+## Fynd från H2
+
+- **Regeln** är `heldUnitIds` i passet och `Held` i `computeUnlocked`. En hållen
+  del öppnar inte, varken i dagens pass eller i ett fokuspass. Det som redan är
+  öppet eller påbörjat hålls aldrig. I startkollen öppnar en hållen del bara om
+  barnet klarar den.
+- **Simulering** (`tests/simulation/held.test.ts`): när ×4 och tabellerna efter
+  hålls i sex veckor går passen som vanligt, med repetition och samma träffsäkerhet,
+  och tabellerna öppnar så fort de släpps. Efter 20 veckor sitter 98 av 100 fakta,
+  mot 99 utan väntan.
+- **Kopplingen** till skalet (`GameDeps`) görs i H5, när Stigen finns att räkna
+  från.
 
 ## Avgjorda frågor
 

@@ -21,7 +21,8 @@ export interface Engine {
   initialStates(): Record<ItemId, ItemState>;
   initialMeta(): LearnerMeta;
   /** Unlocked units; excluded items (not practised) are not counted. */
-  unlockedUnits(states: Record<ItemId, ItemState>, meta: LearnerMeta, excluded?: readonly ItemId[]): string[];
+  /** Units open for the learner; `held` units wait for something outside the pack (see `Held`). */
+  unlockedUnits(states: Record<ItemId, ItemState>, meta: LearnerMeta, excluded?: readonly ItemId[], held?: readonly string[]): string[];
   dueCount(states: Record<ItemId, ItemState>): number;
   statusCounts(states: Record<ItemId, ItemState>): Record<Status, number>;
   /** True if today's regular session is already done ("the garden is asleep"). */
@@ -85,8 +86,8 @@ export function createEngine({ pack, config = makeConfig(pack.config ?? {}), clo
     },
     initialStates: () => withDefaults({}),
     initialMeta: () => initialLearnerMeta(config, firstUnits),
-    unlockedUnits: (states, meta, excluded) =>
-      computeUnlocked(pack.units, withDefaults(states), meta.unlockedUnitIds, undefined, new Set(excluded ?? [])),
+    unlockedUnits: (states, meta, excluded, held) =>
+      computeUnlocked(pack.units, withDefaults(states), meta.unlockedUnitIds, undefined, new Set(excluded ?? []), new Set(held ?? [])),
     dueCount(states) {
       const today = clock.today();
       return Object.values(states).filter((s) => isDue(s, today)).length;
