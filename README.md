@@ -25,6 +25,8 @@ Mer att läsa:
   och dess spel.
 - [docs/PLAN-BACKEN.md](docs/PLAN-BACKEN.md) och [docs/BACKEN.md](docs/BACKEN.md):
   Bäcken, addition och subtraktion inom 20: innehållet, platsen och planen.
+- [docs/PLAN-DELAT-MED.md](docs/PLAN-DELAT-MED.md): plan för delat med i
+  Trädgården, med blommor och frukt på plantorna.
 
 ## Principer
 
