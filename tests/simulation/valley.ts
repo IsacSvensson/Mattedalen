@@ -1,4 +1,4 @@
-import { createEngine, ManualClock, seededRng, type Engine, type ItemId, type ItemState, type LearnerMeta, type Rng } from '../../src/engine';
+import { createEngine, diffDays, makeConfig, ManualClock, seededRng, type Engine, type ItemId, type ItemState, type LearnerMeta, type Rng, type StatusConfig } from '../../src/engine';
 import { createAdditionPack } from '../../src/content/addition';
 import { createHundredPack } from '../../src/content/hundred';
 import { createMultiplicationPack, isDivisionId, isFactId, parseDivisionId, parseFactId } from '../../src/content/multiplication';
@@ -32,6 +32,8 @@ export interface ValleyOptions {
   /** The brook's parts Stigen opens after (the app's `PATH_OPENS_AFTER` by default). */
   pathAfter?: readonly string[];
   minutes?: number;
+  /** Other rules for the steps (docs/PLAN-GRANSKNING.md, S2), on top of each pack's own. */
+  status?: Partial<StatusConfig>;
 }
 
 const BROOK_DIFFICULTY: Record<string, number> = {
@@ -76,6 +78,23 @@ export interface ValleyResult {
   byCap: string[];
   answered: number;
   correct: number;
+  /** The garden's multiplications at the end of each week (S2). */
+  weekly: WeekState[];
+  /** The child's own speed: median time of the first two weeks' correct answers on what the child knew before (the brook's easiest parts). */
+  knownRtMs: number | null;
+}
+
+/** The garden's multiplications at the end of a week: shares of all of them, and of the ones that sit. */
+export interface WeekState {
+  /** At least fluent (a bush). */
+  sit: number;
+  automatic: number;
+  /** Of the bushes and trees: the child would not recall it (the model's P(recall) under ½), only work it out. */
+  notRecalled: number;
+  /** Introduced four weeks ago or more and still a sprout, in every open place. */
+  stuck: number;
+  /** Median time of the week's correct answers in the garden, ms. */
+  rtMs: number | null;
 }
 
 const DAY_MS = 86_400_000;
@@ -84,7 +103,8 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
   const clock = new ManualClock(Date.UTC(2026, 0, 5, 15));
   const rng: Rng = seededRng(o.seed + 3000);
   const make = (id: Place['id'], pack: ReturnType<typeof createAdditionPack>, difficulty: (id: ItemId) => number, k: number): Place => {
-    const engine = createEngine({ pack, clock, rng: seededRng(o.seed + k) });
+    const config = o.status ? makeConfig(pack.config ?? {}, { status: o.status }) : undefined;
+    const engine = createEngine({ pack, config, clock, rng: seededRng(o.seed + k) });
     const learner = new SimulatedLearner(o.profile, seededRng(o.seed + 100 + k), difficulty, (i) => engine.item(i).pairId, (i) => engine.item(i).derivedFrom);
     return { id, engine, learner, states: engine.initialStates(), meta: engine.initialMeta(), openDay: null };
   };
@@ -103,6 +123,9 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
   const byCap: string[] = [];
   const sitDay: Record<string, number> = {};
   const timesHistory: number[] = [];
+  const weekly: WeekState[] = [];
+  let weekRts: number[] = [];
+  const knownRts: number[] = [];
   const timesIds = gardenPack.items.filter((i) => isFactId(i.id)).map((i) => i.id);
   let last: DayPlan | undefined;
   let ready: Record<string, string> = {};
@@ -122,8 +145,9 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
     const loads = open.map((p) => ({ id: p.id, due: p.engine.dueCount(p.states) }));
     const plan = planDay(today, o.minutes ?? 12, loads, restedYesterday(last, today, loads.map((l) => l.id)));
     last = plan;
-    if (rng.next() > 6 / 7) continue;
-    for (const p of open) {
+    // A day off still ends its week: the week's state is taken on it too.
+    const plays = rng.next() <= 6 / 7;
+    for (const p of plays ? open : []) {
       const minutes = plan.minutes[p.id];
       if (minutes === undefined) continue;
       const tables = () => {
@@ -142,6 +166,8 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
         clock.advance(rtMs);
         const fb = session.submit(given, rtMs);
         clock.advance(fb.correct ? 2500 : 8000);
+        if (p === garden && fb.correct && q.kind !== 'new') weekRts.push(rtMs);
+        if (p === brook && fb.correct && q.kind !== 'new' && day < 14 && BROOK_KNOWN_BEFORE.includes(q.item.unitId)) knownRts.push(rtMs);
         answered++;
         if (fb.correct) correct++;
       }
@@ -158,8 +184,28 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
       for (const u of p.engine.pack.units) if (sitDay[`${p.id}:${u.id}`] === undefined && partSits(p.engine.pack, p.states, u.id)) sitDay[`${p.id}:${u.id}`] = day;
     }
     // As in the app: a day counts once its sessions are saved.
-    if (open.some((p) => plan.minutes[p.id] !== undefined)) played.push(today);
-    if (day % 7 === 6) timesHistory.push(timesIds.filter((i) => ['fluent', 'automatic'].includes(garden.states[i]!.status)).length / timesIds.length);
+    if (plays && open.some((p) => plan.minutes[p.id] !== undefined)) played.push(today);
+    if (day % 7 === 6) {
+      const sits = timesIds.filter((i) => ['fluent', 'automatic'].includes(garden.states[i]!.status));
+      timesHistory.push(sits.length / timesIds.length);
+      let stuck = 0;
+      let introduced = 0;
+      for (const p of open)
+        for (const s of Object.values(p.states)) {
+          if (s.introducedDay === null) continue;
+          introduced++;
+          if (s.status === 'learning' && diffDays(s.introducedDay, today) >= 28) stuck++;
+        }
+      weekRts.sort((a, b) => a - b);
+      weekly.push({
+        sit: sits.length / timesIds.length,
+        automatic: timesIds.filter((i) => garden.states[i]!.status === 'automatic').length / timesIds.length,
+        notRecalled: sits.length ? sits.filter((i) => garden.learner.recallProbability(i) < 0.5).length / sits.length : 0,
+        stuck: introduced ? stuck / introduced : 0,
+        rtMs: weekRts.length ? weekRts[Math.floor(weekRts.length / 2)]! : null,
+      });
+      weekRts = [];
+    }
   }
   return {
     firstDay,
@@ -169,5 +215,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
     timesSit: (week) => timesHistory[Math.min(week, timesHistory.length) - 1] ?? 0,
     answered,
     correct,
+    weekly,
+    knownRtMs: knownRts.length ? knownRts.sort((a, b) => a - b)[Math.floor(knownRts.length / 2)]! : null,
   };
 }

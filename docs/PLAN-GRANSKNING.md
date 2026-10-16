@@ -84,15 +84,19 @@ Gångerfakta som sitter:
 
 | Elev | Vecka | Utan Stigen | Ingen väntan | Som i appen | Väntan utan tak |
 |---|---|---|---|---|---|
-| Genomsnittlig | 26 | 84 % (81–90) | 74 % (38–80) | 75 % (33–84) | 76 % (32–84) |
-| Genomsnittlig | 52 | 90 % (86–95) | 86 % (67–88) | 84 % (77–90) | 78 % (63–90) |
-| Stark | 26 | 100 % | 97 % (93–100) | 97 % (96–99) | 97 % (93–99) |
-| Stark | 52 | 100 % | 100 % | 100 % | 99 % |
-| Svag | 52 | 1 % (0–11) | 1 % | 1 % | 1 % |
+| Genomsnittlig | 26 | 74 % (60–78) | 68 % (26–78) | 68 % (21–74) | 67 % (23–74) |
+| Genomsnittlig | 52 | 90 % (86–94) | 86 % (67–88) | 86 % (77–93) | 79 % (63–93) |
+| Stark | 26 | 100 % | 96 % (92–98) | 96 % (92–98) | 96 % (87–98) |
+| Stark | 52 | 100 % | 100 % (98–100) | 100 % (99–100) | 99 % |
+| Svag | 52 | 2 % (0–11) | 2 % (0–11) | 2 % (0–11) | 2 % (0–11) |
+
+*Rättat i S2.* Simuleringen tog veckans läge bara när barnet spelade på
+veckans sista dag. Då hamnade ”vecka 26” några veckor för sent. Siffrorna ovan
+är körda igen. Slutsatserna står kvar, men väntan kostar inget efter ett år.
 
 - **Den tredje platsen kostar mer än väntan.** För ett genomsnittligt barn går
-  det från 90 % till 86 % när dagen delas på tre platser, och till 84 % med
-  väntan. Efter ett halvår är skillnaden större: 84 % mot 75 %.
+  det från 90 % till 86 % när dagen delas på tre platser. Väntan kostar inget
+  efter ett år. Efter ett halvår är skillnaden större: 74 % mot 68 %.
 - **Ett frö kan lura.** Mellan frön skiljer det upp till 50 procentenheter efter
   ett halvår. Siffrorna i H5 kom från ett frö.
 - **Ett starkt barn** får alla tabeller inom 15 veckor, några veckor senare
@@ -179,3 +183,134 @@ S2–S4 efter R3.
   räknestigen för sig, till exempel ”2 försök, 50 % rätt · 2 gånger via
   räknestigen”. Äldre sammanfattad historik skiljer inte på dem.
 
+
+## Fynd från S2
+
+Hela dalen kördes ett år med tio slumpfrön per elev
+(`tests/simulation/timeReport.test.ts`). Varje siffra är medianen, med det
+lägsta och högsta värdet inom parentes.
+
+Fem elever jämfördes. Den svaga, den genomsnittliga och den starka är samma som
+i R2. Två nya elever minns som den genomsnittliga, men svarar långsamt:
+
+- **Långsam:** svarar på det den redan kan på ungefär 4,7 s.
+- **Mycket långsam:** svarar på det den redan kan på ungefär 6 s.
+
+Det kan vara ett barn som skriver långsamt, eller som kollar svaret innan det
+svarar.
+
+Fem regler för busken jämfördes:
+
+- **Som nu:** rätt under 5 s två dagar.
+- **10 s:** rätt under 10 s två dagar.
+- **Utan tid:** rätt två dagar, hur lång tid det än tar. Tiden gäller bara trädet.
+- **Egen fart × 2:** under dubbla barnets egen fart, aldrig under 5 s. Trädet
+  kräver då under 1,3 gånger den egna farten, aldrig under 3 s.
+- **Egen fart × 1,6:** samma, men under 1,6 gånger den egna farten.
+
+Barnets egna fart är mediantiden på det barnet redan kunde (bäckens första
+delar) under de två första veckorna.
+
+### Gångerfakta som är buske eller träd
+
+| Elev | Vecka | Som nu | 10 s | Utan tid | Egen fart × 2 | Egen fart × 1,6 |
+|---|---|---|---|---|---|---|
+| Stark | 26 | 96 % | 98 % | 98 % | 96 % | 96 % |
+| Genomsnittlig | 26 | 68 % (21–74) | 95 % | 95 % | 65 % (26–74) | 65 % (26–74) |
+| Genomsnittlig | 52 | 86 % | 94 % | 93 % | 83 % | 83 % |
+| Svag | 52 | 2 % (0–11) | 52 % | 65 % | 41 % | 10 % |
+| Långsam | 26 | 0 % | 49 % | 73 % | 49 % (6–62) | 12 % |
+| Långsam | 52 | 0 % | 79 % | 93 % | 79 % (39–88) | 44 % |
+| Mycket långsam | 52 | 0 % | 45 % | 88 % | 71 % (37–88) | 29 % |
+
+### När platserna öppnar, vecka
+
+| Elev | Plats | Som nu | 10 s | Utan tid | Egen fart × 2 | Egen fart × 1,6 |
+|---|---|---|---|---|---|---|
+| Genomsnittlig | Trädgården | 5 (4–9) | 3 | 3 | 6 (4–9) | 6 (4–9) |
+| Genomsnittlig | Stigen | 17 (9–23) | 9 | 9 | 17 (9–21) | 17 (9–21) |
+| Svag | Trädgården | 38 (26–51) | 4 | 4 | 7 (5–29) | 34 |
+| Långsam | Trädgården | aldrig | 5 | 3 | 5 (4–14) | 15 |
+| Långsam | Stigen | aldrig | 21 | 12 | 22 (12–36) | 27 |
+| Mycket långsam | Trädgården | aldrig | 18 | 3 | 5 (4–13) | 19 |
+
+### Buskar som barnet inte minns, vecka 26
+
+Simuleringen vet om barnet minns en fakta eller bara räknar ut den. Här är
+andelen av buskarna och träden som barnet inte skulle minnas (mindre än hälften
+så troligt).
+
+| Elev | Som nu | 10 s | Utan tid | Egen fart × 2 | Egen fart × 1,6 |
+|---|---|---|---|---|---|
+| Genomsnittlig | 25 % | 85 % | 85 % | 26 % | 26 % |
+| Svag | – | 94 % | 89 % | 50 % | – |
+| Långsam | – | 72 % | 89 % | 44 % | 0 % |
+| Mycket långsam | – | 38 % | 86 % | 74 % | 14 % |
+
+”–” betyder att barnet inte har några buskar vecka 26.
+
+### Vad siffrorna säger
+
+- **Felet är större än vi trodde.** Ett barn som svarar rätt på 92 % men
+  långsamt får inte en enda buske på ett år. Trädgården öppnar aldrig, och
+  efter ett halvår är nästan hälften av det barnet övat grodd sedan en månad.
+- **Busken utan tid löser det, men busken slutar betyda något.** Efter ett
+  halvår är 85–89 % av buskarna sådant barnet räknar ut, inte minns. Det gäller
+  också det genomsnittliga barnet. Barnet går vidare fortare, gör fler fel
+  (81 % rätt blir 78 %, för det svaga barnet 78 % blir 69 %) och Stigen öppnar
+  åtta veckor tidigare.
+- **10 s har samma problem** för det genomsnittliga barnet, och räcker ändå
+  inte för det mycket långsamma.
+- **Egen fart × 2 ändrar nästan inget för det genomsnittliga och det starka
+  barnet.** Gränsen blir 5 s för dem som i dag. De små skillnaderna ligger inom
+  slumpen. Det långsamma barnet får trädgården vecka 5 och 79 % buskar efter
+  ett år, ungefär som ett genomsnittligt barn. För det mycket långsamma barnet
+  är gränsen 12 s, och då är tre av fyra buskar sådant barnet räknar ut.
+- **× 1,6 är försiktigare.** Buskarna är nästan alltid sådant barnet minns, men
+  det långsamma barnet får trädgården först vecka 15 och 44 % efter ett år.
+- **Det svaga barnet** har ett annat problem: det minns sämre. Egen fart × 2
+  öppnar trädgården vecka 7 i stället för 38, men hälften av buskarna är sådant
+  barnet räknar ut.
+- **Trädet:** det genomsnittliga barnet får inga träd på ett år, med någon regel.
+  Det starka barnet får 80 %. Det kan bero på modellen. Piloten får visa det.
+- Trädgården mäter tiden till svaret är klart. Bäcken och Stigen mäter tiden
+  till första siffran.
+
+Modellen är en modell. Den vet inte hur ett riktigt barn räknar ut 7 × 8. Men
+den visar att gränsen inte kan vara samma för alla barn, och inte heller kan tas
+bort.
+
+### Förslag
+
+**Busken efter barnets egen fart, × 2.** Gränsen är dubbla barnets egen fart på
+det barnet redan kan, aldrig under 5 s. Det är samma krav som i dag för ett
+genomsnittligt barn (5 s mot 2,3 s), i barnets egen takt. Trädet kräver svar
+utan alternativ under 1,3 gånger den egna farten, aldrig under 3 s. En buske
+som barnet bara räknar ut blir alltså inte ett träd.
+
+Så kan det byggas, om du säger ja:
+
+1. **Motorn:** varje plats mäter barnets egen fart på sina lättaste fakta (vid
+   bäcken +0, +1 och +10, i trädgården ×1, ×2 och ×10, och startkollen). Det är
+   medianen av de senaste 20 rätta svaren. Farten följer barnet när det blir
+   snabbare. Gränserna kan bara bli längre än i dag, aldrig kortare.
+2. **För vuxna:** platsens sida visar barnets egen fart och gränserna, till
+   exempel ”Egen fart 4,7 s. En buske kräver under 9,4 s.”
+3. **Tester och simulering:** samma siffror som i dag för det genomsnittliga
+   och starka barnet. Det långsamma barnet fastnar inte.
+4. **Dokumentation** i TRADGARDEN, BACKEN och STIGEN.
+
+Andra vägar:
+
+- **Ett val för vuxna,** ”Ge mer tid”. Det är enklare, men en vuxen måste först
+  se att barnet fastnar.
+- **× 1,6** i stället för × 2, om buskarna ska vara säkrare.
+- **× 2 med ett tak på 10 s.** Det mycket långsamma barnet får då trädgården
+  vecka 18, men fler av buskarna är sådant barnet minns.
+- **Tiden till första siffran också i trädgården.** Det hjälper ett barn som
+  skriver långsamt, men inte ett som tänker långsamt.
+
+### Frågor till piloten
+
+- Hur snabbt svarar barnen på det de redan kan? Siffran styr gränsen.
+- Får genomsnittliga barn några träd? Om inte är 3 s för strängt.

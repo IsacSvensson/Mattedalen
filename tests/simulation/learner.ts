@@ -82,6 +82,14 @@ export const STRONG: LearnerProfile = {
   hardBias: -0.3,
 };
 
+/**
+ * Remembers like the average child but answers slowly (docs/PLAN-GRANSKNING.md,
+ * S2): a well-known fact takes about 5 s ("långsam") or 6 s ("mycket långsam"),
+ * e.g. a child who writes slowly or checks the answer before giving it.
+ */
+export const SLOW: LearnerProfile = { ...AVERAGE, name: 'långsam', minRtMs: 3000, latencyF: 2600 };
+export const VERY_SLOW: LearnerProfile = { ...AVERAGE, name: 'mycket långsam', minRtMs: 4000, latencyF: 3000 };
+
 interface Trace {
   t: number;
   d: number;
