@@ -28,8 +28,8 @@ En nionde del på Stigen: 75 − 23, 72 − 38 och 71 − 68. Den kommer efter
   till tiotalet (68 + __ = 70). De stegen hör till den nya delen och kommer först
   i den. Ett steg som en tidigare del redan har stannar där (47 + __ = 50).
 - **Förväxlingen** ”minsta från största” får en egen förklaring: 72 − 38 = 46
-  kommer av 8 − 2 i stället för 2 − 8. ”Här går det inte att ta 8 från 2. Gå
-  över tiotalet: 72 − 30 = 42, 42 − 8 = 34.”
+  kommer av 8 − 2 i stället för 2 − 8. ”Det går inte att ta 8 från 2. Ta
+  tiotalen först: 72 − 30 = 42, sedan 42 − 8.”
 - **Stigens koll** får en kategori ”Tvåsiffrigt minus”.
 - **QR-koden och sparade framsteg:** de nya uppgifterna läggs sist, och paketets
   version blir 2. En äldre kod läses som förut, och det nya börjar från början.
@@ -61,8 +61,9 @@ En nionde del på Stigen: 75 − 23, 72 − 38 och 71 − 68. Den kommer efter
   delens andel som sitter sjunka för barn som redan har den. Nu ändras inga gamla
   delar. Uppgiften visas ändå som det den är: hopp på tio, med hundrarutan och
   samma felsvar som i ”Hoppa tio”.
-- **Den öppnar när tvåsiffrigt plus sitter.** Först öppnade den samtidigt. Då
-  trängdes delarna, och tvåsiffrigt plus satt sämre efter ett halvår.
+- **Den öppnar när tvåsiffrigt plus sitter,** inte samtidigt, så att de två
+  delarna inte trängs om tiden. Med ett eller två frön gick det inte att se
+  någon säker skillnad mellan de två sätten.
 - **Den är svårast på stigen.** I Stigens egen simulering, med åtta frön under
   ett halvår, svarar ett genomsnittligt barn rätt på 78 % mot 79,5 % utan den.
   Tvåsiffrigt plus sitter till 74 % mot 76 %, och det skiljer 42–92 % mellan
