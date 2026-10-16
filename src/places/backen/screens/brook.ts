@@ -1,4 +1,4 @@
-import { systemClock } from '../../../engine';
+import { systemClock, type ItemId, type ItemState } from '../../../engine';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { avatarIcon } from '../../../shell/components/avatars';
@@ -29,13 +29,8 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
   if (fresh && !(await ctx.store.getSetting<boolean>(offeredKey(profile)))) {
     return showBrookPlacementOffer(ctx, profile, () => showBrook(ctx, profile));
   }
-  const unlocked = new Set(engine.unlockedUnits(states, meta));
   const asleep = engine.dailyDone(meta);
-  const stones = bridgeStones(pack, states, unlocked);
-  const laid = laidCount(stones);
-  // What the child is on now: the first open part that is not laid yet. No counts: the bridge shows what sits.
-  const open = partProgress(pack, states, unlocked).filter((p) => p.open);
-  const now = open.find((p) => p.known < LAID_AT * p.total) ?? open.at(-1);
+  const picture = brookPicture(states, new Set(engine.unlockedUnits(states, meta)));
   // Bäckens koll comes first on the days it is due (about every seventh play day).
   const checkFirst =
     !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(checkLaterKey(profile.id)));
@@ -69,14 +64,25 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} bäck`),
       ),
     ),
-    h('div', { class: 'brook-bridge' }, bridge(stones)),
-    h('p', { class: 'sr-only' }, `Bron har ${laid} av ${stones.length} stenar på plats.`),
-    h(
-      'div',
-      { class: 'garden-side' },
-      now ? h('p', { class: 'place-now' }, icon('steps'), h('span', null, 'Nu: ', h('strong', null, now.understanding ? `${now.title} (vågen)` : now.title))) : null,
-      actions,
-    ),
+    picture.art,
+    h('p', { class: 'sr-only' }, picture.artText),
+    h('div', { class: 'garden-side' }, picture.line, actions),
   );
   show(ctx, view);
+}
+
+/**
+ * The bridge and what the child is on now, for the brook's page and its scene
+ * in the valley. What the child is on: the first open part that is not laid
+ * yet. No counts: the bridge shows what sits.
+ */
+export function brookPicture(states: Record<ItemId, ItemState>, unlocked: ReadonlySet<string>): { art: HTMLElement; artText: string; line: HTMLElement | null } {
+  const stones = bridgeStones(pack, states, unlocked);
+  const open = partProgress(pack, states, unlocked).filter((p) => p.open);
+  const now = open.find((p) => p.known < LAID_AT * p.total) ?? open.at(-1);
+  return {
+    art: h('div', { class: 'brook-bridge' }, bridge(stones)),
+    artText: `Bron har ${laidCount(stones)} av ${stones.length} stenar på plats.`,
+    line: now ? h('p', { class: 'place-now' }, icon('steps'), h('span', null, 'Nu: ', h('strong', null, now.understanding ? `${now.title} (vågen)` : now.title))) : null,
+  };
 }

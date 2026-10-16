@@ -1,11 +1,11 @@
-import { atLeast, systemClock, type ContentPack, type ItemId, type ItemState } from '../../../engine';
+import { atLeast, systemClock, type ContentPack, type Engine, type ItemId, type ItemState, type LearnerMeta } from '../../../engine';
 import { checkDue } from '../../../shell/check';
 import { gardenCheckLaterKey, showGardenCheckOffer } from './check';
 import { focusTable, formatDivision, formatFact, isDivisionId, isFactId } from '../../../content/multiplication';
 import { harvestTables } from '../division';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
-import { gardenGrid } from '../components/grid';
+import { gardenGrid, type GridOptions } from '../components/grid';
 import { BLOOM_LABEL, bloomFor, bloomIcon, stageFor, type Bloom, type Stage } from '../../../shell/components/plant';
 import { DEFAULT_DIVISION_SIGN, mathNodes } from '../../../shell/divisionSign';
 import { avatarIcon } from '../../../shell/components/avatars';
@@ -38,34 +38,17 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
   // The first time in the garden, with nothing planted yet: offer the start check (once).
   const fresh = Object.values(states).every((s) => s.status === 'new');
   if (fresh && !(await ctx.store.getSetting<boolean>(gardenOfferedKey(profile)))) return showPlacementOffer(ctx, profile);
-  // Tables that wait for their part on Stigen are not dug yet (docs/PLAN-HUNDRA.md).
-  const waits = await gardenWaits(ctx, profile, { states, meta }, engine);
-  const unlockedUnits = new Set(engine.unlockedUnits(states, meta, undefined, waits.held));
-  const nextWaiting = pack.units.find((u) => waits.waitingNow.includes(u.id));
-  const unlockedItemIds = new Set(pack.units.filter((u) => unlockedUnits.has(u.id)).flatMap((u) => u.itemIds));
   const asleep = engine.dailyDone(meta);
   // Trädgårdens koll comes first on the days it is due (about every seventh play day in the garden).
   const checkFirst =
     !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(gardenCheckLaterKey(profile.id)));
   const play = () => showSession(ctx, profile, 'daily');
 
-  // The plants are the multiplications; the divisions grow on them as blossoms and fruit.
-  const counts: Record<Stage, number> = { locked: 0, soil: 0, seed: 0, sprout: 0, bush: 0, tree: 0 };
-  const blooms: Record<Bloom, number> = { none: 0, blossom: 0, kart: 0, fruit: 0 };
-  for (const id of Object.keys(states)) {
-    if (isFactId(id)) counts[stageFor(states[id], unlockedItemIds.has(id))]++;
-    else if (isDivisionId(id)) blooms[bloomFor(states[id])]++;
-  }
-
   const sign = profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN;
   const info = h('p', { class: 'grid-info', 'aria-live': 'polite' }, ' ');
   const harvest = harvestTables(states);
-  const grid = gardenGrid({
-    states,
-    unlockedItemIds,
+  const picture = await gardenPicture(ctx, profile, { states, meta, engine }, {
     highlight,
-    masteredTables: knownTables(pack, states),
-    harvestTables: harvest,
     onSelect: ({ a, b, stage, bloom }) => {
       // Only facts the child has met show their answer.
       const fact = formatFact(a, b);
@@ -125,30 +108,67 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
       ),
     ),
     await bloomNews(ctx, profile, states),
-    h('div', { class: 'garden-bed' }, grid),
-    known.size
-      ? h('p', { class: 'sr-only' }, `Tabeller du kan: ${[...known].map((t) => `×${t}`).join(', ')}.`)
-      : null,
+    picture.art,
     // Beside the bed on wide screens, below it on phones.
     h(
       'div',
       { class: 'garden-side' },
       info,
-      // Before the first table: what comes first, so a bed of meadow is not a puzzle.
-      unlockedUnits.has('u2')
-        ? nextWaiting
-          ? h('p', { class: 'garden-next' }, icon('lantern'), waitText(nextWaiting.id))
-          : null
-        : h('p', { class: 'garden-next' }, icon('basket'), 'Först: lika stora grupper. Sedan planterar vi ×2.'),
+      picture.line,
       // No counts under the bed: the plants themselves show what the child knows (docs/PLAN-GRANSKNING.md).
       // A screen reader gets the bed in words instead.
-      h('p', { class: 'sr-only' }, bedInWords(counts, blooms)),
+      h('p', { class: 'sr-only' }, picture.artText),
       actions,
       extras,
       canChallenge ? null : h('p', { class: 'extras-note' }, `Rekordjakten öppnar när ${CHALLENGE_MIN_FACTS} plantor blivit buskar.`),
     ),
   );
   show(ctx, view);
+}
+
+/**
+ * The bed and the line under it, for the garden's page and its scene in the
+ * valley. Tables that wait for their part on Stigen are not dug yet
+ * (docs/PLAN-HUNDRA.md). On the page the squares can be tapped (`onSelect`);
+ * in the valley the bed is only a picture.
+ */
+export async function gardenPicture(
+  ctx: AppContext,
+  profile: Profile,
+  { states, meta, engine }: { states: Record<ItemId, ItemState>; meta: LearnerMeta; engine: Engine },
+  opts: { highlight?: Set<ItemId>; onSelect?: GridOptions['onSelect'] } = {},
+): Promise<{ art: HTMLElement; artText: string; line: HTMLElement | null }> {
+  const waits = await gardenWaits(ctx, profile, { states, meta }, engine);
+  const unlockedUnits = new Set(engine.unlockedUnits(states, meta, undefined, waits.held));
+  const nextWaiting = pack.units.find((u) => waits.waitingNow.includes(u.id));
+  const unlockedItemIds = new Set(pack.units.filter((u) => unlockedUnits.has(u.id)).flatMap((u) => u.itemIds));
+  // The plants are the multiplications; the divisions grow on them as blossoms and fruit.
+  const counts: Record<Stage, number> = { locked: 0, soil: 0, seed: 0, sprout: 0, bush: 0, tree: 0 };
+  const blooms: Record<Bloom, number> = { none: 0, blossom: 0, kart: 0, fruit: 0 };
+  for (const id of Object.keys(states)) {
+    if (isFactId(id)) counts[stageFor(states[id], unlockedItemIds.has(id))]++;
+    else if (isDivisionId(id)) blooms[bloomFor(states[id])]++;
+  }
+  const known = knownTables(pack, states);
+  const grid = gardenGrid({
+    states,
+    unlockedItemIds,
+    highlight: opts.highlight,
+    masteredTables: known,
+    harvestTables: harvestTables(states),
+    onSelect: opts.onSelect,
+    still: !opts.onSelect,
+  });
+  return {
+    art: h('div', { class: 'garden-bed' }, grid),
+    artText: bedInWords(counts, blooms) + (known.size ? ` Tabeller du kan: ${[...known].map((t) => `×${t}`).join(', ')}.` : ''),
+    // Before the first table: what comes first, so a bed of meadow is not a puzzle.
+    line: unlockedUnits.has('u2')
+      ? nextWaiting
+        ? h('p', { class: 'garden-next' }, icon('lantern'), waitText(nextWaiting.id))
+        : null
+      : h('p', { class: 'garden-next' }, icon('basket'), 'Först: lika stora grupper. Sedan planterar vi ×2.'),
+  };
 }
 
 /** What grows in the bed, in words and without counts: "I lådan växer frön, plantor och buskar, med blommor." */

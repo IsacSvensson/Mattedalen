@@ -36,9 +36,11 @@ async function toPath(page: Page, states: Record<string, SeedState>, unlockedUni
   await page.getByRole('button', { name: /^Stigen\./ }).click();
   // The start check is offered the first time; these children start from the beginning.
   const offer = page.getByRole('heading', { name: 'Kan du redan talen till 100?' });
-  await expect(offer.or(page.locator('.path-trail'))).toBeVisible();
+  // Stigen's own page, not its scene in the valley (which draws the same trail).
+  const own = page.getByRole('heading', { name: /s? stig$/ });
+  await expect(offer.or(own)).toBeVisible();
   if (await offer.isVisible()) await page.getByRole('button', { name: 'Börja från början' }).click();
-  await expect(page.locator('.path-trail')).toBeVisible();
+  await expect(own).toBeVisible();
 }
 
 /** Answers questions until `stop` is visible, at most `max` questions. */
@@ -130,9 +132,10 @@ test('the path has a post at every ten and a lantern for each part, lit when it 
   await expect(page.locator('.path .sr-only')).toContainText('På stigen lyser 1 av 8 lyktor. Du är vid lyktan för tiotal och ental.');
   await expect(page.locator('.place-now')).toHaveText('Nu: Tiotal och ental');
   await expect(page.locator('.garden-side')).not.toContainText(/\d+ av \d+/);
-  // Back to the valley: the small path on the map has one light.
+  // Back to the valley: the path in its scene, the same lantern lit.
   await page.getByRole('button', { name: 'Till dalen' }).click();
-  await expect(page.locator('.place-path .tr-glass.lit')).toHaveCount(1);
+  await expect(page.locator('.world-scene .tr-glass.lit')).toHaveCount(1);
+  await expect(page.locator('.world-scene .place-now', { hasText: 'Tiotal och ental' })).toHaveCount(1);
 });
 
 test('a new child builds whole tens with rods first, then answers', async ({ page }) => {

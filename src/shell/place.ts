@@ -7,24 +7,29 @@ import type { IconName } from './components/icons';
 export type ProfileChange = Partial<Omit<Profile, 'settings'>> & { settings?: Partial<Profile['settings']> };
 export type SaveProfile = (change: ProfileChange) => Promise<void>;
 
-/** How a place looks on the valley map for one child. */
-export interface PlaceOnMap {
-  /** Class of the place's spot on the map, e.g. `place-garden`. */
-  spot: string;
+/**
+ * A place's scene in the valley for one child (docs/PLAN-DALEN.md): the place
+ * as it is, with what the child is on now and the place's own button.
+ */
+export interface PlaceScene {
   /** Today's state, e.g. `thirsty`; used as the class `mood-…`. */
   mood: string;
   /** Today's state in words, shown and read aloud. */
   moodText: string;
   moodIcon: Element;
-  /** What grows or is built there: the child's knowledge. */
+  /** The place as it is: the bridge, the path with its lanterns or the bed. Never a control. */
   art: HTMLElement;
+  /** The picture in words, for screen readers. */
+  artText: string | null;
+  /** What the child is on now, e.g. "Nu: Tiokamrater", or what waits. */
+  line: HTMLElement | null;
   /** Icon on the name, e.g. a moon while the place rests. */
   nameIcon: Element | null;
   /** Whole areas known: one sunflower each on the hill. */
   sunflowers: number;
   /** The same in words, for screen readers. */
   landscapeText: string | null;
-  /** The main button to the place, e.g. "Gå till trädgården". */
+  /** The place's button, e.g. "Gå till trädgården". */
   go: { label: string; icon: IconName };
   /** Items due for review today: the day's time is shared after this. */
   due: number;
@@ -40,11 +45,12 @@ export interface Place {
   pack: ContentPack;
   /** The place's own screen. */
   open(ctx: AppContext, profile: Profile): Promise<void>;
-  onMap(ctx: AppContext, profile: Profile): Promise<PlaceOnMap>;
+  /** The place's scene in the valley. */
+  scene(ctx: AppContext, profile: Profile): Promise<PlaceScene>;
   /**
-   * Whether the place is open to this child. A place that is not open yet is
-   * drawn resting on the map, with `closedText` saying when it opens. Without
-   * this, the place is always open.
+   * Whether the place is open to this child. A place that is not open yet
+   * rests in the valley, with `closedText` saying when it opens. Without this,
+   * the place is always open.
    */
   isOpen?(ctx: AppContext, profile: Profile): Promise<boolean>;
   /** When a closed place opens, in words for the child, e.g. "Trädgården öppnar när …". */

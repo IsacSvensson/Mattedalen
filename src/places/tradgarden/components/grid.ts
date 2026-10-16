@@ -16,6 +16,8 @@ export interface GridOptions {
   /** Tables whose delat med the child knows completely: a harvest basket by their number. */
   harvestTables?: Set<number>;
   onSelect?: (info: { a: number; b: number; stage: Stage; bloom: Bloom }) => void;
+  /** Only a picture (the garden's scene in the valley): no buttons, and words come from elsewhere. */
+  still?: boolean;
 }
 
 /**
@@ -24,7 +26,7 @@ export interface GridOptions {
  * The square also holds the division ab ÷ b = a: its blossoms and fruit grow
  * on the plant (see `Bloom`).
  */
-export function gardenGrid({ states, unlockedItemIds, highlight, masteredTables, harvestTables, onSelect }: GridOptions): HTMLElement {
+export function gardenGrid({ states, unlockedItemIds, highlight, masteredTables, harvestTables, onSelect, still }: GridOptions): HTMLElement {
   const head = (n: number) => {
     const basket = harvestTables?.has(n) ? h('span', { class: 'harvest-mark', title: `Hela delat med i ×${n} kan du!` }, icon('basket')) : null;
     if (masteredTables?.has(n)) return sunflowerLabel(n, basket);
@@ -40,20 +42,24 @@ export function gardenGrid({ states, unlockedItemIds, highlight, masteredTables,
       const division = divisionInSquare(a, b);
       const bloom = bears(stage) ? bloomFor(states[division]) : 'none';
       const grew = highlight?.has(id) || highlight?.has(division);
+      const cls = `grid-cell stage-${stage}${a === b ? ' diagonal' : ''}${grew ? ' grew' : ''}`;
       cells.push(
-        h(
-          'button',
-          {
-            class: `grid-cell stage-${stage}${a === b ? ' diagonal' : ''}${grew ? ' grew' : ''}`,
-            type: 'button',
-            'aria-label': `${formatFact(a, b)}: ${STAGE_LABEL[stage]}${bloom !== 'none' ? ` med ${BLOOM_LABEL[bloom]}` : ''}`,
-            onclick: () => onSelect?.({ a, b, stage, bloom }),
-          },
-          plantIcon(stage, '', bloom),
-        ),
+        still
+          ? h('span', { class: cls }, plantIcon(stage, '', bloom))
+          : h(
+              'button',
+              {
+                class: cls,
+                type: 'button',
+                'aria-label': `${formatFact(a, b)}: ${STAGE_LABEL[stage]}${bloom !== 'none' ? ` med ${BLOOM_LABEL[bloom]}` : ''}`,
+                onclick: () => onSelect?.({ a, b, stage, bloom }),
+              },
+              plantIcon(stage, '', bloom),
+            ),
       );
     }
   }
+  if (still) return h('div', { class: 'garden-grid still', 'aria-hidden': 'true' }, cells);
   return h('div', { class: 'garden-grid', role: 'group', 'aria-label': 'Trädgården' }, cells);
 }
 

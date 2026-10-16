@@ -153,12 +153,12 @@ Barnets djur står vid lyktan för den del barnet är på: den första öppna de
 som inte är tänd. Under stigen finns delarna med hur mycket som sitter, som vid
 bäcken. Knappen heter ”Gå på stigen”. När dagens pass är klart vilar stigen.
 
-### På kartan
+### I dalen
 
-Stigen står mellan bron och trädgården, med skylten bredvid. Den visar stolparna
-i litet format och ett ljus för varje öppen del. Med tre platser blir kartan lite
-högre på en stående telefon, så att varje plats får ett eget band. På en liggande
-telefon står stigen i hörnet till höger om bäckens skylt.
+Stigens scen står mellan bäcken och trädgården. Den visar samma stolpar och
+lyktor som här, med barnets djur vid lyktan och raden ”Nu: …” under
+(`pathPicture` i `screens/path.ts`). Innan Stigen öppnar vilar scenen, med raden
+om när den öppnar.
 
 ### Bilderna i passet
 

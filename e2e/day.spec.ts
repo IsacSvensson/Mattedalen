@@ -66,10 +66,10 @@ test('a new child starts at the brook; the garden rests until a grown-up opens i
   // The garden is on the map, resting, and says when it opens; the main button goes to the brook.
   const garden = page.getByRole('button', { name: `Trädgården. ${CLOSED}` });
   await expect(garden).toBeDisabled();
-  await expect(page.locator('.place-garden')).toHaveClass(/mood-closed/);
+  await expect(page.locator('.world-scene.mood-closed')).toHaveCount(2);
   await expect(page.getByText(CLOSED)).toBeVisible();
-  await expect(page.locator('.place-garden .seed-packet')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Gå till bäcken' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Gå till trädgården' })).toHaveCount(0);
+  await expect(page.locator('.world-scene.here .world-sign')).toHaveText('Bäcken');
 
   // A grown-up opens it.
   await page.getByRole('button', { name: 'Byt spelare' }).click();
@@ -100,7 +100,8 @@ test('the garden opens by itself when doubles and going over ten sit at the broo
     unlockedUnitIds: ['ettmer', 'noll', 'sma', 'tio', 'tiokamrater', 'dubblor', 'inom10', 'naradubblor', 'overtio'],
   });
   await page.locator('.profile-tile', { hasText: 'Bo' }).click();
-  await expect(page.getByRole('button', { name: 'Trädgården. Nya frön väntar i trädgården.' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: /^Trädgården\./ })).toBeEnabled();
+  await expect(page.locator('.world-scene.closed')).toHaveCount(0);
 });
 
 test("the day's time is shared after what is due, not in halves, and kept for the day", async ({ page }) => {

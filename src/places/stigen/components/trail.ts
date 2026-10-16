@@ -36,11 +36,10 @@ export function currentPart(lanterns: Lantern[]): number {
 const POSTS = 10;
 
 /**
- * The path. `large` on Stigen's own screen, with the child's animal by the
- * post of the part it is on; `mini` on the map.
+ * The path, with the child's animal by the post of the part it is on (on
+ * Stigen's own screen).
  */
-export function trail(lanterns: Lantern[], size: 'large' | 'mini' = 'large', walker?: Element): HTMLElement {
-  if (size === 'mini') return h('span', { class: 'trail mini' }, miniTrail(lanterns));
+export function trail(lanterns: Lantern[], walker?: Element): HTMLElement {
   const at = currentPart(lanterns);
   const el = h('div', { class: 'trail large' }, largeTrail(lanterns));
   if (walker) {
@@ -88,25 +87,4 @@ function lanternMarkup(x: number, known: number): string {
     (fill > 0 ? `<path class="tr-flame${lit ? ' lit' : ''}" d="M${x} ${74 - 6 * k} c ${3 * k} ${4 * k}, ${3.6 * k} ${6 * k}, 0 ${8 * k} c ${-3.6 * k} ${-2 * k}, ${-3 * k} ${-4 * k}, 0 ${-8 * k} Z"/>` : '') +
     `<rect class="tr-base" x="${x - 8}" y="82" width="16" height="4" rx="1.5"/>`
   );
-}
-
-/** On the map: a short stretch of path with small posts and a dot of light for each open part. */
-function miniTrail(lanterns: Lantern[]): SVGSVGElement {
-  const w = 200;
-  const svg = s('svg', { class: 'trail-svg mini', viewBox: `0 0 ${w} 64`, 'aria-hidden': 'true' });
-  let markup = `<path class="tr-path" d="M2 54 C 50 50, 100 58, 150 52 S 190 50, 198 52"/>`;
-  for (let i = 0; i < POSTS; i++) {
-    const x = 11 + i * 19.8;
-    markup += `<rect class="tr-post" x="${x - 2}" y="22" width="4" height="32" rx="1"/>`;
-    const lantern = i >= 1 && i <= lanterns.length ? lanterns[i - 1] : undefined;
-    if (lantern?.open) {
-      const lit = lantern.known >= LIT_AT;
-      markup +=
-        (lit ? `<circle class="tr-glow" cx="${x + 6}" cy="30" r="9"/>` : '') +
-        `<path class="tr-arm" d="M${x} 24 H${x + 7}"/>` +
-        `<rect class="tr-glass${lit ? ' lit' : ''}" x="${x + 3}" y="26" width="6" height="8" rx="1"/>`;
-    }
-  }
-  svg.innerHTML = markup;
-  return svg;
 }

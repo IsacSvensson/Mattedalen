@@ -14,7 +14,7 @@ import { pathCheckLaterKey } from '../check';
 import { showPathCheckOffer } from './check';
 import { offeredKey, showPathPlacementOffer } from './placement';
 import { checkDue } from '../../../shell/check';
-import { systemClock } from '../../../engine';
+import { systemClock, type ItemId, type ItemState } from '../../../engine';
 import { showPathSession } from './session';
 
 /**
@@ -34,9 +34,7 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
   const held = await pathHeld(ctx, profile);
   const unlocked = new Set(engine.unlockedUnits(states, meta, undefined, held));
   const asleep = engine.dailyDone(meta);
-  const lights = lanterns(pack, states, unlocked);
-  const lit = litCount(lights);
-  const now = lights[currentPart(lights)];
+  const picture = pathPicture(states, unlocked, avatarIcon(profile.avatar));
   // Stigens koll comes first on the days it is due (about every seventh play day on Stigen).
   const checkFirst =
     !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(pathCheckLaterKey(profile.id)));
@@ -70,15 +68,28 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} stig`),
       ),
     ),
-    h('div', { class: 'path-trail' }, trail(lights, 'large', avatarIcon(profile.avatar))),
-    h('p', { class: 'sr-only' }, `På stigen lyser ${lit} av ${lights.length} lyktor.${now ? ` Du är vid lyktan för ${now.title.toLowerCase()}.` : ''}`),
-    h(
-      'div',
-      { class: 'garden-side' },
-      // What the child is on now, without counts: the lanterns show what sits.
-      now ? h('p', { class: 'place-now' }, icon('lantern'), h('span', null, 'Nu: ', h('strong', null, now.title))) : null,
-      actions,
-    ),
+    picture.art,
+    h('p', { class: 'sr-only' }, picture.artText),
+    h('div', { class: 'garden-side' }, picture.line, actions),
   );
   show(ctx, view);
+}
+
+/**
+ * The path with its lanterns and what the child is on now, without counts,
+ * for Stigen's page and its scene in the valley. On the page the child's
+ * animal stands by the lantern it is at.
+ */
+export function pathPicture(
+  states: Record<ItemId, ItemState>,
+  unlocked: ReadonlySet<string>,
+  walker?: Element,
+): { art: HTMLElement; artText: string; line: HTMLElement | null } {
+  const lights = lanterns(pack, states, unlocked);
+  const now = lights[currentPart(lights)];
+  return {
+    art: h('div', { class: 'path-trail' }, trail(lights, walker)),
+    artText: `På stigen lyser ${litCount(lights)} av ${lights.length} lyktor.${now ? ` Du är vid lyktan för ${now.title.toLowerCase()}.` : ''}`,
+    line: now ? h('p', { class: 'place-now' }, icon('lantern'), h('span', null, 'Nu: ', h('strong', null, now.title))) : null,
+  };
 }

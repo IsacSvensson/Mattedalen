@@ -31,31 +31,26 @@ for (const width of [320, 360]) {
       }
     });
 
-    test('the valley fits: the places, the animal and the main button', async ({ page }) => {
+    test('the valley fits: the scene the child is at, its picture, sign and button', async ({ page }) => {
       await page.goto('/');
       await createProfile(page, 'Alexandra-Charlotte');
       await page.getByRole('button', { name: 'Till dalen' }).click();
-      await expect(page.locator('.valley-map')).toBeVisible();
-      await expect(page.locator('.place')).toHaveCount(3);
-      for (const place of ['.place-garden', '.place-brook', '.place-path']) await expectWithin(page, place, '.valley-ground');
-      await expectWithin(page, '.valley-walker', '.valley-ground');
-      await expectInside(page, '.place-status-row', 'main');
-      await expectInside(page, '.valley-side .big-button', 'main');
-      // What is drawn never overlaps: the animal, and each place's picture and sign.
-      const parts = [
-        '.place-garden > :first-child',
-        '.place-garden .place-name',
-        '.place-brook > :first-child',
-        '.place-brook .place-name',
-        '.place-path > :first-child',
-        '.place-path .place-name',
-        '.valley-walker',
-      ];
-      const boxes = await Promise.all(parts.map(async (sel) => (await page.locator(sel).boundingBox())!));
-      for (let i = 0; i < parts.length; i++)
-        for (let j = i + 1; j < parts.length; j++)
-          if (parts[i]!.split(' ')[0] !== parts[j]!.split(' ')[0]) expect(overlap(boxes[i]!, boxes[j]!), `${parts[i]} / ${parts[j]}`).toBe(false);
-      await expectNoSidewaysScroll(page);
+      await expect(page.locator('.world-scene')).toHaveCount(3);
+      for (const step of ['ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight']) {
+        await page.waitForTimeout(500);
+        // Each scene: its sign, picture and button inside it, and on screen.
+        // A closed place has no button.
+        const parts = ['.world-title', '.world-art', '.place-status'];
+        if (await page.locator('.world-scene.here .big-button').count()) parts.push('.big-button');
+        for (const part of parts) await expectWithin(page, `.world-scene.here ${part}`, '.world-scene.here');
+        await expectInside(page, '.world-scene.here', 'main');
+        // The animal stands beside the sign, never on it.
+        const guide = (await page.locator('.world-guide').boundingBox())!;
+        const sign = (await page.locator('.world-scene.here .world-sign').boundingBox())!;
+        expect(overlap(guide, sign)).toBe(false);
+        await expectNoSidewaysScroll(page);
+        await page.keyboard.press(step);
+      }
     });
 
     test('the parent view never scrolls sideways', async ({ page }) => {

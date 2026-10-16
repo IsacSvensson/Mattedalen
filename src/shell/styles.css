@@ -974,257 +974,191 @@ h1:focus {
   color: #f6efe0;
 }
 
-/* --- valley: the map of the places ----------------------------------- */
+/* --- valley: a world of scenes, one per place (docs/PLAN-DALEN.md) ------ */
 /*
  * The same three channels as in the garden:
- * - availability: a place is drawn only when it exists (no locked places)
- * - knowledge: what grows in the place (the small bed shows the child's plants)
+ * - availability: a place has a scene when it exists; a closed one rests
+ * - knowledge: the place as it is (the bridge, the lanterns, the bed)
  * - whole areas: the landscape (one sunflower on the hill per known table)
+ * The page never scrolls sideways: the world pans inside its own track.
  */
 
 .screen.valley {
-  gap: 14px;
+  max-width: none;
+  gap: 0;
+  padding-inline: 0;
 }
 
-.valley-head {
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.valley-head h1 {
-  margin: 0;
-  font-size: clamp(1.6rem, 7vw, 2.2rem);
-}
-
-.valley-map {
+.world {
   position: relative;
   width: 100%;
+  /* A free edge on each side: a swipe from the very edge is the phone's back gesture, not the world. */
+  padding-inline: 16px;
+  box-sizing: border-box;
+}
+
+.world-track {
+  /* Positioned, so that nothing inside it (text for screen readers) can widen the page. */
+  position: relative;
   display: flex;
-  flex-direction: column;
-  border: var(--outline);
-  border-radius: var(--r-card);
-  overflow: hidden;
-  background: var(--hill-front);
+  gap: 14px;
+  margin: 0;
+  padding: 14px 7% 6px;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 7%;
+  scrollbar-width: none;
 }
 
-/* The landscape band, here inside the map's frame instead of edge to edge. */
-.valley-map .scene {
-  width: 100%;
-  margin-inline: 0;
-  padding-top: 0;
-  border-bottom: none;
-}
-
-.valley-map .scene-sky {
-  top: 6px;
-  right: 8px;
-}
-
-/* On the map the ground goes on below the hills, so no shade band there. */
-.valley-map .hill-shade {
+.world-track::-webkit-scrollbar {
   display: none;
 }
 
-/* The hills' outline runs down their sides; keep those ends outside the frame. */
-.valley-map .scene-hills {
-  left: -4px;
-  width: calc(100% + 8px);
-}
-
-.valley-ground {
-  --mini-cell: clamp(26px, 8vw, 48px);
-  position: relative;
-  height: clamp(240px, 66vw, max(340px, calc(100dvh - 560px)));
-  background: var(--hill-front);
-}
-
-.valley-land {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.valley-land path {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-  stroke-linecap: round;
-}
-
-.valley-land .brook-water {
-  fill: var(--water);
-  stroke: var(--water-shade);
-  stroke-width: 2px;
-  stroke-linejoin: round;
-}
-
-/* A thin light glint along the water. */
-.brook-glint {
-  stroke: #c4e6f4;
-  stroke-width: 2px;
-  stroke-dasharray: 14 22;
-  opacity: 0.9;
-}
-
-/* The path: worn stepping stones of warm sand, each a little different. */
-.valley-path {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.path-stone {
-  position: absolute;
-  width: calc(var(--s, 1) * clamp(8px, 2.8vw, 13px));
-  height: calc(var(--s, 1) * clamp(6px, 2.1vw, 10px));
-  transform: translate(-50%, -50%) rotate(var(--r, 0deg));
-  border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%;
-  background: radial-gradient(circle at 40% 35%, #f7e3bb, var(--path-stone) 70%);
-  box-shadow: 0 1.5px 0 var(--path-edge);
-}
-
-/* A place: what grows there, and its name on a pill you can press. */
-.place {
-  position: absolute;
-  left: 62%;
-  top: 46%;
-  transform: translate(-50%, -50%);
+.world-scene {
+  /* Sizes inside a scene follow the scene, not the window. */
+  container-type: inline-size;
+  flex: 0 0 86%;
+  max-width: 520px;
+  scroll-snap-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.world-title {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
   gap: 8px;
+  min-height: 52px;
+}
+
+/* The child's animal by the sign of the scene it is at; a tap goes back to today's place. */
+.world-guide {
+  width: 50px;
+  height: 50px;
   padding: 0;
   border: none;
   background: none;
-  color: var(--ink);
-  font: inherit;
+  display: grid;
+  place-items: center;
+}
+
+.world-guide svg {
+  width: 46px;
+  height: 46px;
+}
+
+.world-art {
+  width: 100%;
+  display: flex;
+  justify-content: center;
   cursor: pointer;
 }
 
-.place:focus-visible {
-  outline: none;
-}
-
-.place:focus-visible .place-name {
-  outline: 3px solid var(--primary);
-  outline-offset: 3px;
-}
-
-/*
- * The garden on the map: a wooden planter of boards with dark earth inside,
- * not a grid of tiles. The squares are only marked in the soil.
- */
-.mini-bed {
-  --frame: clamp(6px, 1.8vw, 9px);
-  --furrow: #2a1a0e;
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, var(--mini-cell));
-  gap: 3px;
-  padding: 3px;
-  border: var(--frame) solid transparent;
-  border-radius: 10px;
-  background:
-    linear-gradient(var(--soil), var(--soil)) padding-box,
-    radial-gradient(circle at 5px 5px, var(--plank-edge) 1.5px, transparent 2.2px) border-box,
-    radial-gradient(circle at calc(100% - 5px) 5px, var(--plank-edge) 1.5px, transparent 2.2px) border-box,
-    radial-gradient(circle at 5px calc(100% - 5px), var(--plank-edge) 1.5px, transparent 2.2px) border-box,
-    radial-gradient(circle at calc(100% - 5px) calc(100% - 5px), var(--plank-edge) 1.5px, transparent 2.2px) border-box,
-    repeating-linear-gradient(0deg, transparent 0 3px, rgba(122, 78, 40, 0.22) 3px 4px) border-box,
-    linear-gradient(var(--plank-light), var(--plank)) border-box;
-  box-shadow:
-    0 0 0 var(--stroke) var(--ink),
-    inset 0 2px 0 rgba(0, 0, 0, 0.35),
-    0 9px 10px -6px var(--ground-shadow);
-}
-
-/* A planting square: a slightly raised mound of earth with its furrows. */
-.mini-cell {
-  width: var(--mini-cell);
-  height: var(--mini-cell);
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  background: radial-gradient(ellipse at 50% 38%, #654328, #573923 70%);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.28);
-}
-
-.mini-cell .plant {
-  width: 100%;
-  height: 100%;
-}
-
-/* New seeds wait in their packet on the edge of the bed: nothing is planted yet. */
-.seed-packet {
-  position: absolute;
-  right: calc(-1 * var(--frame) - 10px);
-  bottom: calc(-1 * var(--frame) - 8px);
-  width: calc(var(--mini-cell) * 0.75);
-  height: calc(var(--mini-cell) * 0.95);
-  transform: rotate(9deg);
-  overflow: visible;
-  filter: drop-shadow(0 3px 2px var(--ground-shadow));
-}
-
-.sp-bag {
-  fill: #f6e6c4;
-  stroke: var(--ink);
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-}
-
-.sp-fold {
-  fill: #e8cf9d;
-  stroke: var(--ink);
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-}
-
-.sp-stem {
-  stroke: #2f5e2a;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-}
-
-.sp-leaf {
-  fill: var(--leaf);
-  stroke: #2f5e2a;
-  stroke-width: 1.1;
-}
-
-.sp-leaf.light {
-  fill: var(--leaf-light);
-}
-
-/*
- * Resting (today's session done) or not open yet: dimmed, darker and covered by
- * a thin dusk, so it plainly rests. The line below the map says why.
- */
-.place.mood-asleep .mini-bed,
-.place.mood-asleep .bridge,
-.place.mood-closed .mini-bed {
-  filter: saturate(0.6) brightness(0.8);
-}
-
-/* Not open yet: nothing to press, so the sign has no press edge either. */
-.place:disabled {
+.world-scene.closed .world-art {
   cursor: default;
+  opacity: 0.55;
+  filter: saturate(0.5);
 }
 
-.place:disabled .place-name {
-  box-shadow: none;
+.world-art > * {
+  width: 100%;
+  margin: 0;
 }
 
-.place.mood-asleep .mini-bed::after,
-.place.mood-closed .mini-bed::after {
-  content: '';
+.world-art .garden-bed {
+  width: auto;
+}
+
+.world-art .garden-grid {
+  --cell: min(calc((100cqi - 24px) / 11), 40px);
+}
+
+.world-scene .place-status {
+  justify-content: center;
+  font-size: 1.15rem;
+}
+
+.world-scene .big-button {
+  max-width: 100%;
+  min-width: 0;
+  padding-inline: 22px;
+  font-size: clamp(1.15rem, 6.6cqi, 1.5rem);
+  white-space: nowrap;
+}
+
+/* In a scene the sign stands in a row, not on the ground: no posts. */
+.world-sign::before,
+.world-sign::after {
+  display: none;
+}
+
+/* The arrows at the edges, level with the middle of the picture; they carry the neighbour's icon. */
+.world-arrow {
   position: absolute;
-  inset: calc(-1 * var(--frame));
-  border-radius: 10px;
-  background: linear-gradient(rgba(36, 50, 74, 0.28), rgba(36, 50, 74, 0.42));
-  pointer-events: none;
+  top: var(--arrow-top, 120px);
+  translate: 0 -50%;
+  z-index: 2;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border: var(--outline);
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone, rgba(58, 42, 32, 0.25));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.world-arrow[hidden] {
+  display: none;
+}
+
+.world-arrow.prev {
+  left: 4px;
+}
+
+.world-arrow.next {
+  right: 4px;
+}
+
+.world-arrow .icon,
+.world-arrow .plant {
+  width: 30px;
+  height: 30px;
+}
+
+.world-chevron {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.world-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 4px 0 0;
+}
+
+.world-dots span {
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+
+.world-dots span.on {
+  background: var(--ink);
 }
 
 /* The name on a small wooden sign on two posts, part of the landscape. */
@@ -1281,81 +1215,14 @@ h1:focus {
  * Pressed by moving it down, not by a transform: a transform would make the sign
  * its own stacking context, and the posts behind it would be drawn on top of it.
  */
-.place:active .place-name {
+.world-sign:active:not(:disabled) {
   top: var(--press-depth);
   box-shadow: none;
 }
 
-.place-garden {
-  left: 70%;
-  top: 70%;
-}
-
-/* Bäcken: the small bridge over the brook. */
-.place-brook {
-  --bridge-w: clamp(130px, 40vw, 190px);
-  left: 26%;
-  top: 15%;
-  align-items: flex-start;
-  /* Placed by the middle of the bridge, which stands over the brook; the sign reaches out to the right. */
-  transform: translate(calc(-0.5 * var(--bridge-w)), -50%);
-}
-
-/*
- * The sign stands right beside the bridge's right foot, on the far bank and at
- * the height of the bridge: plainly the bridge's sign, well away from the garden.
- */
-.place-brook .place-name {
-  align-self: flex-start;
-  margin-left: calc(var(--bridge-w) + 4px);
-  margin-top: calc(-0.05 * var(--bridge-w) - 28px);
-}
-
-/* The child's animal stands on the ground itself, with a soft green shadow. */
-.valley-walker {
-  position: absolute;
-  left: 30%;
-  top: 82%;
-  transform: translate(-50%, -50%);
-  width: clamp(44px, 12vw, 56px);
-  height: clamp(44px, 12vw, 56px);
-  display: grid;
-  place-items: center;
-}
-
-.valley-walker::before {
-  content: '';
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  bottom: -6%;
-  height: 26%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, var(--ground-shadow), transparent);
-}
-
-.valley-walker svg {
-  position: relative;
-}
-
-.valley-walker svg {
-  width: 100%;
-  height: 100%;
-}
-
-.valley-side {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-}
-
-.place-status-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+.world-sign:disabled {
+  cursor: default;
+  color: var(--ink-soft);
 }
 
 .place-status {
@@ -1382,25 +1249,6 @@ h1:focus {
   margin: -6px -4px;
 }
 
-/* The animal stands by the place the child went to last. */
-/* Left of the garden, between it and the brook, so it never covers the sign. */
-.valley-walker.at-place-garden {
-  left: 34%;
-  top: 88%;
-}
-
-/* By the brook: on its left bank, below the bridge. */
-.valley-walker.at-place-brook {
-  left: 7%;
-  top: 46%;
-}
-
-.place-statuses {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 /* --- brook (Bäcken) --------------------------------------------------- */
 /*
  * The same three channels:
@@ -1419,29 +1267,6 @@ h1:focus {
   display: block;
   width: 100%;
   height: auto;
-}
-
-.bridge.mini {
-  width: var(--bridge-w, clamp(130px, 40vw, 190px));
-}
-
-/* The arch on the map: open stones outlined, laid stones solid, gaps for what is not open yet. */
-.bridge.mini .br-slot {
-  fill: rgba(255, 250, 240, 0.8);
-  stroke: var(--ink);
-  stroke-width: 1.6;
-  stroke-dasharray: 4 3;
-  stroke-linejoin: round;
-}
-
-.bridge.mini .br-slot.laid {
-  fill: var(--bridge-block);
-  stroke-dasharray: none;
-}
-
-.bridge.mini .br-fill {
-  fill: var(--bridge-block);
-  stroke: none;
 }
 
 /* The wooden centering the arch is built on, until it carries itself. */
@@ -2678,7 +2503,6 @@ h1:focus {
   gap: 2px;
 }
 
-
 .heat-cell {
   border: none;
   border-radius: 4px;
@@ -3096,7 +2920,6 @@ h1:focus {
   font-weight: 800;
 }
 
-
 /* --- focus practice: one table ---------------------------------------- */
 
 .focus-grid {
@@ -3510,66 +3333,73 @@ h1:focus {
   }
 }
 
-/* Valley on wide landscape screens (tablets on their side): the map with the controls beside it. */
-@media (min-width: 900px) and (orientation: landscape) {
-  .screen.valley {
-    display: grid;
-    grid-template-columns: minmax(0, 700px) minmax(300px, 380px);
+/* Valley on wide screens: every scene side by side, nothing to swipe. */
+@media (min-width: 1020px) and (orientation: landscape) {
+  .world-track {
+    overflow: clip;
     justify-content: center;
-    align-content: center;
-    align-items: center;
-    column-gap: 40px;
-    max-width: 1180px;
+    gap: 28px;
+    padding-inline: 24px;
   }
 
-  .valley-head {
-    grid-column: 1 / -1;
+  .world-scene {
+    flex: 1 1 0;
+    max-width: 560px;
   }
 
-  .valley-ground {
-    --mini-cell: 46px;
-    height: min(400px, calc(100dvh - 300px));
+  .world-arrow,
+  .world-dots {
+    display: none;
   }
 }
 
-/* Valley on phones on their side: a lower map, the controls beside it. */
+/* Valley on phones on their side: one scene at a time, the picture beside its words and button. */
 @media (orientation: landscape) and (max-height: 520px) {
-  .screen.valley {
+  .valley-head .scene {
+    display: none;
+  }
+
+  .valley-head .scene-title {
+    position: static;
+    padding: max(8px, env(safe-area-inset-top)) 16px 0;
+  }
+
+  .world-track {
+    padding-inline: 64px;
+    scroll-padding-inline: 64px;
+  }
+
+  .world-scene {
+    flex-basis: 100%;
+    max-width: none;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-auto-flow: dense;
     align-items: center;
-    column-gap: 24px;
-    row-gap: 8px;
-    max-width: 900px;
-    padding-top: max(10px, env(safe-area-inset-top));
+    column-gap: 20px;
+    row-gap: 6px;
   }
 
-  .valley-head {
-    grid-column: 1 / -1;
+  .world-scene > * {
+    grid-column: 2;
   }
 
-  .valley-head h1 {
-    font-size: 1.4rem;
+  .world-scene > .world-art {
+    grid-column: 1;
+    grid-row: 1 / span 5;
   }
 
-  .valley-ground {
-    --mini-cell: clamp(20px, 6.5dvh, 30px);
-    height: calc(100dvh - 64px - 44px - 50px);
-    min-height: 150px;
+  .world-art .garden-grid {
+    --cell: min(calc((100dvh - 130px) / 11), calc((55cqi - 24px) / 11), 30px);
   }
 
-  .valley-walker {
-    width: 40px;
-    height: 40px;
+  .world-arrow {
+    width: 56px;
+    height: 56px;
   }
 
   .place-name {
     font-size: 1.1rem;
-  }
-
-  /* A lower map: a smaller arch, so the brook still runs under its middle. */
-  .place-brook {
-    --bridge-w: clamp(110px, 40dvh, 150px);
   }
 }
 
@@ -3998,10 +3828,6 @@ h1:focus {
   height: auto;
 }
 
-.trail.mini {
-  width: clamp(130px, 38vw, 180px);
-}
-
 .tr-path {
   fill: none;
   stroke: var(--path-stone);
@@ -4009,18 +3835,10 @@ h1:focus {
   stroke-linecap: round;
 }
 
-.trail.mini .tr-path {
-  stroke-width: 9;
-}
-
 .tr-post {
   fill: var(--plank);
   stroke: var(--ink);
   stroke-width: 1.6;
-}
-
-.trail.mini .tr-post {
-  stroke-width: 1.1;
 }
 
 .tr-arm,
@@ -4037,10 +3855,6 @@ h1:focus {
   stroke-width: 3;
 }
 
-.trail.mini .tr-arm {
-  stroke-width: 1.6;
-}
-
 .tr-roof,
 .tr-base {
   fill: #5a4636;
@@ -4054,10 +3868,6 @@ h1:focus {
   fill: #5b6b7d;
   stroke: var(--ink);
   stroke-width: 1.4;
-}
-
-.trail.mini .tr-glass {
-  stroke-width: 1;
 }
 
 .tr-glass.lit {
@@ -4118,37 +3928,6 @@ h1:focus {
 /* At night the lanterns are what shines. */
 .asleep .path-trail {
   background: var(--night-soft);
-}
-
-/*
- * On the map: the path between the brook and the garden, with its sign beside
- * it. With three places the map is a little taller, so each has its own band.
- */
-@media (orientation: portrait) {
-  .valley-ground:has(.place-path) {
-    height: clamp(290px, 82vw, max(400px, calc(100dvh - 520px)));
-  }
-}
-
-.place-path {
-  left: 62%;
-  top: 38%;
-  flex-direction: row;
-  gap: 6px;
-}
-
-.place-path .trail.mini {
-  width: clamp(100px, 30vw, 160px);
-}
-
-.place.mood-asleep .trail,
-.place.mood-closed .trail {
-  filter: saturate(0.6) brightness(0.8);
-}
-
-.valley-walker.at-place-path {
-  left: 34%;
-  top: 49%;
 }
 
 /* Rods and cubes. */
@@ -4422,22 +4201,6 @@ h1:focus {
 }
 
 @media (orientation: landscape) and (max-height: 520px) {
-  /* A low map: the path goes up in the free corner to the right of the brook's sign. */
-  .place-path {
-    left: 85%;
-    top: 19%;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .place-path .trail.mini {
-    width: clamp(80px, 26dvh, 110px);
-  }
-
-  .valley-walker.at-place-path {
-    left: 47%;
-    top: 52%;
-  }
 
   .path-trail {
     width: min(100%, 520px);

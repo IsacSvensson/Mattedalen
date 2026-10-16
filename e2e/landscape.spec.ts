@@ -17,13 +17,14 @@ test('the garden fits beside its buttons, with readable squares', async ({ page 
   await seedStates(page, s);
   await page.locator('.profile-tile').first().click();
 
-  // The valley: the whole map beside the main button, without scrolling.
-  const map = (await page.locator('.valley-map').boundingBox())!;
-  expect(map.y + map.height).toBeLessThanOrEqual(360);
-  const go = (await page.getByRole('button', { name: 'Gå till trädgården' }).boundingBox())!;
+  // The valley: one scene at a time, the picture beside the button, without scrolling.
+  await page.waitForTimeout(400);
+  const art = (await page.locator('.world-scene.here .world-art').boundingBox())!;
+  expect(art.y + art.height).toBeLessThanOrEqual(360);
+  const go = (await page.locator('.world-scene.here .big-button').boundingBox())!;
   expect(go.y + go.height).toBeLessThanOrEqual(360);
-  expect(go.x).toBeGreaterThan(map.x + map.width);
-  await expectWithin(page, '.place', '.valley-ground');
+  expect(go.x).toBeGreaterThan(art.x + art.width);
+  await expectWithin(page, '.world-scene.here', 'main');
 
   await enterGarden(page);
   await expect(page.locator('.garden-grid')).toBeVisible();

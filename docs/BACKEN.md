@@ -105,8 +105,8 @@ det 8 → 10 → 13, vid 13 − 5 är det 13 → 10 → 8 och vid 12 − 9, räk
 
 ## Platsen
 
-Barnet når bäcken från dalen: platsen på kartan (bäcken med en liten bro) eller
-huvudknappen ”Gå till bäcken” när trädgården vilar. Djuret i sidhuvudet leder
+Barnet når bäcken från dalen: bäckens scen med bron och knappen ”Gå till
+bäcken”. Djuret i sidhuvudet leder
 tillbaka till dalen.
 
 - **Humör i dalen.** ”Nya stenar väntar vid bäcken.” innan något är övat,
@@ -117,10 +117,8 @@ tillbaka till dalen.
   är minst flytande och räknas som lagt vid 80 % (`LAID_AT`). Blocken är fyrkantiga
   och huggna, så att de inte förväxlas med tallinjens runda stenar (J7). Vågen är
   inget block.
-- **På kartan** är bron ett stenvalv över dalens egen bäck, en sten per del. En
-  öppen del har sin plats i valvet och fylls inifrån; en del som inte är öppen än
-  är en lucka. Tills alla stenar ligger står en byggställning av trä under valvet.
-  Skylten står vid brons högra fot, och bäcken rinner ner längs vänster sida.
+- **I dalen** visar bäckens scen samma bro som här, med raden ”Nu: …” under
+  (`brookPicture` i `screens/brook.ts`).
 - **Tangenterna** vid bäcken är släta stenar, i trädgården trä.
 - **Delarna** står under bron med ”8 av 16” och en stapel. Bara öppna delar visas.
 - **Startkoll.** Första gången vid bäcken, innan något är övat, erbjuds startkollen

@@ -115,9 +115,31 @@ i sidled / rulla nedåt”) låter piloten pröva båda.
 
 | Fas | Innehåll |
 |---|---|
-| R3a. Världen | Komponenten med scener av platsernas egna delar, snäpp, pilar, prickar, tangenter, startscen och breda skärmar. Platssidorna finns kvar bakom scenens knapp. |
+| R3a. Världen **(klar)** | Komponenten med scener av platsernas egna delar, snäpp, pilar, prickar, tangenter, startscen och breda skärmar. Platssidorna finns kvar bakom scenens knapp. |
 | R3b. Platssidorna i scenerna | Scenens knapp börjar passet. Tillbaka-knappar och slutskärmar leder till scenen. Trädgårdens extra knappar och rader flyttar in i scenen. |
 | R3c. Lodrätt och verifiering | Lodrätt läge och inställningen för piloten. Tester för svep, pilar, tangenter och skärmläsare. Skärmbilder i alla storlekar, dokumenten och regeln om sidled. |
+
+## Fynd från R3a
+
+- **Scenerna är byggda av platsernas egna bilder.** `brookPicture`,
+  `pathPicture` och `gardenPicture` ritar bron, stigen och lådan både på
+  platssidan och i scenen. Kartans små varianter (minilådan, fröpåsen, valvbron
+  och den lilla stigen) är borttagna.
+- **Lådan i scenen är en bild, inte knappar.** Rutorna är `aria-hidden`, och
+  lådan beskrivs i ord för skärmläsare, som på platssidan. Annars skulle
+  scenen ha 100 knappar till en skärmläsare.
+- **Skylten behöver inga stolpar** i scenen. Stolparna hörde till kartans mark.
+- **Världen måste snäppa om när fönstret ändras.** Utan det visade en vriden
+  telefon fel scen, och prickarna och pilen sa olika saker. Världen följer nu
+  sin storlek och står kvar vid samma scen.
+- **Två snabba tryck på pilen** gick bara ett steg. Medan världen gled mot
+  scenen räknades scenen den passerade som barnets. Nu gäller den valda scenen
+  tills världen har stannat.
+- **Djuret står inte längre vid den senaste platsen.** Dalen börjar vid dagens
+  plats. Att komma tillbaka till samma scen efter ett pass kommer i R3b.
+- **Ordningen ändrar dagens plan vid lika.** Dagens två platser väljs efter vad
+  som är förfallet, och vid lika vinner den första i dalen. Med Bäcken först
+  kan Trädgården vila en dag där den tidigare vann.
 
 ## Beslut
 
