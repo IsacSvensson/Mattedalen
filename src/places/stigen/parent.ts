@@ -10,7 +10,7 @@ import type { AppContext } from '../../shell/app';
 import { icon } from '../../shell/components/icons';
 import { h } from '../../shell/dom';
 import { engineFor, loadProgress } from '../../shell/play';
-import { formatDay, knownOf, partNow, STATUS_TEXT, topConfusions } from '../../shell/stats';
+import { formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, bestTimes, slowButRight } from '../../shell/stats';
 import { limitedList } from '../../shell/components/limitedList';
 import type { PlaceSummary } from '../../shell/place';
 import { partProgress } from './logic';
@@ -144,6 +144,8 @@ export async function pathParentSummary(ctx: AppContext, profile: Profile, save:
     now: open ? partNow(pack, states, new Set(engine.unlockedUnits(states, meta, undefined, await pathHeld(ctx, profile)))) : null,
     hardest: hardest ? [hardest.text] : null,
     ...knownOf(pack, states),
+    slow: slowButRight(engine, states),
+    bestTimes: bestTimes(states),
     todo: open
       ? []
       : [

@@ -7,7 +7,7 @@ import { heatmapView } from '../../shell/components/heatmap';
 import { icon } from '../../shell/components/icons';
 import { h } from '../../shell/dom';
 import { engineFor, loadProgress } from '../../shell/play';
-import { factStats, factStatsText, formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
+import { factStats, factStatsText, formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, type FactStats, bestTimes, slowButRight } from '../../shell/stats';
 import { limitedList } from '../../shell/components/limitedList';
 import type { PlaceSummary } from '../../shell/place';
 import { partProgress } from './logic';
@@ -188,6 +188,8 @@ export async function brookParentSummary(ctx: AppContext, profile: Profile): Pro
     now: partNow(pack, states, new Set(engine.unlockedUnits(states, meta))),
     hardest: hardest ? [hardest.text] : null,
     ...knownOf(pack, states),
+    slow: slowButRight(engine, states),
+    bestTimes: bestTimes(states),
     todo: [],
   };
 }

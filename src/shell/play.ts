@@ -7,6 +7,7 @@ import {
   systemClock,
   type Clock,
   type ContentPack,
+  type EngineConfig,
   type Engine,
   type Feedback,
   type FocusSet,
@@ -63,11 +64,22 @@ export function engineFor(profile: Profile, deps: GameDeps): Engine {
   // The day's plan decides this place's minutes; before there is one, the day is shared evenly.
   const minutes = plannedMinutes(profile.id, deps.pack.id, clock.today()) ?? placeMinutes(profile.settings.sessionMinutes, deps.share);
   // The pack's own settings first, then the child's.
+  const base = makeConfig(deps.pack.config ?? {});
   const config = makeConfig(deps.pack.config ?? {}, {
     session: { durationMs: minutes * 60_000 },
     format: { allowFree: (deps.allowFree ?? true) && profile.settings.allowFree },
+    ...(profile.settings.moreTime ? { status: moreTime(base.status) } : {}),
   });
   return createEngine({ pack: deps.pack, config, clock, rng: deps.rng ?? mathRandomRng });
+}
+
+/**
+ * "Ge mer tid" (docs/PLAN-GRANSKNING.md, S2): a grown-up doubles the time
+ * limits for a bush and a tree, for a child who answers right but slowly. The
+ * rest of the rules stay: right, without help, on different days.
+ */
+export function moreTime(status: EngineConfig['status']): Pick<EngineConfig['status'], 'fluentRtMs' | 'automaticRtMs'> {
+  return { fluentRtMs: status.fluentRtMs * 2, automaticRtMs: status.automaticRtMs * 2 };
 }
 
 export interface LoadedProgress {

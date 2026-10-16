@@ -20,6 +20,8 @@ export interface ProfileSettings {
   tablesWait?: boolean;
   /** Per garden table: the day it could first have opened (`2000-01-01` = opened by a grown-up). */
   tableReady?: Record<string, DayKey>;
+  /** A grown-up gives the child more time: the time limits for a bush and a tree are doubled. */
+  moreTime?: boolean;
 }
 
 export const DEFAULT_SETTINGS: ProfileSettings = {

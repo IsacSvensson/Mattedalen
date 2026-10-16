@@ -96,6 +96,7 @@ function sanitizeProfile(raw: unknown): Profile {
       ...(settings.divisionSign === 'obelus' || settings.divisionSign === 'slash' ? { divisionSign: settings.divisionSign } : {}),
       ...(settings.tablesWait === false ? { tablesWait: false } : {}),
       ...(tableReadyOf(settings.tableReady) ? { tableReady: tableReadyOf(settings.tableReady) } : {}),
+      ...(settings.moreTime === true ? { moreTime: true } : {}),
     },
   };
 }

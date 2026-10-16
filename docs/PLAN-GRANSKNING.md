@@ -282,6 +282,8 @@ bort.
 
 ### Förslag
 
+*Beslutet blev ett val för vuxna, se [Beslut](#beslut) nedan.*
+
 **Busken efter barnets egen fart, × 2.** Gränsen är dubbla barnets egen fart på
 det barnet redan kan, aldrig under 5 s. Det är samma krav som i dag för ett
 genomsnittligt barn (5 s mot 2,3 s), i barnets egen takt. Trädet kräver svar
@@ -314,3 +316,57 @@ Andra vägar:
 
 - Hur snabbt svarar barnen på det de redan kan? Siffran styr gränsen.
 - Får genomsnittliga barn några träd? Om inte är 3 s för strängt.
+
+### Beslut
+
+Ett val för vuxna, **Ge mer tid**, i stället för en gräns efter barnets egen
+fart. Och 3 s för trädet är för strängt (oktober 2026).
+
+### Byggt
+
+- **Ge mer tid** finns bland barnets inställningar. Det fördubblar gränserna:
+  10 s för busken och 8 s för trädet. Valet följer med i säkerhetskopian och
+  QR-koden. Det som redan har vuxit står kvar om valet slås av.
+- **Förslaget i ”Att göra för dig”:** ”Alva svarar rätt men långsamt på 12
+  fakta”, med knappen ”Ge mer tid”. Det kommer när minst 5 fakta är rätt två
+  dagar men aldrig under gränsen, och barnet är långsamt i sig: även dess tionde
+  snabbaste fakta tar 3,7 s eller mer. Ett barn som har svårt att minnas svarar
+  snabbt på det lättaste. Det får inte förslaget, eftersom mer tid bara skulle
+  göra uträknade svar till buskar (98 % i simuleringen).
+- **Trädet:** fritt svar under 4 s på 3 dagar, och dagarna räknas inom 30 dagar
+  i stället för 10. Bara 4 s räckte inte. Det var de 10 dagarna som stoppade
+  trädet: en buske kommer tillbaka bara var 4:e till 30:e dag, så tre dagar inom
+  10 dagar hände nästan aldrig.
+
+Siffrorna (`tests/simulation/timeReport.test.ts`):
+
+| Elev | Vecka | Förut | Träd 4 s | 30 dagar | Nu | Nu, med Ge mer tid |
+|---|---|---|---|---|---|---|
+| Genomsnittlig, träd | 52 | 0 % | 2 % | 0 % | 36 % (25–43) | 53 % |
+| Stark, träd | 26 | 8 % | 12 % | 33 % | 73 % (62–84) | 88 % |
+| Genomsnittlig, buske eller träd | 52 | 86 % | 83 % | 90 % | 90 % (85–93) | 97 % |
+| Långsam, buske eller träd | 52 | 0 % | 0 % | 0 % | 0 % | 81 % (75–88) |
+| Mycket långsam, buske eller träd | 52 | 0 % | 0 % | 0 % | 0 % | 42 % (22–76) |
+
+| Elev | Förslaget syns, vecka | Trädgården öppnar med Ge mer tid, vecka |
+|---|---|---|
+| Stark, genomsnittlig | aldrig | – |
+| Svag | aldrig | – |
+| Långsam | 1 | 5 (4–8) |
+| Mycket långsam | 1 | 15 (6–21) |
+
+- **Med de nya reglerna** sitter 90 % av gångerfakta efter ett år för ett
+  genomsnittligt barn, mot 86 % förut. Stigen öppnar vecka 14 i stället för 17,
+  eftersom 30 dagar också gör busken lite lättare att samla. Därför väntar fler
+  tabeller på Stigen: taket släpper 40 av 70 tabeller, mot 16 av 68.
+- **Träd som barnet inte minns:** 16 % för det genomsnittliga barnet efter ett
+  år. Ett träd kommer tillbaka var 30:e dag, och modellen glömmer mellan
+  gångerna. Ett fel tar trädet tillbaka till en buske.
+- **Med Ge mer tid** gör det långsamma barnet fler fel (92 % rätt blir 79 %),
+  eftersom det går vidare till svårare fakta. Mer än hälften av buskarna är
+  sådant det räknar ut. Det är priset för att inte stå still.
+- **Kollen** räknar fortfarande snabba svar under 3 s, så att kollar går att
+  jämföra över tid. Startkollen är oförändrad.
+- **Till piloten:** gränsen 3,7 s kommer från modellen. Bäcken och Stigen mäter
+  tiden till första siffran, trädgården tiden till hela svaret. Piloten får visa
+  hur snabbt riktiga barn svarar på det lättaste.

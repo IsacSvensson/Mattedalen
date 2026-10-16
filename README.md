@@ -205,7 +205,7 @@ blockerat, till exempel i vissa privata lägen. Båda körs mot samma kontraktst
 
 | Objektlager | Nyckel | Innehåll |
 |---|---|---|
-| `profiles` | `id` | namn, avatar, inställningar (passlängd, uppläsning, fritt svar) |
+| `profiles` | `id` | namn, avatar, inställningar (passlängd, mer tid, uppläsning, fritt svar) |
 | `progress` | `[profileId, packId]` | alla `ItemState` + `LearnerMeta` |
 | `attempts` | autoinkrement, index `[profileId, ts]` | svarsloggen |
 | `sessions` | `[profileId, id]` | ett litet kvitto per pass (minuter per dag, resultat) |
@@ -263,7 +263,7 @@ webbläsaren (`e2e/legacy.spec.ts`).
 
 - **QR-kod** (`storage/qrCodec.ts`, formatet `MD1:`). Koden innehåller namn, djur,
   passlängd, om Trädgården och Stigen är öppna, om tabellerna väntar på Stigen
-  och vilken dag de kunde ha öppnat, och ett block per plats: innehållspaketets id
+  och vilken dag de kunde ha öppnat, om barnet har mer tid, och ett block per plats: innehållspaketets id
   och version och status per fakta i 3 bitar (status plus ungefärlig
   Leitner-låda). Allt skyddas med CRC-8. Datan base45-kodas, så att QR-kodens
   kompakta alfanumeriska läge kan användas. Båda platserna ryms i en QR-kod av
@@ -294,7 +294,8 @@ steg tillbaka, från en sida till översikten.
 
 - **Översikten** visar barnen överst, sedan **Att göra för dig** när något
   väntar på en vuxen: en plats som kan öppnas tidigare, en tabell som väntar på
-  stigen, ett nytt kollresultat och lagring som webbläsaren kan radera. Det går
+  stigen, ett nytt kollresultat, ett barn som svarar rätt men långsamt (”Ge mer
+  tid”) och lagring som webbläsaren kan radera. Det går
   inte att avfärda; en sak försvinner när den är gjord. Sedan **den här
   veckan** (övade minuter per dag under 14 dagar och hur många dagar barnet
   spelat), en rad per plats med vad barnet är på, det som är svårast och en
@@ -304,7 +305,8 @@ steg tillbaka, från en sida till översikten.
   ”Visa alla”), de vanligaste förväxlingarna, platsens koll, alla fakta som
   värmekartor (ihopfällda) och sist startkollen (`Place.parentPage`).
 - **Barnets inställningar** samlar allt barnet har: namn, djur, passlängd
-  10–15 minuter och uppläsning, sedan platsernas egna val
+  10–15 minuter, **Ge mer tid** (dubbel tid för buske och träd, för ett barn som
+  svarar rätt men långsamt) och uppläsning, sedan platsernas egna val
   (`Place.parentSettings`): fritt svar, hur delat med skrivs och om tabellerna
   väntar på stigen. Längst ner flyttar man eller sparar barnet, eller tar bort
   profilen.

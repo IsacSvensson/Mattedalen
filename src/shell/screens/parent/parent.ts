@@ -1,11 +1,12 @@
-import { systemClock } from '../../../engine';
+import { DEFAULT_CONFIG, systemClock } from '../../../engine';
+import { moreTime } from '../../play';
 import { persistenceStatus, requestPersistence, type Profile } from '../../../storage';
 import { show, type AppContext } from '../../app';
 import { avatarIcon } from '../../components/avatars';
 import { toast } from '../../components/modal';
 import { icon } from '../../components/icons';
 import { h } from '../../dom';
-import { formatDay, minutesPerDay } from '../../stats';
+import { formatDay, minutesPerDay, slowFacts } from '../../stats';
 import { showProfiles } from '../profiles';
 import { showDevice } from './device';
 import { pageRow, profileSaver, showParentPage } from './frame';
@@ -87,7 +88,7 @@ async function childOverview(ctx: AppContext, profile: Profile): Promise<HTMLEle
       pageRow({
         icon: icon('grownup'),
         title: 'Barnets inställningar',
-        text: 'Namn, passlängd, uppläsning, platsernas val, flytta eller spara',
+        text: 'Namn, passlängd, mer tid, uppläsning, platsernas val, flytta eller spara',
         onclick: () => void showChildSettings(ctx, profile.id),
       }),
     ),
@@ -107,6 +108,9 @@ export async function showParentPlace(ctx: AppContext, profileId: string, placeI
 /** Rows only read in the overview; the things to do save through their own saver. */
 const noSave = async () => undefined;
 
+/** So many facts right but slow, and "Att göra för dig" suggests more time. */
+const SLOW_FACTS = 5;
+
 const checksSeenKey = (profileId: string, placeId: string) => `parentChecksSeen:${profileId}:${placeId}`;
 
 const checkCount = async (ctx: AppContext, profileId: string, place: Place) =>
@@ -116,15 +120,19 @@ const checkCount = async (ctx: AppContext, profileId: string, place: Place) =>
  * "Att göra för dig": what waits for a grown-up, only when there is something.
  * It cannot be put away; a thing goes when it is done (docs/PLAN-FORALDRAVYN.md).
  * From the places (opening a place early, a table that waits for Stigen), a new
- * check result to look at, and storage the browser may clear.
+ * check result to look at, a child who is right but slow (more time), and
+ * storage the browser may clear.
  */
 async function todoSection(ctx: AppContext, profile: Profile | undefined): Promise<HTMLElement | null> {
   const again = () => showParent(ctx, profile?.id);
   const items: { place: string | null; todo: ParentTodo }[] = [];
+  const speeds: Pick<PlaceSummary, 'slow' | 'bestTimes'>[] = [];
   if (profile) {
     const save = profileSaver(ctx, profile, again);
     for (const place of ctx.places) {
-      for (const todo of (await place.parentSummary(ctx, profile, save)).todo) items.push({ place: place.name, todo });
+      const summary = await place.parentSummary(ctx, profile, save);
+      for (const todo of summary.todo) items.push({ place: place.name, todo });
+      speeds.push(summary);
       const checks = await checkCount(ctx, profile.id, place);
       const seen = (await ctx.store.getSetting<number>(checksSeenKey(profile.id, place.id))) ?? 0;
       if (checks > seen)
@@ -134,7 +142,16 @@ async function todoSection(ctx: AppContext, profile: Profile | undefined): Promi
         });
     }
   }
-  if (ctx.storageKind === 'memory') items.push({ place: null, todo: { text: 'Webbläsaren sparar inte just nu (privat läge?). Framstegen försvinner när sidan stängs.' } });
+  const slow = slowFacts(speeds);
+  if (profile && !profile.settings.moreTime && slow >= SLOW_FACTS)
+    items.push({
+      place: null,
+      todo: {
+        text: `${profile.name} svarar rätt men långsamt på ${slow} fakta. De blir inte buskar förrän svaren går under ${DEFAULT_CONFIG.status.fluentRtMs / 1000} s. Med mer tid räcker det med svar under ${moreTime(DEFAULT_CONFIG.status).fluentRtMs / 1000} s.`,
+        action: { label: 'Ge mer tid', run: () => profileSaver(ctx, profile, again)({ settings: { moreTime: true } }) },
+      },
+    });
+    if (ctx.storageKind === 'memory') items.push({ place: null, todo: { text: 'Webbläsaren sparar inte just nu (privat läge?). Framstegen försvinner när sidan stängs.' } });
   else if ((await persistenceStatus()) === 'not-persisted')
     items.push({
       place: null,

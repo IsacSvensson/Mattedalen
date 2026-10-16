@@ -1,14 +1,17 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'vitest';
-import type { StatusConfig } from '../../src/engine';
+import { DEFAULT_CONFIG, type StatusConfig } from '../../src/engine';
+import { moreTime } from '../../src/shell/play';
 import { AVERAGE, SLOW, STRONG, VERY_SLOW, WEAK, type LearnerProfile } from './learner';
 import { simulateValley } from './valley';
 
 /**
  * Time and slow children (docs/PLAN-GRANSKNING.md, S2): the whole valley with
- * the steps' rules as now, with more time for a bush, and with no time for a
- * bush (time only for a tree), and after the child's own speed. Not part of the normal test run. One profile
+ * the steps' rules as before, with no time for a bush, with more time for a
+ * tree and a longer memory for its days, and with the grown-up's choice to give
+ * more time. (The first runs also tried 10 s and limits after the child's own
+ * speed; their numbers are in the plan.) Not part of the normal test run. One profile
  * per process, then a summary:
  *
  *   TIME_REPORT=svag npx vitest run tests/simulation/timeReport.test.ts   (and genomsnittlig, stark, långsam, "mycket långsam")
@@ -22,24 +25,14 @@ const SEEDS = Number(process.env.VALLEY_SEEDS ?? 10);
 const WEEKS = 52;
 
 const PROFILES: LearnerProfile[] = [WEAK, AVERAGE, STRONG, SLOW, VERY_SLOW];
-/**
- * `own`: the limits follow the child's own speed on what it already knows
- * (`knownRtMs`, the first two weeks), never below today's: a bush under twice
- * that (or 1.6 times), a tree under 1.3 times it.
- */
-function own(factor: number) {
-  return (known: number): Partial<StatusConfig> => ({
-    fluentRtMs: Math.max(5000, Math.round(factor * known)),
-    automaticRtMs: Math.max(3000, Math.round(1.3 * known)),
-  });
-}
-
-const RULES: { id: string; title: string; status?: (knownRtMs: number) => Partial<StatusConfig> }[] = [
-  { id: 'now', title: 'Som nu (buske under 5 s)' },
-  { id: 'ten', title: 'Buske under 10 s', status: () => ({ fluentRtMs: 10_000 }) },
-  { id: 'free', title: 'Buske utan tid', status: () => ({ fluentRtMs: Number.MAX_SAFE_INTEGER }) },
-  { id: 'own', title: 'Egen fart × 2', status: own(2) },
-  { id: 'own16', title: 'Egen fart × 1,6', status: own(1.6) },
+const BEFORE: Partial<StatusConfig> = { fluentRtMs: 5000, automaticRtMs: 3000, keepEvidenceDays: 10 };
+const RULES: { id: string; title: string; status: Partial<StatusConfig> }[] = [
+  { id: 'now', title: 'Som förut (buske 5 s, träd 3 s, 10 dagar)', status: BEFORE },
+  { id: 'free', title: 'Buske utan tid', status: { ...BEFORE, fluentRtMs: Number.MAX_SAFE_INTEGER } },
+  { id: 'tree4', title: 'Träd 4 s', status: { ...BEFORE, automaticRtMs: 4000 } },
+  { id: 'k30', title: '30 dagar', status: { ...BEFORE, keepEvidenceDays: 30 } },
+  { id: 'new', title: 'Nu (träd 4 s, 30 dagar)', status: {} },
+  { id: 'more', title: 'Nu, med Ge mer tid', status: moreTime(DEFAULT_CONFIG.status) },
 ];
 const CHECKPOINTS = [8, 13, 26, 52];
 
@@ -57,7 +50,7 @@ const week = (day: number | null | undefined) => (day === null || day === undefi
 function run(profile: LearnerProfile, rules: (typeof RULES)[number], seed: number): Run {
   // The child's own speed comes from its first two weeks, which today's rules do not change.
   const known = simulateValley({ profile, seed, weeks: 2, path: true }).knownRtMs ?? 0;
-  const r = simulateValley({ profile, seed, weeks: WEEKS, path: true, status: rules.status?.(known) });
+  const r = simulateValley({ profile, seed, weeks: WEEKS, path: true, status: rules.status });
   return {
     gardenOpens: week(r.openDay.multiplication),
     pathOpens: week(r.openDay.hundred),
@@ -96,8 +89,8 @@ describe.skipIf(!MODE)('the time report', () => {
       const all: Record<string, Run[]> = JSON.parse(readFileSync(fileOf(profile), 'utf8'));
       lines.push(`## ${profile.name}`, '', 'Median (lägst–högst). Veckor räknas från första dagen.', '');
       lines.push('| | ' + RULES.map((v) => v.title).join(' | ') + ' |', '|---|' + RULES.map(() => '---').join('|') + '|');
-      const row = (title: string, f: (r: Run) => number | null, format?: (n: number) => string) =>
-        lines.push(`| ${title} | ${RULES.map((v) => spread(all[v.id]!.map(f), format)).join(' | ')} |`);
+      const row = (title: string, f: (r: Run, rule: string) => number | null, format?: (n: number) => string) =>
+        lines.push(`| ${title} | ${RULES.map((v) => spread(all[v.id]!.map((r) => f(r, v.id)), format)).join(' | ')} |`);
       const at = (w: number) => (r: Run) => r.weekly[w - 1] ?? null;
       row('Egen fart (det barnet redan kan)', (r) => r.knownRtMs, sec);
       row('Svar i trädgården, vecka 13', (r) => at(13)(r)?.rtMs ?? null, sec);
@@ -107,7 +100,14 @@ describe.skipIf(!MODE)('the time report', () => {
       for (const w of CHECKPOINTS) row(`Gånger: buske eller träd, vecka ${w}`, (r) => at(w)(r)?.sit ?? null, pct);
       for (const w of [26, 52]) row(`Gånger: träd, vecka ${w}`, (r) => at(w)(r)?.automatic ?? null, pct);
       for (const w of [26, 52]) row(`Buskar barnet inte minns, vecka ${w}`, (r) => at(w)(r)?.notRecalled ?? null, pct);
+      row('Träd barnet inte minns, vecka 52', (r) => at(52)(r)?.treesNotRecalled ?? null, pct);
       for (const w of [13, 26]) row(`Grodd i 4 veckor eller mer, vecka ${w}`, (r) => at(w)(r)?.stuck ?? null, pct);
+      // With more time already given there is nothing to suggest.
+      row('Förslaget ”Ge mer tid” syns, vecka', (r, rule) => {
+        if (rule === 'more') return null;
+        const i = r.weekly.findIndex((w) => w.slowFacts >= 5);
+        return i < 0 ? null : i + 1;
+      });
       row('Rätt svar', (r) => r.correct, pct);
       lines.push('');
     }

@@ -23,6 +23,10 @@ export interface PlaceSummary {
   /** How much sits: facts at least fluent, of all the place's. */
   known: number;
   total: number;
+  /** Facts the child answers right but too slowly for a bush (`slowButRight`). */
+  slow: number;
+  /** Each fact's best time here, fastest first (`bestTimes`): how fast the child is in itself. */
+  bestTimes: number[];
   todo: ParentTodo[];
 }
 

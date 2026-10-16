@@ -108,8 +108,8 @@ describe('status rules', () => {
   it('keeps only recent evidence', () => {
     let s = introduced();
     s = answer(s, 1, true, 2000);
-    s = answer(s, 30, true, 2000);
-    expect(Object.keys(s.dayBest)).toEqual([addDays(DAY0, 30)]);
+    s = answer(s, 31, true, 2000);
+    expect(Object.keys(s.dayBest)).toEqual([addDays(DAY0, 31)]);
     expect(s.status).toBe('learning');
   });
 });

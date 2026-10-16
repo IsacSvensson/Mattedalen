@@ -6,11 +6,13 @@ export const DEFAULT_CONFIG: EngineConfig = {
     fluentRtMs: 5000,
     fluentDays: 2,
     fluentFormats: ['choice', 'free'],
-    // automatic = correct under 3 s on 3 different days, recalled without options
-    automaticRtMs: 3000,
+    // automatic = correct under 4 s on 3 different days, recalled without options
+    // (3 s and 10 days of evidence gave the average simulated child no trees in a
+    // year: a fluent fact comes back every 4–30 days; docs/PLAN-GRANSKNING.md, S2)
+    automaticRtMs: 4000,
     automaticDays: 3,
     automaticFormats: ['free'],
-    keepEvidenceDays: 10,
+    keepEvidenceDays: 30,
   },
   leitner: { intervalsDays: [1, 2, 4, 7, 14, 30] },
   session: {

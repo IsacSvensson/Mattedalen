@@ -4,6 +4,7 @@ import { createHundredPack } from '../../src/content/hundred';
 import { createMultiplicationPack, isDivisionId, isFactId, parseDivisionId, parseFactId } from '../../src/content/multiplication';
 import { planDay, restedYesterday, type DayPlan } from '../../src/shell/dayPlan';
 import { partSits } from '../../src/shell/parts';
+import { bestTimes, QUICK_FACTS, slowButRight, slowFacts } from '../../src/shell/stats';
 import { gardenOpens } from '../../src/places/tradgarden/opening';
 import { heldTables, tablesWaiting, WAIT_PLAY_DAYS } from '../../src/places/tradgarden/waits';
 import { pathOpens, pathWaiting } from '../../src/places/stigen/opening';
@@ -91,13 +92,19 @@ export interface WeekState {
   automatic: number;
   /** Of the bushes and trees: the child would not recall it (the model's P(recall) under ½), only work it out. */
   notRecalled: number;
+  /** The same for the trees alone. */
+  treesNotRecalled: number;
   /** Introduced four weeks ago or more and still a sprout, in every open place. */
   stuck: number;
   /** Median time of the week's correct answers in the garden, ms. */
   rtMs: number | null;
+  /** Facts more time would help with, over the open places (`slowFacts`), and the child's tenth quickest fact. */
+  slowFacts: number;
+  quickMs: number | null;
 }
 
 const DAY_MS = 86_400_000;
+const share = (n: number, of: number) => (of ? n / of : 0);
 
 export function simulateValley(o: ValleyOptions): ValleyResult {
   const clock = new ManualClock(Date.UTC(2026, 0, 5, 15));
@@ -187,6 +194,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
     if (plays && open.some((p) => plan.minutes[p.id] !== undefined)) played.push(today);
     if (day % 7 === 6) {
       const sits = timesIds.filter((i) => ['fluent', 'automatic'].includes(garden.states[i]!.status));
+      const trees = sits.filter((i) => garden.states[i]!.status === 'automatic');
       timesHistory.push(sits.length / timesIds.length);
       let stuck = 0;
       let introduced = 0;
@@ -199,10 +207,13 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
       weekRts.sort((a, b) => a - b);
       weekly.push({
         sit: sits.length / timesIds.length,
-        automatic: timesIds.filter((i) => garden.states[i]!.status === 'automatic').length / timesIds.length,
+        automatic: trees.length / timesIds.length,
         notRecalled: sits.length ? sits.filter((i) => garden.learner.recallProbability(i) < 0.5).length / sits.length : 0,
+        treesNotRecalled: share(trees.filter((i) => garden.learner.recallProbability(i) < 0.5).length, trees.length),
         stuck: introduced ? stuck / introduced : 0,
         rtMs: weekRts.length ? weekRts[Math.floor(weekRts.length / 2)]! : null,
+        slowFacts: slowFacts(open.map((p) => ({ slow: slowButRight(p.engine, p.states), bestTimes: bestTimes(p.states) }))),
+        quickMs: open.flatMap((p) => bestTimes(p.states)).sort((a, b) => a - b)[QUICK_FACTS - 1] ?? null,
       });
       weekRts = [];
     }

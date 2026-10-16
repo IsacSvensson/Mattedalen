@@ -138,6 +138,8 @@ export interface QrTransfer {
   divisionSign?: 'fraction' | 'obelus' | 'slash';
   /** False when the garden's tables do not wait for Stigen (bit 4 of the flags). */
   tablesWait?: boolean;
+  /** A grown-up gives the child more time (bit 5 of the flags). */
+  moreTime?: boolean;
   /** The day each garden table could first open (`ProfileSettings.tableReady`). */
   tableReady?: Record<string, DayKey>;
   packs: QrPackLevels[];
@@ -154,7 +156,7 @@ export function encodeTransfer(t: QrTransfer): string {
   const bytes = [
     TRANSFER_VERSION,
     Math.max(0, Math.min(255, Math.round(t.sessionMinutes))),
-    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0) | (t.tablesWait === false ? 16 : 0),
+    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0) | (t.tablesWait === false ? 16 : 0) | (t.moreTime ? 32 : 0),
     name.length,
     ...name,
     avatar.length,
@@ -237,6 +239,7 @@ export function decodeTransfer(text: string): QrTransfer {
     ...((flags & 8) === 8 ? { pathOpen: true } : {}),
     ...(sign !== 'fraction' ? { divisionSign: sign } : {}),
     ...((flags & 16) === 16 ? { tablesWait: false } : {}),
+    ...((flags & 32) === 32 ? { moreTime: true } : {}),
     ...(tableReady ? { tableReady } : {}),
     packs,
   };

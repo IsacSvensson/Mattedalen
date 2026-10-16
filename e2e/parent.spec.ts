@@ -279,3 +279,31 @@ test('"Svåra just nu" shows five at first, and all with "Visa alla"', async ({ 
   await expect(page.locator('.hard-list li:visible')).toHaveCount(7);
   await expect(page.getByRole('button', { name: /^Visa alla/ })).toHaveCount(0);
 });
+
+test('"Ge mer tid": suggested for a child who is right but slow, and a choice in the child’s settings', async ({ page }) => {
+  await createProfile(page, 'Alva');
+  // Ten facts right on two days, but never under 5 s; even the quickest take 6 s.
+  const slow = (n: number) => ({
+    status: 'learning',
+    box: 1,
+    introducedDay: '2026-01-20',
+    dayBest: { '2026-01-28': { choice: 6000 + n * 100 }, '2026-01-30': { choice: 6200 + n * 100 } },
+  });
+  await seedStates(page, Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => [`10x${n}`, slow(n)])));
+  await openParent(page);
+  const todo = page.getByRole('region', { name: 'Att göra för dig' });
+  await expect(todo.getByText(/^Alva svarar rätt men långsamt på 10 fakta\. De blir inte buskar förrän svaren går under 5 s\./)).toBeVisible();
+  await todo.getByRole('button', { name: 'Ge mer tid' }).click();
+  await expect(page.getByText(/svarar rätt men långsamt/)).toHaveCount(0);
+
+  await parentSettings(page);
+  const more = page.getByRole('checkbox', { name: 'Ge mer tid' });
+  await expect(more).toBeChecked();
+  await expect(page.getByText(/En buske kräver då svar under 10 s i stället för 5 s, och ett träd under 8 s i stället för 4 s\./)).toBeVisible();
+  // Off again: the suggestion comes back. (The first "Sparat" goes first, so the next one is this one.)
+  await expect(page.locator('.toast')).toHaveCount(0);
+  await more.uncheck();
+  await expect(page.getByText('Sparat')).toBeVisible();
+  await parentBack(page);
+  await expect(page.getByRole('region', { name: 'Att göra för dig' }).getByRole('button', { name: 'Ge mer tid' })).toBeVisible();
+});

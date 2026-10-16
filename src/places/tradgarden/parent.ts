@@ -28,7 +28,7 @@ import { heatmapView } from '../../shell/components/heatmap';
 import { h } from '../../shell/dom';
 import type { PlaceSummary, SaveProfile } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
-import { factStats, factStatsText, formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
+import { factStats, factStatsText, formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, type FactStats, bestTimes, slowButRight } from '../../shell/stats';
 import { limitedList } from '../../shell/components/limitedList';
 import { gardenDeps, pack } from './pack';
 import { gardenIsOpen } from './isOpen';
@@ -311,6 +311,8 @@ export async function gardenParentSummary(ctx: AppContext, profile: Profile, sav
     // Written as on the page, with the child's sign for delat med.
     hardest: hardest ? mathNodes(hardest.text, sign) : null,
     ...knownOf(pack, states),
+    slow: slowButRight(engine, states),
+    bestTimes: bestTimes(states),
     todo,
   };
 }

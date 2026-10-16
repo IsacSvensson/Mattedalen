@@ -140,6 +140,7 @@ async function importQr(ctx: AppContext, text: string): Promise<void> {
               ...(snap.gardenOpen ? { gardenOpen: true } : {}),
               ...(snap.pathOpen ? { pathOpen: true } : {}),
               ...(snap.tablesWait === false ? { tablesWait: false } : {}),
+              ...(snap.moreTime ? { moreTime: true } : {}),
               ...(snap.tableReady ? { tableReady: snap.tableReady } : {}),
             },
           }

@@ -1,4 +1,4 @@
-import { addDays, atLeast, type ContentPack, type DayKey, type ItemId, type ItemState } from '../engine';
+import { addDays, atLeast, evidenceDays, type ContentPack, type DayKey, type Engine, type ItemId, type ItemState } from '../engine';
 import type { AttemptDaySummary, SessionRecord, StoredAttempt } from '../storage';
 
 export interface DayMinutes {
@@ -102,6 +102,53 @@ export function partNow(pack: ContentPack, states: Record<ItemId, ItemState>, op
   const sits = (id: ItemId) => atLeast(states[id]?.status ?? 'new', 'fluent');
   const now = parts.find((u) => u.itemIds.filter(sits).length < 0.8 * u.itemIds.length) ?? parts.at(-1);
   return now?.title ?? null;
+}
+
+/**
+ * Facts the child answers right but slowly (docs/PLAN-GRANSKNING.md, S2): right
+ * without help on enough days to be a bush, but not under the time limit. They
+ * stay sprouts; a grown-up can give the child more time.
+ */
+export function slowButRight(engine: Engine, states: Record<ItemId, ItemState>): number {
+  const units = new Map(engine.pack.units.map((u) => [u.id, u.status]));
+  return engine.pack.items.filter((it) => {
+    const s = states[it.id];
+    if (s?.status !== 'learning') return false;
+    const rules = { ...engine.config.status, ...units.get(it.unitId) };
+    return (
+      evidenceDays(s, Number.MAX_SAFE_INTEGER, rules.fluentFormats) >= rules.fluentDays &&
+      evidenceDays(s, rules.fluentRtMs, rules.fluentFormats) < rules.fluentDays
+    );
+  }).length;
+}
+
+/** Each fact's best time on the days that count as evidence, fastest first. */
+export function bestTimes(states: Record<ItemId, ItemState>): number[] {
+  return Object.values(states)
+    .map((s) => Math.min(...Object.values(s.dayBest).flatMap((ev) => Object.values(ev).filter((x): x is number => typeof x === 'number'))))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+}
+
+/** The child's quickest facts tell how fast it is in itself: the tenth quickest. */
+export const QUICK_FACTS = 10;
+/**
+ * A child is slow in itself when even its tenth quickest fact takes this long.
+ * Simulated over a year: strong 1.4–1.8 s, average 1.9–2.4 s, weak 2.8–3.4 s,
+ * slow 4.0–4.5 s (docs/PLAN-GRANSKNING.md, S2).
+ */
+export const SLOW_QUICK_MS = 3700;
+
+/**
+ * The facts more time would help with, over the child's places: the facts right
+ * but slow (`slowButRight`), when the child is slow in itself: even its tenth
+ * quickest fact, at any place, takes `SLOW_QUICK_MS`. A child who has trouble
+ * remembering still answers its easiest facts quickly; for it more time would
+ * only let it work facts out, so none.
+ */
+export function slowFacts(places: readonly { slow: number; bestTimes: readonly number[] }[]): number {
+  const quick = places.flatMap((p) => p.bestTimes).sort((a, b) => a - b)[QUICK_FACTS - 1];
+  return quick !== undefined && quick >= SLOW_QUICK_MS ? places.reduce((n, p) => n + p.slow, 0) : 0;
 }
 
 /** How much of a place sits: facts at least fluent, of all its facts. */

@@ -183,10 +183,14 @@ Utseendet bygger på några få regler. De står också överst i `styles.css`.
 |---|---|---|
 | Frö | Planta | Rätt svar när faktan är dags för repetition. |
 | Planta | Buske | Rätt under 5 s på 2 olika dagar (flytande). |
-| Buske | Träd | Fritt svar under 3 s på 3 olika dagar (automatiserad). |
+| Buske | Träd | Fritt svar under 4 s på 3 olika dagar (automatiserad). |
 | Träd | Buske | Ett fel svar. |
 | Buske | Planta | Ett fel svar. Faktan blir aldrig frö igen: det barnet lärt sig en gång är inte borta. |
 | Planta | Frö | Ett fel svar, bara för en fakta som aldrig har varit buske. |
+
+Dagarna räknas inom 30 dagar. Med ”Ge mer tid” bland barnets inställningar
+gäller 10 s för busken och 8 s för trädet
+([MOTORN](MOTORN.md)).
 
 Motorn minns det högsta läget en fakta nått (`ItemState.peak`). Lägen som
 sparades före regeln har inte `peak`. Där räcker det att faktan har fallit från

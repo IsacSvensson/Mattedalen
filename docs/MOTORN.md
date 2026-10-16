@@ -97,8 +97,23 @@ const { meta, introduced, accuracy } = session.summary();
 |---|---|
 | ny → inlärning | när faktan introduceras |
 | flytande | rätt under 5 s på 2 olika dagar (flerval eller fritt svar) |
-| automatiserad | rätt under 3 s på 3 olika dagar, **med fritt svar** |
+| automatiserad | rätt under 4 s på 3 olika dagar, **med fritt svar** |
 | fel svar | ett steg ner; nivån måste sedan visas på en ny dag. Det högsta läget faktan nått sparas (`peak`), så att en fakta som varit flytande visas som planta och inte som frö. |
+
+Dagarna räknas inom 30 dagar (`keepEvidenceDays`). Förut var det 3 s och 10
+dagar. Då fick det genomsnittliga simulerade barnet inga träd alls på ett år,
+eftersom en flytande fakta kommer tillbaka bara var 4:e till 30:e dag
+([PLAN-GRANSKNING, S2](PLAN-GRANSKNING.md#fynd-från-s2)).
+
+**Ge mer tid** (ett val för vuxna, `ProfileSettings.moreTime`): gränserna
+fördubblas, till 10 s för flytande och 8 s för automatiserad. Resten av reglerna
+gäller som förut. Valet är för ett barn som svarar rätt men långsamt. Föräldravyn
+föreslår det under ”Att göra för dig” när minst 5 fakta är rätt på 2 dagar men
+aldrig under gränsen, och barnet är långsamt i sig: även dess tionde
+snabbaste fakta, på alla platser, tar 3,7 s eller mer (`slowFacts` i
+`shell/stats.ts`). Ett barn som har svårt att minnas svarar snabbt på det
+lättaste, och får inte förslaget. För det barnet skulle mer tid bara göra
+uträknade svar till buskar.
 
 Två svar räknas aldrig som bevis: svar samma dag som faktan introducerades, och
 rätt svar efter ett fel samma dag. I båda fallen har barnet nyss sett svaret.
@@ -213,4 +228,4 @@ befästning och blir lättare, vilket är väntat.
 - Den starka eleven ligger över 90 % eftersom motorn inte introducerar fler än
   12 nya fakta per pass och inte hoppar över enheter.
 - Den svaga eleven når sällan ”automatiserad”, eftersom den simulerade svarstiden
-  sällan går under 3 s. Gränsen går att ändra i `config.ts`.
+  sällan går under gränsen. Gränsen går att ändra i `config.ts`.

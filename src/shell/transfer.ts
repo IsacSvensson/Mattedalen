@@ -22,6 +22,7 @@ export function transferOf(profile: Profile, packs: { pack: ContentPack; states:
     ...(profile.settings.pathOpen ? { pathOpen: true } : {}),
     ...(profile.settings.divisionSign && profile.settings.divisionSign !== 'fraction' ? { divisionSign: profile.settings.divisionSign } : {}),
     ...(profile.settings.tablesWait === false ? { tablesWait: false } : {}),
+    ...(profile.settings.moreTime ? { moreTime: true } : {}),
     ...(profile.settings.tableReady ? { tableReady: profile.settings.tableReady } : {}),
     packs: packs.map(({ pack, states }) => ({ packId: pack.id, packVersion: pack.version, levels: pack.items.map((it) => levelOf(states[it.id])) })),
   };
@@ -54,7 +55,7 @@ export function progressFromSnapshot(snap: Pick<QrSnapshot, 'levels'>, engine: E
 }
 
 export function profileFromSnapshot(
-  snap: Pick<QrSnapshot, 'name' | 'avatar' | 'sessionMinutes'> & Pick<Partial<QrTransfer>, 'gardenOpen' | 'pathOpen' | 'divisionSign' | 'tablesWait' | 'tableReady'>,
+  snap: Pick<QrSnapshot, 'name' | 'avatar' | 'sessionMinutes'> & Pick<Partial<QrTransfer>, 'gardenOpen' | 'pathOpen' | 'divisionSign' | 'tablesWait' | 'moreTime' | 'tableReady'>,
   id: string,
   now: number,
 ): Profile {
@@ -71,6 +72,7 @@ export function profileFromSnapshot(
       ...(snap.pathOpen ? { pathOpen: true } : {}),
       ...(snap.divisionSign && snap.divisionSign !== 'fraction' ? { divisionSign: snap.divisionSign } : {}),
       ...(snap.tablesWait === false ? { tablesWait: false } : {}),
+      ...(snap.moreTime ? { moreTime: true } : {}),
       ...(snap.tableReady ? { tableReady: snap.tableReady } : {}),
     },
   };

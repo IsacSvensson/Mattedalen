@@ -1,10 +1,11 @@
+import { DEFAULT_CONFIG } from '../../../engine';
 import { encodeTransfer, exportFileName, type Profile } from '../../../storage';
 import type { AppContext } from '../../app';
 import { AVATAR_KEYS, avatarName } from '../../components/avatars';
 import { choose, toast } from '../../components/modal';
 import { h } from '../../dom';
 import type { SaveProfile } from '../../place';
-import { loadProgress } from '../../play';
+import { loadProgress, moreTime } from '../../play';
 import { hasSwedishVoice, speechSupported } from '../../speech';
 import { qrSvgMarkup, transferOf } from '../../transfer';
 import { genitive } from '../../words';
@@ -50,6 +51,10 @@ export async function showChildSettings(ctx: AppContext, profileId: string): Pro
   );
 }
 
+const rules = DEFAULT_CONFIG.status;
+const more = moreTime(rules);
+const sec = (ms: number) => `${ms / 1000} s`;
+
 /** Settings for the child in every place. */
 function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
   const name = h('input', { type: 'text', value: profile.name, maxlength: 20, 'aria-label': 'Namn' });
@@ -92,6 +97,21 @@ function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
       ),
     ),
     h('p', { class: 'muted' }, 'Passlängden är hela dagens tid. Den delas mellan dagens platser efter hur mycket som ska repeteras.'),
+    h(
+      'label',
+      { class: 'check' },
+      h('input', {
+        type: 'checkbox',
+        checked: profile.settings.moreTime === true,
+        onchange: (e: Event) => void save({ settings: { moreTime: (e.target as HTMLInputElement).checked } }),
+      }),
+      h('span', null, 'Ge mer tid'),
+    ),
+    h(
+      'p',
+      { class: 'muted' },
+      `För ett barn som svarar rätt men långsamt. En buske kräver då svar under ${sec(more.fluentRtMs)} i stället för ${sec(rules.fluentRtMs)}, och ett träd under ${sec(more.automaticRtMs)} i stället för ${sec(rules.automaticRtMs)}. Det som redan har vuxit står kvar om du slår av det.`,
+    ),
     h(
       'label',
       { class: 'check' },
