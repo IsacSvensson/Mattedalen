@@ -133,7 +133,7 @@ src/
 tests/
   engine/                   enhetstester för motorn (med ett glosor-paket)
   content/                  tester för innehållspaketen
-  simulation/               simulerade elever över 26 veckor, i Trädgården och Bäcken
+  simulation/               simulerade elever: varje plats för sig, och hela dalen i ett år
   storage/                  kontraktstester för minne och IndexedDB, importen
   game/                     spelets och dalens logik (utan DOM)
 e2e/                        Playwright: hela flöden i riktig webbläsare
@@ -386,6 +386,11 @@ Playwright-tester vid varje push och pull request.
   - `legacy.spec.ts`: importen från Gångerträdgården och att den gamla appens
     databas och cachar lämnas orörda.
   - `update.spec.ts`: nya versioner når även en installerad app.
+- **Dalen med många slumpfrön** tar några minuter och körs bara för hand. Den
+  skriver en rapport till `tests/simulation/out/report.md`:
+  `VALLEY_REPORT=svag npx vitest run tests/simulation/valleyReport.test.ts`
+  (och `genomsnittlig`, `stark`), sedan `VALLEY_REPORT=summary` med samma
+  kommando.
 - Typkontroll, enhetstester, bygge och e2e körs före varje push. Ett fel som
   hittas på en riktig enhet får ett eget e2e-test.
 

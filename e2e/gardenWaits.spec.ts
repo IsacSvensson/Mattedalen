@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { createProfile, enterGarden, GROUPS_KNOWN, openParent, playedAt, seedStates, type SeedState } from './helpers';
+import { createProfile, enterGarden, GROUPS_KNOWN, openParent, openPath, playedAt, seedStates, type SeedState } from './helpers';
 
-/** The garden's tables wait for their part on Stigen (docs/PLAN-HUNDRA.md), at most 14 play days. */
+/** The garden's tables wait for their part on Stigen (docs/PLAN-HUNDRA.md) while Stigen is open, at most 14 play days. */
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
 });
@@ -16,6 +16,7 @@ function twos(): Record<string, SeedState> {
 test('a table that waits for Stigen says so, and a grown-up can open it', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Alva');
+  await openPath(page, 'Alva');
   await seedStates(page, twos(), { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
   await enterGarden(page, 'Alva');
   await expect(page.locator('.garden-next')).toHaveText('×10 kommer när du kan hela tiotal på stigen.');
@@ -36,6 +37,7 @@ test('a table that waits for Stigen says so, and a grown-up can open it', async 
 test('a table waits at most 14 play days, however long that takes in weeks', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Bo');
+  await openPath(page, 'Bo');
   await seedStates(page, twos(), { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
   await enterGarden(page, 'Bo');
   await expect(page.locator('.garden-next')).toContainText('×10 kommer');
@@ -58,6 +60,7 @@ test('a table waits at most 14 play days, however long that takes in weeks', asy
 test('a grown-up can turn the waiting off, and the garden follows its own order', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Cia');
+  await openPath(page, 'Cia');
   await seedStates(page, twos(), { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
   await openParent(page);
   const garden = page.getByRole('region', { name: /^Trädgården/ });
@@ -67,6 +70,15 @@ test('a grown-up can turn the waiting off, and the garden follows its own order'
   await wait.uncheck();
   await page.getByRole('button', { name: /Tillbaka|Stäng/ }).first().click();
   await enterGarden(page, 'Cia');
+  await expect(page.locator('.garden-grid')).toBeVisible();
+  await expect(page.locator('.garden-next')).toHaveCount(0);
+});
+
+test('nothing waits while Stigen is closed', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Dan');
+  await seedStates(page, twos(), { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
+  await enterGarden(page, 'Dan');
   await expect(page.locator('.garden-grid')).toBeVisible();
   await expect(page.locator('.garden-next')).toHaveCount(0);
 });

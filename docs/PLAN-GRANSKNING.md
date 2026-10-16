@@ -65,3 +65,52 @@ gör det. Fynden från varje fas skrivs in här.
 - **Simuleringen med ett frö** (R2 kör fler): ett genomsnittligt barn har 86 % av
   gångerfakta som sitter efter ett år med Stigen, mot 90 % utan Stigen och 66 %
   med väntan utan tak. Ett starkt barn har allt efter ett år.
+
+## Fynd från R2
+
+Dalen kördes med tio slumpfrön per elev i ett år
+(`tests/simulation/valleyReport.test.ts`). Varje siffra är medianen, med det
+lägsta och högsta värdet inom parentes. Fyra fall jämfördes: utan Stigen, med
+Stigen men ingen väntan, som i appen, och med väntan utan tak.
+
+**Ett fel i regeln hittades.** Stigen öppnar först när barnet kan gå över
+tiotalet vid bäcken, för ett genomsnittligt barn vecka 17. Men ×10, ×4 och ×3
+kan öppna redan vecka 10–14. De väntade alltså på en plats som barnet inte kunde
+gå till, och taket släppte 64 av 68 tabeller. Väntan var bara en fördröjning.
+**Nu väntar tabellerna bara när Stigen är öppen.** Då släpper taket 16 av 68
+tabeller, och resten öppnar när delen sitter eller utan väntan.
+
+Gångerfakta som sitter:
+
+| Elev | Vecka | Utan Stigen | Ingen väntan | Som i appen | Väntan utan tak |
+|---|---|---|---|---|---|
+| Genomsnittlig | 26 | 84 % (81–90) | 74 % (38–80) | 75 % (33–84) | 76 % (32–84) |
+| Genomsnittlig | 52 | 90 % (86–95) | 86 % (67–88) | 84 % (77–90) | 78 % (63–90) |
+| Stark | 26 | 100 % | 97 % (93–100) | 97 % (96–99) | 97 % (93–99) |
+| Stark | 52 | 100 % | 100 % | 100 % | 99 % |
+| Svag | 52 | 1 % (0–11) | 1 % | 1 % | 1 % |
+
+- **Den tredje platsen kostar mer än väntan.** För ett genomsnittligt barn går
+  det från 90 % till 86 % när dagen delas på tre platser, och till 84 % med
+  väntan. Efter ett halvår är skillnaden större: 84 % mot 75 %.
+- **Ett frö kan lura.** Mellan frön skiljer det upp till 50 procentenheter efter
+  ett halvår. Siffrorna i H5 kom från ett frö.
+- **Ett starkt barn** får alla tabeller inom 15 veckor, några veckor senare
+  med Stigen. Taket släpper 41 av 70 tabeller, eftersom tabellerna kan öppna
+  snabbare än Stigens delar sitter. Utan tak skulle ×3, kvadrattalen och ×7 och
+  ×8 vänta ungefär tio veckor till.
+- **Ett svagt barn är vid bäcken nästan hela året.** Dubblorna sitter vecka 38
+  (26–51), och då öppnar trädgården. Över tiotalet sitter inte inom ett år, så
+  Stigen öppnar aldrig. Väntan spelar ingen roll för det barnet.
+- **Rätt svar:** 81 % för ett genomsnittligt barn med Stigen, mot 85 % utan.
+  Stigens uppgifter är svårare i modellen, som inte vet att 40 + 30 bygger på
+  4 + 3. Ett starkt barn har 92 %, ett svagt 78 %.
+
+**Frågor till piloten:**
+
+- Ska trädgården öppna tidigare för ett barn som kan dubblorna säkert men
+  långsamt? I dag krävs att de sitter, och det räknar med tid. En vuxen kan
+  redan öppna den.
+- Är Stigen värd en tredjedel av dagen för ett genomsnittligt barn, när den kostar
+  ungefär fyra procentenheter av gångerfakta efter ett år? Svaret beror på vad
+  barnet vinner i talen till 100, och det mäter Stigens koll.

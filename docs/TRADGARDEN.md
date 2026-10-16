@@ -46,6 +46,11 @@ väntar därför på sin del på Stigen (`TABLES_WAIT` i `places/tradgarden/wait
 | ×3, ×9, ×6 | Över tiotalet |
 | Kvadrattalen, ×7 och ×8 | Tvåsiffrigt plus tvåsiffrigt |
 
+- **Tabellerna väntar bara när Stigen är öppen.** En väntan som barnet inte kan
+  göra något åt är bara en fördröjning. Förut släppte taket nästan varje tabell
+  för ett genomsnittligt barn, eftersom Stigen öppnar först när barnet kan gå över
+  tiotalet vid bäcken (se R2 i [PLAN-GRANSKNING.md](PLAN-GRANSKNING.md#fynd-från-r2)).
+  En tabell som har börjat innan Stigen öppnar väntar aldrig.
 - **×5 väntar inte.** ×5 är att räkna femsteg, och det kan de flesta barn. Den
   kommer direkt efter ×10 (se [PLAN-GRANSKNING.md](PLAN-GRANSKNING.md)).
 - En tabell väntar **högst 14 speldagar** (`WAIT_PLAY_DAYS`) från den dag den

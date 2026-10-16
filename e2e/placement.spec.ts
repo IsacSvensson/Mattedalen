@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createProfile, openParent, switchPlayer, untilIntro } from './helpers';
+import { createProfile, openGarden, openParent, openPath, switchPlayer, untilIntro } from './helpers';
 
 /**
  * Answers the check: right (and fast) for facts with a factor in `known`, otherwise "0".
@@ -22,10 +22,20 @@ async function answerCheck(page: import('@playwright/test').Page, known: number[
   }
 }
 
+/** To the garden's start check, offered on the first visit. */
+async function toGardenCheck(page: import('@playwright/test').Page, name: string): Promise<void> {
+  await page.locator('.profile-tile', { hasText: name }).click();
+  await page.getByRole('button', { name: /^Trädgården\./ }).click();
+  await expect(page.getByRole('heading', { name: 'Kan du redan lite gånger?' })).toBeVisible();
+}
+
 test('a new player who knows ×2, ×10, ×5 and ×1 starts at ×4', async ({ page }) => {
   await page.goto('/');
-  // A new child starts at the brook; the garden's start check comes on the first visit there.
-  await createProfile(page, 'Alva', 'garden-check');
+  // A new child starts at the brook; a grown-up opens the garden and Stigen (the tables wait for Stigen only when it is open).
+  await createProfile(page, 'Alva', 'brook');
+  await openPath(page, 'Alva');
+  await openGarden(page, 'Alva');
+  await toGardenCheck(page, 'Alva');
   await page.getByRole('button', { name: 'Gör startkollen' }).click();
   await answerCheck(page, [10, 2, 5, 1]);
 
@@ -34,7 +44,7 @@ test('a new player who knows ×2, ×10, ×5 and ×1 starts at ×4', async ({ pag
   await page.getByRole('button', { name: 'Till trädgården' }).click();
   await expect(page.locator('.grid-cell.stage-bush')).toHaveCount(64);
   // ×4 is open: it waits for doubling and halving on Stigen, and a child who knows ×5 can halve.
-  // ×3, ×9 and ×6 wait for going over the ten on Stigen (at most three weeks).
+  // ×3, ×9 and ×6 wait for going over the ten on Stigen (at most 14 play days).
   await expect(page.locator('.grid-cell.stage-soil')).toHaveCount(11);
   await expect(page.locator('.garden-next')).toHaveText('×3 kommer när du kan gå över tiotalet på stigen.');
 

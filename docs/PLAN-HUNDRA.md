@@ -343,7 +343,9 @@ direkt, även om Stigen dröjer.
 - **Med taket och den regeln** sitter 84–93 % av gångerfakta efter ett år (90–93 %
   utan Stigen med samma barn), och 66–86 % efter ett halvår (84–90 %). Tabellerna
   kommer i samma ordning som förut, några veckor senare. Kostnaden är mest att
-  dagen nu delas på tre platser.
+  dagen nu delas på tre platser. *Ändrat i R2:* siffrorna kom från ett slumpfrö.
+  Med tio frön per elev, och med att tabellerna bara väntar när Stigen är öppen,
+  står de nya siffrorna i [PLAN-GRANSKNING.md](PLAN-GRANSKNING.md#fynd-från-r2).
 - **Stigen öppnar efter Över tiotalet vid bäcken**, som i planen. Vi prövade att
   öppna den tidigare, när tiokamraterna och tio och några sitter. Då tog Stigen
   tid från bäcken just när barnet lär sig gå över tiotalet där, trädgården

@@ -13,7 +13,8 @@ kopplingen till de andra platserna i H5.
 - **Delar som väntar på bäcken:** varje del väntar på det den bygger på vid bäcken
   (`BROOK_PREREQUISITES`). Dubbla och halvera väntar alltså på dubblorna vid bäcken.
   Föräldravyn visar ”väntar på bäcken”.
-- **Trädgårdens tabeller väntar på Stigen**, men högst 14 speldagar. Se
+- **Trädgårdens tabeller väntar på Stigen** när den är öppen, men högst 14
+  speldagar. Se
   [TRADGARDEN.md](TRADGARDEN.md#tabellerna-väntar-på-stigen).
 - **Dagens plan:** dalen har nu tre platser, och ett barn besöker högst två om
   dagen. En plats som vilade i går kommer först i dag, så att Stigen inte går
@@ -221,3 +222,16 @@ minnas, också 40 + 30, fast barnet kan 4 + 3. Den är alltså försiktig.
 - **Ett barn som redan kan talen till 100** klarar startkollen för de första
   delarna och börjar på Över tiotalet inom två veckor.
 - Barnen svarar rätt på 80–93 % av frågorna (det svaga barnet 71 %).
+
+**I hela dalen** (`tests/simulation/valleyReport.test.ts`, tio slumpfrön per
+elev, ett år) får Stigen bara en del av dagen. Då går det långsammare:
+
+- **Ett genomsnittligt barn** får Stigen vecka 17 (9–23). Hela tiotal sitter
+  vecka 24, Tiotal och ental vecka 28. Över tiotalet börjar först vecka 48, och
+  hinner sällan sitta inom året.
+- **Ett starkt barn** får Stigen vecka 5. Alla delar sitter inom ett halvår,
+  Över tiotalet vecka 22.
+- **Ett svagt barn** får inte Stigen under året, eftersom Över tiotalet inte
+  sitter vid bäcken.
+
+Se R2 i [PLAN-GRANSKNING.md](PLAN-GRANSKNING.md#fynd-från-r2).

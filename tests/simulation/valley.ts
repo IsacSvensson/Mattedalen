@@ -72,6 +72,8 @@ export interface ValleyResult {
   timesSit: (week: number) => number;
   /** Day a part first sat (80 % fluent), by place and part. */
   sitDay: Record<string, number>;
+  /** Garden tables that started while their part on Stigen did not sit yet: let go by the cap. */
+  byCap: string[];
   answered: number;
   correct: number;
 }
@@ -98,6 +100,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
   const places = o.path ? [garden, brook, path] : [garden, brook];
 
   const firstDay: Record<string, number> = {};
+  const byCap: string[] = [];
   const sitDay: Record<string, number> = {};
   const timesHistory: number[] = [];
   const timesIds = gardenPack.items.filter((i) => isFactId(i.id)).map((i) => i.id);
@@ -124,7 +127,8 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
       const minutes = plan.minutes[p.id];
       if (minutes === undefined) continue;
       const tables = () => {
-        if (o.waits === 'none') return [];
+        // As in the app: nothing waits while Stigen is closed.
+        if (o.waits === 'none' || path.openDay === null) return [];
         const waiting = tablesWaiting(pathPack, path.states, { pack: gardenPack, states: garden.states });
         const could = new Set(garden.engine.unlockedUnits(garden.states, garden.meta));
         const out = heldTables(waiting, could, ready, today, played, o.waits === 'hard' ? Infinity : WAIT_PLAY_DAYS);
@@ -144,8 +148,11 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
       const summary = session.summary();
       p.states = session.stateRecord();
       p.meta = summary.meta;
+      const stillWaiting = p === garden && o.path && path.openDay !== null && o.waits !== 'none' ? tablesWaiting(pathPack, path.states, { pack: gardenPack, states: garden.states }) : [];
       for (const id of summary.introduced) {
-        const key = `${p.id}:${units.get(p.id)!.get(id)}`;
+        const unit = units.get(p.id)!.get(id)!;
+        const key = `${p.id}:${unit}`;
+        if (firstDay[key] === undefined && stillWaiting.includes(unit)) byCap.push(unit);
         firstDay[key] ??= day;
       }
       for (const u of p.engine.pack.units) if (sitDay[`${p.id}:${u.id}`] === undefined && partSits(p.engine.pack, p.states, u.id)) sitDay[`${p.id}:${u.id}`] = day;
@@ -157,6 +164,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
   return {
     firstDay,
     sitDay,
+    byCap,
     openDay: Object.fromEntries(places.map((p) => [p.id, p.openDay])),
     timesSit: (week) => timesHistory[Math.min(week, timesHistory.length) - 1] ?? 0,
     answered,

@@ -1,6 +1,7 @@
 import { systemClock, type DayKey, type Engine, type ItemId, type ItemState, type LearnerMeta } from '../../engine';
 import type { Profile, SessionRecord } from '../../storage';
 import type { AppContext } from '../../shell/app';
+import { placeIsOpen } from '../../shell/place';
 import { loadProgress } from '../../shell/play';
 import { heldTables, tablesWaiting } from './waits';
 
@@ -36,8 +37,10 @@ export interface GardenWaits {
 
 /**
  * The garden's tables that wait for Stigen today, worked out from the child's
- * progress on Stigen (`TABLES_WAIT`). Without Stigen in the valley, or when a
- * grown-up has turned the waiting off, nothing waits.
+ * progress on Stigen (`TABLES_WAIT`). Nothing waits without Stigen in the
+ * valley, while Stigen is not open (a wait the child can do nothing about is
+ * only a delay, docs/PLAN-GRANSKNING.md, R2), or when a grown-up has turned the
+ * waiting off.
  */
 export async function gardenWaits(
   ctx: AppContext,
@@ -46,7 +49,7 @@ export async function gardenWaits(
   engine: Engine,
 ): Promise<GardenWaits> {
   const path = ctx.places.find((p) => p.pack.id === 'hundred');
-  if (!path || profile.settings.tablesWait === false) return { held: [], waitingNow: [] };
+  if (!path || profile.settings.tablesWait === false || !(await placeIsOpen(path, ctx, profile))) return { held: [], waitingNow: [] };
   const pathStates = (await loadProgress(profile, { store: ctx.store, pack: path.pack })).states;
   const waiting = tablesWaiting(path.pack, pathStates, { pack: engine.pack, states: progress.states });
   if (!waiting.length) return { held: [], waitingNow: [] };
