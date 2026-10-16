@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { createProfile, openParent, parentBack, parentPlace, parentSettings, switchPlayer } from './helpers';
+import { createProfile, openParent, parentBack, parentLink, parentPlace, parentSettings, switchPlayer } from './helpers';
 
 /** Small phones: nothing may stick out of its container or make the page scroll sideways. */
 for (const width of [320, 360]) {
@@ -55,14 +55,22 @@ for (const width of [320, 360]) {
       await switchPlayer(page);
       await openParent(page);
       await expectNoSidewaysScroll(page);
-      // Every page: a place with its heat maps open, and the child's settings.
-      await parentPlace(page, 'Trädgården');
-      await expect(page.locator('#place-garden-heading')).toBeVisible();
-      await page.getByText('Alla fakta (värmekartor)').click();
-      await expectNoSidewaysScroll(page);
-      await parentBack(page);
+      // Every page: each place with its heat maps open, the child's settings, the device and bringing a child in.
+      for (const place of ['Bäcken', 'Stigen', 'Trädgården'] as const) {
+        await parentPlace(page, place);
+        const all = page.getByText(/^Alla fakta/);
+        if (await all.count()) await all.click();
+        await expectNoSidewaysScroll(page);
+        await parentBack(page);
+      }
       await parentSettings(page);
       await expectNoSidewaysScroll(page);
+      await parentBack(page);
+      for (const title of ['Den här enheten', 'Hämta ett barn'] as const) {
+        await parentLink(page, title);
+        await expectNoSidewaysScroll(page);
+        await parentBack(page);
+      }
     });
 
     test('a focus session fits the table label and the drops', async ({ page }) => {

@@ -2917,6 +2917,33 @@ h1:focus {
   margin-top: 4px;
 }
 
+/* A computer: two columns, what waits for a grown-up and the device on the left, the child on the right. */
+@media (min-width: 1000px) {
+  .parent-overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    align-items: start;
+    gap: 16px 20px;
+    max-width: 1160px;
+  }
+
+  .parent-overview > .top-bar,
+  .parent-overview > .parent-tabs,
+  .parent-overview > p {
+    grid-column: 1 / -1;
+  }
+
+  .parent-overview > .parent-todo,
+  .parent-overview > nav.parent-section {
+    grid-column: 1;
+  }
+
+  .parent-overview > section[aria-labelledby='child-heading'] {
+    grid-column: 2;
+    grid-row: 3 / span 3;
+  }
+}
+
 /* All facts as heat maps, folded so the page stays short. */
 .all-facts {
   margin-top: 20px;

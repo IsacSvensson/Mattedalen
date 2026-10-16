@@ -20,13 +20,13 @@ ställe, och det som gäller enheten får en egen sida.
 
 ## Skiss
 
-Skissen är en attrapp av föräldravyns egna delar.
+Bilderna är skärmbilder från appen.
 
 ![Telefon: översikten, en plats och barnets inställningar](img/foraldravy-telefon.png)
 
 *Telefon, 360 px. Till vänster översikten: det som väntar på en vuxen, veckan och
-en rad per plats. I mitten en plats: läget först, sedan det som är svårt och
-kollen. Till höger barnets inställningar på ett ställe.*
+en rad per plats. I mitten Trädgårdens sida: läget först, sedan det som är svårt
+och kollen. Till höger barnets inställningar på ett ställe.*
 
 ![Dator: översikten i två spalter](img/foraldravy-dator.png)
 
@@ -88,7 +88,7 @@ kollen. Till höger barnets inställningar på ett ställe.*
 |---|---|
 | F1. Översikten och sidorna **(klar)** | Översikten, sidorna för plats, inställningar, enheten och hämta, bakåtknappen och delningen av `parentSection`. |
 | F2. Att göra och raderna **(klar)** | Listan över det som väntar på en vuxen, raderna per plats och ”Svårt just nu” med ”Visa alla”. |
-| F3. Verifiering | Skärmbilder i alla storlekar, testerna, dokumenten. |
+| F3. Verifiering **(klar)** | Skärmbilder i alla storlekar, testerna, dokumenten. |
 
 ## Fynd från F1
 
@@ -121,6 +121,18 @@ kollen. Till höger barnets inställningar på ett ställe.*
   sida.
 - **Svårt just nu** visar högst fem, de lättaste först, och ”Visa alla 7” för
   resten.
+
+## Fynd från F3
+
+- **Ingen sida rullar i sidled,** i någon storlek från 320 px till dator. Ett
+  test går igenom alla sju sidor på 320 och 360 px, med värmekartorna öppna.
+- **Översikten är cirka 1 600 px lång** på en telefon på 360 px, med ”Att göra”.
+  Förut var föräldravyn nästan 10 000 px.
+- **En dator** visar översikten i två spalter: ”Att göra” och enheten till
+  vänster, barnet med veckan och platserna till höger. Allt får plats utan att
+  rulla.
+- **Trädgårdens sida** är den längsta, cirka 2 800 px på en telefon med
+  värmekartorna öppna. Utan dem är den hälften så lång.
 
 Loggexporten i R5 läggs i den nya strukturen, under barnets ”Flytta eller
 spara”.
