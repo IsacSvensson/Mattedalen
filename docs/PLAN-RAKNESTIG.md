@@ -45,7 +45,7 @@ redan kan stegen, i stället för samma väg för alla.
 | Fas | Innehåll |
 |---|---|
 | S3a. Vägarna och valet **(klar)** | Flera vägar per fakta, motorn väljer, räknestigen, rektangeln och raden följer vägen. Enhetstester. |
-| S3b. Föräldravyn och simuleringen | Svåra just nu visar barnets väg. Simuleringen mäter hur ofta en räknestig kan ges, före och efter. |
+| S3b. Föräldravyn och simuleringen **(klar)** | Svåra just nu visar barnets väg. Simuleringen mäter hur ofta en räknestig kan ges, före och efter. |
 | S3c. Verifiering | E2e för ett barn som kan 5 × 8 och 2 × 8 men inte 4 × 7, skärmbilder, dokumenten. |
 
 ## Fallgropar
@@ -72,3 +72,33 @@ redan kan stegen, i stället för samma väg för alla.
   barn som kan 5 × 8 och 2 × 8 men inte 7 × 4 eller 7 × 3.
 - **Ett barn som kan alla vägar** får tabellens egen, så länge den är lika stark.
   Vägen ändras först när en annan väg blir starkare.
+
+## Fynd från S3b
+
+- **Föräldravyn** visar under ”Svåra just nu” den väg barnet får, till exempel
+  ”7 × 8 = 56 – 7 × 8 = 5 × 8 + 2 × 8 = 40 + 16 = 56”. Kan barnet ingen väg än
+  visas tabellens egen.
+- **Simuleringen** (`tests/simulation/raknestigReport.test.ts`) kör dalen ett år
+  med tio slumpfrön, med en väg per fakta och med flera. Barnet är detsamma, bara
+  hjälpen skiljer. Det långsamma barnet har ”Ge mer tid”.
+
+Andelen svåra fakta i trädgården där spelet inte kan ge någon räknestig, summerat
+över alla veckor (median):
+
+| Elev | En väg | Flera vägar | Varav: barnet kan inte stegen än, en väg → flera |
+|---|---|---|---|
+| Genomsnittlig | 44 % | 35 % | 9 % → 6 % |
+| Långsam | 66 % | 63 % | 10 % → 7 % |
+| Stark | 29 % | 28 % | 0 % → 0 % |
+| Svag | 99 % | 99 % | 0 % → 0 % |
+
+- **Där barnet inte kan stegen än** blir det ungefär en tredjedel färre fall.
+  Det var det S3 skulle lösa.
+- **Det mesta som saknar räknestig är fakta utan väg,** framför allt ×2 och ×10.
+  Det svaga barnet är i trädgården sent, och där är nästan alla svåra fakta ×2.
+  En sådan fakta har ingen tidigare gångerfakta att bygga på. Men ×2 är dubblorna
+  från bäcken (7 × 2 = 7 + 7), och ×10 är tiotal från Stigen. En väg över
+  platsernas gränser är ett förslag till senare.
+- **Antalet räknestigar** ändras nästan inte (499 mot 507 på ett år för ett
+  genomsnittligt barn). Taket är tre per pass och en per fakta och dag, och det
+  nås redan. Andelen gångerfakta som sitter ändras inte heller.

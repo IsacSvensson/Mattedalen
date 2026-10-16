@@ -1,4 +1,4 @@
-import { atLeast, isStruggling, systemClock, type EngineConfig, type ItemState } from '../../engine';
+import { atLeast, isStruggling, knownPath, systemClock, type Engine, type ItemState } from '../../engine';
 import {
   divisionId,
   divisionStrategy,
@@ -17,7 +17,7 @@ import {
   parseFactId,
   SHARE_TASKS,
   shareId,
-  strategyFor,
+  strategyFrom,
 } from '../../content/multiplication';
 import { DEFAULT_DIVISION_SIGN, DIVISION_SIGNS, mathNodes, type DivisionSign } from '../../shell/divisionSign';
 import { checkResultsView } from '../../shell/components/checkResults';
@@ -113,7 +113,7 @@ export async function gardenParentPage(ctx: AppContext, profile: Profile, save: 
     h('h4', null, 'Dela lika'),
     shareSummary(states),
     h('h3', null, 'Svåra just nu'),
-    hardList(states, engine.config, today, sign),
+    hardList(states, engine, today, sign),
     h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states, sign),
     h('h3', null, 'Trädgårdens koll'),
@@ -245,10 +245,11 @@ function openingNote(save: SaveProfile): HTMLElement {
 }
 
 /** Multiplications and divisions the child finds hard right now, by the size of the number (a "Dela lika" task is never timed, so never hard this way). */
-function hardFacts(states: Record<string, ItemState>, config: EngineConfig, today: string): { text: string; strategy: string; size: number }[] {
+function hardFacts(states: Record<string, ItemState>, engine: Engine, today: string): { text: string; strategy: string; size: number }[] {
   return Object.values(states)
-    .filter((s) => (isFactId(s.itemId) || isDivisionId(s.itemId)) && isStruggling(s, today, config.support))
-    .map((s) => hardFact(s.itemId))
+    .filter((s) => (isFactId(s.itemId) || isDivisionId(s.itemId)) && isStruggling(s, today, engine.config.support))
+    // The way the child gets: the one it knows best (docs/PLAN-RAKNESTIG.md).
+    .map((s) => hardFact(s.itemId, knownPath(engine.item(s.itemId), (id) => states[id]) ?? undefined))
     .sort((x, y) => x.size - y.size || x.text.localeCompare(y.text));
 }
 
@@ -257,8 +258,8 @@ function hardFacts(states: Record<string, ItemState>, config: EngineConfig, toda
  * ("räknestigen"): grown-ups can use the same idea when talking about it.
  * At most five, with "Visa alla".
  */
-function hardList(states: Record<string, ItemState>, config: EngineConfig, today: string, sign: DivisionSign): HTMLElement {
-  const hard = hardFacts(states, config, today);
+function hardList(states: Record<string, ItemState>, engine: Engine, today: string, sign: DivisionSign): HTMLElement {
+  const hard = hardFacts(states, engine, today);
   if (hard.length === 0) return h('p', { class: 'muted' }, 'Inga just nu.');
   return h(
     'div',
@@ -266,7 +267,7 @@ function hardList(states: Record<string, ItemState>, config: EngineConfig, today
     h(
       'p',
       { class: 'muted' },
-      'Fel på flera dagar, eller länge utan att fastna. De här tas i steg från det barnet redan kan (räknestigen), och kommer sedan tillbaka utan hjälp.',
+      'Fel på flera dagar, eller länge utan att fastna. De här tas i steg från det barnet redan kan (räknestigen), och kommer sedan tillbaka utan hjälp. Vägen är den barnet kan bäst just nu.',
     ),
     limitedList(
       'ul',
@@ -288,7 +289,7 @@ export async function gardenParentSummary(ctx: AppContext, profile: Profile, sav
   const open = await gardenIsOpen(ctx, profile, states);
   const waits = await gardenWaits(ctx, profile, { states, meta }, engine);
   const sign = profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN;
-  const hardest = hardFacts(states, engine.config, systemClock.today())[0];
+  const hardest = hardFacts(states, engine, systemClock.today())[0];
   const todo: PlaceSummary['todo'] = [];
   if (!open)
     todo.push({
@@ -317,13 +318,13 @@ export async function gardenParentSummary(ctx: AppContext, profile: Profile, sav
   };
 }
 
-function hardFact(id: string): { text: string; strategy: string; size: number } {
+function hardFact(id: string, from?: string[]): { text: string; strategy: string; size: number } {
   if (isDivisionId(id)) {
     const { dividend, divisor, quotient } = parseDivisionId(id);
     return { text: `${formatDivision(dividend, divisor)} = ${quotient}`, strategy: divisionStrategy(quotient, divisor).text, size: dividend };
   }
   const { a, b } = parseFactId(id);
-  return { text: `${formatFact(a, b)} = ${a * b}`, strategy: strategyFor(a, b).text, size: a * b };
+  return { text: `${formatFact(a, b)} = ${a * b}`, strategy: strategyFrom(a, b, from).text, size: a * b };
 }
 
 /** How a fact is written for grown-ups: 3 × 7, 21 ÷ 3, or a "Dela lika" task in short. */

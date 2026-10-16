@@ -1,4 +1,4 @@
-import { createEngine, diffDays, makeConfig, ManualClock, seededRng, type Engine, type ItemId, type ItemState, type LearnerMeta, type Rng, type StatusConfig } from '../../src/engine';
+import { createEngine, diffDays, isStruggling, knownPath, makeConfig, ManualClock, seededRng, type Engine, type ItemId, type ItemState, type LearnerMeta, type Rng, type StatusConfig } from '../../src/engine';
 import { createAdditionPack } from '../../src/content/addition';
 import { createHundredPack } from '../../src/content/hundred';
 import { createMultiplicationPack, isDivisionId, isFactId, parseDivisionId, parseFactId } from '../../src/content/multiplication';
@@ -35,6 +35,8 @@ export interface ValleyOptions {
   minutes?: number;
   /** Other rules for the steps (docs/PLAN-GRANSKNING.md, S2), on top of each pack's own. */
   status?: Partial<StatusConfig>;
+  /** `one`: every garden fact has only the table's own way, as before S3 (docs/PLAN-RAKNESTIG.md). */
+  ways?: 'one' | 'all';
 }
 
 const BROOK_DIFFICULTY: Record<string, number> = {
@@ -98,6 +100,13 @@ export interface WeekState {
   stuck: number;
   /** Median time of the week's correct answers in the garden, ms. */
   rtMs: number | null;
+  /** The garden's hard facts at the week's end, and of them those without a way the child knows (no räknestig). */
+  hard: number;
+  hardNoWay: number;
+  /** Of those, the ones with no way at all (×1, ×2, ×10, and divisions without a path). */
+  hardNoPath: number;
+  /** Räknestigar in the garden during the week. */
+  derives: number;
   /** Facts more time would help with, over the open places (`slowFacts`), and the child's tenth quickest fact. */
   slowFacts: number;
   quickMs: number | null;
@@ -118,6 +127,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
   const brookPack = createAdditionPack();
   const pathPack = createHundredPack();
   const gardenPack = createMultiplicationPack({ division: true });
+  if (o.ways === 'one') for (const item of gardenPack.items) delete item.paths;
   const brook = make('addition', brookPack, (i) => BROOK_DIFFICULTY[brookPack.units.find((u) => u.itemIds.includes(i))!.id] ?? 0.5, 1);
   const unitOfPath = new Map(pathPack.units.flatMap((u) => u.itemIds.map((i) => [i, u.id])));
   const path = make('hundred', pathPack, (i) => PATH_DIFFICULTY[unitOfPath.get(i)!] ?? 0.5, 2);
@@ -132,6 +142,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
   const timesHistory: number[] = [];
   const weekly: WeekState[] = [];
   let weekRts: number[] = [];
+  let weekDerives = 0;
   const knownRts: number[] = [];
   const timesIds = gardenPack.items.filter((i) => isFactId(i.id)).map((i) => i.id);
   let last: DayPlan | undefined;
@@ -174,6 +185,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
         const fb = session.submit(given, rtMs);
         clock.advance(fb.correct ? 2500 : 8000);
         if (p === garden && fb.correct && q.kind !== 'new') weekRts.push(rtMs);
+        if (p === garden && q.kind === 'derive') weekDerives++;
         if (p === brook && fb.correct && q.kind !== 'new' && day < 14 && BROOK_KNOWN_BEFORE.includes(q.item.unitId)) knownRts.push(rtMs);
         answered++;
         if (fb.correct) correct++;
@@ -205,6 +217,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
           if (s.status === 'learning' && diffDays(s.introducedDay, today) >= 28) stuck++;
         }
       weekRts.sort((a, b) => a - b);
+      const hard = Object.values(garden.states).filter((st) => (isFactId(st.itemId) || isDivisionId(st.itemId)) && isStruggling(st, today, garden.engine.config.support));
       weekly.push({
         sit: sits.length / timesIds.length,
         automatic: trees.length / timesIds.length,
@@ -212,10 +225,18 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
         treesNotRecalled: share(trees.filter((i) => garden.learner.recallProbability(i) < 0.5).length, trees.length),
         stuck: introduced ? stuck / introduced : 0,
         rtMs: weekRts.length ? weekRts[Math.floor(weekRts.length / 2)]! : null,
+        hard: hard.length,
+        hardNoWay: hard.filter((st) => !knownPath(garden.engine.item(st.itemId), (id) => garden.states[id])).length,
+        hardNoPath: hard.filter((st) => {
+          const item = garden.engine.item(st.itemId);
+          return item.derivedFrom.length === 0 && !item.paths?.length;
+        }).length,
+        derives: weekDerives,
         slowFacts: slowFacts(open.map((p) => ({ slow: slowButRight(p.engine, p.states), bestTimes: bestTimes(p.states) }))),
         quickMs: open.flatMap((p) => bestTimes(p.states)).sort((a, b) => a - b)[QUICK_FACTS - 1] ?? null,
       });
       weekRts = [];
+      weekDerives = 0;
     }
   }
   return {
