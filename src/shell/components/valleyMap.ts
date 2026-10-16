@@ -239,8 +239,16 @@ export function valleyMap(places: MapPlace[], opts: { start: string; guide: Elem
   };
   document.addEventListener('keydown', onKey);
 
-  // A turned phone or a resized window: lay out again, at the same place.
-  const resized = typeof ResizeObserver === 'function' ? new ResizeObserver(() => layout()) : null;
+  // A turned phone or a resized window: lay out again, at the same place. The
+  // window's own event too: two quick changes that end at the same size are
+  // one or none for the observer, while the browser has moved the map between them.
+  let laidOut = 0;
+  const relayout = () => {
+    cancelAnimationFrame(laidOut);
+    laidOut = requestAnimationFrame(() => layout());
+  };
+  const resized = typeof ResizeObserver === 'function' ? new ResizeObserver(relayout) : null;
+  window.addEventListener('resize', relayout);
 
   return {
     el,
@@ -253,6 +261,8 @@ export function valleyMap(places: MapPlace[], opts: { start: string; guide: Elem
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(laidOut);
+      window.removeEventListener('resize', relayout);
       resized?.disconnect();
     },
   };

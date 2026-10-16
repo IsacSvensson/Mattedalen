@@ -48,28 +48,75 @@ export function spokenText(text: string): string {
     .trim();
 }
 
+/** Chrome drops an utterance spoken right after `cancel()`: this long a pause first. */
+export const CANCEL_GAP_MS = 80;
+/** An utterance that has not started after this long is tried once more. */
+export const START_WAIT_MS = 1200;
+/** Some engines never fire `end`; the game never waits longer than this. */
+const LONGEST_MS = 6000;
+
+const pause = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** Wakes an engine left paused (every browser has `resume`; a stand-in for one may not). */
+function wake(s: SpeechSynthesis): void {
+  if (typeof s.resume === 'function') s.resume();
+}
+
 /**
  * Speaks the text with a Swedish voice on the device; resolves when done, or
  * right away if there is no such voice. It never waits for voices to load:
  * a session times the answer from when the question has been read, so a wait
  * here would make the measured time shorter. Screens that read aloud check
  * `hasSwedishVoice()` once when they open.
+ *
+ * Chrome on Android can get stuck: paused, or still "speaking" an earlier
+ * utterance, so that new ones wait in silence until the phone is restarted.
+ * So the engine is woken (`resume`) before each utterance, an earlier one is
+ * cancelled with a short pause after it, and an utterance that has not
+ * started after a moment is tried once more.
  */
 export async function speak(text: string): Promise<void> {
   const s = synth();
   const voice = swedishVoice();
   if (!s || typeof SpeechSynthesisUtterance === 'undefined' || !voice) return;
-  s.cancel();
+  if (s.speaking || s.pending) {
+    s.cancel();
+    await pause(CANCEL_GAP_MS);
+  }
+  wake(s);
   return new Promise((resolve) => {
-    const u = new SpeechSynthesisUtterance(spokenText(text));
-    u.lang = LANG;
-    u.voice = voice;
-    u.rate = 0.9;
-    u.onend = () => resolve();
-    u.onerror = () => resolve();
-    s.speak(u);
-    // Some engines never fire `end`; don't let the game wait forever.
-    setTimeout(resolve, 6000);
+    let started = false;
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    const say = (again: boolean) => {
+      const u = new SpeechSynthesisUtterance(spokenText(text));
+      u.lang = LANG;
+      u.voice = voice;
+      u.rate = 0.9;
+      u.onstart = () => {
+        started = true;
+      };
+      u.onend = finish;
+      u.onerror = finish;
+      s.speak(u);
+      if (again) return;
+      setTimeout(() => {
+        if (started || settled || s.speaking) return;
+        // Not started: the engine was stuck. Clear it and try once more.
+        s.cancel();
+        setTimeout(() => {
+          if (settled) return;
+          wake(s);
+          say(true);
+        }, CANCEL_GAP_MS);
+      }, START_WAIT_MS);
+    };
+    say(false);
+    setTimeout(finish, LONGEST_MS);
   });
 }
 

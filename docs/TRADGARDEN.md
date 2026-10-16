@@ -312,6 +312,11 @@ De påverkar inte schemaläggningen.
   börjar mätas först när frågan är uppläst, så uppläsningen gör inte barnets
   svarstid längre. Saknas en svensk röst på enheten läses ingenting upp, och det
   står i föräldravyn.
+- **Om talmotorn fastnar.** Chrome på Android kan fastna, pausad eller
+  ”upptagen” med en tidigare uppläsning, så att det blir tyst tills telefonen
+  startas om. Därför väcks talmotorn före varje uppläsning. En tidigare
+  uppläsning avbryts, med en kort paus efter. En uppläsning som inte har börjat
+  efter en dryg sekund görs om en gång.
 
 Logiken för båda spelen (`challenge.ts`) är rena funktioner med egna tester.
 Spelen sparas som pass med `mode: 'challenge'` respektive `'duel'`, och

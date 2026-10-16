@@ -57,3 +57,64 @@ describe('read-aloud stays on the device', () => {
     expect(spoken).toEqual(['Alva: 3 gånger 7']);
   });
 });
+
+describe('read-aloud when the engine is stuck (Chrome on Android)', () => {
+  /** An engine that may be left "speaking", and that ignores the first utterance once. */
+  function stuckSpeech(opts: { busy: boolean; ignoreFirst: boolean }) {
+    const log: string[] = [];
+    let busy = opts.busy;
+    let ignore = opts.ignoreFirst;
+    class FakeUtterance {
+      lang = '';
+      rate = 1;
+      voice: { name: string } | null = null;
+      onstart: (() => void) | null = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(public text: string) {}
+    }
+    vi.stubGlobal('SpeechSynthesisUtterance', FakeUtterance);
+    vi.stubGlobal('speechSynthesis', {
+      getVoices: () => [{ lang: 'sv-SE', name: 'Alva', localService: true }],
+      get speaking() {
+        return busy;
+      },
+      pending: false,
+      speak: (u: FakeUtterance) => {
+        if (ignore) {
+          ignore = false;
+          log.push(`ignored: ${u.text}`);
+          return;
+        }
+        log.push(`said: ${u.text}`);
+        u.onstart?.();
+        u.onend?.();
+      },
+      cancel: () => {
+        busy = false;
+        log.push('cancel');
+      },
+      resume: () => log.push('resume'),
+      addEventListener: () => undefined,
+    });
+    return log;
+  }
+
+  it('wakes the engine, and cancels what it is stuck on with a pause before speaking', async () => {
+    vi.useFakeTimers();
+    const log = stuckSpeech({ busy: true, ignoreFirst: false });
+    const done = speak('3 + 4');
+    await vi.advanceTimersByTimeAsync(100);
+    await done;
+    expect(log).toEqual(['cancel', 'resume', 'said: 3 plus 4']);
+  });
+
+  it('tries once more when the utterance does not start', async () => {
+    vi.useFakeTimers();
+    const log = stuckSpeech({ busy: false, ignoreFirst: true });
+    const done = speak('3 + 4');
+    await vi.advanceTimersByTimeAsync(1500);
+    await done;
+    expect(log).toEqual(['resume', 'ignored: 3 plus 4', 'cancel', 'resume', 'said: 3 plus 4']);
+  });
+});
