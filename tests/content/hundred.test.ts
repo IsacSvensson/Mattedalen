@@ -4,6 +4,10 @@ import { createAdditionPack } from '../../src/content/addition';
 import { createMultiplicationPack, derivationStepsFor } from '../../src/content/multiplication';
 import {
   BROOK_PREREQUISITES,
+  buildPathCheck,
+  hundredDistractors,
+  landings,
+  strategyFor,
   confusionNote,
   createHundredPack,
   crossesTen,
@@ -125,6 +129,12 @@ describe('the tasks of Stigen', () => {
           expect(t.y).toBeGreaterThan(10);
           expect([ones(t.x), ones(t.y)]).not.toContain(0);
           break;
+        case 'tvasiffrminus':
+          expect(t.op).toBe('-');
+          // The task itself, or its first hop back of whole tens.
+          if (t.y % 10 === 0) expect(t.y).toBeGreaterThanOrEqual(10);
+          else expect(t.y).toBeGreaterThan(10);
+          break;
         default:
           throw new Error(`${item.id} in ${item.unitId}`);
       }
@@ -132,6 +142,9 @@ describe('the tasks of Stigen', () => {
     expect(['47+8', '52-6', '35+7', '60-6'].map((id) => byId.get(id)!.unitId)).toEqual(['overtio', 'overtio', 'overtio', 'tilltio']);
     expect(['34+10', '58-20', '26+30'].filter((id) => byId.has(id)).map((id) => byId.get(id)!.unitId)).toEqual(['hopptio', 'hopptio']);
     expect(unitOf(parseTaskId('34+25'))).toBe('tvasiffr');
+    expect(['75-23', '72-38', '71-68', '75-20', 'next:68'].map((id) => byId.get(id)!.unitId)).toEqual(Array(5).fill('tvasiffrminus'));
+    // A step an earlier part has stays there: 47 + __ = 50 is the way up to the ten in Över tiotalet.
+    expect(byId.get('next:47')!.unitId).toBe('tilltio');
     expect(inUnit('tiental').every((i) => i.id.startsWith('te:'))).toBe(true);
   });
 
@@ -290,5 +303,53 @@ describe('Stigen and the garden', () => {
   it('keeps the answer to every task a number the brook’s number pad can type', () => {
     for (const item of pack.items as Item[]) expect(item.answer).toMatch(/^\d{1,3}$/);
     expect(taskAnswer(parseTaskId('next:95'))).toBe(5);
+  });
+});
+
+describe('two-digit minus (docs/PLAN-MINUS.md)', () => {
+  const minus = pack.items.filter((i) => i.unitId === 'tvasiffrminus');
+
+  it('comes last in the pack, after two-digit plus, so older QR codes and saved progress still fit', () => {
+    expect(pack.version).toBe(2);
+    expect(pack.units.at(-1)!.id).toBe('tvasiffrminus');
+    expect(pack.units.at(-1)!.unlockRule).toMatchObject({ kind: 'after', requires: ['tvasiffr'] });
+    // Version 1 had 224 items: they keep their places, and every new item comes after them.
+    expect(pack.items.slice(224).every((i) => i.unitId === 'tvasiffrminus')).toBe(true);
+    expect(pack.items.slice(0, 224).some((i) => i.unitId === 'tvasiffrminus')).toBe(false);
+    expect(minus.length).toBe(pack.items.length - 224);
+  });
+
+  it('takes the tens away first, and goes down to the ten on the way when the ones do not reach', () => {
+    expect(strategyFor(parseTaskId('75-23')).text).toBe('75 − 23 = 75 − 20 − 3 = 55 − 3 = 52.');
+    expect(landings(parseTaskId('75-23'))).toEqual({ stops: [75, 55, 52], up: false });
+    expect(landings(parseTaskId('72-38'))).toEqual({ stops: [72, 42, 40, 34], up: false });
+    expect(derivationSteps('72-38')!.map((s) => `${s.prompt} = ${s.answer}`)).toEqual(['72 − 30 = 42', '42 − 8 = 34', '72 − 38 = 34']);
+    // The first hop is a task of the part, told as the hops it is.
+    expect(strategyFor(parseTaskId('75-20')).text).toBe('Två hopp bakåt på tio: 75, 65, 55.');
+    expect(byId.get('72-38')!.derivedFrom).toEqual(['72-30']);
+  });
+
+  it('counts up when the numbers are close', () => {
+    expect(strategyFor(parseTaskId('71-68')).text).toBe('Räkna upp från 68: 2 till 70 och 1 till 71. 2 + 1 = 3.');
+    expect(landings(parseTaskId('71-68'))).toEqual({ stops: [68, 70, 71], up: true });
+    expect(derivationSteps('71-68')!.map((s) => `${s.prompt} = ${s.answer}`)).toEqual(['68 + 2 = 70', '71 − 70 = 1', '2 + 1 = 3', '71 − 68 = 3']);
+    expect(byId.get('52-47')!.derivedFrom).toEqual(['next:47']);
+  });
+
+  it('knows the typical mix-ups: the smaller ones from the larger, and the tens forgotten', () => {
+    const values = (id: string) => hundredDistractors(parseTaskId(id)).map((d) => d.value);
+    expect(values('72-38')).toContain('46');
+    expect(values('75-23')).toContain('72');
+    expect(confusionNote('72-38', '46')).toBe('Det går inte att ta 8 från 2. Ta tiotalen först: 72 − 30 = 42, sedan 42 − 8.');
+    expect(confusionNote('75-23', '72')).toBe('Glöm inte tiotalen i 23: 75 − 20 = 55 först.');
+    expect(confusionNote('71-68', '17')).toBe('71 och 68 ligger nära varandra. Räkna upp från 68: 2 till 70, och vidare till 71.');
+    // A hop back of whole tens is told as in Hoppa tio.
+    expect(confusionNote('75-20', '73')).toBe('20 är 2 tiotal. Hoppa tio 2 gånger.');
+  });
+
+  it('is in Stigens koll, after the kinds before it', () => {
+    const items = buildPathCheck(seededRng(4));
+    expect(items.filter((i) => i.category === 'tvasiffrminus')).toHaveLength(2);
+    for (const i of items.filter((x) => x.category === 'tvasiffrminus')) expect(i.prompt).toMatch(/^\d\d − \d\d = __$/);
   });
 });

@@ -109,7 +109,7 @@ test('Stigens koll comes on the second day on the path, and grown-ups see the re
     await page.getByRole('button', { name: 'Svara' }).click();
     n++;
   }
-  expect(n).toBe(14);
+  expect(n).toBe(16);
   await page.getByRole('button', { name: 'Till stigen' }).click();
   await expect(page.locator('.intro-card').or(page.locator('.question'))).toBeVisible();
   await page.getByRole('button', { name: 'Tillbaka till stigen' }).click();
@@ -130,8 +130,8 @@ test('the path has a post at every ten and a lantern for each part, lit when it 
   // Two parts open: two lanterns, the first lit; the rest only hooks.
   await expect(page.locator('.trail.large .tr-glass')).toHaveCount(2);
   await expect(page.locator('.trail.large .tr-glass.lit')).toHaveCount(1);
-  await expect(page.locator('.trail.large .tr-hook')).toHaveCount(6);
-  await expect(page.locator('.path .sr-only')).toContainText('På stigen lyser 1 av 8 lyktor. Du är vid lyktan för tiotal och ental.');
+  await expect(page.locator('.trail.large .tr-hook')).toHaveCount(7);
+  await expect(page.locator('.path .sr-only')).toContainText('På stigen lyser 1 av 9 lyktor. Du är vid lyktan för tiotal och ental.');
   await expect(page.locator('.place-now')).toHaveText('Nu: Tiotal och ental');
   await expect(page.locator('.garden-side')).not.toContainText(/\d+ av \d+/);
   // Back to the valley: the path on the map, the same lantern lit.

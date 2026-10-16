@@ -1,6 +1,6 @@
 import type { DistractorCandidate } from '../../engine';
 import { halfSplit } from './items';
-import { crossesTen, formatFact, isTen, onesOf, taskAnswer, tenBelow, tensOf, unitOf, type Task } from './tasks';
+import { countsUp, crossesTen, formatFact, formOf, isTen, onesOf, taskAnswer, tenAbove, tenBelow, tensOf, type Task } from './tasks';
 
 const MIN_CANDIDATES = 5;
 const MAX = 100;
@@ -8,8 +8,8 @@ const MAX = 100;
 /** 47 and 74: the digits the other way round. */
 const reversed = (n: number) => (n >= 10 && n < 100 ? Number(String(n).split('').reverse().join('')) : n);
 
-/** 52 − 6 = 54: the smaller ones digit taken from the larger, tens left alone. */
-export const onesTurned = (x: number, y: number) => tenBelow(x) + (y - onesOf(x));
+/** 52 − 6 = 54 and 72 − 38 = 46: the smaller ones digit taken from the larger, the tens on their own. */
+export const onesTurned = (x: number, y: number) => 10 * (tensOf(x) - tensOf(y)) + Math.abs(onesOf(x) - onesOf(y));
 
 /** Hälften av 56 = 23: half of each digit, the odd ten dropped. */
 const halfByDigits = (n: number) => 10 * Math.floor(tensOf(n) / 2) + Math.floor(onesOf(n) / 2);
@@ -81,7 +81,7 @@ export function hundredDistractors(t: Task): DistractorCandidate[] {
       break;
     case 'fact': {
       const { op, x, y } = t;
-      const unit = unitOf(t);
+      const unit = formOf(t);
       if (unit === 'hopptio') {
         // 26 + 30 = 29: the tens added to the ones.
         add(op === '+' ? x + y / 10 : x - y / 10, 3);
@@ -97,6 +97,8 @@ export function hundredDistractors(t: Task): DistractorCandidate[] {
         if (crossesTen(t)) add(answer + 10, 1.5);
         add(x + y, 1);
         if (isTen(x) && y < 10) add(x - 10 + y, 2);
+        // 75 − 23 = 72: the tens of the smaller number forgotten.
+        if (y > 10 && !isTen(y)) add(x - onesOf(y), 2);
       }
       add(answer + 1, 2.5);
       add(answer - 1, 2.5);
@@ -137,10 +139,16 @@ export function hundredNote(t: Task, given: string): string | undefined {
       return undefined;
     case 'fact': {
       const { op, x, y } = t;
-      if (unitOf(t) === 'hopptio' && g === (op === '+' ? x + y / 10 : x - y / 10))
+      if (formOf(t) === 'hopptio' && g === (op === '+' ? x + y / 10 : x - y / 10))
         return y === 10 ? `10 är ett tiotal. Hoppa tio en gång.` : `${y} är ${y / 10} tiotal. Hoppa tio ${y / 10} gånger.`;
       if (op === '+' && crossesTen(t) && g === answer - 10) return `Glöm inte det nya tiotalet: ${formatFact(op, x, y)} är mer än ${tenBelow(answer)}.`;
       if (op === '+' && !isTen(x) && y < 10 && g === x + 10 * y) return `${y} är ental. Lägg till dem till entalen i ${x}.`;
+      if (op === '-' && y > 10 && !isTen(y)) {
+        if (countsUp(x, y) && g !== answer) return `${x} och ${y} ligger nära varandra. Räkna upp från ${y}: ${tenAbove(y) - y} till ${tenAbove(y)}, och vidare till ${x}.`;
+        if (crossesTen(t) && g === onesTurned(x, y))
+          return `Det går inte att ta ${onesOf(y)} från ${onesOf(x)}. Ta tiotalen först: ${formatFact('-', x, tenBelow(y))} = ${x - tenBelow(y)}, sedan ${formatFact('-', x - tenBelow(y), onesOf(y))}.`;
+        if (g === x - onesOf(y)) return `Glöm inte tiotalen i ${y}: ${formatFact('-', x, tenBelow(y))} = ${x - tenBelow(y)} först.`;
+      }
       if (op === '-' && crossesTen(t) && g === onesTurned(x, y))
         return `${onesOf(x)} räcker inte till ${y}. Gå ner till ${tenBelow(x)} först: ${formatFact('-', x, onesOf(x))} = ${tenBelow(x)}.`;
       if (op === '-' && g === x + y) return `${g} är ${formatFact('+', x, y)}. Här ska det vara minus.`;

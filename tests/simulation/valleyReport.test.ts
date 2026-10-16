@@ -27,7 +27,7 @@ const VARIANTS: { id: string; title: string; options: Partial<ValleyOptions> }[]
   { id: 'hard', title: 'Med Stigen, väntan utan tak', options: { path: true, waits: 'hard' } },
 ];
 const TABLES = ['u2', 'u10', 'u5', 'u1', 'u4', 'u3', 'usq', 'u9', 'u6', 'u78'];
-const PATH_PARTS = ['tiotal', 'tiental', 'ental', 'tilltio', 'hopptio', 'dubbla', 'overtio', 'tvasiffr'];
+const PATH_PARTS = ['tiotal', 'tiental', 'ental', 'tilltio', 'hopptio', 'dubbla', 'overtio', 'tvasiffr', 'tvasiffrminus'];
 const BROOK_PARTS = ['dubblor', 'overtio'];
 
 interface Run {

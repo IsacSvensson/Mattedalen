@@ -27,8 +27,9 @@ describe('Stigen without the DOM', () => {
       'Hoppa tio',
       'Dubbla och halvera',
       'Tvåsiffrigt plus tvåsiffrigt',
+      'Tvåsiffrigt minus tvåsiffrigt',
     ]);
-    expect(lights.map((l) => l.open)).toEqual([true, true, false, false, false, false, true, false]);
+    expect(lights.map((l) => l.open)).toEqual([true, true, false, false, false, false, true, false, false]);
     expect(lights[0]!.known).toBe(1);
     expect(lights[1]!.known).toBe(0.5);
     expect(litCount(lights)).toBe(1);

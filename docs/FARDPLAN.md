@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **R4. Tvåsiffrigt minus tvåsiffrigt** | 75 − 23 saknas på Stigen. | Plan skrivs | |
+| 1 | **R4. Tvåsiffrigt minus tvåsiffrigt** | 75 − 23 saknas på Stigen. | [PLAN-MINUS](PLAN-MINUS.md) | R4a klar, R4b nästa |
 | 2 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#faser) | |
 | 3 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 

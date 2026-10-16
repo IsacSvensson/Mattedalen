@@ -8,7 +8,7 @@ import { crossesTen, isTen, onesOf, taskAnswer, taskId, taskPrompt, type Task } 
  * also shows whether the way of thinking carries over.
  */
 
-export type CheckCategory = 'tiotal' | 'ental' | 'plus' | 'minus' | 'dubbla' | 'tvasiffr';
+export type CheckCategory = 'tiotal' | 'ental' | 'plus' | 'minus' | 'dubbla' | 'tvasiffr' | 'tvasiffrminus';
 
 export const CHECK_CATEGORIES: { id: CheckCategory; title: string; short: string; count: number }[] = [
   { id: 'tiotal', title: 'Tiotal och ental', short: 'Tiotal', count: 2 },
@@ -17,6 +17,8 @@ export const CHECK_CATEGORIES: { id: CheckCategory; title: string; short: string
   { id: 'minus', title: 'Minus över tiotalet', short: 'Minus över', count: 3 },
   { id: 'dubbla', title: 'Dubbla och halvera', short: 'Dubbla', count: 2 },
   { id: 'tvasiffr', title: 'Tvåsiffrigt plus tvåsiffrigt', short: 'Tvåsiffrigt', count: 2 },
+  // Last, so the kinds before it are drawn as in the checks before it (docs/PLAN-MINUS.md).
+  { id: 'tvasiffrminus', title: 'Tvåsiffrigt minus tvåsiffrigt', short: 'Tvåsiffrigt minus', count: 2 },
 ];
 
 export interface CheckItem {
@@ -52,6 +54,7 @@ const POOLS: Record<CheckCategory, () => Task[]> = {
     ...range(11, 49).map((n) => 2 * n).filter((n) => !isTen(n)).map((n): Task => ({ kind: 'half', n })),
   ],
   tvasiffr: () => twoDigit.flatMap((x) => twoDigit.filter((y) => y !== x && x + y <= 99).map((y) => fact('+', x, y))),
+  tvasiffrminus: () => twoDigit.flatMap((x) => twoDigit.filter((y) => y < x).map((y) => fact('-', x, y))),
 };
 
 function pick<T>(pool: T[], n: number, rng: Rng): T[] {

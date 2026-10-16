@@ -43,7 +43,7 @@ const BROOK_DIFFICULTY: Record<string, number> = {
   noll: 0, ettmer: 0, tio: 0.1, sma: 0.2, tiokamrater: 0.3, dubblor: 0.3, vagen: 0.3, inom10: 0.5, naradubblor: 0.6, overtio: 0.9,
 };
 const PATH_DIFFICULTY: Record<string, number> = {
-  tiotal: 0.1, tiental: 0.2, hopptio: 0.3, ental: 0.3, tilltio: 0.4, dubbla: 0.6, overtio: 0.8, tvasiffr: 0.9,
+  tiotal: 0.1, tiental: 0.2, hopptio: 0.3, ental: 0.3, tilltio: 0.4, dubbla: 0.6, overtio: 0.8, tvasiffr: 0.9, tvasiffrminus: 0.9,
 };
 const BROOK_KNOWN_BEFORE = ['noll', 'ettmer', 'sma', 'tio'];
 

@@ -54,7 +54,7 @@ export function createHundredPack(): ContentPack {
 
   return {
     id: 'hundred',
-    version: 1,
+    version: 2,
     title: 'Talen till 100',
     items,
     units,

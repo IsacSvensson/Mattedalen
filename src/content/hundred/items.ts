@@ -12,6 +12,8 @@ import {
   tenBelow,
   tensOf,
   unitOf,
+  countsUp,
+  formOf,
   type Task,
 } from './tasks';
 
@@ -66,7 +68,8 @@ export function strategyFor(t: Task): { kind: string; text: string; from: ItemId
 function factStrategy({ op, x, y }: Task & { kind: 'fact' }, answer: number): { kind: string; text: string; from: ItemId[] } {
   const self = formatFact(op, x, y);
   const t: Task = { kind: 'fact', op, x, y };
-  switch (unitOf(t)) {
+  // By form: the first hops of two-digit minus (75 − 20, 90 − 30) are told as the hops and tens they are.
+  switch (formOf(t)) {
     case 'tiotal':
       return {
         kind: 'tens',
@@ -113,6 +116,23 @@ function factStrategy({ op, x, y }: Task & { kind: 'fact' }, answer: number): { 
         from: [taskId({ kind: 'fact', op: '+', x, y: tens })],
       };
     }
+    case 'tvasiffrminus': {
+      if (countsUp(x, y)) {
+        const up = tenAbove(y) - y;
+        const rest = x - tenAbove(y);
+        return {
+          kind: 'countUp',
+          text: `Räkna upp från ${y}: ${up} till ${tenAbove(y)}${rest ? ` och ${rest} till ${x}` : ''}. ${rest ? `${up} + ${rest} = ` : ''}${answer}.`,
+          from: [taskId({ kind: 'next', n: y })],
+        };
+      }
+      const [tens, ones] = [tenBelow(y), onesOf(y)];
+      return {
+        kind: 'jumpTensDown',
+        text: `${self} = ${x} − ${tens} − ${ones} = ${x - tens} − ${ones} = ${answer}.`,
+        from: [taskId({ kind: 'fact', op: '-', x, y: tens })],
+      };
+    }
     default:
       throw new Error(`Not a calculation of Stigen: ${self}`);
   }
@@ -126,7 +146,9 @@ function splitText({ x, y }: { x: number; y: number }): string {
 
 /**
  * Where the hops land on an empty number line: 47 + 8 is 47 → 50 → 55,
- * 52 − 6 is 52 → 50 → 46, 34 + 25 is 34 → 54 → 59, 26 + 30 is 26 → 36 → 46 → 56.
+ * 52 − 6 is 52 → 50 → 46, 34 + 25 is 34 → 54 → 59, 26 + 30 is 26 → 36 → 46 → 56,
+ * 72 − 38 is 72 → 42 → 40 → 34. Counting up (71 − 68) goes from the smaller
+ * number to the larger, 68 → 70 → 71, and the answer is the hops, not a stop.
  */
 export function landings(t: Task): { stops: number[]; up: boolean } | null {
   const answer = taskAnswer(t);
@@ -134,7 +156,7 @@ export function landings(t: Task): { stops: number[]; up: boolean } | null {
   if (t.kind !== 'fact') return null;
   const { op, x, y } = t;
   const up = op === '+';
-  switch (unitOf(t)) {
+  switch (formOf(t)) {
     case 'hopptio':
       return { stops: hops(x, up ? 10 : -10, y / 10), up };
     case 'overtio':
@@ -142,6 +164,13 @@ export function landings(t: Task): { stops: number[]; up: boolean } | null {
     case 'tvasiffr':
     case 'dubbla':
       return isTen(y) || onesOf(y) === 0 ? { stops: [x, answer], up } : { stops: [x, x + tenBelow(y), answer], up };
+    case 'tvasiffrminus': {
+      // From the smaller number up: the hops add up to the answer (68 → 70 → 71 is 2 + 1).
+      if (countsUp(x, y)) return { stops: tenAbove(y) === x ? [y, x] : [y, tenAbove(y), x], up: true };
+      // The tens back, then down to the ten on the way if the ones go past it (72 → 42 → 40 → 34).
+      const after = x - tenBelow(y);
+      return onesOf(y) > onesOf(after) && !isTen(after) ? { stops: [x, after, tenBelow(after), answer], up } : { stops: [x, after, answer], up };
+    }
     default:
       return { stops: [x, answer], up };
   }

@@ -7,7 +7,7 @@ describe('Stigens koll', () => {
     const seen = new Set<string>();
     for (let seed = 1; seed <= 30; seed++) {
       const items = buildPathCheck(seededRng(seed));
-      expect(items).toHaveLength(14);
+      expect(items).toHaveLength(16);
       for (const { id, count } of CHECK_CATEGORIES) expect(items.filter((i) => i.category === id)).toHaveLength(count);
       expect(new Set(items.map((i) => i.id)).size).toBe(items.length);
       for (const item of items) {

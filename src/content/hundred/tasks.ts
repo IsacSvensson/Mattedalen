@@ -135,6 +135,8 @@ export const UNIT_DEFS = [
   // A lane of its own: the garden's ×4 and ×5 wait for it, not for the bridge over the ten.
   { id: 'dubbla', title: 'Dubbla och halvera', requires: ['tiental'], lane: 'dubbla' },
   { id: 'tvasiffr', title: 'Tvåsiffrigt plus tvåsiffrigt', requires: ['hopptio', 'overtio'] },
+  // After two-digit plus: the same hops of ten, backwards (docs/PLAN-MINUS.md).
+  { id: 'tvasiffrminus', title: 'Tvåsiffrigt minus tvåsiffrigt', requires: ['tvasiffr'] },
 ] as const;
 
 export type UnitId = (typeof UNIT_DEFS)[number]['id'];
@@ -147,8 +149,16 @@ export const BROOK_PREREQUISITES: Partial<Record<UnitId, string[]>> = {
   dubbla: ['dubblor'],
 };
 
-/** The part a task belongs to. */
+/**
+ * The part a task belongs to: by its form (`formOf`), except the first steps
+ * of two-digit minus that no earlier part has (75 − 20, 68 + __ = 70).
+ */
 export function unitOf(t: Task): UnitId {
+  return minusStepIds().has(taskId(t)) ? 'tvasiffrminus' : formOf(t);
+}
+
+/** The part a task's form goes with: 75 − 20 is a hop of ten, wherever it is practised. */
+export function formOf(t: Task): UnitId {
   switch (t.kind) {
     case 'tens':
     case 'count':
@@ -166,7 +176,7 @@ export function unitOf(t: Task): UnitId {
       if (y === 10 || (isTen(y) && !isTen(x))) return 'hopptio';
       if (isTen(x) && isTen(y)) return 'tiotal';
       if (op === '+' && x === y) return 'dubbla';
-      if (y >= 10) return 'tvasiffr';
+      if (y >= 10) return op === '+' ? 'tvasiffr' : 'tvasiffrminus';
       if (op === '+') return isTen(x) || onesOf(x) + y < 10 ? 'ental' : 'overtio';
       if (isTen(x)) return 'tilltio';
       return y <= onesOf(x) ? 'ental' : 'overtio';
@@ -200,8 +210,56 @@ const TWO_DIGIT: [number, number][] = [
   [47, 36], [28, 35], [39, 24], [56, 27], [18, 46], [65, 29], [37, 38],
 ];
 
-/** Every task of Stigen, in no particular order (each part sorts its own). */
+/**
+ * Two-digit minus two-digit (docs/PLAN-MINUS.md): first without going over a
+ * ten, then over it, taking the tens away first (75 − 20 − 3).
+ */
+const TWO_DIGIT_DOWN: [number, number][] = [
+  [75, 23], [68, 25], [89, 34], [57, 32], [96, 41],
+  [72, 38], [63, 27], [81, 46], [54, 29], [45, 18], [90, 36],
+];
+/** Numbers close to each other: count up from the smaller (68 → 70 → 71). */
+const CLOSE: [number, number][] = [
+  [71, 68], [52, 47], [83, 79], [64, 58],
+];
+
+/** Counting up is the way when the numbers are at most ten apart, and the smaller one is not a whole ten. */
+export const countsUp = (x: number, y: number) => x - y <= 10 && !isTen(y) && tenAbove(y) <= x;
+
+/** The steps two-digit minus starts from: the first hop back (75 − 20), and up to the ten (68 + __ = 70). */
+function minusStepTasks(): Task[] {
+  return [...TWO_DIGIT_DOWN.map(([x, y]) => sub(x, tenBelow(y))), ...CLOSE.map(([, y]): Task => ({ kind: 'next', n: y }))];
+}
+
+/** The steps that are new with two-digit minus: they belong to it, not to the part the kind of task would go to. */
+let minusSteps: Set<ItemId> | undefined;
+function minusStepIds(): Set<ItemId> {
+  if (!minusSteps) {
+    const before = new Set(tasksBeforeMinus().map(taskId));
+    minusSteps = new Set(minusStepTasks().map(taskId).filter((id) => !before.has(id)));
+  }
+  return minusSteps;
+}
+
+/**
+ * Every task of Stigen, in no particular order (each part sorts its own).
+ * Two-digit minus comes last, so that the items before it keep their places
+ * (QR codes from version 1 of the pack hold the first items only).
+ */
 export function allTasks(): Task[] {
+  const out = [...tasksBeforeMinus(), ...minusStepTasks(), ...TWO_DIGIT_DOWN.map(([x, y]) => sub(x, y)), ...CLOSE.map(([x, y]) => sub(x, y))];
+  // Once each: a hop or a step can come from two places.
+  const seen = new Set<ItemId>();
+  return out.filter((t) => {
+    const id = taskId(t);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
+/** The tasks of version 1 of the pack, before two-digit minus. */
+function tasksBeforeMinus(): Task[] {
   const out: Task[] = [];
 
   // Hela tiotal: how many tens, and the brook's facts as tens (40 + 30, 90 − 20).
@@ -249,13 +307,5 @@ export function allTasks(): Task[] {
 
   // Tvåsiffrigt plus tvåsiffrigt.
   for (const [x, y] of TWO_DIGIT) out.push(add(x, y));
-
-  // Once each: a hop or a step can come from two places.
-  const seen = new Set<ItemId>();
-  return out.filter((t) => {
-    const id = taskId(t);
-    if (seen.has(id)) return false;
-    seen.add(id);
-    return true;
-  });
+  return out;
 }

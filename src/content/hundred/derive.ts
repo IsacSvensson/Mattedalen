@@ -72,6 +72,21 @@ export function derivationSteps(id: ItemId): DeriveStep[] | null {
       const tens = tenBelow(y);
       return [known('Hoppa tiotalen först', { kind: 'fact', op: '+', x, y: tens }), combine('Sedan entalen', formatFact('+', x + tens, onesOf(y)), answer), target];
     }
+    case 'jumpTensDown': {
+      const tens = tenBelow(y);
+      return [known('Hoppa tiotalen bakåt först', { kind: 'fact', op: '-', x, y: tens }), combine('Sedan entalen', formatFact('-', x - tens, onesOf(y)), answer), target];
+    }
+    case 'countUp': {
+      const ten = tenAbove(y);
+      const steps = [known('Räkna upp till tiotalet', { kind: 'next', n: y })];
+      if (ten === x) return [...steps, combine('Hur långt hoppade du?', formatFact('-', ten, y), answer), target];
+      return [
+        ...steps,
+        combine(`Upp till ${x}`, formatFact('-', x, ten), x - ten),
+        combine('Lägg ihop hoppen', formatFact('+', ten - y, x - ten), answer),
+        target,
+      ];
+    }
     case 'double': {
       const [tens, ones] = [tenBelow(x), onesOf(x)];
       return [

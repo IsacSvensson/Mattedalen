@@ -1,5 +1,5 @@
 import type { Question, SessionMode } from '../../../engine';
-import { confusionNote, derivationSteps, landings, parseTaskId, taskAnswer, taskWithAnswer, unitOf, type Task } from '../../../content/hundred';
+import { confusionNote, derivationSteps, formOf, landings, parseTaskId, taskAnswer, taskWithAnswer, unitOf, type Task } from '../../../content/hundred';
 import type { Profile } from '../../../storage';
 import type { AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
@@ -67,7 +67,7 @@ function picture(t: Task, opts: { hops?: boolean; animate?: boolean; onDone?: ()
 /** A second picture beside the line: rods and cubes for a two-digit sum or a double, the hundred chart for hops of ten. */
 function extraPicture(t: Task): HTMLElement | null {
   if (t.kind !== 'fact') return null;
-  const unit = unitOf(t);
+  const unit = formOf(t);
   if (unit === 'hopptio') return hundredChart(landings(t)!.stops.filter((n) => n >= 1));
   if (t.op === '+' && (unit === 'tvasiffr' || unit === 'dubbla')) return base10Sum(t.x, t.y);
   return null;
@@ -103,7 +103,7 @@ function pathSession(ctx: AppContext, profile: Profile): SessionPlace {
       }
       const line = landings(t);
       // A hop of ten is shown on the hundred chart, as a step straight down; the rest as hops on the line.
-      const hop = t.kind === 'fact' && unitOf(t) === 'hopptio';
+      const hop = t.kind === 'fact' && formOf(t) === 'hopptio';
       if (hop) setTimeout(ready, 0);
       const body = h('div', { class: 'intro-pictures' }, hop ? null : picture(t, { animate: true, onDone: ready }), extraPicture(t));
       return {
