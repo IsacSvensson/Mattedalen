@@ -25,6 +25,12 @@ Bilderna är skärmbilder från appen, för ett barn som har alla tre platser.
 pekar mot bäcken och stigen. Till höger har barnet tryckt på solen i hörnet,
 och ”I dag” visar vad som återstår och att stigen vilar.*
 
+![Telefon: närbild vid trädgården, och samma telefon utzoomad till hela dalen](img/karta-zoom.png)
+
+*Telefon, 360 px. Till vänster närbilden. Till höger har barnet tryckt på
+knappen nere till höger, eller nypt med två fingrar, och ser hela dalen.
+Skyltarna går fortfarande att läsa.*
+
 ![Surfplatta liggande: hela dalen på en gång](img/karta-bred.png)
 
 *Surfplatta liggande, 1080 px. Hela dalen syns, och inget behöver dras.*
@@ -42,8 +48,15 @@ och ”I dag” visar vad som återstår och att stigen vilar.*
 - **Vid varje plats** står skylten, dagens läge och raden ”Nu: …”. Ett tryck på
   skylten eller bilden leder till platsen.
 - **Telefon:** kartan är större än skärmen. Barnet drar runt i den åt alla håll
-  med fingret, utan zoom. Med mus går det att dra på samma sätt, och
-  piltangenterna flyttar kartan.
+  med fingret. Med mus går det att dra på samma sätt, och piltangenterna
+  flyttar kartan.
+- **Zooma ut (K4):** två fingrar nyper kartan, från närbild ut till hela dalen,
+  aldrig närmare än full storlek. Knappen nere till höger växlar mellan ”Visa
+  hela dalen” och ”Gå närmare”, och går tillbaka in till platsen barnet var vid.
+  Tangenterna + och − zoomar också, liksom ctrl och mushjulet. Långt ute behåller
+  skyltarna en läsbar storlek, och raderna under dem väntar tills barnet kommer
+  närmare. Skärmläsare har dem kvar. På en hög telefon får himlen en tredjedel
+  av det lediga utrymmet och ängen resten. Kartan börjar alltid i närbild.
 - **Pilar i kanten** pekar mot platser utanför skärmen, med platsens ikon och
   namn (”↑ Bäcken”). Ett tryck glider dit. Pilarna skjuts isär längs kanten, så
   att de aldrig ligger på varandra eller på knapparna i hörnen.
@@ -103,6 +116,7 @@ och ”I dag” visar vad som återstår och att stigen vilar.*
 | K1. Kartan **(klar)** | Kartan med platserna i full storlek, valvbron, bäcken och stenarna, dra runt på telefon, hela dalen på breda skärmar, pilar i kanten, startläge vid dagens plats. Ersätter scenerna från R3a. |
 | K2. I dag och vägen tillbaka **(klar)** | Solen i hörnet och kortet ”I dag” som startar passet. Tillbaka från en plats leder till kartan vid samma plats. |
 | K3. Verifiering **(klar)** | Skärmbilder i alla storlekar, tester för att dra, pilar, ”I dag” och skärmläsare, dokumenten. |
+| K4. Zooma ut **(klar)** | Nypa med två fingrar och en knapp i hörnet, från närbild till hela dalen. Skyltar som går att läsa långt ute. |
 
 ## Fynd från K1
 
@@ -150,6 +164,22 @@ och ”I dag” visar vad som återstår och att stigen vilar.*
   bilderna finns i ord, pilarna är dolda och utanför tabbordningen, och en skylt
   som får fokus rullas in i bild. Med minskad rörelse hoppar kartan direkt.
 
+## Fynd från K4
+
+- **En skala för allt.** Kartan har en skala mellan hela dalen och full
+  storlek. En bred skärm visar hela dalen som förut och har ingen knapp.
+- **Sidan zoomar inte.** Kartan tar själv hand om två fingrar
+  (`touch-action: pan-x pan-y`), så att sidan aldrig förstoras. Testet nyper
+  med riktiga pekhändelser.
+- **Skyltarna växer bort från bilden.** Trädgårdens skylt står ovanför lådan och
+  växer uppåt, så att den inte täcker rutorna.
+- **Pilarna** räknas om för varje skala. De lägger sig aldrig på knappen i
+  hörnet. När hela dalen syns finns inga pilar.
+- **Två tryck på −** fortsätter från det första målet, inte från där kartan är
+  mitt i glidningen.
+- **I närbild kan knappen ligga över en rad vid en plats** tills barnet drar
+  kartan. Den är 56 px och står i hörnet, som solen.
+
 ## Vad vi prövade
 
 - **R3a: scener i sidled.** Varje plats var ett kort som barnet svepte mellan,
@@ -182,7 +212,8 @@ Det här gäller fortfarande:
 Beslutat i oktober 2026:
 
 1. **Dalen är en karta att dra runt i,** inte scener i sidled. På breda skärmar
-   syns allt på en gång.
+   syns allt på en gång. På en telefon går det att zooma ut till hela dalen
+   (K4).
 2. **Bron på kartan** är valvbron över bäcken, som på den gamla kartan.
 3. **Ingen stor knapp på kartan.** ”I dag” i hörnet visar vad som återstår.
 4. **Ordningen** är Bäcken, Stigen, Trädgården.

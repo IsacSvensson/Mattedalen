@@ -82,7 +82,10 @@ full storlek (`src/shell/components/valleyMap.ts`, lägena i
   (`Place.scene`). Vid varje plats står skylten, dagens läge och raden ”Nu: …”.
   Solrosorna på kullen är samma som i trädgården: en per tabell barnet kan.
 - **Telefon:** kartan är större än skärmen, och barnet drar runt i den åt alla
-  håll, utan zoom. Musen drar på samma sätt, och piltangenterna flyttar kartan.
+  håll. Musen drar på samma sätt, och piltangenterna flyttar kartan. Två fingrar
+  zoomar ut till hela dalen och in igen, aldrig närmare än full storlek, och
+  knappen nere till höger gör samma sak (”Visa hela dalen”, ”Gå närmare”). Långt
+  ute behåller skyltarna en läsbar storlek.
   Pilar i kanten pekar mot platser utanför skärmen (”↑ Bäcken”), och ett tryck
   glider dit. Pilarna skjuts isär, så att de aldrig ligger på varandra eller på
   rubriken. Sidan rullar aldrig: kartan panoreras i sin egen behållare.
@@ -140,7 +143,7 @@ src/
   shell/                    skalet, gemensamt för alla platser (vanilla TS + liten h()-hjälpare)
     place.ts                gränssnittet Place som varje plats implementerar
     screens/valley.ts       dalen: startsidan med kartan
-    components/valleyMap.ts kartan: platserna, bäcken, att dra runt, pilarna i kanten
+    components/valleyMap.ts kartan: platserna, bäcken, att dra runt och zooma, pilarna i kanten
     valleyLayout.ts         var platserna, bäcken och stigen står på kartan
     screens/session.ts      ramen för ett pass (frågor, svar, uppläsning, räknestig, hjälpkort)
     screens/parent/         För vuxna: översikten och sidorna (plats, inställningar, enheten, hämta)

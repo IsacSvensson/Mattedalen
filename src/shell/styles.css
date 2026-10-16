@@ -1002,6 +1002,8 @@ h1:focus {
   inset: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  /* One finger moves the map; two fingers zoom it, not the page. */
+  touch-action: pan-x pan-y;
   scrollbar-width: none;
   cursor: grab;
   background: var(--hill-front);
@@ -1027,6 +1029,7 @@ h1:focus {
   position: absolute;
   left: 0;
   top: 0;
+  overflow: hidden;
   transform-origin: 0 0;
   background: var(--hill-front);
 }
@@ -1150,6 +1153,34 @@ h1:focus {
   display: flex;
   align-items: center;
   gap: 12px;
+  /* Far out on the map the sign keeps a readable size (`--label`, set by the map). */
+  transform: scale(var(--label, 1));
+  transform-origin: 0 0;
+}
+
+/* A sign above its place's picture grows upwards, away from it. */
+.map-sign-row.up {
+  transform-origin: 0 100%;
+}
+
+/* Far out, the lines under the signs wait until the child comes closer; screen readers still have them. */
+.valley-map.far .map-notes {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Out to the whole valley and back, bottom right; only where the map is larger than the screen. */
+.map-zoom {
+  position: absolute;
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 1;
+  display: none;
+  background: var(--card);
+}
+
+.valley-map.zoomable .map-zoom {
+  display: grid;
 }
 
 .map-guide {

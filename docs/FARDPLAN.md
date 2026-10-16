@@ -17,11 +17,10 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **K4. Zooma ut på kartan** | På en telefon ska barnet kunna se hela dalen på en gång. | [PLAN-DALEN](PLAN-DALEN.md) | Nästa |
-| 2 | **S3. Räknestig efter det barnet kan** | Räknestigen är fast per fakta. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#föreslagna-faser) | |
-| 3 | **R4. Tvåsiffrigt minus tvåsiffrigt** | 75 − 23 saknas på Stigen. | Plan skrivs | |
-| 4 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#faser) | |
-| 5 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
+| 1 | **S3. Räknestig efter det barnet kan** | Räknestigen är fast per fakta. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#föreslagna-faser) | |
+| 2 | **R4. Tvåsiffrigt minus tvåsiffrigt** | 75 − 23 saknas på Stigen. | Plan skrivs | |
+| 3 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#faser) | |
+| 4 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
 ## Efter piloten
 
@@ -60,5 +59,6 @@ i, med ”I dag” i hörnet i stället för en stor knapp (se
 | – | Siffertangenterna skriver svaret vid flerval. | [TRADGARDEN](TRADGARDEN.md) |
 | S1 | Växterna tar ett steg i taget. Svar med stöd räknas för sig i föräldravyn. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#fynd-från-s1) |
 | R3 (K1–K3) | Dalen som en karta att dra runt i, med platserna i full storlek och ”I dag” i hörnet. | [PLAN-DALEN](PLAN-DALEN.md) |
+| K4 | Zooma ut på kartan: nypa eller knappen i hörnet, ut till hela dalen. | [PLAN-DALEN](PLAN-DALEN.md#fynd-från-k4) |
 | S2 | Tid och långsamma barn: ”Ge mer tid” för vuxna, föreslås när barnet svarar rätt men långsamt. Trädet under 4 s, och dagarna räknas inom 30 dagar. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#fynd-från-s2) |
 | F (F1–F3) | För vuxna: en kort översikt med Att göra och en rad per plats, och egna sidor för platserna, barnets inställningar, enheten och att hämta ett barn. | [PLAN-FORALDRAVYN](PLAN-FORALDRAVYN.md) |

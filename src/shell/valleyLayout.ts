@@ -21,8 +21,12 @@ export interface Box {
 export interface Spot {
   /** The place's picture: its top left corner, and its width when the picture scales. */
   art: { x: number; y: number; w?: number };
-  /** The sign (and the child's animal beside it). */
-  sign: { x: number; y: number };
+  /**
+   * The sign (and the child's animal beside it). Far out on the map the sign
+   * keeps a readable size and grows from its top left corner, or from its
+   * bottom left (`up`) when the place's picture lies below it.
+   */
+  sign: { x: number; y: number; up?: boolean };
   /** Today's state and what the child is on now. */
   notes: { x: number; y: number };
   /** All of the place: what should be on screen when the map shows it. */
@@ -37,7 +41,7 @@ export const SPOTS: Record<string, Spot> = {
   // The posts and lanterns along the far bank.
   stigen: { art: { x: 610, y: 400, w: 460 }, sign: { x: 700, y: 560 }, notes: { x: 700, y: 614 }, box: { x: 600, y: 390, w: 470, h: 290 }, focusX: 780 },
   // The whole bed on this side of the brook.
-  tradgarden: { art: { x: 40, y: 470 }, sign: { x: 40, y: 396 }, notes: { x: 40, y: 965 }, box: { x: 30, y: 390, w: 520, h: 690 }, focusX: 180 },
+  tradgarden: { art: { x: 40, y: 470 }, sign: { x: 40, y: 396, up: true }, notes: { x: 40, y: 965 }, box: { x: 30, y: 390, w: 520, h: 690 }, focusX: 180 },
 };
 
 /**

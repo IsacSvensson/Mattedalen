@@ -216,7 +216,7 @@ test.describe('the map on a phone', () => {
         for (let y = 0; y <= view.scrollHeight; y += 60) {
           view.scrollTo(x, y);
           await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-          const boxes = [...document.querySelectorAll('.map-pointer, .map-head h1, .map-head .avatar-button')].map((e) => e.getBoundingClientRect());
+          const boxes = [...document.querySelectorAll('.map-pointer, .map-head h1, .map-head .avatar-button, .map-zoom')].map((e) => e.getBoundingClientRect());
           for (let i = 0; i < boxes.length; i++) {
             const a = boxes[i]!;
             if (a.left < 0 || a.right > innerWidth || a.top < 0 || a.bottom > innerHeight) out.push(`${x},${y}: outside`);
@@ -244,6 +244,89 @@ test.describe('the map on a phone', () => {
   });
 });
 
+/** Every place on screen at once: its picture and its sign. */
+const wholeValley = (page: Page) =>
+  page.evaluate(() =>
+    [...document.querySelectorAll('.map-art, .map-sign')].every((el) => {
+      const r = el.getBoundingClientRect();
+      return r.left >= -1 && r.right <= innerWidth + 1 && r.top >= -1 && r.bottom <= innerHeight + 1;
+    }),
+  );
+const mapScale = (page: Page) => page.locator('.map-world').evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+
+test.describe('zooming the map on a phone', () => {
+  test.use({ viewport: { width: 360, height: 760 } });
+
+  test('the button shows the whole valley, with signs that can still be read, and goes back in where the child was', async ({ page }) => {
+    await page.goto('/');
+    await createProfile(page, 'Alva');
+    await page.getByRole('button', { name: 'Till dalen' }).click();
+    await expect(page.locator('.valley-map.zoomable')).toBeVisible();
+    const start = (await page.locator('.map-place.here .map-sign').textContent())!;
+    expect(await wholeValley(page)).toBe(false);
+    const close = (await page.locator('.map-sign', { hasText: 'Stigen' }).boundingBox())!;
+
+    await page.getByRole('button', { name: 'Visa hela dalen' }).click();
+    await expect.poll(() => wholeValley(page)).toBe(true);
+    await expect(page.locator('.map-pointer')).toHaveCount(0);
+    // The signs keep a readable size; the lines under them wait, but screen readers still have them.
+    const far = (await page.locator('.map-sign', { hasText: 'Stigen' }).boundingBox())!;
+    expect(far.height).toBeGreaterThanOrEqual(0.6 * close.height);
+    await expect(page.locator('.map-notes').first()).toHaveCSS('opacity', '0');
+    await expect(page.locator('.map-notes').first()).toBeAttached();
+    expect(await noPageScroll(page)).toBe(true);
+
+    await page.getByRole('button', { name: 'Gå närmare' }).click();
+    await expect.poll(() => mapScale(page)).toBeCloseTo(1, 2);
+    await expect.poll(() => inView(page, start)).toBe(true);
+    await expect(page.getByRole('button', { name: 'Visa hela dalen' })).toBeVisible();
+  });
+
+  test('two fingers pinch the map, not the page, and never closer than full size', async ({ page, hasTouch }) => {
+    test.skip(!hasTouch, 'A screen without touch');
+    await page.goto('/');
+    await createProfile(page, 'Alva');
+    await page.getByRole('button', { name: 'Till dalen' }).click();
+    await expect(page.locator('.valley-map.zoomable')).toBeVisible();
+    const cdp = await page.context().newCDPSession(page);
+    const pinch = async (from: number, to: number) => {
+      const at = (d: number) => [
+        { x: 180 - d / 2, y: 400 },
+        { x: 180 + d / 2, y: 400 },
+      ];
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: at(from) });
+      for (let i = 1; i <= 8; i++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: at(from + ((to - from) * i) / 8) });
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    };
+    await pinch(240, 80);
+    await expect.poll(() => mapScale(page)).toBeLessThan(0.6);
+    expect(await page.evaluate(() => visualViewport?.scale ?? 1)).toBe(1);
+    // Further out stops at the whole valley.
+    await pinch(240, 20);
+    await expect.poll(() => wholeValley(page)).toBe(true);
+    await expect(page.getByRole('button', { name: 'Gå närmare' })).toBeVisible();
+    // In again, and no closer than full size.
+    await pinch(40, 300);
+    await pinch(40, 300);
+    await expect.poll(() => mapScale(page)).toBeCloseTo(1, 2);
+    expect(await noPageScroll(page)).toBe(true);
+  });
+
+  test('the keys + and − zoom', async ({ page }) => {
+    await page.goto('/');
+    await createProfile(page, 'Alva');
+    await page.getByRole('button', { name: 'Till dalen' }).click();
+    await expect(page.locator('.valley-map.zoomable')).toBeVisible();
+    await page.keyboard.press('-');
+    await expect.poll(() => mapScale(page)).toBeLessThan(0.7);
+    await page.keyboard.press('-');
+    await page.keyboard.press('-');
+    await expect.poll(() => wholeValley(page)).toBe(true);
+    await page.keyboard.press('+');
+    await expect.poll(() => wholeValley(page)).toBe(false);
+  });
+});
+
 test.describe('the map on a wide screen', () => {
   test.use({ viewport: { width: 1080, height: 810 } });
 
@@ -253,6 +336,8 @@ test.describe('the map on a wide screen', () => {
     await page.getByRole('button', { name: 'Till dalen' }).click();
     await expect(page.locator('.valley-map.fits')).toBeVisible();
     await expect(page.locator('.map-pointer')).toHaveCount(0);
+    // Nothing to zoom out to.
+    await expect(page.locator('.map-zoom')).toBeHidden();
     for (const name of ['Bäcken', 'Stigen', 'Trädgården']) expect(await inView(page, name)).toBe(true);
     // The whole bed is on screen.
     const bed = (await page.locator('.map-place .garden-bed').boundingBox())!;
