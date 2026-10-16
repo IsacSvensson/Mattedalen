@@ -12,7 +12,7 @@ bruk.
 > (multiplikation och delat med), som öppnar när dubblorna sitter, och Stigen
 > (talen till 100), som öppnar när barnet kan gå över tiotalet vid bäcken.
 > Delat med växer som blommor och frukt på plantorna, och på Stigen tänds en
-> lykta för varje del. Trädgårdens tabeller väntar högst tre veckor på sin del på
+> lykta för varje del. Trädgårdens tabeller väntar högst 14 speldagar på sin del på
 > Stigen. Dagens tid delas mellan högst två platser efter vad som väntar på
 > repetition, och varje plats har en koll som ungefär var sjunde speldag mäter
 > vad barnet kan utan stöd. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
@@ -47,6 +47,9 @@ Dalen visar vad barnet kan, inte vad barnet har förtjänat.
   läge.
 - Inga streaks, ingen valuta, inga kosmetiska upplåsningar och inga topplistor.
   Innehåll öppnas när förkunskaperna finns, aldrig som belöning.
+- Inga siffror om framsteg på barnens sidor. Bron, lyktorna och lådan visar vad
+  som sitter, och en rad säger vad barnet är på nu (”Nu: Över tiotalet”).
+  Antal och andelar står i föräldravyn.
 - Det som behöver repeteras ser törstigt ut. Inget vissnar och inget försvinner.
 - Färg är aldrig den enda signalen, allt kan läsas upp och knapparna är stora.
 - Barnet väljer vägen, systemet väljer innehållet.
@@ -241,7 +244,8 @@ webbläsaren (`e2e/legacy.spec.ts`).
 ## Flytta mellan enheter
 
 - **QR-kod** (`storage/qrCodec.ts`, formatet `MD1:`). Koden innehåller namn, djur,
-  passlängd, om Trädgården är öppen och ett block per plats: innehållspaketets id
+  passlängd, om Trädgården och Stigen är öppna, om tabellerna väntar på Stigen
+  och vilken dag de kunde ha öppnat, och ett block per plats: innehållspaketets id
   och version och status per fakta i 3 bitar (status plus ungefärlig
   Leitner-låda). Allt skyddas med CRC-8. Datan base45-kodas, så att QR-kodens
   kompakta alfanumeriska läge kan användas. Båda platserna ryms i en QR-kod av

@@ -109,6 +109,7 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
   await expect(other.getByText('0 automatiserade, 2 flytande och 1 som övas.')).toBeVisible();
   await other.getByRole('button', { name: 'Lägg till', exact: true }).click();
   await expect(other.getByText('Alva är hämtad')).toBeVisible();
+  await expect(other.getByRole('region', { name: /^Bäcken/ }).locator('.brook-parts li').first()).toContainText('plus 1 av 19 · minus 1 av 19');
 
   await other.getByRole('button', { name: 'Stäng föräldravyn' }).click();
   await enterGarden(other, 'Alva');
@@ -117,7 +118,7 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
   await expect(other.locator('.grid-cell.stage-sprout')).toHaveCount(1);
   await other.getByRole('button', { name: 'Till dalen' }).click();
   await other.getByRole('button', { name: /^Bäcken\./ }).click();
-  await expect(other.locator('.brook-parts')).toContainText('2 av 38');
+  await expect(other.locator('.place-now')).toHaveText('Nu: Ett mer, ett mindre');
   await other.close();
 });
 

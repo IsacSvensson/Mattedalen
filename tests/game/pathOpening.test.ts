@@ -4,7 +4,10 @@ import { createAdditionPack } from '../../src/content/addition';
 import { createHundredPack } from '../../src/content/hundred';
 import { createMultiplicationPack } from '../../src/content/multiplication';
 import { pathOpens, pathWaiting } from '../../src/places/stigen/opening';
-import { heldTables, OPENED_BY_ADULT, tablesWaiting, TABLES_WAIT, WAIT_DAYS_MAX, waitText } from '../../src/places/tradgarden/waits';
+import { heldTables, OPENED_BY_ADULT, tablesWaiting, TABLES_WAIT, WAIT_PLAY_DAYS, waitText } from '../../src/places/tradgarden/waits';
+import { playDays } from '../../src/places/tradgarden/held';
+import { addDays } from '../../src/engine';
+import type { SessionRecord } from '../../src/storage';
 import { planDay, restedYesterday } from '../../src/shell/dayPlan';
 
 const brook = createAdditionPack();
@@ -41,17 +44,32 @@ describe('the garden’s tables and Stigen', () => {
     expect(waitText('u78')).toBe('×7 och ×8 kommer när du kan lägga ihop tvåsiffriga tal på stigen.');
   });
 
-  it('wait at most three weeks from the day they could have opened, or not at all once a grown-up opens them', () => {
+  it('do not count ×5 among those that wait: it is counting in fives', () => {
+    expect(TABLES_WAIT.u5).toBeUndefined();
+    expect(tablesWaiting(path, {})).not.toContain('u5');
+  });
+
+  it('wait at most 14 play days from the day they could have opened, or not at all once a grown-up opens them', () => {
     const could = new Set(['u10', 'u4']);
-    const first = heldTables(['u10', 'u4', 'u3'], could, {}, '2026-02-02');
+    const first = heldTables(['u10', 'u4', 'u3'], could, {}, '2026-02-02', []);
     // u3 cannot open yet (its own rule in the garden), so it gets no day.
     expect(first.ready).toEqual({ u10: '2026-02-02', u4: '2026-02-02' });
     expect(first.changed).toBe(true);
     expect(first.held).toEqual(['u10', 'u4', 'u3']);
-    expect(heldTables(['u10', 'u4'], could, first.ready, '2026-02-22').held).toEqual(['u10', 'u4']);
-    expect(heldTables(['u10', 'u4'], could, first.ready, '2026-02-23').held).toEqual([]);
-    expect(heldTables(['u10'], could, { u10: OPENED_BY_ADULT }, '2026-02-02').held).toEqual([]);
-    expect(WAIT_DAYS_MAX).toBe(21);
+    // Every other day for four weeks: 14 play days, but only from the 27th day on.
+    const everyOther = Array.from({ length: 14 }, (_, i) => addDays('2026-02-02', 2 * i));
+    expect(heldTables(['u10', 'u4'], could, first.ready, '2026-02-27', everyOther.slice(0, 13)).held).toEqual(['u10', 'u4']);
+    expect(heldTables(['u10', 'u4'], could, first.ready, '2026-03-01', everyOther).held).toEqual([]);
+    // Days before the table could open do not count.
+    expect(heldTables(['u10'], could, first.ready, '2026-02-03', Array.from({ length: 20 }, (_, i) => addDays('2026-01-01', i))).held).toEqual(['u10']);
+    expect(heldTables(['u10'], could, { u10: OPENED_BY_ADULT }, '2026-02-02', []).held).toEqual([]);
+    expect(WAIT_PLAY_DAYS).toBe(14);
+  });
+
+  it('count a play day once, from sessions with answers, not the start check or a koll', () => {
+    const s = (day: string, mode: SessionRecord['mode'], answered = 5) => ({ day, mode, answered }) as SessionRecord;
+    const days = playDays([s('2026-02-02', 'daily'), s('2026-02-02', 'extra'), s('2026-02-03', 'placement'), s('2026-02-04', 'check'), s('2026-02-05', 'daily', 0), s('2026-02-06', 'focus')]);
+    expect(days).toEqual(['2026-02-02', '2026-02-06']);
   });
 });
 

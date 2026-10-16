@@ -8,7 +8,7 @@ import { h } from '../../../shell/dom';
 import { engineFor, loadProgress } from '../../../shell/play';
 import { showValley } from '../../../shell/screens/valley';
 import { genitive } from '../../../shell/words';
-import { bridge, laidCount } from '../components/bridge';
+import { bridge, LAID_AT, laidCount } from '../components/bridge';
 import { bridgeStones, partProgress } from '../logic';
 import { brookDeps, pack } from '../pack';
 import { checkDue, checkLaterKey } from '../check';
@@ -32,8 +32,10 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
   const unlocked = new Set(engine.unlockedUnits(states, meta));
   const asleep = engine.dailyDone(meta);
   const stones = bridgeStones(pack, states, unlocked);
-  const parts = partProgress(pack, states, unlocked).filter((p) => p.open);
   const laid = laidCount(stones);
+  // What the child is on now: the first open part that is not laid yet. No counts: the bridge shows what sits.
+  const open = partProgress(pack, states, unlocked).filter((p) => p.open);
+  const now = open.find((p) => p.known < LAID_AT * p.total) ?? open.at(-1);
   // Bäckens koll comes first on the days it is due (about every seventh play day).
   const checkFirst =
     !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(checkLaterKey(profile.id)));
@@ -72,19 +74,7 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
     h(
       'div',
       { class: 'garden-side' },
-      h(
-        'ul',
-        { class: 'brook-parts', 'aria-label': 'Det här sitter' },
-        parts.map((p) =>
-          h(
-            'li',
-            null,
-            h('span', { class: 'part-name' }, p.understanding ? `${p.title} (vågen)` : p.title),
-            h('span', { class: 'part-count' }, `${p.known} av ${p.total}`),
-            h('span', { class: 'part-bar', 'aria-hidden': 'true' }, h('span', { style: `width:${Math.round((100 * p.known) / Math.max(1, p.total))}%` })),
-          ),
-        ),
-      ),
+      now ? h('p', { class: 'place-now' }, icon('steps'), h('span', null, 'Nu: ', h('strong', null, now.understanding ? `${now.title} (vågen)` : now.title))) : null,
       actions,
     ),
   );

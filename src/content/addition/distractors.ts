@@ -53,7 +53,7 @@ export function additionNote(f: Fact, given: string): string | undefined {
   if (op === '+' && g === Math.abs(x - y)) return `${g} är ${formatFact('-', Math.max(x, y), Math.min(x, y))}. Här ska det vara plus.`;
   if (op === '-' && g === x + y) return `${g} är ${formatFact('+', x, y)}. Här ska det vara minus.`;
   if (op === '-' && x > 10 && y > x % 10 && g === 10 + (y - (x % 10)))
-    return `Man kan inte ta ${y} från ${x % 10}. Gå ner till 10 först: ${x} − ${x % 10} = 10.`;
+    return `${x % 10} räcker inte till ${y}. Gå ner till 10 först: ${x} − ${x % 10} = 10.`;
   if (op === '+' && crossesTen(f) && g === answer - 10) return `Glöm inte tiotalet: ${formatFact(op, x, y)} är mer än 10.`;
   return undefined;
 }

@@ -218,7 +218,7 @@ describe('wrong answers on Stigen', () => {
 
   it('include the typical mistakes, with a kind word about them', () => {
     const typical: [string, string, RegExp][] = [
-      ['52-6', '54', /inte ta 6 från 2/],
+      ['52-6', '54', /2 räcker inte till 6/],
       ['47+8', '45', /nya tiotalet/],
       ['26+30', '29', /3 tiotal/],
       ['34+5', '84', /ental/],

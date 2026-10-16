@@ -335,7 +335,8 @@ direkt, även om Stigen dröjer.
   ett år för ett genomsnittligt barn (44–61 %), mot ungefär 90 % utan Stigen.
   ×3, ×6 och ×9 hann inte börja alls.
 - **Därför ett tak:** en tabell väntar på Stigen högst tre veckor från den dag den
-  annars hade kunnat öppna (`WAIT_DAYS_MAX`).
+  annars hade kunnat öppna. *Ändrat i R1:* högst 14 speldagar (`WAIT_PLAY_DAYS`),
+  och ×5 väntar inte alls (se [PLAN-GRANSKNING.md](PLAN-GRANSKNING.md)).
 - **Det barnet visar i trädgården räknas.** Ett barn som kan ×5 kan halvera, så ×4
   väntar inte på Dubbla och halvera. Det märktes i startkollen: ett barn som kan
   ×2, ×10, ×5 och ×1 fick annars vänta på ×4.
@@ -376,7 +377,8 @@ Avgjort enligt förslagen:
 2. **Spärrar:** nya tabeller väntar på sina delar på Stigen. Det som är
    påbörjat stängs aldrig, och en vuxen kan öppna en tabell. *Ändrat i H5:*
    väntan har ett tak på tre veckor, eftersom hårda spärrar stoppade trädgården
-   i simuleringen.
+   i simuleringen. *Ändrat i R1:* taket är 14 speldagar, och en vuxen kan stänga
+   av väntan.
 3. **Trädgården öppnar efter dubblorna** vid bäcken.
 4. **×2 kommer före ×10.**
 5. **Talområdet är 0–100 nu.** 200 och 1000 kan bli en egen del senare.

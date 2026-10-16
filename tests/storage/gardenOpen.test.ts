@@ -28,3 +28,14 @@ describe('Stigen in backups', () => {
     expect(parseExport(backup(EXPORT_FORMAT, { pathOpen: 'ja' })).profile.settings.pathOpen).toBeUndefined();
   });
 });
+
+describe('the garden’s waits in backups', () => {
+  it('keeps the days the tables could open, and a grown-up’s choice to turn the waiting off', () => {
+    const settings = parseExport(backup(EXPORT_FORMAT, { tablesWait: false, tableReady: { u10: '2026-02-02', u4: 'i går', u3: 7 } })).profile.settings;
+    expect(settings.tablesWait).toBe(false);
+    expect(settings.tableReady).toEqual({ u10: '2026-02-02' });
+    const plain = parseExport(backup(EXPORT_FORMAT, { tablesWait: true, tableReady: [] })).profile.settings;
+    expect(plain.tablesWait).toBeUndefined();
+    expect(plain.tableReady).toBeUndefined();
+  });
+});

@@ -13,7 +13,7 @@ kopplingen till de andra platserna i H5.
 - **Delar som väntar på bäcken:** varje del väntar på det den bygger på vid bäcken
   (`BROOK_PREREQUISITES`). Dubbla och halvera väntar alltså på dubblorna vid bäcken.
   Föräldravyn visar ”väntar på bäcken”.
-- **Trädgårdens tabeller väntar på Stigen**, men högst tre veckor. Se
+- **Trädgårdens tabeller väntar på Stigen**, men högst 14 speldagar. Se
   [TRADGARDEN.md](TRADGARDEN.md#tabellerna-väntar-på-stigen).
 - **Dagens plan:** dalen har nu tre platser, och ett barn besöker högst två om
   dagen. En plats som vilade i går kommer först i dag, så att Stigen inte går
@@ -60,7 +60,7 @@ håller delen tills det sitter (H5). Motorn vet inget om bäcken.
 - **Hoppa tio** öppnar lika tidigt som entalen. Men dess nya uppgifter kommer när
   barnet väntar på att Över tiotalet ska öppna, så att vägen dit inte blir längre.
 - **Dubbla och halvera** har ett eget spår. Nya dubblor och halvor kommer
-  omväxlande med de andra delarna. Trädgårdens ×5 och ×4 väntar på den här
+  omväxlande med de andra delarna. Trädgårdens ×4 väntar på den här
   delen, inte på att gå över tiotalet.
 - **Tiotal och ental** är förståelse, som Vågen vid bäcken. Den bedöms på rätt
   svar på olika dagar och i olika former, aldrig på tid. Startkollen prövar den
@@ -124,7 +124,7 @@ något vänligt om det:
 
 | Fel | Exempel | Hjälpkortet |
 |---|---|---|
-| Entalen åt fel håll | 52 − 6 = 54 | Man kan inte ta 6 från 2. Gå ner till 50 först. |
+| Entalen åt fel håll | 52 − 6 = 54 | 2 räcker inte till 6. Gå ner till 50 först. |
 | Glömt det nya tiotalet | 47 + 8 = 45 | Glöm inte det nya tiotalet. |
 | Tiotal lagda till entalen | 26 + 30 = 29 | 30 är 3 tiotal. Hoppa tio 3 gånger. |
 | Ental lagda till tiotalen | 34 + 5 = 84 | 5 är ental. |
@@ -216,7 +216,7 @@ minnas, också 40 + 30, fast barnet kan 4 + 3. Den är alltså försiktig.
   tvåsiffrigt. Dubbla och halvera börjar efter två veckor.
 - **Ett starkt barn** börjar på Över tiotalet efter fyra veckor.
 - **Ett svagt barn** kommer inte fram till Över tiotalet på ett halvår. Därför
-  väntar trädgårdens tabeller högst tre veckor (se H5 i
+  väntar trädgårdens tabeller högst 14 speldagar (se H5 i
   [PLAN-HUNDRA.md](PLAN-HUNDRA.md#fynd-från-h5)).
 - **Ett barn som redan kan talen till 100** klarar startkollen för de första
   delarna och börjar på Över tiotalet inom två veckor.

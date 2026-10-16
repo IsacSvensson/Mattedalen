@@ -78,7 +78,7 @@ utan tidsgräns.
 | likhetstecknet som ”svaret kommer här” | `7 + 5 = __ + 8`: 12 (vänstra sidan) eller 20 (allt ihop) |
 
 Ett fel svar som är en sådan förväxling får en vänlig förklaring i hjälpkortet
-(`confusionNote`), till exempel ”Man kan inte ta 5 från 3. Gå ner till 10 först:
+(`confusionNote`), till exempel ”3 räcker inte till 5. Gå ner till 10 först:
 13 − 3 = 10.”
 
 ## Räknestigar

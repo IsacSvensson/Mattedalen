@@ -3829,6 +3829,15 @@ h1:focus {
   .screen.garden:has(> .bloom-news) .garden-side {
     grid-column: 2;
   }
+
+  /* The two meet in the middle beside the bed, with no gap between them. */
+  .screen.garden:has(> .bloom-news) .bloom-news {
+    align-self: end;
+  }
+
+  .screen.garden:has(> .bloom-news) .garden-side {
+    align-self: start;
+  }
 }
 
 /* Little height: a short note at the bottom, over the garden until the child has read it. */
@@ -4447,4 +4456,25 @@ h1:focus {
   align-items: center;
   justify-content: space-between;
   gap: 6px 12px;
+}
+
+/* What the child is on now, at the brook and on Stigen: a name, no counts (the world shows what sits). */
+.place-now {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.place-now .icon {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.place-now strong {
+  font-weight: 600;
 }

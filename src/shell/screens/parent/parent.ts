@@ -125,10 +125,10 @@ function minutesChart(days: { day: string; minutes: number }[]): HTMLElement {
 
 /** Saves changes to a child; every setting on the page goes through the same one. */
 function profileSaver(ctx: AppContext, profile: Profile): SaveProfile {
-  // Always merge into the latest saved version; only name/avatar changes need a redraw.
-  let current = profile;
+  // Always merge into the latest saved version (a place may have saved to it); only name/avatar changes need a redraw.
   return async (change) => {
-    current = { ...current, ...change, settings: { ...current.settings, ...change.settings } };
+    const stored = (await ctx.store.getProfile(profile.id)) ?? profile;
+    const current = { ...stored, ...change, settings: { ...stored.settings, ...change.settings } };
     await ctx.store.saveProfile(current);
     toast('Sparat');
     if (change.name !== undefined || change.avatar !== undefined) await showParent(ctx, profile.id);
@@ -349,7 +349,17 @@ async function importQr(ctx: AppContext, text: string): Promise<void> {
     if (!answer) return;
     const profile =
       answer === 'replace' && existing
-        ? { ...existing, avatar: snap.avatar || existing.avatar, settings: { ...existing.settings, ...(snap.gardenOpen ? { gardenOpen: true } : {}), ...(snap.pathOpen ? { pathOpen: true } : {}) } }
+        ? {
+            ...existing,
+            avatar: snap.avatar || existing.avatar,
+            settings: {
+              ...existing.settings,
+              ...(snap.gardenOpen ? { gardenOpen: true } : {}),
+              ...(snap.pathOpen ? { pathOpen: true } : {}),
+              ...(snap.tablesWait === false ? { tablesWait: false } : {}),
+              ...(snap.tableReady ? { tableReady: snap.tableReady } : {}),
+            },
+          }
         : profileFromSnapshot(snap, crypto.randomUUID(), Date.now());
     await ctx.store.saveProfile(profile);
     for (const { place, states, meta } of restored) {

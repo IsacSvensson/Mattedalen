@@ -8,7 +8,7 @@ import { engineFor, loadProgress } from '../../../shell/play';
 import { showValley } from '../../../shell/screens/valley';
 import { genitive } from '../../../shell/words';
 import { currentPart, litCount, trail } from '../components/trail';
-import { lanterns, partProgress } from '../logic';
+import { lanterns } from '../logic';
 import { pack, pathDeps, pathHeld } from '../pack';
 import { pathCheckLaterKey } from '../check';
 import { showPathCheckOffer } from './check';
@@ -36,7 +36,6 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
   const asleep = engine.dailyDone(meta);
   const lights = lanterns(pack, states, unlocked);
   const lit = litCount(lights);
-  const parts = partProgress(pack, states, unlocked).filter((p) => p.open);
   const now = lights[currentPart(lights)];
   // Stigens koll comes first on the days it is due (about every seventh play day on Stigen).
   const checkFirst =
@@ -76,19 +75,8 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
     h(
       'div',
       { class: 'garden-side' },
-      h(
-        'ul',
-        { class: 'brook-parts', 'aria-label': 'Det här sitter' },
-        parts.map((p) =>
-          h(
-            'li',
-            null,
-            h('span', { class: 'part-name' }, p.title),
-            h('span', { class: 'part-count' }, `${p.known} av ${p.total}`),
-            h('span', { class: 'part-bar', 'aria-hidden': 'true' }, h('span', { style: `width:${Math.round((100 * p.known) / Math.max(1, p.total))}%` })),
-          ),
-        ),
-      ),
+      // What the child is on now, without counts: the lanterns show what sits.
+      now ? h('p', { class: 'place-now' }, icon('lantern'), h('span', null, 'Nu: ', h('strong', null, now.title))) : null,
       actions,
     ),
   );

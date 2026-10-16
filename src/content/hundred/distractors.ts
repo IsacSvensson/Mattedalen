@@ -142,7 +142,7 @@ export function hundredNote(t: Task, given: string): string | undefined {
       if (op === '+' && crossesTen(t) && g === answer - 10) return `Glöm inte det nya tiotalet: ${formatFact(op, x, y)} är mer än ${tenBelow(answer)}.`;
       if (op === '+' && !isTen(x) && y < 10 && g === x + 10 * y) return `${y} är ental. Lägg till dem till entalen i ${x}.`;
       if (op === '-' && crossesTen(t) && g === onesTurned(x, y))
-        return `Man kan inte ta ${y} från ${onesOf(x)}. Gå ner till ${tenBelow(x)} först: ${formatFact('-', x, onesOf(x))} = ${tenBelow(x)}.`;
+        return `${onesOf(x)} räcker inte till ${y}. Gå ner till ${tenBelow(x)} först: ${formatFact('-', x, onesOf(x))} = ${tenBelow(x)}.`;
       if (op === '-' && g === x + y) return `${g} är ${formatFact('+', x, y)}. Här ska det vara minus.`;
       return undefined;
     }

@@ -31,8 +31,8 @@ import { engineFor, loadProgress } from '../../shell/play';
 import { factStats, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
 import { gardenDeps, pack } from './pack';
 import { gardenIsOpen } from './isOpen';
-import { gardenWaits, readyKey } from './held';
-import { OPENED_BY_ADULT, tableName, WAIT_DAYS_MAX, waitText } from './waits';
+import { gardenWaits, saveTableReady, tableReady } from './held';
+import { OPENED_BY_ADULT, tableName, WAIT_PLAY_DAYS, waitText } from './waits';
 import { showPlacementOffer } from './screens/placement';
 
 /** How delat med is written for this child; only once the garden has delat med. */
@@ -133,6 +133,7 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
         ' Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)',
       ),
       divisionSignSetting(profile, save),
+      waitSetting(ctx, profile, save),
     ),
     h('h4', null, 'Startkoll'),
     h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
@@ -141,8 +142,26 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
 }
 
 /**
+ * Whether the tables wait for Stigen: on by default, only when Stigen is in the
+ * valley. A grown-up who would rather follow the garden's own order turns it off.
+ */
+function waitSetting(ctx: AppContext, profile: Profile, save: SaveProfile): HTMLElement | null {
+  if (!ctx.places.some((p) => p.pack.id === 'hundred')) return null;
+  return h(
+    'label',
+    { class: 'check' },
+    h('input', {
+      type: 'checkbox',
+      checked: profile.settings.tablesWait !== false,
+      onchange: (e: Event) => void save({ settings: { tablesWait: (e.target as HTMLInputElement).checked } }),
+    }),
+    ' Tabellerna väntar på det de bygger på vid stigen',
+  );
+}
+
+/**
  * Tables that could open but wait for their part on Stigen (`TABLES_WAIT`), at
- * most three weeks. A grown-up who knows the child is ready opens one here.
+ * most `WAIT_PLAY_DAYS` play days. A grown-up who knows the child is ready opens one here.
  */
 function waitingTables(ctx: AppContext, profile: Profile, waiting: string[]): HTMLElement {
   const list = h(
@@ -161,9 +180,8 @@ function waitingTables(ctx: AppContext, profile: Profile, waiting: string[]): HT
               class: 'soft-button',
               type: 'button',
               onclick: async () => {
-                const key = readyKey(profile.id);
-                const ready = (await ctx.store.getSetting<Record<string, string>>(key)) ?? {};
-                await ctx.store.setSetting(key, { ...ready, [u.id]: OPENED_BY_ADULT });
+                const stored = (await ctx.store.getProfile(profile.id)) ?? profile;
+                await saveTableReady(ctx, profile, { ...(await tableReady(ctx, stored)), [u.id]: OPENED_BY_ADULT });
                 item.replaceChildren(h('span', null, `${tableName(u.id)} är öppen.`));
               },
             },
@@ -176,7 +194,7 @@ function waitingTables(ctx: AppContext, profile: Profile, waiting: string[]): HT
   return h(
     'div',
     { class: 'notice garden-opening' },
-    h('p', null, `Tabellerna väntar på stigen tills det de bygger på sitter där, högst ${WAIT_DAYS_MAX / 7} veckor.`),
+    h('p', null, `Tabellerna väntar på stigen tills det de bygger på sitter där, högst ${WAIT_PLAY_DAYS} speldagar. Det går att stänga av under Inställning.`),
     list,
   );
 }

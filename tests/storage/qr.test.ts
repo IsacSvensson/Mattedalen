@@ -194,6 +194,17 @@ describe('a child with every place (MD1)', () => {
     expect(decodeTransfer(encodeTransfer(transferOf(profile, [{ pack: addition, states: mixed(addition) }]))).pathOpen).toBeUndefined();
   });
 
+  it('carries the days the garden’s tables could open, and whether they wait at all', () => {
+    const ready = { u10: '2026-02-02', u4: '2000-01-01', usq: '2026-10-16' };
+    const t = decodeTransfer(encodeTransfer(transferOf({ ...profile, settings: { ...profile.settings, tablesWait: false, tableReady: ready } }, [{ pack: addition, states: mixed(addition) }])));
+    expect(t.tablesWait).toBe(false);
+    expect(t.tableReady).toEqual(ready);
+    // A code without them (as older codes) has neither.
+    const plain = decodeTransfer(encodeTransfer(transferOf(profile, [{ pack: addition, states: mixed(addition) }])));
+    expect(plain.tablesWait).toBeUndefined();
+    expect(plain.tableReady).toBeUndefined();
+  });
+
   it('opens a started unit and what it builds on, not every earlier unit', () => {
     const unitOf = (id: string) => addition.units.find((u) => u.id === id)!;
     const states = Object.fromEntries(addition.items.map((it) => [it.id, emptyState(it.id)])) as Record<string, ItemState>;

@@ -300,6 +300,29 @@ export async function seedStates(page: Page, states: Record<string, SeedState>, 
   await page.reload();
 }
 
+/** A day on a place earlier on, as the session record a played day leaves. */
+export async function playedAt(page: Page, packId: string, day: string): Promise<void> {
+  await page.evaluate(
+    async ({ packId, day }) => {
+      const db: IDBDatabase = await new Promise((r) => {
+        const q = indexedDB.open('mattedalen');
+        q.onsuccess = () => r(q.result);
+      });
+      const profiles: { id: string }[] = await new Promise((r) => {
+        const q = db.transaction('profiles').objectStore('profiles').getAll();
+        q.onsuccess = () => r(q.result);
+      });
+      await new Promise((r) => {
+        const tx = db.transaction('sessions', 'readwrite');
+        tx.objectStore('sessions').put({ id: `daily-${day}`, profileId: profiles[0]!.id, packId, mode: 'daily', day, startedAt: 1, endedAt: 2, answered: 12, correct: 10, introduced: [] });
+        tx.oncomplete = r;
+      });
+      db.close();
+    },
+    { packId, day },
+  );
+}
+
 /** Opens the parent view, choosing the PIN on first use. */
 export async function openParent(page: Page, pin = '2580', link: RegExp = /För vuxna|föräldravyn/): Promise<void> {
   await page.getByRole('button', { name: link }).click();

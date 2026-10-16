@@ -93,8 +93,19 @@ function sanitizeProfile(raw: unknown): Profile {
       ...(settings.gardenOpen === true ? { gardenOpen: true } : {}),
       ...(settings.pathOpen === true ? { pathOpen: true } : {}),
       ...(settings.divisionSign === 'obelus' || settings.divisionSign === 'slash' ? { divisionSign: settings.divisionSign } : {}),
+      ...(settings.tablesWait === false ? { tablesWait: false } : {}),
+      ...(tableReadyOf(settings.tableReady) ? { tableReady: tableReadyOf(settings.tableReady) } : {}),
     },
   };
+}
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+/** The days the garden's tables could open (`ProfileSettings.tableReady`), if any are valid. */
+export function tableReadyOf(raw: unknown): Record<string, string> | undefined {
+  if (!isObject(raw)) return undefined;
+  const out = Object.fromEntries(Object.entries(raw).filter(([id, day]) => id.length > 0 && id.length <= 32 && typeof day === 'string' && DAY.test(day)));
+  return Object.keys(out).length ? (out as Record<string, string>) : undefined;
 }
 
 /** Validates and normalizes an export (parsed JSON or a JSON string). */

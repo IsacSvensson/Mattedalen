@@ -6,7 +6,7 @@ import { simulateValley } from './valley';
  * The whole valley with simulated children (docs/PLAN-HUNDRA.md, Fynd från
  * H5): the brook, the garden when doubles sit, and Stigen when going over the
  * ten sits at the brook. The garden's tables wait for their part on Stigen at
- * most three weeks. Without that limit, the later tables stalled for months.
+ * most 14 play days. Without that limit, the later tables stalled for months.
  */
 const WEEKS = 52;
 const week = (day: number | undefined) => (day === undefined ? Infinity : Math.floor(day / 7));
@@ -25,7 +25,7 @@ describe('the valley with Stigen, simulated', () => {
     expect(strong.firstDay['hundred:overtio']).toBeDefined();
   });
 
-  it('keeps the garden going: the tables come in order, each waiting at most a few weeks for Stigen', () => {
+  it('keeps the garden going: the tables come in order, each waiting at most 14 play days for Stigen', () => {
     for (const table of ['u2', 'u10', 'u5', 'u1', 'u4', 'u3', 'u9', 'u6']) expect(app.firstDay[`multiplication:${table}`], table).toBeDefined();
     expect(week(app.firstDay['multiplication:u2'])).toBeLessThan(week(app.firstDay['multiplication:u10']));
     // A third place takes some of the day, and the tables wait a little: a cost, not a stall.
@@ -33,7 +33,7 @@ describe('the valley with Stigen, simulated', () => {
   });
 
   it('would stall the garden if the tables waited until Stigen sits, however long that takes', () => {
-    expect(hard.timesSit(WEEKS)).toBeLessThan(app.timesSit(WEEKS) - 0.25);
+    expect(hard.timesSit(WEEKS)).toBeLessThan(app.timesSit(WEEKS) - 0.15);
     expect(hard.firstDay['multiplication:u3']).toBeUndefined();
   });
 

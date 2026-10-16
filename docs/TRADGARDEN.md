@@ -42,25 +42,30 @@ väntar därför på sin del på Stigen (`TABLES_WAIT` i `places/tradgarden/wait
 | Tabell | Väntar på (Stigen) |
 |---|---|
 | ×10 | Hela tiotal |
-| ×5, ×4 | Dubbla och halvera |
+| ×4 | Dubbla och halvera |
 | ×3, ×9, ×6 | Över tiotalet |
 | Kvadrattalen, ×7 och ×8 | Tvåsiffrigt plus tvåsiffrigt |
 
-- En tabell väntar **högst tre veckor** (`WAIT_DAYS_MAX`) från den dag den annars
-  hade kunnat öppna. Simulerade barn visade att en väntan utan tak stoppar
+- **×5 väntar inte.** ×5 är att räkna femsteg, och det kan de flesta barn. Den
+  kommer direkt efter ×10 (se [PLAN-GRANSKNING.md](PLAN-GRANSKNING.md)).
+- En tabell väntar **högst 14 speldagar** (`WAIT_PLAY_DAYS`) från den dag den
+  annars hade kunnat öppna. En speldag är en dag då barnet spelat någonstans i
+  dalen. Startkollen och kollen räknas inte. Speldagar, inte veckor, så att ett
+  barn som spelar två dagar i veckan får lika många pass på Stigen som ett som
+  spelar varje dag. Simulerade barn visade att en väntan utan tak stoppar
   trädgården i månader (se H5 i [PLAN-HUNDRA.md](PLAN-HUNDRA.md#fynd-från-h5)).
-  Dagen sparas per barn på enheten (`tableReady:<id>`). Den följer inte med i
-  säkerhetskopior eller QR-koder, så efter en flytt kan en tabell vänta upp till
-  tre veckor till.
+- **Dagen sparas i barnets profil** (`settings.tableReady`). Den följer med i
+  säkerhetskopior och QR-koder, så en flytt startar inte väntan om.
 - **Det som är påbörjat stängs aldrig.** En tabell som redan är öppen, eller där
-  någon fakta är påbörjad, väntar inte. ×2 och ×1 väntar aldrig.
+  någon fakta är påbörjad, väntar inte. ×2, ×1 och ×5 väntar aldrig.
 - **Det barnet visar i trädgården räknas.** Sitter en tabell som behöver samma del
-  på Stigen, räknas delen som sittande. Ett barn som kan ×5 kan halvera, så ×4
-  väntar inte.
+  på Stigen, räknas delen som sittande. ×5 är hälften av ×10, så ett barn som kan
+  ×5 kan halvera, och ×4 väntar inte.
 - **I trädgården** står en rad under lådan om nästa tabell som väntar, till exempel
   ”×6 kommer när du kan gå över tiotalet på stigen.”
 - **I föräldravyn** står de tabeller som väntar, var och en med en knapp för att
-  öppna den nu.
+  öppna den nu. Där kan en vuxen också stänga av väntan helt
+  (`settings.tablesWait`). Då följer trädgården sin egen ordning, som utan Stigen.
 - Väntan räknas ut av platsen (`held.ts`) och ges till motorn som `heldUnitIds`,
   i passet, i startkollen och på skärmen. Motorn vet inget om Stigen.
 

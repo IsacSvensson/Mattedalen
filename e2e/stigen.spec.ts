@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, answerDerive, createProfile, nextStep, openParent, openPath, seedStates, solve, type SeedState } from './helpers';
+import { answer, answerDerive, createProfile, nextStep, openParent, openPath, playedAt, seedStates, solve, type SeedState } from './helpers';
 
 /**
  * Stigen, the numbers to 100 (docs/STIGEN.md): it opens when going over the
@@ -118,29 +118,6 @@ test('Stigens koll comes on the second day on the path, and grown-ups see the re
   await expect(row).toContainText('3 av 3');
 });
 
-/** A day on a place earlier on, as the session record a played day leaves. */
-async function playedAt(page: Page, packId: string, day: string): Promise<void> {
-  await page.evaluate(
-    async ({ packId, day }) => {
-      const db: IDBDatabase = await new Promise((r) => {
-        const q = indexedDB.open('mattedalen');
-        q.onsuccess = () => r(q.result);
-      });
-      const profiles: { id: string }[] = await new Promise((r) => {
-        const q = db.transaction('profiles').objectStore('profiles').getAll();
-        q.onsuccess = () => r(q.result);
-      });
-      await new Promise((r) => {
-        const tx = db.transaction('sessions', 'readwrite');
-        tx.objectStore('sessions').put({ id: `daily-${day}`, profileId: profiles[0]!.id, packId, mode: 'daily', day, startedAt: 1, endedAt: 2, answered: 12, correct: 10, introduced: [] });
-        tx.oncomplete = r;
-      });
-      db.close();
-    },
-    { packId, day },
-  );
-}
-
 test('the path has a post at every ten and a lantern for each part, lit when it sits', async ({ page }) => {
   await newChild(page, 'Cia');
   await toPath(page, all([...WHOLE_TENS, 'te:63', 'te:47']), ['tiotal', 'tiental']);
@@ -151,8 +128,8 @@ test('the path has a post at every ten and a lantern for each part, lit when it 
   await expect(page.locator('.trail.large .tr-glass.lit')).toHaveCount(1);
   await expect(page.locator('.trail.large .tr-hook')).toHaveCount(6);
   await expect(page.locator('.path .sr-only')).toContainText('På stigen lyser 1 av 8 lyktor. Du är vid lyktan för tiotal och ental.');
-  await expect(page.locator('.brook-parts li')).toHaveCount(2);
-  await expect(page.locator('.brook-parts li').first()).toContainText('Hela tiotal30 av 30');
+  await expect(page.locator('.place-now')).toHaveText('Nu: Tiotal och ental');
+  await expect(page.locator('.garden-side')).not.toContainText(/\d+ av \d+/);
   // Back to the valley: the small path on the map has one light.
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.locator('.place-path .tr-glass.lit')).toHaveCount(1);

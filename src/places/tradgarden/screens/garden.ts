@@ -6,7 +6,7 @@ import { harvestTables } from '../division';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { gardenGrid } from '../components/grid';
-import { BLOOM_LABEL, bloomFor, bloomIcon, plantIcon, stageFor, type Bloom, type Stage } from '../../../shell/components/plant';
+import { BLOOM_LABEL, bloomFor, bloomIcon, stageFor, type Bloom, type Stage } from '../../../shell/components/plant';
 import { DEFAULT_DIVISION_SIGN, mathNodes } from '../../../shell/divisionSign';
 import { avatarIcon } from '../../../shell/components/avatars';
 import { icon } from '../../../shell/components/icons';
@@ -140,28 +140,24 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
           ? h('p', { class: 'garden-next' }, icon('lantern'), waitText(nextWaiting.id))
           : null
         : h('p', { class: 'garden-next' }, icon('basket'), 'Först: lika stora grupper. Sedan planterar vi ×2.'),
-      h(
-        'ul',
-        { class: 'garden-counts', 'aria-label': 'Så här växer det' },
-        (['seed', 'sprout', 'bush', 'tree'] as const).map((stage) =>
-          h('li', { 'aria-label': `${counts[stage]} ${STAGE_PLURAL[stage]}` }, plantIcon(stage), h('span', { 'aria-hidden': 'true' }, counts[stage])),
-        ),
-      ),
-      blooms.blossom + blooms.kart + blooms.fruit
-        ? h(
-            'ul',
-            { class: 'garden-counts blooms', 'aria-label': 'Delat med' },
-            (['blossom', 'kart', 'fruit'] as const).map((bloom) =>
-              h('li', { 'aria-label': `${blooms[bloom]} med ${BLOOM_LABEL[bloom]}` }, bloomIcon(bloom), h('span', { 'aria-hidden': 'true' }, blooms[bloom])),
-            ),
-          )
-        : null,
+      // No counts under the bed: the plants themselves show what the child knows (docs/PLAN-GRANSKNING.md).
+      // A screen reader gets the bed in words instead.
+      h('p', { class: 'sr-only' }, bedInWords(counts, blooms)),
       actions,
       extras,
       canChallenge ? null : h('p', { class: 'extras-note' }, `Rekordjakten öppnar när ${CHALLENGE_MIN_FACTS} plantor blivit buskar.`),
     ),
   );
   show(ctx, view);
+}
+
+/** What grows in the bed, in words and without counts: "I lådan växer frön, plantor och buskar, med blommor." */
+function bedInWords(counts: Record<Stage, number>, blooms: Record<Bloom, number>): string {
+  const and = (xs: string[]) => (xs.length <= 1 ? (xs[0] ?? '') : `${xs.slice(0, -1).join(', ')} och ${xs.at(-1)}`);
+  const plants = (['seed', 'sprout', 'bush', 'tree'] as const).filter((st) => counts[st] > 0).map((st) => STAGE_PLURAL[st]);
+  const on = (['blossom', 'kart', 'fruit'] as const).filter((b) => blooms[b] > 0).map((b) => BLOOM_LABEL[b]);
+  if (!plants.length) return 'Lådan väntar på de första fröna.';
+  return `I lådan växer ${and(plants)}${on.length ? `, med ${and(on)}` : ''}.`;
 }
 
 export const bloomNewsKey = (profile: Profile) => `bloomNews:${profile.id}`;

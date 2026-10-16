@@ -16,6 +16,10 @@ export interface ProfileSettings {
   pathOpen?: boolean;
   /** How "delat med" is written: a fraction bar (default), `÷` or `/`. */
   divisionSign?: 'fraction' | 'obelus' | 'slash';
+  /** False when a grown-up has turned off that the garden's tables wait for Stigen. */
+  tablesWait?: boolean;
+  /** Per garden table: the day it could first have opened (`2000-01-01` = opened by a grown-up). */
+  tableReady?: Record<string, DayKey>;
 }
 
 export const DEFAULT_SETTINGS: ProfileSettings = {

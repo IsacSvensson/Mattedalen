@@ -5,7 +5,7 @@ import { createMultiplicationPack, isDivisionId, isFactId, parseDivisionId, pars
 import { planDay, restedYesterday, type DayPlan } from '../../src/shell/dayPlan';
 import { partSits } from '../../src/shell/parts';
 import { gardenOpens } from '../../src/places/tradgarden/opening';
-import { heldTables, tablesWaiting, WAIT_DAYS_MAX } from '../../src/places/tradgarden/waits';
+import { heldTables, tablesWaiting, WAIT_PLAY_DAYS } from '../../src/places/tradgarden/waits';
 import { pathOpens, pathWaiting } from '../../src/places/stigen/opening';
 import { SimulatedLearner, type LearnerProfile } from './learner';
 
@@ -25,7 +25,7 @@ export interface ValleyOptions {
   path: boolean;
   /**
    * How the garden's tables wait for Stigen: as in the app (`capped`, at most
-   * `WAIT_DAYS_MAX`), until their part sits however long that takes (`hard`,
+   * `WAIT_PLAY_DAYS` play days), until their part sits however long that takes (`hard`,
    * the first plan), or not at all.
    */
   waits?: 'capped' | 'hard' | 'none';
@@ -103,6 +103,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
   const timesIds = gardenPack.items.filter((i) => isFactId(i.id)).map((i) => i.id);
   let last: DayPlan | undefined;
   let ready: Record<string, string> = {};
+  const played: string[] = [];
   let answered = 0;
   let correct = 0;
   const unitOf = (p: Place) => new Map(p.engine.pack.units.flatMap((u) => u.itemIds.map((i) => [i, u.id])));
@@ -126,7 +127,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
         if (o.waits === 'none') return [];
         const waiting = tablesWaiting(pathPack, path.states, { pack: gardenPack, states: garden.states });
         const could = new Set(garden.engine.unlockedUnits(garden.states, garden.meta));
-        const out = heldTables(waiting, could, ready, today, o.waits === 'hard' ? Infinity : WAIT_DAYS_MAX);
+        const out = heldTables(waiting, could, ready, today, played, o.waits === 'hard' ? Infinity : WAIT_PLAY_DAYS);
         ready = out.ready;
         return out.held;
       };
@@ -149,6 +150,8 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
       }
       for (const u of p.engine.pack.units) if (sitDay[`${p.id}:${u.id}`] === undefined && partSits(p.engine.pack, p.states, u.id)) sitDay[`${p.id}:${u.id}`] = day;
     }
+    // As in the app: a day counts once its sessions are saved.
+    if (open.some((p) => plan.minutes[p.id] !== undefined)) played.push(today);
     if (day % 7 === 6) timesHistory.push(timesIds.filter((i) => ['fluent', 'automatic'].includes(garden.states[i]!.status)).length / timesIds.length);
   }
   return {

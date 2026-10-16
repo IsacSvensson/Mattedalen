@@ -1,5 +1,5 @@
-import { addDays, emptyState, type DayKey, type ItemState } from '../engine';
-import { ImportError } from './backup';
+import { addDays, diffDays, emptyState, type DayKey, type ItemState } from '../engine';
+import { ImportError, tableReadyOf } from './backup';
 
 /**
  * Compact snapshot of a child's status for moving between devices with a QR
@@ -108,9 +108,13 @@ export function decodeSnapshot(text: string): QrSnapshot {
  * Codes from Gångerträdgården ("GT1:") are read as a child with the garden.
  *
  * Layout (bytes): version, session minutes, flags (bit 0: the garden is open;
- * bits 1–2: how "delat med" is written, 0 fraction bar, 1 ÷, 2 /),
- * name length, name, avatar length, avatar, block count, and per block: id
- * length, id (UTF-8), pack version, item count (2 bytes), packed levels; CRC-8.
+ * bits 1–2: how "delat med" is written, 0 fraction bar, 1 ÷, 2 /; bit 3:
+ * Stigen is open; bit 4: the tables do not wait for Stigen), name length,
+ * name, avatar length, avatar, block count, and per block: id length, id
+ * (UTF-8), pack version, item count (2 bytes), packed levels; then, when there
+ * are any, the days the garden's tables could open: count, and per table id
+ * length, id, days since 2000-01-01 (2 bytes); CRC-8. Older codes end after the
+ * blocks.
  */
 export const TRANSFER_PREFIX = 'MD1:';
 const TRANSFER_VERSION = 1;
@@ -131,10 +135,15 @@ export interface QrTransfer {
   pathOpen?: boolean;
   /** How "delat med" is written; the fraction bar when left out. */
   divisionSign?: 'fraction' | 'obelus' | 'slash';
+  /** False when the garden's tables do not wait for Stigen (bit 4 of the flags). */
+  tablesWait?: boolean;
+  /** The day each garden table could first open (`ProfileSettings.tableReady`). */
+  tableReady?: Record<string, DayKey>;
   packs: QrPackLevels[];
 }
 
 const SIGNS = ['fraction', 'obelus', 'slash'] as const;
+const DAY_ZERO: DayKey = '2000-01-01';
 
 export function encodeTransfer(t: QrTransfer): string {
   const enc = new TextEncoder();
@@ -144,7 +153,7 @@ export function encodeTransfer(t: QrTransfer): string {
   const bytes = [
     TRANSFER_VERSION,
     Math.max(0, Math.min(255, Math.round(t.sessionMinutes))),
-    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0),
+    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0) | (t.tablesWait === false ? 16 : 0),
     name.length,
     ...name,
     avatar.length,
@@ -155,6 +164,14 @@ export function encodeTransfer(t: QrTransfer): string {
     const id = enc.encode(block.packId).slice(0, 32);
     if (block.levels.length > 0xffff) throw new Error('Too many items for a QR code');
     bytes.push(id.length, ...id, block.packVersion & 0xff, block.levels.length >> 8, block.levels.length & 0xff, ...packLevels(block.levels));
+  }
+  const ready = Object.entries(t.tableReady ?? {})
+    .map(([u, day]) => [enc.encode(u).slice(0, 32), diffDays(DAY_ZERO, day)] as const)
+    .filter(([, days]) => days >= 0 && days <= 0xffff)
+    .slice(0, 255);
+  if (ready.length) {
+    bytes.push(ready.length);
+    for (const [id, days] of ready) bytes.push(id.length, ...id, days >> 8, days & 0xff);
   }
   bytes.push(crc8(bytes));
   return TRANSFER_PREFIX + base45Encode(Uint8Array.from(bytes));
@@ -201,7 +218,15 @@ export function decodeTransfer(text: string): QrTransfer {
     if (levels.some((l) => l >= LEVEL_STATE.length)) throw fail();
     packs.push({ packId, packVersion, levels });
   }
+  const ready: Record<string, DayKey> = {};
+  if (i < end) {
+    for (let n = byte(); n > 0; n--) {
+      const id = dec.decode(take(byte()));
+      ready[id] = addDays(DAY_ZERO, byte() * 256 + byte());
+    }
+  }
   if (i !== end) throw fail();
+  const tableReady = tableReadyOf(ready);
   const sign = SIGNS[(flags >> 1) & 3] ?? 'fraction';
   return {
     name,
@@ -210,6 +235,8 @@ export function decodeTransfer(text: string): QrTransfer {
     gardenOpen: (flags & 1) === 1,
     ...((flags & 8) === 8 ? { pathOpen: true } : {}),
     ...(sign !== 'fraction' ? { divisionSign: sign } : {}),
+    ...((flags & 16) === 16 ? { tablesWait: false } : {}),
+    ...(tableReady ? { tableReady } : {}),
     packs,
   };
 }

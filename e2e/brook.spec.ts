@@ -93,9 +93,9 @@ test('the first visit offers the start check once; from the beginning, two parts
   await page.getByRole('button', { name: 'Börja från början' }).click();
 
   await expect(page.getByRole('heading', { name: 'Alvas bäck' })).toBeVisible();
-  await expect(page.locator('.brook-parts li')).toHaveCount(2);
-  await expect(page.locator('.brook-parts')).toContainText('Ett mer, ett mindre');
-  await expect(page.locator('.brook-parts')).toContainText('Noll');
+  // What the child is on now, without counts on the child's page.
+  await expect(page.locator('.place-now')).toHaveText('Nu: Ett mer, ett mindre');
+  await expect(page.locator('.garden-side')).not.toContainText(/\d+ av \d+/);
   // One outlined place in the bridge per open part, nothing laid yet.
   await expect(page.locator('.brook-bridge .br-slot')).toHaveCount(2);
   await expect(page.locator('.brook-bridge .br-slot.laid')).toHaveCount(0);
@@ -124,7 +124,7 @@ test('the start check lays what the child already knows into the bridge', async 
   await expect(page.getByText(/^Du kan redan .*ett mer, ett mindre.*noll/)).toBeVisible();
   await done.click();
   await expect(page.getByRole('heading', { name: 'Bos bäck' })).toBeVisible();
-  expect(await page.locator('.brook-parts li').count()).toBeGreaterThan(2);
+  await expect(page.locator('.place-now')).not.toHaveText('Nu: Ett mer, ett mindre');
   expect(await page.locator('.brook-bridge .br-slot.laid').count()).toBeGreaterThanOrEqual(2);
 });
 
