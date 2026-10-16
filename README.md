@@ -396,21 +396,9 @@ Playwright-tester vid varje push och pull request.
 
 ## Ordning framåt
 
-Enligt [överlämningen](docs/OVERLAMNING-MATTEDALEN.md#ordning):
-
-1. ~~Nytt repo med Gångerträdgårdens historik, egen databas och import.~~
-2. ~~Skalet med dalens karta och Trädgården som första plats.~~
-3. ~~**Bäcken**: addition och subtraktion inom 20 som faktafamiljer, en linjär
-   numrerad tallinje, tiokamrater, dubblor, övergång via tiotalet och
-   likhetstecknet i varierade former ([PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser)).
-   Talen till 100 blev en egen plats, **Stigen** ([PLAN-HUNDRA.md](docs/PLAN-HUNDRA.md#faser)).~~
-   Efter granskningen kommer dalen som svepbar värld, tvåsiffrigt minus
-   tvåsiffrigt och en loggexport inför piloten
-   ([PLAN-GRANSKNING.md](docs/PLAN-GRANSKNING.md#faser)).
-4. **Analoga spel:** ett utskrivbart brädspel och kortlekar, och ett ”spela med
-   en vuxen”-kort i veckan.
-5. **Pilot** med 6–10 barn.
-6. **Dammen** (taluppfattning) och **Bikupan** (positionssystemet).
+Vad vi bygger och i vilken ordning står i [docs/FARDPLAN.md](docs/FARDPLAN.md):
+det som är klart, det som kommer härnäst, öppna beslut och det som väntar till
+efter piloten. Varje fas har en egen plan som länkas därifrån.
 
 ## Licens
 

@@ -37,7 +37,7 @@ gör det. Fynden från varje fas skrivs in här.
 | R1. Snabba rättelser **(klar)** | Siffrorna bort från barnens sidor. Nya ord på hjälpkortet. ×5 slutar vänta. Taket i speldagar. En vuxen kan stänga av väntan. Väntedatumen i QR-koden och säkerhetskopian. |
 | R2. Simuleringen igen **(klar)** | Fler slumpfrön, och svag, genomsnittlig och stark elev var för sig. Siffrorna i dokumenten uppdateras. |
 | H6. Verifiering **(klar)** | Stigen och R1: genomgång av hela flödet, skärmbilder i alla storlekar, dokumenten. |
-| R3. Dalen som svepbar värld | En egen plan med skärmbilder, sedan bygget. |
+| R3. Dalen som svepbar värld | Plan och attrapp i [PLAN-DALEN.md](PLAN-DALEN.md), sedan bygget. |
 | R4. Tvåsiffrigt minus tvåsiffrigt | En egen del på Stigen. |
 | R5. Inför piloten | Loggexport som den vuxna väljer att skicka. Trädgårdens former som fråga till piloten. |
 
