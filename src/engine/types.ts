@@ -39,6 +39,11 @@ export interface Item {
   tags: string[];
   /** Items this one can be derived from (used for strategy feedback). */
   derivedFrom: ItemId[];
+  /**
+   * Other ways to derive the item, after `derivedFrom` (docs/PLAN-RAKNESTIG.md):
+   * the engine takes the one the learner knows best (`knownPath`).
+   */
+  paths?: ItemId[][];
   hints: Hint[];
   /** Mirrored twin item (e.g. a reversed form), if any. */
   pairId?: ItemId;

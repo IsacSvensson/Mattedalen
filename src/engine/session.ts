@@ -3,7 +3,7 @@ import { buildChoices } from './distractors';
 import { applyLeitner, isDue } from './leitner';
 import { PacingController } from './pacing';
 import { applyStatus, atLeast, emptyState } from './status';
-import { isStruggling } from './support';
+import { isStruggling, knownPath } from './support';
 import { computeUnlocked, sortedUnits, unitStarted } from './unlock';
 import type {
   AnswerFormat,
@@ -58,6 +58,11 @@ export interface Question {
   pairKnown: boolean;
   /** How well the item was known when asked, e.g. to fade a picture out as it is learnt. */
   state?: ItemState;
+  /**
+   * The way to the item from items the learner knows best (`knownPath`): the
+   * steps of a `derive` question, and the help shown with it. Absent when no way is known.
+   */
+  from?: ItemId[];
 }
 
 export interface Feedback {
@@ -231,6 +236,8 @@ export class Session {
       pairKnown: item.pairId !== undefined && this.state(item.pairId).status !== 'new',
       state,
     };
+    const from = knownPath(item, (id) => this.state(id));
+    if (from) this.current.from = from;
     return this.current;
   }
 
@@ -489,7 +496,7 @@ export class Session {
   /**
    * A hard item becomes a supported `derive` question, at most once per day
    * and `config.support.maxPerSession` times per session, and only when the
-   * items it is derived from are already known (fluent).
+   * items of one of its paths are already known (fluent; `knownPath`).
    */
   private withSupport(pick: { itemId: ItemId; kind: QuestionKind }): { itemId: ItemId; kind: QuestionKind } {
     if (pick.kind !== 'retry' && pick.kind !== 'due' && pick.kind !== 'mixed') return pick;
@@ -498,8 +505,7 @@ export class Session {
     if (!this.deps.config.format.allowFree || this.supported >= cfg.maxPerSession) return pick;
     const state = this.state(pick.itemId);
     if (state.supportDay === this.today || !isStruggling(state, this.today, cfg)) return pick;
-    const from = this.item(pick.itemId).derivedFrom;
-    if (from.length === 0 || !from.every((id) => atLeast(this.state(id).status, 'fluent'))) return pick;
+    if (!knownPath(this.item(pick.itemId), (id) => this.state(id))) return pick;
     return { itemId: pick.itemId, kind: 'derive' };
   }
 

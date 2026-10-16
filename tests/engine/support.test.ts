@@ -6,6 +6,7 @@ import {
   DEFAULT_CONFIG,
   emptyState,
   isStruggling,
+  knownPath,
   makeConfig,
   ManualClock,
   seededRng,
@@ -139,5 +140,44 @@ describe('supported questions in a session', () => {
 
     const noFree = setup({ format: { allowFree: false } });
     expect(run(startWith(noFree.engine, { häst: hard('häst') }), noFree.clock).some((q) => q.kind === 'derive')).toBe(false);
+  });
+});
+
+describe('the way the learner knows best (docs/PLAN-RAKNESTIG.md)', () => {
+  /** "häst" can also be reached from "gris" and "får". */
+  function twoWays(): ContentPack {
+    const pack = derivablePack();
+    for (const item of pack.items) if (item.id === 'häst') item.paths = [['gris', 'får']];
+    return pack;
+  }
+  const states = (extra: Record<string, ItemState>) => {
+    const engine = createEngine({ pack: twoWays() });
+    const all = engine.initialStates();
+    Object.assign(all, extra);
+    return { engine, all };
+  };
+
+  it('takes the way whose weakest step is strongest, and the first when they are equal', () => {
+    const item = twoWays().items.find((i) => i.id === 'häst')!;
+    const known = (status: ItemState['status'], box = 3) => ({ ...knownState('x', status, TODAY), box });
+    const of = (m: Record<string, ItemState>) => (id: string) => m[id];
+    expect(knownPath(item, of({ hund: known('fluent'), katt: known('fluent'), gris: known('fluent'), får: known('fluent') }))).toEqual(['hund', 'katt']);
+    expect(knownPath(item, of({ hund: known('fluent'), katt: known('learning'), gris: known('fluent'), får: known('fluent') }))).toEqual(['gris', 'får']);
+    expect(knownPath(item, of({ hund: known('fluent', 1), katt: known('automatic'), gris: known('automatic'), får: known('fluent', 2) }))).toEqual(['gris', 'får']);
+    expect(knownPath(item, of({ hund: known('learning'), gris: known('fluent') }))).toBeNull();
+  });
+
+  it('gives a hard item a räknestig along the other way when only that one is known', () => {
+    const clock = new ManualClock(START);
+    const engine = createEngine({ pack: twoWays(), clock, rng: seededRng(5), config: makeConfig({ session: { durationMs: 5 * 60_000 } }) });
+    const { all } = states({});
+    for (const id of ['gris', 'får']) all[id] = knownState(id, 'fluent', addDays(TODAY, 3));
+    all['hund'] = learning('hund');
+    all['häst'] = hard('häst');
+    const asked = run(engine.startSession({ states: all, meta: engine.initialMeta() }), clock);
+    const derive = asked.find((q) => q.item.id === 'häst' && q.kind === 'derive');
+    expect(derive?.from).toEqual(['gris', 'får']);
+    // Every question of the item carries the way, for the help with it.
+    expect(asked.filter((q) => q.item.id === 'häst').every((q) => q.from?.join() === 'gris,får')).toBe(true);
   });
 });

@@ -143,6 +143,12 @@ inget hämtas utifrån.
   sifferknappsatsen, med rektangeln i färgade delar bredvid. Ett fel steg visar
   bara talet, och stigen fortsätter. Föräldravyn visar ”Svåra just nu” med samma
   strategi, så att vuxna kan prata om samma knep.
+- **Flera vägar** (`strategiesFor` i `content/multiplication/facts.ts`). En svår
+  fakta kan nås på flera sätt, till exempel 7 × 8 som dubbla 7 × 4, som
+  7 × 5 + 7 × 3 eller som 5 × 8 + 2 × 8. Stegen är alltid fakta från en tidigare
+  del. Räknestigen, rektangeln och raden under ett nytt frö eller efter ett fel
+  tar den väg barnet kan bäst. Kan barnet ingen väg än visas tabellens egen
+  ([PLAN-RAKNESTIG](PLAN-RAKNESTIG.md)).
 - **Återkoppling.** Vid rätt svar blir frågekortet grönt, svaret visas och en
   liten planta dyker upp. Vid fel ersätts frågan av ett hjälpkort: ”Du svarade 54.
   Så här kan du tänka:”, rätt svar, strategin och den färgade rektangeln. Aldrig

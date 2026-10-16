@@ -162,8 +162,13 @@ Innehållspaketet beskriver valbara grupper med `focusSets` (`FocusSet`).
 som svår om barnet har svarat fel på den på 2 olika dagar, om den har fallit
 tillbaka från flytande 2 gånger eller om den har övats i mer än 7 dagar utan att
 bli flytande (`config.support`). När en svår fakta kommer upp frågas den i stället
-som `derive`, men bara om de fakta den härleds från (`item.derivedFrom`) redan är
-flytande, högst en gång per dag och högst 3 gånger per pass. Spelet går då steg
+som `derive`, men bara om de fakta den härleds från redan är flytande, högst en
+gång per dag och högst 3 gånger per pass. En fakta kan ha flera vägar
+(`item.derivedFrom` först, sedan `item.paths`). Motorn tar den väg barnet kan
+bäst (`knownPath` i `support.ts`): bland vägarna där alla steg är flytande den
+där det svagaste steget är starkast. Vägen följer med frågan (`Question.from`),
+så att stigen och hjälpen visar samma väg
+([PLAN-RAKNESTIG](PLAN-RAKNESTIG.md)). Spelet går då steg
 för steg från det barnet kan: 5 × 7 = 35 → 35 + 7 → 6 × 7. Svaret på stigen räknas
 inte som bevis och sänker inte heller faktan, eftersom barnet fick hjälp. Några
 frågor senare kommer samma fakta tillbaka som en vanlig fråga, och det svaret

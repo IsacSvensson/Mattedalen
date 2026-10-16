@@ -138,6 +138,97 @@ export function strategyFor(a: number, b: number): Strategy {
   }
 }
 
+/**
+ * The ways to a × b from easier facts (docs/PLAN-RAKNESTIG.md): the table's own
+ * way first (`strategyFor`), then the other factor's ways, and other splits of
+ * the same factor. Every step is a fact the child learns earlier (an earlier
+ * unit), never the fact itself or its mirror. Facts with nothing to build on (×1, ×2,
+ * ×10) have only their own way, with no steps.
+ */
+export function strategiesFor(a: number, b: number): Strategy[] {
+  const own = strategyFor(a, b);
+  if (own.from.length === 0) return [own];
+  const order = (id: ItemId) => {
+    const f = parseFactId(id);
+    return UNIT_DEFS.indexOf(unitFor(f.a, f.b));
+  };
+  const target = UNIT_DEFS.indexOf(unitFor(a, b));
+  const banned = new Set([factId(a, b), factId(b, a)]);
+  const out: Strategy[] = [own];
+  const seen = new Set([pathKey(own.from)]);
+  const { tableFirst } = tableAndOther(a, b);
+  // A square has one factor: splitting the other is the same way, mirrored.
+  for (const splitA of a === b ? [true] : [tableFirst, !tableFirst]) {
+    for (const st of waysBySplitting(a, b, splitA)) {
+      const key = pathKey(st.from);
+      if (seen.has(key) || st.from.some((id) => banned.has(id) || order(id) >= target)) continue;
+      seen.add(key);
+      out.push(st);
+    }
+  }
+  return out;
+}
+
+/** The way with these steps, or the table's own way. */
+export function strategyFrom(a: number, b: number, from: readonly ItemId[] | undefined): Strategy {
+  const key = from ? pathKey(from) : null;
+  const all = strategiesFor(a, b);
+  return all.find((st) => pathKey(st.from) === key) ?? all[0]!;
+}
+
+const pathKey = (from: readonly ItemId[]) => [...from].sort().join('+');
+
+/** Ways to a × b by splitting one factor (`splitA`: the first) into groups the child knows. */
+function waysBySplitting(a: number, b: number, splitA: boolean): Strategy[] {
+  const t = splitA ? a : b;
+  const o = splitA ? b : a;
+  const ans = a * b;
+  const self = formatFact(a, b);
+  const e = (n: number) => (splitA ? formatFact(n, o) : formatFact(o, n));
+  const id = (n: number) => (splitA ? factId(n, o) : factId(o, n));
+  const parts = (sizes: number[], removeLast?: boolean): ArrayParts => ({ axis: splitA ? 'rows' : 'cols', sizes, ...(removeLast ? { removeLast } : {}) });
+  const plus = (n: number): Strategy => ({
+    kind: 'plusGroup',
+    text: `${self} = ${e(n)} + ${o} = ${n * o} + ${o} = ${ans}`,
+    from: [id(n)],
+    parts: parts([n, 1]),
+  });
+  const minus = (n: number): Strategy => ({
+    kind: 'minusGroup',
+    text: `${self} = ${e(n)} − ${o} = ${n * o} − ${o} = ${ans}`,
+    from: [id(n)],
+    parts: parts([t, 1], true),
+  });
+  const double = (n: number): Strategy => ({
+    kind: 'doubleOf',
+    text: `${self} = dubbla ${e(n)} = ${n * o} + ${n * o} = ${ans}`,
+    from: [id(n)],
+    parts: parts([n, n]),
+  });
+  const split = (n: number, m: number): Strategy => ({
+    kind: 'split',
+    text: `${self} = ${e(n)} + ${e(m)} = ${n * o} + ${m * o} = ${ans}`,
+    from: [id(n), id(m)],
+    parts: parts([n, m]),
+  });
+  switch (t) {
+    case 3:
+      return [plus(2)];
+    case 4:
+      return [double(2), minus(5)];
+    case 6:
+      return [plus(5), double(3)];
+    case 7:
+      return [split(5, 2)];
+    case 8:
+      return [double(4), split(5, 3)];
+    case 9:
+      return [minus(10)];
+    default:
+      return [];
+  }
+}
+
 export function hintsFor(a: number, b: number): Hint[] {
   const strategy = strategyFor(a, b);
   const hints: Hint[] = [
@@ -153,6 +244,9 @@ export function hintsFor(a: number, b: number): Hint[] {
   }
   return hints;
 }
+
+/** The other ways' steps, for the engine (`Item.paths`). */
+const paths = (a: number, b: number) => strategiesFor(a, b).slice(1).map((st) => st.from);
 
 export function buildFacts(): Item[] {
   const items: Item[] = [];
@@ -170,6 +264,7 @@ export function buildFacts(): Item[] {
         unitId: unit.id,
         tags,
         derivedFrom: strategy.from,
+        ...(paths(a, b).length ? { paths: paths(a, b) } : {}),
         hints: hintsFor(a, b),
         pairId: a === b ? undefined : factId(b, a),
         // Smaller "other" factor first; "o × table" (how Swedish tables are

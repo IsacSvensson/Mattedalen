@@ -1,5 +1,5 @@
 import type { FocusSet, Question, SessionMode } from '../../../engine';
-import { confusionNote, derivationStepsFor, divisionNote, isDivisionId, parseDivisionId, parseFactId } from '../../../content/multiplication';
+import { confusionNote, derivationStepsFor, divisionNote, isDivisionId, isFactId, parseDivisionId, parseFactId, strategyFrom, type ArrayParts } from '../../../content/multiplication';
 import type { Profile } from '../../../storage';
 import type { AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
@@ -41,11 +41,23 @@ export function showSession(ctx: AppContext, profile: Profile, mode: SessionMode
 }
 
 function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
+  /**
+   * The way to a multiplication the child knows best (`Question.from`,
+   * docs/PLAN-RAKNESTIG.md); for every other item its own strategy.
+   */
+  const way = (q: Question): { text: string | undefined; parts: ArrayParts | undefined } => {
+    if (isFactId(q.item.id)) {
+      const { a, b } = parseFactId(q.item.id);
+      const st = strategyFrom(a, b, q.from);
+      return { text: st.text, parts: st.parts };
+    }
+    return { text: q.item.hints.find((x) => x.kind === 'strategy')?.text, parts: partsOf(q.item.hints) };
+  };
   const picture = (q: Question) => {
     const { a, b } = square(q.item.id);
-    return arrayView(a, b, { size: 'small', parts: partsOf(q.item.hints) });
+    return arrayView(a, b, { size: 'small', parts: way(q).parts });
   };
-  const strategyText = (q: Question) => q.item.hints.find((x) => x.kind === 'strategy')?.text;
+  const strategyText = (q: Question) => way(q).text;
   /** The strategy, with delat med in the child's sign. */
   const strategyLine = (q: Question) => {
     const text = strategyText(q);
@@ -103,7 +115,7 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
       return {
         label: [plantIcon('seed'), 'Ett nytt frö'],
         spoken: `Ett nytt frö. ${q.prompt}`,
-        body: arrayBuilder({ rows: a, cols: b, parts: partsOf(q.item.hints), startRotated: q.pairKnown, onDone: ready }),
+        body: arrayBuilder({ rows: a, cols: b, parts: way(q).parts, startRotated: q.pairKnown, onDone: ready }),
         after: [strategyLine(q), swap ? h('p', { class: 'strategy swap' }, icon('rotate'), swap) : null],
       };
     },
@@ -113,7 +125,7 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
      * where it has no path, and otherwise every other time.
      */
     derivation(q) {
-      const steps = derivationStepsFor(q.item.id);
+      const steps = derivationStepsFor(q.item.id, q.from);
       if (isDivisionId(q.item.id) && (!steps || (q.state?.seen ?? 0) % 2 === 0)) {
         return {
           build: (q, ready) => ({

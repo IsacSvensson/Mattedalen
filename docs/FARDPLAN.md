@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **S3. Räknestig efter det barnet kan** | Räknestigen är fast per fakta. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#föreslagna-faser) | |
+| 1 | **S3. Räknestig efter det barnet kan** | Räknestigen är fast per fakta. | [PLAN-RAKNESTIG](PLAN-RAKNESTIG.md) | S3a klar, S3b nästa |
 | 2 | **R4. Tvåsiffrigt minus tvåsiffrigt** | 75 − 23 saknas på Stigen. | Plan skrivs | |
 | 3 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#faser) | |
 | 4 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |

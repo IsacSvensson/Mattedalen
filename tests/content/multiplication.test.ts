@@ -8,7 +8,9 @@ import {
   multiplicationDistractors,
   normalizeNumberAnswer,
   parseFactId,
+  strategiesFor,
   strategyFor,
+  strategyFrom,
 } from '../../src/content/multiplication';
 
 const pack = createMultiplicationPack();
@@ -273,5 +275,53 @@ describe('derivation paths (räknestigen)', () => {
     expect(derivationSteps(8, 7)!.map((s) => s.prompt)).toEqual(['4 × 7', '28 + 28', '8 × 7']);
     expect(derivationSteps(9, 6)!.map((s) => s.prompt)).toEqual(['10 × 6', '60 − 6', '9 × 6']);
     expect(derivationSteps(7, 7)!.map((s) => s.prompt)).toEqual(['5 × 7', '2 × 7', '35 + 14', '7 × 7']);
+  });
+});
+
+describe('several ways to a fact (docs/PLAN-RAKNESTIG.md)', () => {
+  const pack = createMultiplicationPack();
+  const byId = new Map(pack.items.map((i) => [i.id, i]));
+  const unitOrder = new Map(pack.units.map((u) => [u.id, u.order]));
+
+  it('starts with the table’s own way, and every way adds up', () => {
+    for (let a = 1; a <= 10; a++)
+      for (let b = 1; b <= 10; b++) {
+        const ways = strategiesFor(a, b);
+        expect(ways[0]).toEqual(strategyFor(a, b));
+        for (const w of ways) expect(w.text.endsWith(`= ${a * b}`), w.text).toBe(true);
+      }
+  });
+
+  it('builds only on facts learnt earlier, never on the fact or its mirror', () => {
+    for (const item of pack.items) {
+      if (!/^\d+x\d+$/.test(item.id)) continue;
+      const { a, b } = parseFactId(item.id);
+      for (const path of item.paths ?? []) {
+        expect(path).not.toContain(factId(a, b));
+        expect(path).not.toContain(factId(b, a));
+        for (const src of path) expect(unitOrder.get(byId.get(src)!.unitId)!, `${item.id} ← ${src}`).toBeLessThan(unitOrder.get(item.unitId)!);
+      }
+    }
+  });
+
+  it('gives 7 × 8 a way through the fives and twos, and the free tables none', () => {
+    expect(strategiesFor(7, 8).map((w) => w.from)).toContainEqual(['5x8', '2x8']);
+    expect(byId.get('8x7')!.paths).toContainEqual(['8x5', '8x2']);
+    for (const id of ['2x7', '7x10', '1x9']) expect(byId.get(id)!.paths).toBeUndefined();
+    // A square is split one way only.
+    expect(strategiesFor(6, 6).map((w) => w.text)).toEqual(['6 × 6 = 5 × 6 + 6 = 30 + 6 = 36', '6 × 6 = dubbla 3 × 6 = 18 + 18 = 36']);
+  });
+
+  it('walks the way the child knows: räknestigen and the rectangle', () => {
+    expect(derivationSteps(7, 8, ['5x8', '2x8'])).toEqual([
+      { kind: 'known', label: 'Börja med det du kan', prompt: '5 × 8', answer: 40, itemId: '5x8' },
+      { kind: 'known', label: 'Och det här kan du också', prompt: '2 × 8', answer: 16, itemId: '2x8' },
+      { kind: 'combine', label: 'Lägg ihop', prompt: '40 + 16', answer: 56 },
+      { kind: 'target', label: 'Alltså', prompt: '7 × 8', answer: 56 },
+    ]);
+    expect(strategyFrom(7, 8, ['5x8', '2x8']).parts).toEqual({ axis: 'rows', sizes: [5, 2] });
+    // Without a way, or with one it does not have, the table's own.
+    expect(strategyFrom(7, 8, undefined)).toEqual(strategyFor(7, 8));
+    expect(strategyFrom(7, 8, ['9x9'])).toEqual(strategyFor(7, 8));
   });
 });

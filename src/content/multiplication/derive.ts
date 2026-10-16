@@ -1,6 +1,6 @@
 import type { ItemId } from '../../engine';
 import { anchorGivesAway, divisionId, divisionStrategy, formatDivision, isDivisionId, parseDivisionId, pathAnchor } from './division';
-import { factId, formatFact, parseFactId, strategyFor } from './facts';
+import { factId, formatFact, parseFactId, strategyFrom } from './facts';
 
 /**
  * A derivation path ("räknestig") for a hard fact: start from facts the child
@@ -25,9 +25,13 @@ const COMBINE: Record<string, (known: number[], answer: number) => { label: stri
   halfOfTen: ([k = 0]) => ({ label: 'Ta hälften', prompt: `hälften av ${k}` }),
 };
 
-/** Steps for a × b, or null when the fact has no derivation from other facts (×1, ×2, ×10). */
-export function derivationSteps(a: number, b: number): DeriveStep[] | null {
-  const strategy = strategyFor(a, b);
+/**
+ * Steps for a × b along the way with the steps `from` (the one the child knows
+ * best, `Question.from`; the table's own way without it), or null when the fact
+ * has no derivation from other facts (×1, ×2, ×10).
+ */
+export function derivationSteps(a: number, b: number, from?: readonly ItemId[]): DeriveStep[] | null {
+  const strategy = strategyFrom(a, b, from);
   const combine = COMBINE[strategy.kind];
   if (!combine || strategy.from.length === 0) return null;
   const answer = a * b;
@@ -76,9 +80,9 @@ export function divisionDerivationSteps(id: ItemId): DeriveStep[] | null {
 }
 
 /** The path for any item of the pack: a multiplication or a division. */
-export function derivationStepsFor(id: ItemId): DeriveStep[] | null {
+export function derivationStepsFor(id: ItemId, from?: readonly ItemId[]): DeriveStep[] | null {
   if (isDivisionId(id)) return divisionDerivationSteps(id);
   if (!/^\d+x\d+$/.test(id)) return null;
   const { a, b } = parseFactId(id);
-  return derivationSteps(a, b);
+  return derivationSteps(a, b, from);
 }

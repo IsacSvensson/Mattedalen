@@ -51,7 +51,7 @@ export function validatePack(pack: ContentPack): void {
       const twin = pack.items.find((i) => i.id === item.pairId);
       if (!twin || twin.pairId !== item.id) throw new Error(`Item ${item.id} has an asymmetric pair`);
     }
-    for (const d of item.derivedFrom) if (!ids.has(d)) throw new Error(`Item ${item.id} derives from unknown ${d}`);
+    for (const d of [item.derivedFrom, ...(item.paths ?? [])].flat()) if (!ids.has(d)) throw new Error(`Item ${item.id} derives from unknown ${d}`);
     for (const r of item.requires ?? []) if (!ids.has(r)) throw new Error(`Item ${item.id} requires unknown ${r}`);
   }
   const units = sortedUnits(pack.units);
