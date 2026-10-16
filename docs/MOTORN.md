@@ -98,7 +98,7 @@ const { meta, introduced, accuracy } = session.summary();
 | ny → inlärning | när faktan introduceras |
 | flytande | rätt under 5 s på 2 olika dagar (flerval eller fritt svar) |
 | automatiserad | rätt under 3 s på 3 olika dagar, **med fritt svar** |
-| fel svar | ett steg ner; nivån måste sedan visas på en ny dag |
+| fel svar | ett steg ner; nivån måste sedan visas på en ny dag. Det högsta läget faktan nått sparas (`peak`), så att en fakta som varit flytande visas som planta och inte som frö. |
 
 Två svar räknas aldrig som bevis: svar samma dag som faktan introducerades, och
 rätt svar efter ett fel samma dag. I båda fallen har barnet nyss sett svaret.

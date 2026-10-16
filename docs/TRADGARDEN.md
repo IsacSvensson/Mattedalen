@@ -175,6 +175,26 @@ Utseendet bygger på några få regler. De står också överst i `styles.css`.
   övas, buske att den är flytande (rätt och snabbt på 2 olika dagar) och träd att
   den är automatiserad (3 dagar, utan alternativ). Ett fel svar sänker faktan ett
   steg, och växten visar då den lägre nivån. Nedgången visas inte som en händelse.
+
+**Växternas steg** (`stageFor` i `shell/components/plant.ts`, testat i
+`tests/game/plantSteps.test.ts`). Ett fel tar växten ett steg ner, aldrig två.
+
+| Från | Till | När |
+|---|---|---|
+| Frö | Planta | Rätt svar när faktan är dags för repetition. |
+| Planta | Buske | Rätt under 5 s på 2 olika dagar (flytande). |
+| Buske | Träd | Fritt svar under 3 s på 3 olika dagar (automatiserad). |
+| Träd | Buske | Ett fel svar. |
+| Buske | Planta | Ett fel svar. Faktan blir aldrig frö igen: det barnet lärt sig en gång är inte borta. |
+| Planta | Frö | Ett fel svar, bara för en fakta som aldrig har varit buske. |
+
+Motorn minns det högsta läget en fakta nått (`ItemState.peak`). Lägen som
+sparades före regeln har inte `peak`. Där räcker det att faktan har fallit från
+flytande (`drops`). QR-koden skickar en fakta som fallit från flytande som en
+som övas, så den blir en planta och inte ett frö på den nya enheten.
+
+Bron vid bäcken och lyktorna på stigen räknar andelen fakta som sitter. Ett fel
+flyttar dem därför bara en fakta.
 - En tabell (till exempel ×7, alla 19 fakta i båda ordningarna) räknas som kunnig
   när alla dess fakta är minst buskar. Då blir siffran på lådan en solros, och en
   solros växer på kullen i landskapet. Hela raden ändras inte, eftersom varje

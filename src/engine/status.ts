@@ -49,6 +49,17 @@ export function promotedStatus(state: ItemState, cfg: StatusConfig): Status {
   return status;
 }
 
+/**
+ * Whether the item has ever been fluent or better: then a wrong answer shows
+ * it as a sprout, never as a seed again (docs/TRADGARDEN.md, Växternas steg).
+ * Older saved states lack `peak`; a drop from fluent says the same.
+ */
+export function hasBeenFluent(s: ItemState): boolean {
+  return atLeast(s.peak ?? s.status, 'fluent') || (s.drops ?? 0) > 0;
+}
+
+const higher = (a: Status, b: Status): Status => (statusRank(a) >= statusRank(b) ? a : b);
+
 /** A wrong answer moves the item down one step (but never back to `new`). */
 export function demotedStatus(status: Status): Status {
   switch (status) {
@@ -122,6 +133,7 @@ export function applyStatus(prev: ItemState, input: AnswerInput, cfg: StatusConf
     if (atLeast(prev.status, 'fluent')) s.drops = (prev.drops ?? 0) + 1;
     s.lastWrongDay = input.today;
     s.confusions[input.given] = (s.confusions[input.given] ?? 0) + 1;
+    s.peak = higher(prev.peak ?? prev.status, prev.status);
     s.status = demotedStatus(s.status);
     s.dayBest = trimEvidenceAfterLapse(s, input.today, cfg);
     return s;
@@ -144,5 +156,6 @@ export function applyStatus(prev: ItemState, input: AnswerInput, cfg: StatusConf
       s.settledDay = input.today;
     }
   }
+  s.peak = higher(prev.peak ?? prev.status, s.status);
   return s;
 }

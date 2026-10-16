@@ -35,24 +35,49 @@ export function topConfusions(states: Record<ItemId, ItemState>, limit = 8, labe
 }
 
 export interface FactStats {
+  /** Answers on its own: not reached in steps on the räknestig. */
   attempts: number;
   correct: number;
   meanRtMs: number | null;
+  /** Right answers reached in steps on the räknestig (with support), counted apart. */
+  supported: number;
 }
 
-/** Attempts per fact from both the recent log and the summarised history. */
+/**
+ * Attempts per fact from both the recent log and the summarised history. An
+ * answer reached on the räknestig is support, not the child's own recall, so it
+ * is counted apart (the summarised history does not tell them apart).
+ */
 export function factStats(attempts: readonly StoredAttempt[], summaries: readonly AttemptDaySummary[]): Map<ItemId, FactStats> {
-  const acc = new Map<ItemId, { attempts: number; correct: number; rt: number }>();
+  const acc = new Map<ItemId, { attempts: number; correct: number; rt: number; supported: number }>();
+  const get = (id: ItemId) => acc.get(id) ?? (acc.set(id, { attempts: 0, correct: 0, rt: 0, supported: 0 }), acc.get(id)!);
   const add = (id: ItemId, n: number, c: number, rt: number) => {
-    const s = acc.get(id) ?? { attempts: 0, correct: 0, rt: 0 };
+    const s = get(id);
     s.attempts += n;
     s.correct += c;
     s.rt += rt;
-    acc.set(id, s);
   };
-  for (const a of attempts) add(a.itemId, 1, a.correct ? 1 : 0, a.rtMs);
+  for (const a of attempts) {
+    if (a.kind === 'derive') {
+      if (a.correct) get(a.itemId).supported++;
+    } else add(a.itemId, 1, a.correct ? 1 : 0, a.rtMs);
+  }
   for (const s of summaries) add(s.itemId, s.attempts, s.correct, s.totalRtMs);
-  return new Map([...acc].map(([id, s]) => [id, { attempts: s.attempts, correct: s.correct, meanRtMs: s.attempts ? s.rt / s.attempts : null }]));
+  return new Map(
+    [...acc].map(([id, s]) => [id, { attempts: s.attempts, correct: s.correct, meanRtMs: s.attempts ? s.rt / s.attempts : null, supported: s.supported }]),
+  );
+}
+
+/** "12 försök, 75 % rätt · snitt 3.1 s · 2 gånger via räknestigen", for the details of a fact. */
+export function factStatsText(st: FactStats | undefined): string[] {
+  if (!st) return [];
+  const parts: string[] = [];
+  if (st.attempts) {
+    parts.push(`${st.attempts} försök, ${Math.round((st.correct / st.attempts) * 100)} % rätt`);
+    if (st.meanRtMs) parts.push(`snitt ${(st.meanRtMs / 1000).toFixed(1)} s`);
+  }
+  if (st.supported) parts.push(`${st.supported === 1 ? 'en gång' : `${st.supported} gånger`} via räknestigen`);
+  return parts;
 }
 
 export const STATUS_TEXT: Record<ItemState['status'], string> = {

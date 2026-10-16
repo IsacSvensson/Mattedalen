@@ -1,4 +1,4 @@
-import { addDays, diffDays, emptyState, type DayKey, type ItemState } from '../engine';
+import { addDays, diffDays, emptyState, hasBeenFluent, type DayKey, type ItemState } from '../engine';
 import { ImportError, tableReadyOf } from './backup';
 
 /**
@@ -28,7 +28,8 @@ export interface QrSnapshot {
 /** 0 new · 1–2 learning · 3–4 fluent · 5–6 automatic (low / high Leitner box). */
 export function levelOf(s: ItemState | undefined): number {
   if (!s || s.status === 'new') return 0;
-  if (s.status === 'learning') return s.box === 0 ? 1 : 2;
+  // A fact that fell back from fluent travels as one being practised, not as a new seed.
+  if (s.status === 'learning') return s.box === 0 && !hasBeenFluent(s) ? 1 : 2;
   if (s.status === 'fluent') return s.box < 3 ? 3 : 4;
   return s.box < 4 ? 5 : 6;
 }

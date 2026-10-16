@@ -1,4 +1,4 @@
-import type { ItemState } from '../../engine';
+import { hasBeenFluent, type ItemState } from '../../engine';
 import { s } from '../dom';
 
 /** Growth stages on the map: frö → planta → buske → träd. */
@@ -40,7 +40,8 @@ export const bears = (stage: Stage) => stage === 'bush' || stage === 'tree';
 
 export function stageFor(state: ItemState | undefined, unitUnlocked: boolean): Stage {
   if (!state || state.status === 'new') return unitUnlocked ? 'soil' : 'locked';
-  if (state.status === 'learning') return state.box === 0 ? 'seed' : 'sprout';
+  // A seed only until it has grown once: a fact that has been a bush comes back as a sprout.
+  if (state.status === 'learning') return state.box === 0 && !hasBeenFluent(state) ? 'seed' : 'sprout';
   return state.status === 'fluent' ? 'bush' : 'tree';
 }
 

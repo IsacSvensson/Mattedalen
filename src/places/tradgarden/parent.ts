@@ -28,7 +28,7 @@ import { heatmapView } from '../../shell/components/heatmap';
 import { h } from '../../shell/dom';
 import type { SaveProfile } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
-import { factStats, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
+import { factStats, factStatsText, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
 import { gardenDeps, pack } from './pack';
 import { gardenIsOpen } from './isOpen';
 import { gardenWaits, saveTableReady, tableReady } from './held';
@@ -291,10 +291,7 @@ function heatmap(states: Record<string, ItemState>, stats: Map<string, FactStats
 
 function describe(fact: string, s: ItemState | undefined, st: FactStats | undefined): string {
   const parts = [`${fact}: ${STATUS_TEXT[s?.status ?? 'new']}`];
-  if (st?.attempts) {
-    parts.push(`${st.attempts} försök, ${Math.round((st.correct / st.attempts) * 100)} % rätt`);
-    if (st.meanRtMs) parts.push(`snitt ${(st.meanRtMs / 1000).toFixed(1)} s`);
-  }
+  parts.push(...factStatsText(st));
   const worst = Object.entries(s?.confusions ?? {}).sort((x, y) => y[1] - x[1])[0];
   if (worst) parts.push(`vanligaste felsvar ${worst[0]}`);
   return parts.join(' · ');

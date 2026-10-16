@@ -57,6 +57,7 @@ function sanitizeItemState(id: string, raw: unknown): ItemState {
     confusions: isObject(raw.confusions) ? (raw.confusions as ItemState['confusions']) : {},
     ...(typeof raw.wrongDays === 'number' ? { wrongDays: num(raw.wrongDays, 0) } : {}),
     ...(typeof raw.drops === 'number' ? { drops: num(raw.drops, 0) } : {}),
+    ...(['learning', 'fluent', 'automatic'].includes(raw.peak as string) ? { peak: raw.peak as ItemState['status'] } : {}),
     ...(typeof raw.supportDay === 'string' ? { supportDay: raw.supportDay } : {}),
     ...(typeof raw.settledDay === 'string' ? { settledDay: raw.settledDay } : {}),
   };

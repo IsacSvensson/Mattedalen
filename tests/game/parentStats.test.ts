@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyState } from '../../src/engine';
-import { factStats, formatDay, minutesPerDay, topConfusions } from '../../src/shell/stats';
+import { factStats, factStatsText, formatDay, minutesPerDay, topConfusions } from '../../src/shell/stats';
 import type { SessionRecord, StoredAttempt } from '../../src/storage';
 
 const session = (day: string, minutes: number): SessionRecord => ({
@@ -45,7 +45,14 @@ describe('parent statistics', () => {
       [attempt(true, 2000), attempt(false, 4000)],
       [{ profileId: 'p', packId: 'multiplication', day: '2026-01-01', itemId: '3x7', attempts: 2, correct: 2, totalRtMs: 6000 }],
     );
-    expect(stats.get('3x7')).toEqual({ attempts: 4, correct: 3, meanRtMs: 3000 });
+    expect(stats.get('3x7')).toEqual({ attempts: 4, correct: 3, meanRtMs: 3000, supported: 0 });
+  });
+
+  it('counts answers reached on the räknestig apart from the child’s own', () => {
+    const attempt = (correct: boolean, kind: StoredAttempt['kind']) => ({ itemId: '7x8', correct, rtMs: 3000, kind }) as StoredAttempt;
+    const stats = factStats([attempt(true, 'due'), attempt(false, 'due'), attempt(true, 'derive'), attempt(true, 'derive')], []);
+    expect(stats.get('7x8')).toEqual({ attempts: 2, correct: 1, meanRtMs: 3000, supported: 2 });
+    expect(factStatsText(stats.get('7x8'))).toEqual(['2 försök, 50 % rätt', 'snitt 3.0 s', '2 gånger via räknestigen']);
   });
 
   it('formats days in Swedish', () => {

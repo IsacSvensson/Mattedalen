@@ -162,3 +162,20 @@ vad vi föreslår.
 
 S1 är ett fel i det barnet ser, och liten. Förslaget är att göra S1 före R3, och
 S2–S4 efter R3.
+
+## Fynd från S1
+
+- **Felet är rättat.** En buske som besvaras fel blir en planta, inte ett frö.
+  Motorn minns det högsta läget en fakta nått (`peak`). En fakta som en gång varit
+  buske blir aldrig frö igen. Alla sex övergångar står i
+  [TRADGARDEN.md](TRADGARDEN.md#designregler) och har tester.
+- **Föräldravyn hade samma fel:** värmekartan visade en fakta som fallit som ny.
+  Nu visas den som övas.
+- **QR-koden** skickar en fakta som fallit från flytande som en som övas, så den
+  blir en planta på den nya enheten.
+- **Bron och lyktorna** räknar andelen fakta som sitter. Ett fel flyttar dem
+  redan bara en fakta, så där behövdes ingen ändring.
+- **Svar med stöd:** föräldravyns detaljer för en fakta räknar nu svar via
+  räknestigen för sig, till exempel ”2 försök, 50 % rätt · 2 gånger via
+  räknestigen”. Äldre sammanfattad historik skiljer inte på dem.
+

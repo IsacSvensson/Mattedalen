@@ -119,9 +119,10 @@ i sidled / rulla nedåt”) låter piloten pröva båda.
 | R3b. Platssidorna i scenerna | Scenens knapp börjar passet. Tillbaka-knappar och slutskärmar leder till scenen. Trädgårdens extra knappar och rader flyttar in i scenen. |
 | R3c. Lodrätt och verifiering | Lodrätt läge och inställningen för piloten. Tester för svep, pilar, tangenter och skärmläsare. Skärmbilder i alla storlekar, dokumenten och regeln om sidled. |
 
-## Frågor innan bygget
+## Beslut
 
-1. **Ordningen:** Bäcken, Stigen, Trädgården, som barnet möter dem? Förslag: ja.
-2. **Scenens knapp:** ska den börja passet direkt, en tryckning mindre, eller
-   visa platssidan som i dag? Förslag: direkt.
-3. **Lodrätt läge** som inställning för piloten? Förslag: ja.
+Beslutat i oktober 2026, enligt förslagen:
+
+1. **Ordningen** är Bäcken, Stigen, Trädgården, som barnet möter dem.
+2. **Scenens knapp** börjar passet direkt, en tryckning mindre.
+3. **Lodrätt läge** blir en inställning för piloten.

@@ -93,9 +93,10 @@ kollen. Till höger barnets inställningar på ett ställe.*
 Loggexporten i R5 läggs i den nya strukturen, under barnets ”Flytta eller
 spara”.
 
-## Frågor
+## Beslut
 
-1. Ska den heta **Föräldravy** som i dag, eller **För vuxna**, som knappen på
-   startsidan? Förslag: För vuxna, eftersom också lärare kan använda den.
-2. Ska **Att göra** kunna avfärdas, till exempel ”Vänta ändå”? Förslag: nej, den
-   försvinner när saken är gjord.
+Beslutat i oktober 2026, enligt förslagen:
+
+1. Den heter **För vuxna**, som knappen på startsidan, eftersom också lärare kan
+   använda den.
+2. **Att göra** kan inte avfärdas. En sak försvinner när den är gjord.

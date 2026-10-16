@@ -7,7 +7,7 @@ import { heatmapView } from '../../shell/components/heatmap';
 import { icon } from '../../shell/components/icons';
 import { h } from '../../shell/dom';
 import { engineFor, loadProgress } from '../../shell/play';
-import { factStats, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
+import { factStats, factStatsText, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
 import { partProgress } from './logic';
 import { brookDeps, pack } from './pack';
 import { showBrook } from './screens/brook';
@@ -124,10 +124,7 @@ function additionHeatmap(states: Record<ItemId, ItemState>, stats: Map<ItemId, F
 function describeFact(id: ItemId, s: ItemState | undefined, st: FactStats | undefined): string {
   const f = parseFactId(id);
   const parts = [`${formatFact(f.op, f.x, f.y)} = ${f.answer}: ${STATUS_TEXT[s?.status ?? 'new']}`];
-  if (st?.attempts) {
-    parts.push(`${st.attempts} försök, ${Math.round((st.correct / st.attempts) * 100)} % rätt`);
-    if (st.meanRtMs) parts.push(`snitt ${(st.meanRtMs / 1000).toFixed(1)} s`);
-  }
+  parts.push(...factStatsText(st));
   const worst = Object.entries(s?.confusions ?? {}).sort((x, y) => y[1] - x[1])[0];
   if (worst) parts.push(`vanligaste felsvar ${worst[0]}`);
   return parts.join(' · ');

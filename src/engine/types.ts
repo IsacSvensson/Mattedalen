@@ -176,6 +176,8 @@ export interface ItemState {
   wrongDays?: number;
   /** Times the item fell back from fluent or automatic. */
   drops?: number;
+  /** The highest status the item has reached (older saved states lack it). */
+  peak?: Status;
   /** Last day the item was practised with support (a derivation path). */
   supportDay?: DayKey;
   /** Day the item was last answered from memory after support. */

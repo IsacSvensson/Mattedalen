@@ -1,10 +1,10 @@
-import type { ItemState } from '../../engine';
+import { hasBeenFluent, type ItemState } from '../../engine';
 import { h } from '../dom';
 
 /** Colour class of a fact in a heat map, by how well it is known. */
 export function heatClass(s: ItemState | undefined): string {
   if (!s || s.status === 'new') return 'heat-new';
-  if (s.status === 'learning') return s.box === 0 ? 'heat-learning-0' : 'heat-learning-1';
+  if (s.status === 'learning') return s.box === 0 && !hasBeenFluent(s) ? 'heat-learning-0' : 'heat-learning-1';
   return s.status === 'fluent' ? 'heat-fluent' : 'heat-automatic';
 }
 
