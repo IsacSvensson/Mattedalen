@@ -125,8 +125,13 @@ inget hämtas utifrån.
   och besvaras sedan: alltid där räknestig saknas, annars varannan gång. Är hela
   delat med i en tabell flytande får tabellens siffra och solros en skördekorg.
   Barn som redan har buskar får en gång nyheten om blommor och frukt.
-- **Svarsformat.** Fakta under inlärning frågas med flerval: fyra stora knappar,
-  och tangenterna 1–4 fungerar. Flytande fakta frågas med fritt svar på en stor
+- **Svarsformat.** Fakta under inlärning frågas med flerval: fyra stora knappar.
+  På en dator skriver siffertangenterna svaret, som på sifferknappsatsen: 3 är
+  svaret 3, och 2 och sedan 4 är 24. Ett tal som också börjar ett längre svar
+  (2 bland 2 och 24) väntar en kort stund på nästa siffra, eller på Enter. Är
+  alternativen inte tal (”ja”, ”nej”) väljer 1, 2, 3 … alternativen i ordning
+  (`shell/components/choiceKeys.ts`). Gäller alla platser. Flytande fakta frågas
+  med fritt svar på en stor
   sifferknappsats (siffror, sudda och bock, eller tangentbordet). Fritt svar krävs för
   statusen ”automatiserad”. Svarstiden mäts men visas aldrig, och ingen klocka
   syns.

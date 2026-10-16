@@ -10,6 +10,7 @@ import { PlayController, type GameDeps } from '../play';
 import { DEFAULT_DIVISION_SIGN, mathNodes, type DivisionSign } from '../divisionSign';
 import { hasSwedishVoice, speak, speechSupported, spokenText, stopSpeaking } from '../speech';
 import { keepTerms } from '../words';
+import { choiceKeys } from '../components/choiceKeys';
 
 /** One step on a derivation path ("räknestigen"). Only the last step is the answer to the question. */
 export interface PathStep {
@@ -347,6 +348,7 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
       button.classList.add('chosen');
       for (const b of buttons) b.disabled = true;
     };
+    const numeric = choices.every((c) => /^\d+$/.test(c));
     const buttons = choices.map((value, i) =>
       h(
         'button',
@@ -354,18 +356,18 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
           class: 'choice',
           type: 'button',
           dataset: { value },
-          'aria-keyshortcuts': String(i + 1),
+          // The digit keys type a number answer; otherwise 1, 2, 3 … pick a choice.
+          'aria-keyshortcuts': numeric ? undefined : String(i + 1),
           onclick: (e: Event) => choose(value, e.currentTarget as HTMLButtonElement),
         },
         place.choiceLabel?.(value) ?? value,
       ),
     );
     stage.replaceChildren(h('div', { class: 'question' }, prompt, h('div', { class: 'answer-area choices' }, buttons)));
-    setKeys((e) => {
-      const i = Number(e.key) - 1;
-      const button = buttons[i];
-      if (button) choose(choices[i] as string, button);
+    const keys = choiceKeys(choices, (i) => choose(choices[i]!, buttons[i]!), {
+      typed: (text) => buttons.forEach((b, i) => b.classList.toggle('keyed', text !== '' && choices[i]!.startsWith(text))),
     });
+    setKeys((e) => keys.onKey(e));
   });
 }
 

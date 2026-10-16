@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, enterGarden, nextStep, passIntro, switchPlayer, untilIntro } from './helpers';
+import { answer, createProfile, enterGarden, nextStep, passIntro, solve, switchPlayer, untilIntro } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -104,3 +104,40 @@ test('an interrupted session continues later the same day: the time adds up', as
   await answer(page);
   await expect(page.getByRole('heading', { name: 'Bra jobbat!' })).toBeVisible();
 });
+
+test('on a computer, the digit keys type the answer to a multiple choice: 3 is the answer 3', async ({ page }) => {
+  await createProfile(page, 'Bo');
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  let typed = 0;
+  let differs = 0;
+  for (let i = 0; i < 12 && typed < 4; i++) {
+    await expect(nextStep(page)).toBeVisible();
+    await passIntro(page);
+    const choices = page.locator('.choice:not([disabled])');
+    if (!(await choices.first().isVisible())) {
+      await answer(page);
+      continue;
+    }
+    const right = String(solve((await page.locator('.question .prompt').getAttribute('data-prompt'))!));
+    const values = await choices.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.value!));
+    // Counts only where the answer is not also its place among the choices (3 as the third).
+    if (values.indexOf(right) + 1 !== Number(right)) differs++;
+    // Catch the choice when it is made: the next question can come quickly after a right answer.
+    await page.evaluate(() => {
+      const w = window as unknown as { chosen?: string };
+      w.chosen = undefined;
+      const seen = new MutationObserver(() => {
+        const el = document.querySelector<HTMLElement>('.choice.chosen');
+        if (el && w.chosen === undefined) w.chosen = el.dataset.value;
+      });
+      seen.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    });
+    await page.keyboard.type(right);
+    // A number that begins a longer choice waits a moment for the next digit.
+    if (values.some((v) => v !== right && v.startsWith(right))) await page.clock.runFor(1000);
+    await expect.poll(() => page.evaluate(() => (window as unknown as { chosen?: string }).chosen)).toBe(right);
+    typed++;
+  }
+  expect(differs).toBeGreaterThan(0);
+});
+

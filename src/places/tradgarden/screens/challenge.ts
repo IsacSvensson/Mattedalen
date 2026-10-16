@@ -9,6 +9,7 @@ import { engineFor, loadProgress } from '../../../shell/play';
 import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../../../shell/speech';
 import { showGarden } from './garden';
 import { gardenDeps, pack } from '../pack';
+import { choiceKeys } from '../../../shell/components/choiceKeys';
 
 /**
  * "Slå ditt rekord": optional, short and timed, only with facts the child
@@ -122,10 +123,8 @@ async function runChallenge(ctx: AppContext, profile: Profile, record: number | 
         const choices = buildChoices(pack, item, states[item.id], mathRandomRng, 4);
         const buttons = choices.map((v) => h('button', { class: 'choice', type: 'button', dataset: { value: v }, onclick: () => submit(v) }, v));
         stage.replaceChildren(h('div', { class: 'question' }, prompt, h('div', { class: 'choices' }, buttons)));
-        setKey((e) => {
-          const v = choices[Number(e.key) - 1];
-          if (v) submit(v);
-        });
+        const keys = choiceKeys(choices, (i) => submit(choices[i]!));
+        setKey((e) => keys.onKey(e));
       }
     });
     if (given === null || over) break;

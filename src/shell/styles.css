@@ -2046,6 +2046,12 @@ h1:focus {
   box-shadow: none;
 }
 
+/* A number typed on the keyboard that begins this choice (2 for 24): marked until it is chosen. */
+.choice.keyed {
+  outline: 4px solid var(--i-blue);
+  outline-offset: 3px;
+}
+
 /* Calm: no red, just a quieter, dashed button. */
 .choice.wrong {
   background: #f1e7d8;

@@ -11,6 +11,7 @@ import { engineFor, loadProgress } from '../../../shell/play';
 import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../../../shell/speech';
 import { genitive, showGarden } from './garden';
 import { gardenDeps, pack } from '../pack';
+import { choiceKeys } from '../../../shell/components/choiceKeys';
 
 const MIN_CARDS = 6;
 
@@ -132,10 +133,8 @@ async function runDuel(ctx: AppContext, profile: Profile): Promise<void> {
       const choices = buildChoices(pack, item, states[item.id], mathRandomRng, 4);
       const buttons = choices.map((v) => h('button', { class: 'choice', type: 'button', onclick: () => resolve(v) }, v));
       stage.replaceChildren(h('div', { class: 'question' }, head, h('div', { class: 'choices' }, buttons)));
-      setKey((e) => {
-        const v = choices[Number(e.key) - 1];
-        if (v) resolve(v);
-      });
+      const keys = choiceKeys(choices, (i) => resolve(choices[i]!));
+      setKey((e) => keys.onKey(e));
     });
   }
 
