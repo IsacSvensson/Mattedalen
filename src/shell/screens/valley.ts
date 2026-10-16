@@ -3,8 +3,7 @@ import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { avatarIcon } from '../components/avatars';
 import { icon } from '../components/icons';
-import { scene } from '../components/scene';
-import { world } from '../components/world';
+import { valleyMap } from '../components/valleyMap';
 import { h } from '../dom';
 import { dayPlanKey, planDay, planHolds, rememberPlan, restedYesterday, type DayPlan, type PlaceLoad } from '../dayPlan';
 import { placeIsOpen, type Place } from '../place';
@@ -12,11 +11,11 @@ import { hasSwedishVoice, speak, speechSupported } from '../speech';
 import { showProfiles } from './profiles';
 
 /**
- * The valley: the child's start page, a world of scenes with one per place
- * (`components/world.ts`, docs/PLAN-DALEN.md). Only places that exist get a
- * scene, so nothing waits to be unlocked; a place that is not open yet rests
- * in its scene. The world opens at today's place: the awake place with the
- * most due today (ties: the first in the valley). The child chooses where to go.
+ * The valley: the child's start page, a map with every place at full size
+ * (`components/valleyMap.ts`, docs/PLAN-DALEN.md). Only places that exist are
+ * drawn, so nothing waits to be unlocked; a place that is not open yet rests on
+ * the map. The map opens at today's place: the awake place with the most due
+ * today (ties: the first in the valley). The child chooses where to go.
  */
 export async function showValley(ctx: AppContext, profile: Profile): Promise<void> {
   const maps = await placeMaps(ctx, profile);
@@ -34,33 +33,29 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
   const sunflowers = maps.reduce((n, m) => n + m.scene.sunflowers, 0);
   const voiceOn = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
   const spoken = maps.map(({ scene }) => scene.moodText).join(' ');
-  const scenes = world(
+  const map = valleyMap(
     maps.map(({ place, scene, open }) => ({ id: place.id, name: place.name, open, scene, go: () => void go(place)() })),
-    { start: maps.indexOf(today), guide: avatarIcon(profile.avatar) },
+    { start: today.place.id, guide: avatarIcon(profile.avatar), sunflowers },
   );
 
   const view = h(
     'main',
-    { class: 'screen valley has-scene' },
+    { class: 'screen valley' },
+    map.el,
+    // On top of the map, top left: the child's animal (switch player), the name and read-aloud.
     h(
       'header',
-      { class: 'garden-head valley-head' },
-      scene({ height: 120, sunflowers, cloud: true }),
-      h(
-        'div',
-        { class: 'scene-title' },
-        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Byt spelare', onclick: () => void showProfiles(ctx) }, avatarIcon(profile.avatar)),
-        h('h1', null, 'Mattedalen'),
-        voiceOn
-          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp', onclick: () => void speak(spoken) }, icon('speaker'))
-          : null,
-      ),
+      { class: 'map-head' },
+      h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Byt spelare', onclick: () => void showProfiles(ctx) }, avatarIcon(profile.avatar)),
+      h('h1', null, 'Mattedalen'),
+      voiceOn
+        ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp', onclick: () => void speak(spoken) }, icon('speaker'))
+        : null,
     ),
     maps.map(({ scene }) => (scene.landscapeText ? h('p', { class: 'sr-only' }, scene.landscapeText) : null)),
-    scenes.el,
   );
-  show(ctx, view, () => scenes.cleanup());
-  scenes.mount();
+  show(ctx, view, () => map.cleanup());
+  map.mount();
 }
 
 const placeMaps = (ctx: AppContext, profile: Profile) =>

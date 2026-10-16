@@ -66,10 +66,9 @@ test('a new child starts at the brook; the garden rests until a grown-up opens i
   // The garden is on the map, resting, and says when it opens; the main button goes to the brook.
   const garden = page.getByRole('button', { name: `Trädgården. ${CLOSED}` });
   await expect(garden).toBeDisabled();
-  await expect(page.locator('.world-scene.mood-closed')).toHaveCount(2);
+  await expect(page.locator('.map-place.mood-closed')).toHaveCount(2);
   await expect(page.getByText(CLOSED)).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Gå till trädgården' })).toHaveCount(0);
-  await expect(page.locator('.world-scene.here .world-sign')).toHaveText('Bäcken');
+  await expect(page.locator('.map-place.here .map-sign')).toHaveText('Bäcken');
 
   // A grown-up opens it.
   await page.getByRole('button', { name: 'Byt spelare' }).click();
@@ -101,7 +100,7 @@ test('the garden opens by itself when doubles and going over ten sit at the broo
   });
   await page.locator('.profile-tile', { hasText: 'Bo' }).click();
   await expect(page.getByRole('button', { name: /^Trädgården\./ })).toBeEnabled();
-  await expect(page.locator('.world-scene.closed')).toHaveCount(0);
+  await expect(page.locator('.map-place.closed')).toHaveCount(0);
 });
 
 test("the day's time is shared after what is due, not in halves, and kept for the day", async ({ page }) => {
@@ -132,8 +131,8 @@ test("the day's time is shared after what is due, not in halves, and kept for th
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await expect.poll(() => storedSetting(page, `dayPlan:${profileId}`)).toMatchObject({ day: '2026-02-03', total: 12, minutes: { multiplication: 7, addition: 5 } });
-  // The main button suggests where most is waiting.
-  await expect(page.getByRole('button', { name: 'Gå till trädgården' })).toBeVisible();
+  // The map opens where most is waiting.
+  await expect(page.locator('.map-place.here .map-sign')).toHaveText('Trädgården');
 });
 
 test("the brook's part in the parent view: the addition table, plus and minus per part, and the scale", async ({ page }) => {

@@ -155,10 +155,9 @@ bäcken. Knappen heter ”Gå på stigen”. När dagens pass är klart vilar st
 
 ### I dalen
 
-Stigens scen står mellan bäcken och trädgården. Den visar samma stolpar och
-lyktor som här, med barnets djur vid lyktan och raden ”Nu: …” under
-(`pathPicture` i `screens/path.ts`). Innan Stigen öppnar vilar scenen, med raden
-om när den öppnar.
+Stigen står på kartan på andra sidan bäcken. Den visar samma stolpar och lyktor
+som här, med skylten, dagens läge och raden ”Nu: …” under (`pathPicture` i
+`screens/path.ts`). Innan Stigen öppnar vilar den, med raden om när den öppnar.
 
 ### Bilderna i passet
 

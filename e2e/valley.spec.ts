@@ -9,27 +9,27 @@ test('a child chooses their name and lands in the valley, and walks to the garde
   // A new child goes straight on from the start check into the garden, as before.
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.getByRole('heading', { name: 'Mattedalen' })).toBeVisible();
-  // One scene per place, in the order the child meets them.
-  await expect(page.locator('.world-scene')).toHaveCount(3);
-  await expect(page.locator('.world-sign')).toHaveText(['Bäcken', 'Stigen', 'Trädgården']);
+  // Every place on the map, in the order the child meets them.
+  await expect(page.locator('.map-place')).toHaveCount(3);
+  await expect(page.locator('.map-sign')).toHaveText(['Bäcken', 'Stigen', 'Trädgården']);
   await expect(page.getByRole('button', { name: 'Trädgården. Nya frön väntar i trädgården.' })).toBeAttached();
   await expect(page.getByRole('button', { name: 'Bäcken. Nya stenar väntar vid bäcken.' })).toBeAttached();
   // Stigen rests until going over the ten sits at the brook.
   await expect(page.getByRole('button', { name: 'Stigen. Stigen öppnar när du kan gå över tiotalet vid bäcken.' })).toBeDisabled();
-  await expect(page.locator('.world-scene.closed')).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Gå till stigen' })).toHaveCount(0);
-  // The child's animal stands by the sign of the scene the day starts at.
-  await expect(page.locator('.world-scene.here .world-guide')).toHaveCount(1);
+  await expect(page.locator('.map-place.closed')).toHaveCount(1);
+  // The child's animal stands by the sign of the place the day starts at.
+  await expect(page.locator('.map-place.here .map-guide')).toHaveCount(1);
+  await expect(page.locator('.map-guide')).toHaveCount(1);
   // Nothing planted yet: the real bed, all dug earth.
-  await expect(page.locator('.world-scene .garden-grid.still')).toHaveCount(1);
-  await expect(page.locator('.world-scene .grid-cell:is(.stage-seed, .stage-sprout, .stage-bush, .stage-tree)')).toHaveCount(0);
+  await expect(page.locator('.map-place .garden-grid.still')).toHaveCount(1);
+  await expect(page.locator('.map-place .grid-cell:is(.stage-seed, .stage-sprout, .stage-bush, .stage-tree)')).toHaveCount(0);
 
   // The place itself leads to the garden …
   await page.getByRole('button', { name: /^Trädgården\./ }).click();
   await expect(page.getByRole('heading', { name: 'Alvas trädgård' })).toBeVisible();
-  // … and so does the main button.
+  // … and so does its picture.
   await page.getByRole('button', { name: 'Till dalen' }).click();
-  await page.getByRole('button', { name: 'Gå till trädgården' }).click();
+  await page.locator('.map-place[data-place="tradgarden"] .map-art').click({ position: { x: 60, y: 60 } });
   await expect(page.getByRole('heading', { name: 'Alvas trädgård' })).toBeVisible();
 
   // To the brook and back.
@@ -38,7 +38,7 @@ test('a child chooses their name and lands in the valley, and walks to the garde
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: 'Alvas bäck' })).toBeVisible();
   await page.getByRole('button', { name: 'Till dalen' }).click();
-  await expect(page.locator('.world-scene')).toHaveCount(3);
+  await expect(page.locator('.map-place')).toHaveCount(3);
 
   // Opening the app again: choose the player, and the valley is the start page.
   await page.reload();
@@ -62,13 +62,13 @@ test('the valley shows what the child knows: plants in the bed and a sunflower p
   await expect(thirsty).toBeVisible();
   await expect(page.locator('.place-status')).toHaveText(['Nya stenar väntar vid bäcken.', 'Stigen öppnar när du kan gå över tiotalet vid bäcken.', 'Trädgården är törstig.']);
   // The bed as it is: the tree and the bushes in their own squares, and the seed.
-  const bed = page.locator('.world-scene .garden-grid.still');
+  const bed = page.locator('.map-place .garden-grid.still');
   await expect(bed.locator('.grid-cell.stage-tree')).toHaveCount(1);
   await expect(bed.locator('.grid-cell.stage-bush')).toHaveCount(19);
   await expect(bed.locator('.grid-cell.stage-seed')).toHaveCount(1);
   await expect(page.getByText(/Tabeller du kan: ×10\./)).toBeAttached();
   // ×10 is known: one sunflower on the hill, said in words as well.
-  await expect(page.locator('.valley-head .scene-sunflower')).toHaveCount(1);
+  await expect(page.locator('.map-world .scene-sunflower')).toHaveCount(1);
   await expect(page.getByText('Solrosor på kullen: 1, en för varje tabell du kan.')).toBeAttached();
 
   // After the day's session the garden sleeps, but can still be visited.
@@ -83,9 +83,9 @@ test('the valley shows what the child knows: plants in the bed and a sunflower p
   await end.click();
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.getByRole('button', { name: 'Trädgården. Trädgården sover. Kom tillbaka i morgon!' })).toBeVisible();
-  await expect(page.locator('.world-scene.mood-asleep .world-sign .icon')).toHaveCount(1);
+  await expect(page.locator('.map-place.mood-asleep .map-sign .icon')).toHaveCount(1);
   // The day now starts at the brook; the sleeping garden can still be visited.
-  await expect(page.locator('.world-scene.here .world-sign')).toHaveText('Bäcken');
+  await expect(page.locator('.map-place.here .map-sign')).toHaveText('Bäcken');
   await enterGarden(page);
   await expect(page.getByText('Trädgården sover. Kom tillbaka i morgon!')).toBeVisible();
 });
@@ -143,7 +143,7 @@ test('a pressed sign keeps its posts behind it', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Bo');
   await page.getByRole('button', { name: 'Till dalen' }).click();
-  const sign = page.locator('.world-sign', { hasText: 'Trädgården' });
+  const sign = page.locator('.map-sign', { hasText: 'Trädgården' });
   await sign.scrollIntoViewIfNeeded();
   await page.waitForTimeout(400);
   const box = (await sign.boundingBox())!;
@@ -157,89 +157,100 @@ test('a pressed sign keeps its posts behind it', async ({ page }) => {
   await page.mouse.up();
 });
 
-const here = (page: Page) => page.locator('.world-scene.here .world-sign');
-const noSidewaysScroll = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+const inView = (page: Page, name: string) =>
+  page.locator('.map-sign', { hasText: name }).evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight;
+  });
+const noPageScroll = (page: Page) =>
+  page.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.documentElement.scrollHeight <= innerHeight);
 
-test.describe('the world on a phone', () => {
+test.describe('the map on a phone', () => {
   test.use({ viewport: { width: 360, height: 760 } });
 
-  test('the child moves between the scenes with the arrows, the keys and a swipe', async ({ page }) => {
+  test('the child drags the map around, and pointers at the edge lead to the places out of view', async ({ page }) => {
     await page.goto('/');
     await createProfile(page, 'Alva');
     await page.getByRole('button', { name: 'Till dalen' }).click();
-    await expect(page.locator('.world-scene.here')).toHaveCount(1);
-    await expect(page.locator('.world-dots .on')).toHaveCount(1);
+    // The map is larger than the screen, and opens at today's place.
+    const start = (await page.locator('.map-place.here .map-sign').textContent())!;
+    await expect.poll(() => inView(page, start)).toBe(true);
+    const view = page.locator('.map-view');
+    expect(await view.evaluate((el) => el.scrollWidth > el.clientWidth && el.scrollHeight > el.clientHeight)).toBe(true);
 
-    // The arrow keys move one scene at a time, and stop at the ends.
-    await page.keyboard.press('ArrowLeft');
-    await page.keyboard.press('ArrowLeft');
-    await expect(here(page)).toHaveText('Bäcken');
-    await expect(page.locator('.world-arrow.prev')).toBeHidden();
-    await expect(page.locator('.world-dots span').first()).toHaveClass(/on/);
+    // Far down in the corner by the pond, a pointer at the edge leads back up to the brook.
+    await view.evaluate((el) => el.scrollTo(el.scrollWidth, el.scrollHeight));
+    await page.locator('.map-pointer', { hasText: 'Bäcken' }).click();
+    await expect.poll(() => inView(page, 'Bäcken')).toBe(true);
 
-    // The arrow names the neighbour and carries its icon.
-    const next = page.getByRole('button', { name: 'Till stigen', exact: true });
-    await expect(next.locator('.icon')).toHaveCount(1);
-    await next.click();
-    await expect(here(page)).toHaveText('Stigen');
-    await page.getByRole('button', { name: 'Till trädgården', exact: true }).click();
-    await expect(here(page)).toHaveText('Trädgården');
-    await expect(page.locator('.world-arrow.next')).toBeHidden();
-    // The scene the child is at fills the screen, its button included.
-    await expect.poll(() => page.locator('.world-scene.here').evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      return r.left >= 0 && r.right <= innerWidth;
-    })).toBe(true);
-    await expect(page.locator('.world-scene.here .big-button')).toBeInViewport();
+    // A mouse drags the map as a finger does, and the arrow keys move it.
+    const before = await view.evaluate((el) => [el.scrollLeft, el.scrollTop]);
+    await page.mouse.move(200, 600);
+    await page.mouse.down();
+    await page.mouse.move(120, 520, { steps: 5 });
+    await page.mouse.up();
+    const after = await view.evaluate((el) => [el.scrollLeft, el.scrollTop]);
+    expect(after).not.toEqual(before);
+    await page.keyboard.press('ArrowRight');
+    await expect.poll(() => view.evaluate((el) => el.scrollLeft)).toBeGreaterThan(after[0]!);
 
-    // A swipe: the track pans, and the world follows to the nearest scene.
-    await page.locator('.world-track').evaluate((el) => el.scrollTo({ left: 0 }));
-    await expect(here(page)).toHaveText('Bäcken');
-    // The animal walks along, and a tap on it goes back to today's place.
-    await expect(page.locator('.world-scene.here .world-guide')).toHaveCount(1);
-    await page.getByRole('button', { name: 'Till dagens plats' }).click();
-    await expect(page.locator('.world-scene.here .world-guide')).toHaveCount(1);
-
-    // The world pans inside its own track: the page never scrolls sideways.
-    expect(await noSidewaysScroll(page)).toBe(true);
+    // The map pans inside its own view: the page never scrolls.
+    expect(await noPageScroll(page)).toBe(true);
   });
 
-  test('a turned phone stays at the same scene', async ({ page }) => {
+  test('the pointers never lie on each other or on the title', async ({ page }) => {
     await page.goto('/');
     await createProfile(page, 'Alva');
     await page.getByRole('button', { name: 'Till dalen' }).click();
-    await page.keyboard.press('ArrowLeft');
-    await page.keyboard.press('ArrowLeft');
-    await page.getByRole('button', { name: 'Till stigen', exact: true }).click();
-    await expect(here(page)).toHaveText('Stigen');
+    await expect(page.locator('.map-place')).toHaveCount(3);
+    const bad = await page.evaluate(async () => {
+      const view = document.querySelector<HTMLElement>('.map-view')!;
+      const out: string[] = [];
+      for (let x = 0; x <= view.scrollWidth; x += 60)
+        for (let y = 0; y <= view.scrollHeight; y += 60) {
+          view.scrollTo(x, y);
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          const boxes = [...document.querySelectorAll('.map-pointer, .map-head h1, .map-head .avatar-button')].map((e) => e.getBoundingClientRect());
+          for (let i = 0; i < boxes.length; i++) {
+            const a = boxes[i]!;
+            if (a.left < 0 || a.right > innerWidth || a.top < 0 || a.bottom > innerHeight) out.push(`${x},${y}: outside`);
+            for (let j = i + 1; j < boxes.length; j++) {
+              const b = boxes[j]!;
+              if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) out.push(`${x},${y}: overlap`);
+            }
+          }
+        }
+      return out;
+    });
+    expect(bad).toEqual([]);
+  });
+
+  test('a turned phone stays at the same place', async ({ page }) => {
+    await page.goto('/');
+    await createProfile(page, 'Alva');
+    await page.getByRole('button', { name: 'Till dalen' }).click();
+    await page.locator('.map-view').evaluate((el) => el.scrollTo(0, 0));
+    await page.locator('.map-pointer', { hasText: 'Stigen' }).click();
+    await expect.poll(() => inView(page, 'Stigen')).toBe(true);
     await page.setViewportSize({ width: 760, height: 360 });
     await page.setViewportSize({ width: 360, height: 760 });
-    await expect(here(page)).toHaveText('Stigen');
-    await expect.poll(() => page.locator('.world-scene.here').evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      return r.left >= 0 && r.right <= innerWidth;
-    })).toBe(true);
+    await expect.poll(() => inView(page, 'Stigen')).toBe(true);
   });
 });
 
-test.describe('the world on a wide screen', () => {
+test.describe('the map on a wide screen', () => {
   test.use({ viewport: { width: 1080, height: 810 } });
 
-  test('shows every scene side by side, without arrows', async ({ page }) => {
+  test('shows the whole valley at once, without pointers', async ({ page }) => {
     await page.goto('/');
     await createProfile(page, 'Alva');
     await page.getByRole('button', { name: 'Till dalen' }).click();
-    await expect(page.locator('.world-scene')).toHaveCount(3);
-    await expect(page.locator('.world-arrow.prev')).toBeHidden();
-    await expect(page.locator('.world-arrow.next')).toBeHidden();
-    const boxes = await page.locator('.world-scene').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().toJSON() as DOMRect));
-    expect(boxes).toHaveLength(3);
-    for (const b of boxes) {
-      expect(b.left).toBeGreaterThanOrEqual(0);
-      expect(b.right).toBeLessThanOrEqual(1080);
-    }
-    for (let i = 1; i < boxes.length; i++) expect(boxes[i]!.left).toBeGreaterThanOrEqual(boxes[i - 1]!.right);
-    for (const name of ['Gå till bäcken', 'Gå till trädgården']) await expect(page.getByRole('button', { name })).toBeInViewport();
-    expect(await noSidewaysScroll(page)).toBe(true);
+    await expect(page.locator('.valley-map.fits')).toBeVisible();
+    await expect(page.locator('.map-pointer')).toHaveCount(0);
+    for (const name of ['Bäcken', 'Stigen', 'Trädgården']) expect(await inView(page, name)).toBe(true);
+    // The whole bed is on screen.
+    const bed = (await page.locator('.map-place .garden-bed').boundingBox())!;
+    expect(bed.y + bed.height).toBeLessThanOrEqual(810);
+    expect(await noPageScroll(page)).toBe(true);
   });
 });

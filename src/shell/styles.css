@@ -974,191 +974,297 @@ h1:focus {
   color: #f6efe0;
 }
 
-/* --- valley: a world of scenes, one per place (docs/PLAN-DALEN.md) ------ */
+/* --- valley: a map to drag around (docs/PLAN-DALEN.md) ------------------ */
 /*
  * The same three channels as in the garden:
- * - availability: a place has a scene when it exists; a closed one rests
- * - knowledge: the place as it is (the bridge, the lanterns, the bed)
- * - whole areas: the landscape (one sunflower on the hill per known table)
- * The page never scrolls sideways: the world pans inside its own track.
+ * - availability: a place is on the map when it exists; a closed one rests
+ * - knowledge: the place as it is (the arch, the lanterns, the bed)
+ * - whole areas: the landscape (one sunflower on the hills per known table)
+ * The page never scrolls: the map pans inside its own view, which fills the screen.
  */
 
 .screen.valley {
+  position: fixed;
+  inset: 0;
   max-width: none;
+  padding: 0;
   gap: 0;
-  padding-inline: 0;
+  background: var(--hill-front);
 }
 
-.world {
-  position: relative;
-  width: 100%;
-  /* A free edge on each side: a swipe from the very edge is the phone's back gesture, not the world. */
-  padding-inline: 16px;
-  box-sizing: border-box;
+.valley-map {
+  position: absolute;
+  inset: 0;
 }
 
-.world-track {
-  /* Positioned, so that nothing inside it (text for screen readers) can widen the page. */
-  position: relative;
-  display: flex;
-  gap: 14px;
-  margin: 0;
-  padding: 14px 7% 6px;
-  list-style: none;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 7%;
+.map-view {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   scrollbar-width: none;
+  cursor: grab;
+  background: var(--hill-front);
 }
 
-.world-track::-webkit-scrollbar {
+.map-view::-webkit-scrollbar {
   display: none;
 }
 
-.world-scene {
-  /* Sizes inside a scene follow the scene, not the window. */
-  container-type: inline-size;
-  flex: 0 0 86%;
-  max-width: 520px;
-  scroll-snap-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  text-align: center;
-}
-
-.world-title {
-  align-self: flex-start;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 52px;
-}
-
-/* The child's animal by the sign of the scene it is at; a tap goes back to today's place. */
-.world-guide {
-  width: 50px;
-  height: 50px;
-  padding: 0;
-  border: none;
-  background: none;
+/* Room for the whole valley: shown at once, scaled, from the top and centred. */
+.valley-map.fits .map-view {
+  overflow: hidden;
   display: grid;
-  place-items: center;
-}
-
-.world-guide svg {
-  width: 46px;
-  height: 46px;
-}
-
-.world-art {
-  width: 100%;
-  display: flex;
   justify-content: center;
+  cursor: default;
+}
+
+.map-sizer {
+  position: relative;
+}
+
+.map-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  background: var(--hill-front);
+}
+
+.map-world .scene {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  margin: 0;
+  padding-top: 0;
+  border-bottom: none;
+}
+
+.map-content {
+  position: absolute;
+  top: 0;
+  width: 1100px;
+  height: 100%;
+}
+
+.map-land {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+.map-water {
+  fill: var(--water);
+  stroke: var(--water-shade);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+}
+
+/* A thin light glint along the water. */
+.map-glint {
+  fill: none;
+  stroke: #c4e6f4;
+  stroke-width: 2.5;
+  stroke-dasharray: 14 24;
+}
+
+.map-pond {
+  fill: var(--water);
+  stroke: var(--water-shade);
+  stroke-width: 2;
+}
+
+/* The path: worn stepping stones of warm sand. */
+.map-stone {
+  fill: var(--path-stone);
+  stroke: var(--path-edge);
+  stroke-width: 1.5;
+}
+
+.map-tree rect {
+  fill: var(--trunk);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.map-tree circle {
+  fill: var(--leaf);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.map-tuft {
+  fill: none;
+  stroke: var(--hill-front-line);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.map-places {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.map-art,
+.map-sign-row,
+.map-notes {
+  position: absolute;
+}
+
+.map-place:not(.closed) .map-art {
   cursor: pointer;
 }
 
-.world-scene.closed .world-art {
-  cursor: default;
-  opacity: 0.55;
-  filter: saturate(0.5);
+.map-place.closed .map-art {
+  filter: saturate(0.55) brightness(0.96);
+  opacity: 0.85;
 }
 
-.world-art > * {
+.map-art .bridge-svg {
+  overflow: visible;
+}
+
+/* On the map the path stands in the valley's own grass, without the page's frame of sky. */
+.map-art .path-trail {
   width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+}
+
+/* The bed at its own size on the map; the whole map scales on a wide screen. */
+.map-art .garden-grid {
+  --cell: 40px;
+}
+
+.map-place.mood-asleep .garden-bed {
+  filter: saturate(0.75) brightness(0.92);
+}
+
+.map-sign-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.map-guide {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 6px 4px var(--ground-shadow));
+}
+
+.map-guide svg {
+  width: 52px;
+  height: 52px;
+}
+
+.map-sign {
+  font-size: 1.45rem;
+}
+
+.map-notes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 420px;
+}
+
+/* Today's state and what the child is on now: small paper labels in the grass. */
+.map-notes > p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  font-family: var(--font-text);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
-.world-art .garden-bed {
-  width: auto;
+.map-notes > p,
+.map-notes > p > span {
+  justify-content: flex-start;
+  text-align: left;
 }
 
-.world-art .garden-grid {
-  --cell: min(calc((100cqi - 24px) / 11), 40px);
+.map-notes > p .icon,
+.map-notes > p .plant {
+  width: 22px;
+  height: 22px;
+  flex: none;
 }
 
-.world-scene .place-status {
-  justify-content: center;
-  font-size: 1.15rem;
+/* Pointers at the edge of the screen to the places out of view. */
+.map-pointers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-.world-scene .big-button {
-  max-width: 100%;
-  min-width: 0;
-  padding-inline: 22px;
-  font-size: clamp(1.15rem, 6.6cqi, 1.5rem);
+.map-pointer {
+  --press-tone: #c3a27c;
+  pointer-events: auto;
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 14px 0 10px;
+  border: var(--outline);
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 
-/* In a scene the sign stands in a row, not on the ground: no posts. */
-.world-sign::before,
-.world-sign::after {
-  display: none;
+.map-pointer .icon,
+.map-pointer .plant {
+  width: 22px;
+  height: 22px;
 }
 
-/* The arrows at the edges, level with the middle of the picture; they carry the neighbour's icon. */
-.world-arrow {
-  position: absolute;
-  top: var(--arrow-top, 120px);
-  translate: 0 -50%;
-  z-index: 2;
-  width: 72px;
-  height: 72px;
-  padding: 0;
-  border: var(--outline);
-  border-radius: 50%;
-  background: var(--card);
-  box-shadow: 0 var(--press-depth) 0 var(--press-tone, rgba(58, 42, 32, 0.25));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-}
-
-.world-arrow[hidden] {
-  display: none;
-}
-
-.world-arrow.prev {
-  left: 4px;
-}
-
-.world-arrow.next {
-  right: 4px;
-}
-
-.world-arrow .icon,
-.world-arrow .plant {
-  width: 30px;
-  height: 30px;
-}
-
-.world-chevron {
-  font-family: var(--font-display);
-  font-size: 1.7rem;
-  font-weight: 700;
+.map-pointer-arrow {
+  font-size: 1.3rem;
   line-height: 1;
 }
 
-.world-dots {
+/* On top of the map, top left: the child's animal, the name and read-aloud. */
+.map-head {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 10px;
-  margin: 4px 0 0;
 }
 
-.world-dots span {
-  width: 12px;
-  height: 12px;
-  box-sizing: border-box;
-  border: 2px solid var(--ink);
-  border-radius: 50%;
+.map-head h1 {
+  margin: 0;
+  padding: 4px 16px;
+  border: var(--outline);
+  border-radius: 999px;
+  background: var(--card);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
 }
 
-.world-dots span.on {
-  background: var(--ink);
+.map-head .speak-button {
+  background: var(--card);
 }
 
 /* The name on a small wooden sign on two posts, part of the landscape. */
@@ -1215,12 +1321,12 @@ h1:focus {
  * Pressed by moving it down, not by a transform: a transform would make the sign
  * its own stacking context, and the posts behind it would be drawn on top of it.
  */
-.world-sign:active:not(:disabled) {
+.map-sign:active:not(:disabled) {
   top: var(--press-depth);
   box-shadow: none;
 }
 
-.world-sign:disabled {
+.map-sign:disabled {
   cursor: default;
   color: var(--ink-soft);
 }
@@ -1327,6 +1433,23 @@ h1:focus {
 
 .br-fill.laid {
   stroke-width: 0;
+}
+
+/* The arch on the map: open stones outlined, laid stones solid, gaps for what is not open yet. */
+.bridge.arch .br-slot {
+  fill: rgba(255, 250, 240, 0.8);
+  stroke-width: 1.6;
+  stroke-dasharray: 4 3;
+  stroke-linejoin: round;
+}
+
+.bridge.arch .br-slot.laid {
+  fill: var(--bridge-block);
+  stroke-dasharray: none;
+}
+
+.bridge.arch .br-fill {
+  stroke: none;
 }
 
 .brook-bridge {
@@ -3330,76 +3453,6 @@ h1:focus {
   .help-wrap {
     flex-direction: row;
     justify-content: center;
-  }
-}
-
-/* Valley on wide screens: every scene side by side, nothing to swipe. */
-@media (min-width: 1020px) and (orientation: landscape) {
-  .world-track {
-    overflow: clip;
-    justify-content: center;
-    gap: 28px;
-    padding-inline: 24px;
-  }
-
-  .world-scene {
-    flex: 1 1 0;
-    max-width: 560px;
-  }
-
-  .world-arrow,
-  .world-dots {
-    display: none;
-  }
-}
-
-/* Valley on phones on their side: one scene at a time, the picture beside its words and button. */
-@media (orientation: landscape) and (max-height: 520px) {
-  .valley-head .scene {
-    display: none;
-  }
-
-  .valley-head .scene-title {
-    position: static;
-    padding: max(8px, env(safe-area-inset-top)) 16px 0;
-  }
-
-  .world-track {
-    padding-inline: 64px;
-    scroll-padding-inline: 64px;
-  }
-
-  .world-scene {
-    flex-basis: 100%;
-    max-width: none;
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    grid-auto-flow: dense;
-    align-items: center;
-    column-gap: 20px;
-    row-gap: 6px;
-  }
-
-  .world-scene > * {
-    grid-column: 2;
-  }
-
-  .world-scene > .world-art {
-    grid-column: 1;
-    grid-row: 1 / span 5;
-  }
-
-  .world-art .garden-grid {
-    --cell: min(calc((100dvh - 130px) / 11), calc((55cqi - 24px) / 11), 30px);
-  }
-
-  .world-arrow {
-    width: 56px;
-    height: 56px;
-  }
-
-  .place-name {
-    font-size: 1.1rem;
   }
 }
 

@@ -132,10 +132,10 @@ test('the path has a post at every ten and a lantern for each part, lit when it 
   await expect(page.locator('.path .sr-only')).toContainText('På stigen lyser 1 av 8 lyktor. Du är vid lyktan för tiotal och ental.');
   await expect(page.locator('.place-now')).toHaveText('Nu: Tiotal och ental');
   await expect(page.locator('.garden-side')).not.toContainText(/\d+ av \d+/);
-  // Back to the valley: the path in its scene, the same lantern lit.
+  // Back to the valley: the path on the map, the same lantern lit.
   await page.getByRole('button', { name: 'Till dalen' }).click();
-  await expect(page.locator('.world-scene .tr-glass.lit')).toHaveCount(1);
-  await expect(page.locator('.world-scene .place-now', { hasText: 'Tiotal och ental' })).toHaveCount(1);
+  await expect(page.locator('.map-place .tr-glass.lit')).toHaveCount(1);
+  await expect(page.locator('.map-place .place-now', { hasText: 'Tiotal och ental' })).toHaveCount(1);
 });
 
 test('a new child builds whole tens with rods first, then answers', async ({ page }) => {

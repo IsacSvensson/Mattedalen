@@ -5,8 +5,7 @@ odlingslåda där varje fakta växer från frö till träd. Den är Gångerträd
 (IsacSvensson/Multiplikation) flyttad in i Mattedalen, och inget har ändrats för
 barnen. Motorn som väljer frågorna beskrivs i [MOTORN.md](MOTORN.md).
 
-Barnet kommer hit från dalen (trädgårdens scen med hela lådan och ”Gå till
-trädgården”), och
+Barnet kommer hit från dalen (lådan eller skylten på kartan), och
 djuret i trädgårdens sidhuvud leder tillbaka till dalen.
 
 ## Multiplikationspaketet (`src/content/multiplication`)

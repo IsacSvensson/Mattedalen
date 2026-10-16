@@ -31,26 +31,22 @@ for (const width of [320, 360]) {
       }
     });
 
-    test('the valley fits: the scene the child is at, its picture, sign and button', async ({ page }) => {
+    test('the valley fits: the map fills the screen, opens at today\'s place, and the title fits', async ({ page }) => {
       await page.goto('/');
       await createProfile(page, 'Alexandra-Charlotte');
       await page.getByRole('button', { name: 'Till dalen' }).click();
-      await expect(page.locator('.world-scene')).toHaveCount(3);
-      for (const step of ['ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowRight']) {
-        await page.waitForTimeout(500);
-        // Each scene: its sign, picture and button inside it, and on screen.
-        // A closed place has no button.
-        const parts = ['.world-title', '.world-art', '.place-status'];
-        if (await page.locator('.world-scene.here .big-button').count()) parts.push('.big-button');
-        for (const part of parts) await expectWithin(page, `.world-scene.here ${part}`, '.world-scene.here');
-        await expectInside(page, '.world-scene.here', 'main');
-        // The animal stands beside the sign, never on it.
-        const guide = (await page.locator('.world-guide').boundingBox())!;
-        const sign = (await page.locator('.world-scene.here .world-sign').boundingBox())!;
-        expect(overlap(guide, sign)).toBe(false);
-        await expectNoSidewaysScroll(page);
-        await page.keyboard.press(step);
-      }
+      await expect(page.locator('.map-place')).toHaveCount(3);
+      await page.waitForTimeout(300);
+      // The title and the child's animal at the top, inside the screen.
+      await expectInside(page, '.map-head', 'main');
+      // Today's place: its sign on screen, the animal beside it and never on it.
+      await expectInside(page, '.map-place.here .map-sign', 'main');
+      const guide = (await page.locator('.map-guide').boundingBox())!;
+      const sign = (await page.locator('.map-place.here .map-sign').boundingBox())!;
+      expect(overlap(guide, sign)).toBe(false);
+      // The map pans in its own view: the page scrolls neither sideways nor down.
+      await expectNoSidewaysScroll(page);
+      expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
     });
 
     test('the parent view never scrolls sideways', async ({ page }) => {
@@ -87,14 +83,6 @@ type Box = { x: number; y: number; width: number; height: number };
 
 const overlap = (a: Box, b: Box) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
-async function expectWithin(page: Page, inner: string, outer: string): Promise<void> {
-  const a = (await page.locator(inner).first().boundingBox())!;
-  const b = (await page.locator(outer).first().boundingBox())!;
-  expect(a.x).toBeGreaterThanOrEqual(b.x);
-  expect(a.y).toBeGreaterThanOrEqual(b.y);
-  expect(a.x + a.width).toBeLessThanOrEqual(b.x + b.width + 0.5);
-  expect(a.y + a.height).toBeLessThanOrEqual(b.y + b.height + 0.5);
-}
 
 /**
  * Measured against the configured width: phones and tablets are emulated as

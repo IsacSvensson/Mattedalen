@@ -17,13 +17,13 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **R3. Dalen som svepbar värld** (R3a–R3c) | Platserna blir små symboler på kartan, och det krävs två tryck innan passet börjar. | [PLAN-DALEN](PLAN-DALEN.md) | R3a klar, R3b nästa |
+| 1 | **R3. Dalen som en karta att dra runt i** (K1–K3) | Platserna blev små symboler på den gamla kartan, och scenerna i R3a tappade dalen. | [PLAN-DALEN](PLAN-DALEN.md) | K1 klar, K2 nästa |
 | 2 | **F. Föräldravyn** (F1–F3) | Föräldravyn är en enda lång sida. Piloten behöver en vy som vuxna hittar i. | [PLAN-FORALDRAVYN](PLAN-FORALDRAVYN.md) | Plan klar |
 | 3 | **S2. Tid och långsamma barn** | Ett barn som svarar rätt men långsamt fastnar vid grodden. Måste avgöras före piloten. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#föreslagna-faser) | Simulering först |
 | 4 | **S3. Räknestig efter det barnet kan** | Räknestigen är fast per fakta. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#föreslagna-faser) | |
 | 5 | **R4. Tvåsiffrigt minus tvåsiffrigt** | 75 − 23 saknas på Stigen. | Plan skrivs | |
 | 6 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#faser) | |
-| 7 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, dalens två lägen och föräldravyn. | Plan skrivs | |
+| 7 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
 ## Efter piloten
 
@@ -38,10 +38,11 @@ Piloten avgör ordningen.
 
 ## Öppna beslut
 
-Besluten om R3 och föräldravyn togs i oktober 2026, enligt förslagen: S1 före
-R3, dalens ordning Bäcken, Stigen, Trädgården, scenens knapp börjar passet
-direkt, lodrätt läge som inställning för piloten, föräldravyn heter ”För
-vuxna”, och ”Att göra” försvinner när saken är gjord.
+Besluten om R3 och föräldravyn togs i oktober 2026: S1 före R3, dalens ordning
+Bäcken, Stigen, Trädgården, föräldravyn heter ”För vuxna”, och ”Att göra”
+försvinner när saken är gjord. Scenerna i R3a ersattes av en karta att dra runt
+i, med ”I dag” i hörnet i stället för en stor knapp (se
+[PLAN-DALEN](PLAN-DALEN.md#beslut)).
 
 | Fråga | Förslag |
 |---|---|

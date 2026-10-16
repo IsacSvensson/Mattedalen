@@ -4,9 +4,10 @@ import { icon } from '../../shell/components/icons';
 import { plantIcon } from '../../shell/components/plant';
 import type { Place, PlaceScene } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
-import { brookMood, MOOD_TEXT, type BrookMood } from './logic';
+import { bridgeStones, brookMood, MOOD_TEXT, type BrookMood } from './logic';
 import { brookDeps, pack } from './pack';
 import { brookParentSection } from './parent';
+import { archBridge } from './components/bridge';
 import { brookPicture, showBrook } from './screens/brook';
 
 /** Bäcken: addition and subtraction within 20 on the stones over the brook, and the equal sign. */
@@ -24,12 +25,15 @@ async function brookScene(ctx: AppContext, profile: Profile): Promise<PlaceScene
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
   const mood = brookMood(states, engine.dailyDone(meta));
-  const picture = brookPicture(states, new Set(engine.unlockedUnits(states, meta)));
+  const unlocked = new Set(engine.unlockedUnits(states, meta));
+  const picture = brookPicture(states, unlocked);
   return {
     mood,
     moodText: MOOD_TEXT[mood],
     moodIcon: moodIcon(mood),
     ...picture,
+    // On the map the bridge is a stone arch over the valley's own brook.
+    art: archBridge(bridgeStones(pack, states, unlocked)),
     nameIcon: mood === 'asleep' ? icon('moon') : null,
     sunflowers: 0,
     landscapeText: null,

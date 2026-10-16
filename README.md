@@ -69,25 +69,26 @@ text. All grafik är ritad SVG och typsnitten följer med appen. Reglerna står 
 ## Dalen (`src/shell/screens/valley.ts`)
 
 Dalen är barnets startsida. Barnet väljer sig själv under ”Vem spelar?” och
-kommer då till dalen. Dalen är en värld av scener, en per plats, i ordningen
-Bäcken, Stigen, Trädgården (`src/shell/components/world.ts`, se
-[PLAN-DALEN.md](docs/PLAN-DALEN.md)).
+kommer då till dalen. Dalen är en karta som fyller skärmen, med varje plats i
+full storlek (`src/shell/components/valleyMap.ts`, lägena i
+`src/shell/valleyLayout.ts`, se [PLAN-DALEN.md](docs/PLAN-DALEN.md)).
 
-- **Bara platser som finns får en scen.** Det finns inga stängda platser som
+- **Bara platser som finns står på kartan.** Det finns inga stängda platser som
   väntar på att låsas upp, för innehåll öppnas när det finns och när barnet har
-  förkunskaperna, aldrig som belöning. En plats som inte är öppen än vilar i sin
-  scen, med raden om när den öppnar.
-- **Scenen visar platsen som den är:** bron vid bäcken, lyktorna på stigen och
-  hela odlingslådan. Bilden kommer från platsens egen sida (`Place.scene`). Under
-  bilden står dagens läge, raden ”Nu: …” och platsens knapp. Solrosorna på kullen
-  är samma som i trädgården: en per tabell barnet kan.
-- **Svep med snäpp.** På en telefon syns en scen i taget, med grannarna i
-  kanten. Pilarna i kanten har grannens ikon och namn (”Till stigen”), och
-  prickarna under scenerna visar var barnet är. Piltangenterna byter också scen.
-  Sidan rullar aldrig i sidled: världen panoreras i sin egen behållare.
-- **Breda skärmar** (från 1020 px, liggande) visar alla scener bredvid varandra,
-  utan pilar. En liggande telefon visar en scen i taget, med bilden till vänster
-  och knappen till höger.
+  förkunskaperna, aldrig som belöning. En plats som inte är öppen än vilar på
+  kartan, med raden om när den öppnar.
+- **Kartan visar platserna som de är:** valvbron över bäcken, stolparna med
+  lyktorna och hela odlingslådan. Bilderna kommer från platsernas egna sidor
+  (`Place.scene`). Vid varje plats står skylten, dagens läge och raden ”Nu: …”.
+  Solrosorna på kullen är samma som i trädgården: en per tabell barnet kan.
+- **Telefon:** kartan är större än skärmen, och barnet drar runt i den åt alla
+  håll, utan zoom. Musen drar på samma sätt, och piltangenterna flyttar kartan.
+  Pilar i kanten pekar mot platser utanför skärmen (”↑ Bäcken”), och ett tryck
+  glider dit. Pilarna skjuts isär, så att de aldrig ligger på varandra eller på
+  rubriken. Sidan rullar aldrig: kartan panoreras i sin egen behållare.
+- **Breda skärmar** visar hela dalen på en gång, skalad så att den får plats.
+  Det gäller när kartan får plats i minst 70 % av sin storlek, som på en
+  surfplatta eller dator.
 - **Dagens läge står i text och bild**, aldrig bara i färg. Platsen kan vänta på
   sina första frön, vara törstig när dagens pass inte är gjort, eller sova när
   passet är klart. Inget vissnar, och inga dagar räknas.
@@ -97,13 +98,11 @@ Bäcken, Stigen, Trädgården (`src/shell/components/world.ts`, se
   stället för att stänga appen: den trycker på skärmens egen väg tillbaka, som
   hemknappen i ett pass eller djuret som går till dalen (`backTarget` i
   `src/shell/app.ts`). Först på ”Vem spelar?” stängs appen.
-- **Navigering.** Dalen börjar vid dagens plats: den plats som inte vilar och har
-  mest att repetera i dag, vid lika den första. Skylten, bilden och knappen i en
-  scen leder till platsen (”Gå till bäcken”). Barnets djur står vid scenens
-  skylt och går med när barnet sveper. Ett tryck på djuret leder tillbaka till
-  dagens plats. Djuret i platsens sidhuvud leder tillbaka till dalen (”Till
-  dalen”), och spelare byts med djuret uppe till vänster i dalen. En ny spelare
-  börjar vid bäcken, där startkollen erbjuds.
+- **Navigering.** Kartan öppnar vid dagens plats: den plats som inte vilar och
+  har mest att repetera i dag, vid lika den första. Där står barnets djur.
+  Skylten och bilden leder till platsen. Djuret i platsens sidhuvud leder
+  tillbaka till dalen (”Till dalen”), och spelare byts med djuret uppe till
+  vänster i dalen. En ny spelare börjar vid bäcken, där startkollen erbjuds.
 - **Dagens plan** (`src/shell/dayPlan.ts`). Passlängden i föräldravyn är hela
   dagens tid. Barnet besöker högst två platser om dagen och väljer själv
   ordningen. Varje plats får först 5 minuter, och resten delas efter hur mycket
@@ -114,7 +113,7 @@ Bäcken, Stigen, Trädgården (`src/shell/components/world.ts`, se
   med dubblorna (×2 är att dubbla), så Trädgården öppnar när dubblorna sitter vid
   bäcken, när barnet redan har framsteg i trädgården eller när en vuxen öppnar den
   i föräldravyn. Barn från Gångerträdgården har den öppen. Innan dess vilar den
-  i sin scen med texten ”Trädgården öppnar när du kan dubblorna vid
+  på kartan med texten ”Trädgården öppnar när du kan dubblorna vid
   bäcken.” Trädgårdens startkoll erbjuds första
   gången barnet kommer dit.
 
@@ -133,8 +132,9 @@ src/
   sw/                       service workerns mall
   shell/                    skalet, gemensamt för alla platser (vanilla TS + liten h()-hjälpare)
     place.ts                gränssnittet Place som varje plats implementerar
-    screens/valley.ts       dalen: startsidan med platsernas scener
-    components/world.ts     världen: scener, snäpp, pilar, prickar och tangenter
+    screens/valley.ts       dalen: startsidan med kartan
+    components/valleyMap.ts kartan: platserna, bäcken, att dra runt, pilarna i kanten
+    valleyLayout.ts         var platserna, bäcken och stigen står på kartan
     screens/session.ts      ramen för ett pass (frågor, svar, uppläsning, räknestig, hjälpkort)
     screens/parent/         föräldravyn, med en del per plats
   places/
@@ -156,7 +156,7 @@ för alla platser och beror inte på någon av dem. Bara `main.ts` vet vilka pla
 som finns.
 
 En plats implementerar `Place` (`src/shell/place.ts`): namn, innehållspaket, sin
-skärm, hur den ser ut i sin scen (det som växer, dagens läge, solrosor på kullen),
+skärm, hur den ser ut på kartan (det som växer, dagens läge, solrosor på kullen),
 vad ett nytt barn möter först och sin del av föräldravyn. I ett pass bidrar
 platsen med hur en ny fakta presenteras, räknestigen och bilden i hjälpkortet
 (`SessionPlace`); resten är skalets ram.

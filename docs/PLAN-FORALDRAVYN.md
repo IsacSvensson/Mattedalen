@@ -15,8 +15,8 @@ ställe, och det som gäller enheten får en egen sida.
 - **Inställningarna är utspridda.** Passlängd och uppläsning står under barnet,
   fritt svar, hur delat med skrivs och väntan på stigen under trädgården, och
   att öppna Stigen under Stigen.
-- **Föräldravyn växer** med varje plats och fas: loggexporten (R5), läget för
-  dalen (R3) och fler platser.
+- **Föräldravyn växer** med varje plats och fas: loggexporten (R5) och fler
+  platser.
 
 ## Skiss
 
@@ -52,8 +52,8 @@ kollen. Till höger barnets inställningar på ett ställe.*
    - **Alla fakta (värmekartor)**, ihopfällt.
    - **Platsens inställningar och startkollen** sist.
 3. **Barnets inställningar**: namn, djur, passlängd, uppläsning, fritt svar,
-   hur delat med skrivs, väntan på stigen, att öppna en plats tidigare och,
-   från R3, dalens läge. Längst ner flytta, spara och ta bort.
+   hur delat med skrivs, väntan på stigen och att öppna en plats tidigare.
+   Längst ner flytta, spara och ta bort.
 4. **Den här enheten**: lagring, version och uppdatering, hemskärmen,
    integritet och vuxenkod.
 5. **Hämta ett barn**: QR-kod, säkerhetskopia och Gångerträdgården.

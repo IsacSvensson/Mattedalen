@@ -17,14 +17,12 @@ test('the garden fits beside its buttons, with readable squares', async ({ page 
   await seedStates(page, s);
   await page.locator('.profile-tile').first().click();
 
-  // The valley: one scene at a time, the picture beside the button, without scrolling.
+  // The valley: the map fills the low screen and opens at today's place, its sign on screen.
   await page.waitForTimeout(400);
-  const art = (await page.locator('.world-scene.here .world-art').boundingBox())!;
-  expect(art.y + art.height).toBeLessThanOrEqual(360);
-  const go = (await page.locator('.world-scene.here .big-button').boundingBox())!;
-  expect(go.y + go.height).toBeLessThanOrEqual(360);
-  expect(go.x).toBeGreaterThan(art.x + art.width);
-  await expectWithin(page, '.world-scene.here', 'main');
+  const sign = (await page.locator('.map-place.here .map-sign').boundingBox())!;
+  expect(sign.y + sign.height).toBeLessThanOrEqual(360);
+  expect(sign.x + sign.width).toBeLessThanOrEqual(800);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 
   await enterGarden(page);
   await expect(page.locator('.garden-grid')).toBeVisible();
@@ -58,12 +56,3 @@ test('a question fits beside its answers', async ({ page }) => {
   }
 });
 
-/** The element lies entirely inside the other one. */
-async function expectWithin(page: Page, inner: string, outer: string): Promise<void> {
-  const a = (await page.locator(inner).first().boundingBox())!;
-  const b = (await page.locator(outer).first().boundingBox())!;
-  expect(a.x).toBeGreaterThanOrEqual(b.x);
-  expect(a.y).toBeGreaterThanOrEqual(b.y);
-  expect(a.x + a.width).toBeLessThanOrEqual(b.x + b.width + 0.5);
-  expect(a.y + a.height).toBeLessThanOrEqual(b.y + b.height + 0.5);
-}

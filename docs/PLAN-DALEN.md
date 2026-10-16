@@ -1,150 +1,161 @@
-# Plan: dalen som svepbar värld (R3)
+# Plan: dalen som en karta att dra runt i (R3)
 
-Dalen blir en rad scener, en per plats. Barnet sveper mellan dem. Varje scen
-visar platsen som den är, med bron, lyktorna eller lådan, och har platsens egen
-knapp. Platssidorna går upp i scenerna. Förslaget kommer från granskningen
-(se [PLAN-GRANSKNING.md](PLAN-GRANSKNING.md)).
+Dalen blir en stor karta som fyller hela skärmen. Varje plats står i full
+storlek: bron över bäcken, stigen med lyktorna och hela odlingslådan. På en
+telefon är kartan större än skärmen, och barnet drar runt i den med fingret.
+På en surfplatta eller dator syns hela dalen på en gång.
 
 ## Varför
 
-- **Kartan är både meny och värld.** Då blir platserna små symboler: åtta buskar
-  i stället för den riktiga lådan.
-- **Två tryck innan passet börjar:** först platsen på kartan, sedan knappen på
-  platsens sida.
-- **Kartan måste ritas om** för varje ny plats. Scener blir bara fler.
+- **Den gamla kartan var trång.** Alla platser fick plats i en ruta på cirka
+  330 px. Då blev platserna små symboler: åtta buskar i stället för lådan.
+- **Scenerna i R3a tappade dalen.** Varje plats blev ett kort som sveps i
+  sidled. Det gav plats, men känslan av en dal försvann. Vi prövade det och
+  valde bort det (se *Vad vi prövade* nedan).
+- **Kartan kan växa.** En ny plats får en plats på kartan, och kartan blir
+  större. Inget behöver tryckas ihop.
 
 ## Bilder
 
-Bilderna är en attrapp, byggd av appens egna delar: bron, stigen och lådan som
-de ser ut för ett barn, med raden ”Nu: …” och platsens knapp.
+Bilderna är från en attrapp byggd av appens egna delar.
 
-![Telefon: bäcken först, stigen syns i kanten; trädgården med pilen tillbaka](img/dalen-telefon.png)
+![Telefon: trädgården i bild, pilar mot platserna utanför; samma vy med ”I dag” öppen](img/karta-telefon.png)
 
-*Telefon, 360 px. Till vänster börjar dagen vid bäcken. Stigen syns i kanten, och
-pilen med lyktan visar att den har något att visa. Till höger har barnet svept
-till trädgården.*
+*Telefon, 360 px. Till vänster öppnar dalen vid trädgården. Pilarna i kanten
+pekar mot bäcken och stigen. Till höger har barnet tryckt på solen i hörnet,
+och ”I dag” visar vad som återstår.*
 
-![Surfplatta liggande: alla tre scener bredvid varandra](img/dalen-bred.png)
+![Surfplatta liggande: hela dalen på en gång](img/karta-bred.png)
 
-*Surfplatta liggande, 1080 px. Alla scener får plats, så inget sveps.*
-
-![Liggande telefon och lodrätt läge](img/dalen-liggande-lodratt.png)
-
-*Liggande telefon: en scen i taget, bilden till vänster och knappen till höger.
-Längst till höger: samma scener staplade lodrätt, som alternativ för piloten.*
+*Surfplatta liggande, 1080 px. Hela dalen syns, och inget behöver dras.*
 
 ## Så fungerar det
 
-- **En scen per plats,** i ordningen Bäcken, Stigen, Trädgården. Det är den
-  ordning barnet möter dem. Kartan i dag ritar trädgården först, eftersom den
-  fanns först.
-- **I varje scen:** platsens namn, bilden i verkligt skick, raden ”Nu: …” eller
-  vad som väntar, och platsens knapp. Trädgården har sina extra knappar under
-  lådan.
-- **En vilande plats** visar månen, ”Kom tillbaka i morgon” och ”Öva lite till”.
-  **En stängd plats** vilar, med raden om när den öppnar.
-- **Svep med snäpp.** Varje scen är 80 % av bredden, så att grannarna syns i
-  kanten. Den som inte ser att det går att svepa sveper inte.
-- **Pilar i kanten** på 72 px, med grannens ikon: droppen när trädgården är
-  törstig, lyktan, stenen. Pilarna ersätter raderna till höger på kartan och
-  fungerar för barn som inte läser.
-- **Prickar** under scenerna visar var barnet är.
-- **Dagen börjar vid dagens första plats,** den som knappen föreslår i dag, inte
-  alltid längst till vänster.
-- **Sköldpaddan** står vid scenens namn och går med när barnet sveper. Ett tryck
-  på den tar barnet till dagens plats. Byt spelare görs som i dag, med djuret
-  uppe till vänster.
-- **Breda skärmar** visar alla scener bredvid varandra, utan snäpp och utan
-  pilar. Det gäller från cirka 1020 px bredd i liggande läge. En surfplatta på
-  högkant sveper.
-- **Liggande telefon:** en scen per skärm, med bilden till vänster och knappen
-  till höger.
-- **Tillbaka från ett pass** leder till världen, vid samma scen. Det gäller
-  ”Tillbaka till stigen” och slutskärmens knapp.
-- **Startkoll och koll** erbjuds när barnet trycker på scenens knapp, som i dag
-  på platssidan.
+- **En karta, ingen ram.** Himlen och kullarna överst, sedan ängen. Bäcken
+  rinner från kullarna, under bron och ner genom dalen. En stig av stenar går
+  mellan platserna. Träd, en damm och tuvor fyller det fria.
+- **Platserna i full storlek:**
+  - **Bäcken:** valvbron över dalens egen bäck, en sten per del, med
+    byggställningen under tills alla stenar ligger, som på den gamla kartan.
+  - **Stigen:** stolparna med lyktorna, samma som på stigens sida.
+  - **Trädgården:** hela lådan med alla rutor.
+- **Vid varje plats** står skylten, dagens läge och raden ”Nu: …”. Ett tryck på
+  skylten eller bilden leder till platsen.
+- **Telefon:** kartan är större än skärmen. Barnet drar runt i den åt alla håll
+  med fingret, utan zoom. Med mus går det att dra på samma sätt, och
+  piltangenterna flyttar kartan.
+- **Pilar i kanten** pekar mot platser utanför skärmen, med platsens ikon och
+  namn (”↑ Bäcken”). Ett tryck glider dit. Pilarna skjuts isär längs kanten, så
+  att de aldrig ligger på varandra eller på knapparna i hörnen.
+- **Surfplatta och dator** visar hela dalen. Kartan skalas så att den får plats,
+  och himlen och ängen når ut till kanterna. Det gäller när kartan får plats i
+  minst 70 % av sin storlek.
+- **Dalen öppnar vid dagens plats,** där barnets djur står.
+- **”I dag” i hörnet.** En rund knapp med en sol uppe till höger visar med en
+  liten prick att det finns något att göra i dag. Ett tryck öppnar ett litet
+  kort med det som återstår, till exempel ”Vattna trädgården” och ”Hoppa på
+  stenarna”. En rad startar passet. En plats som vilar står längst ner. När allt
+  är gjort försvinner knappen. Ingen siffra visas.
+- **Uppe till vänster** byter djuret spelare, som i dag. Knappen ”Läs upp”
+  läser platsernas lägen.
+- **Tillbaka från en plats** leder till kartan, vid samma plats.
 
 ## Regeln om sidled
 
-Regeln ”inget rullar i sidled” skrivs om:
-
-- **Sidan rullar aldrig i sidled.** Världen panoreras inuti en egen behållare
-  (`overflow-x: auto`, `overscroll-behavior-x: contain`).
-- **Behållaren är positionerad** (`position: relative`). Annars kan text som
-  bara finns för skärmläsare hamna utanför den och få hela sidan att rulla. Det
-  hände i attrappen.
-- **Testerna** för smala och liggande telefoner mäter sidan, som i dag, och får
-  ett eget test för att världen sveper.
+- **Sidan rullar aldrig.** Kartan panoreras inuti en egen behållare som fyller
+  skärmen (`overflow: auto`, `overscroll-behavior: contain`).
+- **Testerna** för smala och liggande telefoner mäter sidan, som i dag, och
+  provar att pilarna aldrig överlappar i många lägen på kartan.
 
 ## Fallgropar
 
-- **Androids bakåtgest från kanten** kan krocka med svepet. Världen får en fri
-  kant på 16 px på varje sida, och bakåt i dalen gör ingenting nytt. Följs upp i
-  piloten.
-- **Tillgänglighet:** pilarna har namn (”Till stigen”), piltangenterna vänster
-  och höger byter scen, och scenerna är en lista med rubriker. En skärmläsare
-  läser platserna i ordning. Med `prefers-reduced-motion` hoppar världen utan
-  att glida, och sköldpaddan går inte.
-- **Storlekar efter scenen, inte efter fönstret.** Lådans rutor räknas i dag
-  från fönstrets bredd och höjd. I scenen räknas de från scenens bredd
-  (container queries). Utan det blev lådan för stor i attrappen.
-- **Uppläsning:** knappen ”Läs upp” läser scenens rad.
-
-## Lodrätt som alternativ
-
-Granskningen föreslog också lodrät rullning nedför bäcken. Det är tummens
-naturliga rörelse på en telefon och krockar inte med systemgester. Samma scener
-kan staplas lodrätt med vanlig rullning. Vi bygger båda lägena i samma
-komponent, med vågrätt som standard. En inställning i föräldravyn (”Dalen: svep
-i sidled / rulla nedåt”) låter piloten pröva båda.
+- **Androids bakåtgest från kanten** kan krocka med att dra. Pilarna ligger 8 px
+  in från kanten. Följs upp i piloten.
+- **Tillgänglighet:** platserna är en lista med skyltar som knappar, i
+  ordningen Bäcken, Stigen, Trädgården. En skylt som får fokus rullas in i
+  bild. Pilarna i kanten är en genväg för den som ser, och döljs för
+  skärmläsare. Med `prefers-reduced-motion` hoppar kartan i stället för att
+  glida.
+- **Storlekar i kartans egna enheter.** Platserna har fasta lägen och storlekar
+  i kartan (1100 × 1040). Lådans rutor är 40 px där. På en bred skärm skalas
+  hela kartan.
+- **Pricken på solen** får inte bli en räknare. Den säger bara att något
+  återstår.
 
 ## Vad som ändras i koden
 
-- **`Place`** får `scene(ctx, profile)`, som ritar scenen: bilden, raden och
-  knapparna. Den ersätter `onMap` och platssidan. `open` blir att börja platsens
-  pass, med kollen först när den är dags.
-- **`shell/components/world.ts`** är världen: scenerna, snäpp, pilar, prickar,
-  tangenter och de två lägena. `shell/screens/valley.ts` blir tunn.
-- **Platssidorna** (`brook.ts`, `path.ts`, `garden.ts`) delas. Det som ritar
-  scenen flyttar till en scenfunktion, och sidorna försvinner.
-- **CSS:** storlekar med `cqi` efter scenens bredd. Lådans `--cell` räknas från
-  scenen.
-- **Dagens plan och den senaste platsen** fungerar som i dag.
+- **`shell/components/valleyMap.ts`** är kartan: bäcken, stenarna, dragandet,
+  skalningen, pilarna och startläget. Den ersätter `world.ts` från R3a.
+- **`shell/valleyLayout.ts`** säger var varje plats står och hur bäcken och
+  stigen går. Bäcken och stigen binder ihop platserna, så lägena hör till dalen
+  och inte till platserna.
+- **`Place.scene`** från R3a finns kvar: platsens bild, läge och rad. Bäcken
+  ritar valvbron på kartan (`archBridge`) och den raka bron på sin egen sida.
+- **”I dag”** (K2) använder platsernas `go` och startar passet, med kollen först
+  när den är dags och startkollen första gången.
+- **Platssidorna** finns kvar bakom skylten. Trädgårdens extra knappar och
+  rutorna man trycker på stannar där.
 
 ## Faser
 
 | Fas | Innehåll |
 |---|---|
-| R3a. Världen **(klar)** | Komponenten med scener av platsernas egna delar, snäpp, pilar, prickar, tangenter, startscen och breda skärmar. Platssidorna finns kvar bakom scenens knapp. |
-| R3b. Platssidorna i scenerna | Scenens knapp börjar passet. Tillbaka-knappar och slutskärmar leder till scenen. Trädgårdens extra knappar och rader flyttar in i scenen. |
-| R3c. Lodrätt och verifiering | Lodrätt läge och inställningen för piloten. Tester för svep, pilar, tangenter och skärmläsare. Skärmbilder i alla storlekar, dokumenten och regeln om sidled. |
+| K1. Kartan **(klar)** | Kartan med platserna i full storlek, valvbron, bäcken och stenarna, dra runt på telefon, hela dalen på breda skärmar, pilar i kanten, startläge vid dagens plats. Ersätter scenerna från R3a. |
+| K2. I dag och vägen tillbaka | Solen i hörnet och kortet ”I dag” som startar passet. Tillbaka från en plats leder till kartan vid samma plats. |
+| K3. Verifiering | Skärmbilder i alla storlekar, tester för att dra, pilar, ”I dag” och skärmläsare, dokumenten. |
+
+## Fynd från K1
+
+- **Kartans egen rullning får inte flytta barnet.** När kartan glider till en
+  plats, eller lägger sig om efter en vriden skärm, passerar den andra platser.
+  Om den platsen räknades som barnets hamnade kartan fel efter nästa vridning.
+  Nu räknas bara barnets egna drag.
+- **En plats som är bredare än skärmen** visas från sin skylt, inte från sin
+  vänstra kant. Annars hamnade bäckens skylt utanför en telefon på 320 px.
+- **Bäcken är en enda form** som blir bredare gradvis, som på den gamla
+  kartan. Två linjer med olika bredd gav en kant där de möttes.
+- **Stigen på kartan har ingen ram av himmel.** Ramen hör till stigens egen sida.
+- **Pilarna** prövas i ett test i många lägen på kartan: ingen pil ligger på en
+  annan, på rubriken eller utanför skärmen.
+
+## Vad vi prövade
+
+- **R3a: scener i sidled.** Varje plats var ett kort som barnet svepte mellan,
+  med pilar och prickar. Platserna fick plats, men dalen försvann. Det togs bort
+  i K1. Platsernas bilder (`brookPicture`, `pathPicture`, `gardenPicture`)
+  kommer därifrån och används nu på kartan.
+- **Dalen nedför:** samma platser längs bäcken, med vanlig rullning nedåt. Det
+  kändes som en dal, men att dra åt alla håll kändes mer som en karta.
+- **Den gamla kartan med zoom:** ett tryck på en plats zoomade in. Zoomen gjorde
+  bara småbilden större, och resten av dalen försvann ur bild.
+- **En stor knapp för dagens plats** flöt längst ner på telefonen. Den ersattes
+  av ”I dag” i hörnet, så att kartan får vara en karta.
 
 ## Fynd från R3a
 
-- **Scenerna är byggda av platsernas egna bilder.** `brookPicture`,
-  `pathPicture` och `gardenPicture` ritar bron, stigen och lådan både på
-  platssidan och i scenen. Kartans små varianter (minilådan, fröpåsen, valvbron
-  och den lilla stigen) är borttagna.
-- **Lådan i scenen är en bild, inte knappar.** Rutorna är `aria-hidden`, och
-  lådan beskrivs i ord för skärmläsare, som på platssidan. Annars skulle
-  scenen ha 100 knappar till en skärmläsare.
-- **Skylten behöver inga stolpar** i scenen. Stolparna hörde till kartans mark.
-- **Världen måste snäppa om när fönstret ändras.** Utan det visade en vriden
-  telefon fel scen, och prickarna och pilen sa olika saker. Världen följer nu
-  sin storlek och står kvar vid samma scen.
-- **Två snabba tryck på pilen** gick bara ett steg. Medan världen gled mot
-  scenen räknades scenen den passerade som barnets. Nu gäller den valda scenen
-  tills världen har stannat.
-- **Djuret står inte längre vid den senaste platsen.** Dalen börjar vid dagens
-  plats. Att komma tillbaka till samma scen efter ett pass kommer i R3b.
+Det här gäller fortfarande:
+
+- **Platsernas bilder är samma på platssidan och på kartan.** Då visar kartan
+  det barnet verkligen har.
+- **Lådan på kartan är en bild, inte knappar.** Rutorna är `aria-hidden`, och
+  lådan beskrivs i ord för skärmläsare.
+- **Kartan måste följa sin storlek.** En vriden telefon ska stå kvar vid samma
+  plats.
 - **Ordningen ändrar dagens plan vid lika.** Dagens två platser väljs efter vad
-  som är förfallet, och vid lika vinner den första i dalen. Med Bäcken först
-  kan Trädgården vila en dag där den tidigare vann.
+  som är förfallet, och vid lika vinner den första i dalen: Bäcken, Stigen,
+  Trädgården.
 
 ## Beslut
 
-Beslutat i oktober 2026, enligt förslagen:
+Beslutat i oktober 2026:
 
-1. **Ordningen** är Bäcken, Stigen, Trädgården, som barnet möter dem.
-2. **Scenens knapp** börjar passet direkt, en tryckning mindre.
-3. **Lodrätt läge** blir en inställning för piloten.
+1. **Dalen är en karta att dra runt i,** inte scener i sidled. På breda skärmar
+   syns allt på en gång.
+2. **Bron på kartan** är valvbron över bäcken, som på den gamla kartan.
+3. **Ingen stor knapp på kartan.** ”I dag” i hörnet visar vad som återstår.
+4. **Ordningen** är Bäcken, Stigen, Trädgården.
+5. **Lodrätt läge** som inställning för piloten behövs inte längre.
+
+Förslag som inte är beslutade:
+
+- **”I dag” öppnas bara när barnet trycker.** Pricken räcker som påminnelse.
