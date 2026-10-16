@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createProfile, openGarden, openParent, openPath, switchPlayer, untilIntro } from './helpers';
+import { createProfile, openGarden, openParent, openPath, parentPlace, switchPlayer, untilIntro } from './helpers';
 
 /**
  * Answers the check: right (and fast) for facts with a factor in `known`, otherwise "0".
@@ -90,6 +90,7 @@ test('the check can be redone from the parent view and never moves a child back'
 
   await switchPlayer(page);
   await openParent(page);
+  await parentPlace(page, 'Trädgården');
   await page.getByRole('button', { name: 'Gör om startkollen', exact: true }).click();
   await page.getByRole('button', { name: 'Gör startkollen' }).click();
   await answerCheck(page, []);

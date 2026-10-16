@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { createProfile, openParent, seedStates, type SeedState } from './helpers';
+import { closeParent, createProfile, openParent, parentPlace, seedStates, type SeedState } from './helpers';
 
 /** Fas D: a new child starts at the brook, the garden opens later, and the day's time is shared after what is due. */
 
@@ -73,11 +73,12 @@ test('a new child starts at the brook; the garden rests until a grown-up opens i
   // A grown-up opens it.
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentPlace(page, 'Trädgården');
   const gardenPart = page.getByRole('region', { name: /^Trädgården/ });
   await expect(gardenPart.getByText('Trädgården är inte öppen än.', { exact: false })).toBeVisible();
   await gardenPart.getByRole('button', { name: 'Öppna Trädgården nu' }).click();
   await expect(gardenPart.getByText('Trädgården är öppen.')).toBeVisible();
-  await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+  await closeParent(page);
 
   // Now it is open, and the garden's own start check is offered on the first visit.
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
@@ -140,7 +141,9 @@ test("the brook's part in the parent view: the addition table, plus and minus pe
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentPlace(page, 'Bäcken');
   const brook = page.getByRole('region', { name: /^Bäcken/ });
+  await brook.getByText('Alla fakta (värmekarta)').click();
   await expect(brook.getByRole('heading', { name: 'Additionstabellen' })).toBeVisible();
   await expect(brook.locator('.heat-cell')).toHaveCount(121);
   await expect(brook.locator('.brook-parts li').first()).toContainText('plus 0 av 19 · minus 0 av 19');

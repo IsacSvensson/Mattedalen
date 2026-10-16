@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createProfile, enterGarden, GROUPS_KNOWN, openParent, openPath, playedAt, seedStates, type SeedState } from './helpers';
+import { GROUPS_KNOWN, closeParent, createProfile, enterGarden, openParent, openPath, parentBack, parentPlace, parentSettings, playedAt, seedStates, type SeedState } from './helpers';
 
 /** The garden's tables wait for their part on Stigen (docs/PLAN-HUNDRA.md) while Stigen is open, at most 14 play days. */
 test.beforeEach(async ({ page }) => {
@@ -24,11 +24,12 @@ test('a table that waits for Stigen says so, and a grown-up can open it', async 
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentPlace(page, 'Trädgården');
   const garden = page.getByRole('region', { name: /^Trädgården/ });
   await expect(garden.locator('.waiting-tables')).toContainText('×10 kommer när barnet kan hela tiotal på stigen.');
   await garden.getByRole('button', { name: 'Öppna ×10 nu' }).click();
   await expect(garden.locator('.waiting-tables')).toContainText('×10 är öppen.');
-  await page.getByRole('button', { name: /Tillbaka|Stäng/ }).first().click();
+  await closeParent(page);
   await enterGarden(page, 'Alva');
   // ×10 is open now; the next table that waits is ×4 (×5 comes after ×10 and, as ×1, waits for nothing).
   await expect(page.locator('.garden-next')).toHaveText('×4 kommer när du kan dubbla och halvera på stigen.');
@@ -63,12 +64,15 @@ test('a grown-up can turn the waiting off, and the garden follows its own order'
   await openPath(page, 'Cia');
   await seedStates(page, twos(), { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
   await openParent(page);
-  const garden = page.getByRole('region', { name: /^Trädgården/ });
-  await expect(garden).toContainText('högst 14 speldagar');
-  const wait = garden.getByRole('checkbox', { name: /Tabellerna väntar/ });
+  await parentPlace(page, 'Trädgården');
+  await expect(page.getByRole('region', { name: /^Trädgården/ })).toContainText('högst 14 speldagar');
+  // Turned off on the child's settings page.
+  await parentBack(page);
+  await parentSettings(page);
+  const wait = page.getByRole('checkbox', { name: /Tabellerna väntar/ });
   await expect(wait).toBeChecked();
   await wait.uncheck();
-  await page.getByRole('button', { name: /Tillbaka|Stäng/ }).first().click();
+  await closeParent(page);
   await enterGarden(page, 'Cia');
   await expect(page.locator('.garden-grid')).toBeVisible();
   await expect(page.locator('.garden-next')).toHaveCount(0);

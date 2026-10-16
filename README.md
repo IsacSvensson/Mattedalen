@@ -143,7 +143,7 @@ src/
     components/valleyMap.ts kartan: platserna, bäcken, att dra runt, pilarna i kanten
     valleyLayout.ts         var platserna, bäcken och stigen står på kartan
     screens/session.ts      ramen för ett pass (frågor, svar, uppläsning, räknestig, hjälpkort)
-    screens/parent/         föräldravyn, med en del per plats
+    screens/parent/         För vuxna: översikten och sidorna (plats, inställningar, enheten, hämta)
   places/
     tradgarden/             Trädgården: platsen, dess skärmar och dess del av föräldravyn
     backen/                 Bäcken: bron, tallinjen, tiotalsramen, vågen, skärmarna och föräldradelen
@@ -288,13 +288,27 @@ datan ändå finns på enheten. Den finns bara för att barn inte ska hamna där
 misstag. Den som glömt koden besvarar en additionsfråga för vuxna och väljer
 sedan en ny.
 
-För varje barn visar vyn först det som gäller alla platser:
+Vyn heter **För vuxna** och är uppdelad i sidor (se
+[PLAN-FORALDRAVYN.md](docs/PLAN-FORALDRAVYN.md)). Telefonens bakåtknapp går ett
+steg tillbaka, från en sida till översikten.
 
-- **övade minuter per dag** under de senaste 14 dagarna
-- inställningar: namn, djur, passlängd 10–15 minuter och uppläsning
-- att flytta barnet till en annan enhet, eller ta bort profilen
+- **Översikten** visar barnen överst, **den här veckan** (övade minuter per dag
+  under 14 dagar och hur många dagar barnet spelat), en rad per plats och raden
+  **Barnets inställningar**. Längst ner finns **Hämta ett barn** och **Den här
+  enheten**.
+- **En plats** har alltid samma ordning: läget, svåra just nu, de vanligaste
+  förväxlingarna, platsens koll, alla fakta som värmekartor (ihopfällda) och
+  sist startkollen (`Place.parentPage`).
+- **Barnets inställningar** samlar allt barnet har: namn, djur, passlängd
+  10–15 minuter och uppläsning, sedan platsernas egna val
+  (`Place.parentSettings`): fritt svar, hur delat med skrivs och om tabellerna
+  väntar på stigen. Längst ner flyttar man eller sparar barnet, eller tar bort
+  profilen.
+- **Den här enheten**: lagring, version och uppdatering, hemskärmen, integritet
+  och vuxenkoden.
+- **Hämta ett barn**: QR-kod, säkerhetskopia och Gångerträdgården.
 
-Sedan kommer en del per plats. För **Trädgården**:
+På **Trädgårdens** sida:
 
 - antal fakta per status, antal fullständiga pass, senaste speldag och
   upplåsta enheter
@@ -302,20 +316,20 @@ Sedan kommer en del per plats. För **Trädgården**:
   antal försök, andel rätt, genomsnittlig svarstid och vanligaste felsvar.
 - **svåra just nu**, med samma strategi som räknestigen använder
 - de **vanligaste förväxlingarna**, till exempel ”7 × 8 – svarade 48 (3 gånger)”
-- fritt svar av eller på, och att göra om startkollen
+- att göra om startkollen
 - ”Öppna Trädgården nu” för ett barn där den inte har öppnat än
 
-För **Bäcken**:
+På **Bäckens** sida:
 
-- en **värmekarta** över additionstabellen 0–10
-- delarna med hur många plus- och minusfakta som sitter i varje del
-- svåra just nu med strategin, de vanligaste förväxlingarna och Vågen per
-  uppgiftstyp (”Vad ska stå i rutan?” och ”Stämmer det?”)
+- delarna med hur många plus- och minusfakta som sitter i varje del, och Vågen
+  per uppgiftstyp (”Vad ska stå i rutan?” och ”Stämmer det?”)
+- svåra just nu med strategin och de vanligaste förväxlingarna
 - **Bäckens koll**: rätt per sort vid varje koll, med likhetstecknet i former
   barnet inte har övat (se [BACKEN.md](docs/BACKEN.md#bäckens-koll-checkts))
+- en **värmekarta** över additionstabellen 0–10
 - att göra om startkollen vid bäcken
 
-Under ”Hämta ett barn från en annan enhet” finns hjälp för den som spelat
+Under ”Hämta ett barn” finns hjälp för den som spelat
 Gångerträdgården. Där står också hur många barn som hämtades automatiskt och när.
 
 Vyn visar också enhetens lagringsstatus: om beständig lagring är beviljad, med en

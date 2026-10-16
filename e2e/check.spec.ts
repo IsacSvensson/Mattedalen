@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { createProfile, openParent } from './helpers';
+import { createProfile, openParent, parentPlace } from './helpers';
 
 /** Bäckens koll: separate check tasks about every seventh play day, results for grown-ups only. */
 
@@ -86,6 +86,7 @@ test('the check comes on the second day at the brook, before the session, and gr
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentPlace(page, 'Bäcken');
   const brook = page.getByRole('region', { name: /^Bäcken/ });
   const row = brook.locator('.check-results tbody tr');
   await expect(row).toHaveCount(1);

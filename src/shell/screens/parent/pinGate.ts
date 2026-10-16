@@ -10,13 +10,13 @@ const PIN_LENGTH = 4;
 /**
  * A simple PIN in front of the parent view. It is not a security feature
  * (the data is on the device anyway), it just keeps children from wandering
- * in by accident.
+ * in by accident. `then` is where it leads: the overview, or a page of it.
  */
-export async function showPinGate(ctx: AppContext): Promise<void> {
+export async function showPinGate(ctx: AppContext, then: () => Promise<void> = () => showParent(ctx)): Promise<void> {
   const pin = await ctx.store.getSetting<string>(PIN_KEY);
-  if (!pin) return choosePin(ctx);
+  if (!pin) return choosePin(ctx, then);
   pinScreen(ctx, 'Vuxenkod', 'Skriv in koden för att komma till föräldravyn.', async (entered, retry) => {
-    if (entered === pin) await showParent(ctx);
+    if (entered === pin) await then();
     else retry('Fel kod. Försök igen.');
   }, true);
 }

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, createProfile, enterGarden, nextStep, openParent, seedStates, switchPlayer } from './helpers';
+import { answer, closeParent, createProfile, enterGarden, nextStep, openParent, parentSettings, seedStates, switchPlayer } from './helpers';
 
 /** The valley is the child's start page, with the garden, the brook and Stigen. */
 
@@ -128,8 +128,9 @@ test('the valley can be read aloud', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentSettings(page);
   await page.getByRole('checkbox', { name: /Läs upp frågorna/ }).check();
-  await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+  await closeParent(page);
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: 'Läs upp' }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual([

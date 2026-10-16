@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { enterGarden, openParent, switchPlayer } from './helpers';
+import { closeParent, enterGarden, openParent, parentLink, switchPlayer } from './helpers';
 
 /*
  * Gångerträdgården ran on the same origin before Mattedalen. Its children,
@@ -108,6 +108,7 @@ test('children from Gångerträdgården come along, and the old app keeps its da
   await page.getByRole('button', { name: 'För vuxna' }).click();
   await expect(page.getByRole('heading', { name: 'Vuxenkod' })).toBeVisible();
   await openParentWithCode(page);
+  await parentLink(page, 'Hämta ett barn');
   await expect(page.getByText(/^Ett barn hämtades från Gångerträdgården \d+ \w+\./)).toBeVisible();
 
   expect(await readGangertradgarden(page)).toEqual(before);
@@ -155,7 +156,7 @@ test('a backup file saved in Gångerträdgården can be restored', async ({ page
     .locator('input[type=file][accept*=json]')
     .setInputFiles({ name: 'gangertradgarden-alva-2026-10-01.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
   await expect(page.getByText('Alva är återställd')).toBeVisible();
-  await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+  await closeParent(page);
   await enterGarden(page, 'Alva');
   await expect(page.locator('.grid-cell.stage-tree')).toHaveCount(1);
 });
@@ -175,5 +176,5 @@ test('the service worker leaves Gångerträdgården\u2019s caches alone', async 
 
 async function openParentWithCode(page: Page): Promise<void> {
   await page.keyboard.type('2580');
-  await expect(page.getByRole('heading', { name: 'Föräldravy' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'För vuxna' })).toBeVisible();
 }

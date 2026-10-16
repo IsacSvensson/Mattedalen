@@ -3,6 +3,7 @@ import { show, type AppContext } from '../app';
 import { h } from '../dom';
 import { choose } from '../components/modal';
 import { installGuide, isStandalone } from '../pwa';
+import { showImport } from './parent/importPage';
 import { showPinGate } from './parent/pinGate';
 import { placeIsOpen } from '../place';
 import { prepareDayPlan, showValley } from './valley';
@@ -78,8 +79,8 @@ async function installBanner(ctx: AppContext): Promise<HTMLElement | null> {
   return banner;
 }
 
-function parentLink(ctx: AppContext, text = 'För vuxna'): HTMLElement {
-  return h('button', { class: 'link-button parent-link', type: 'button', onclick: () => void showPinGate(ctx) }, icon('lock'), text);
+function parentLink(ctx: AppContext, text = 'För vuxna', then?: () => Promise<void>): HTMLElement {
+  return h('button', { class: 'link-button parent-link', type: 'button', onclick: () => void showPinGate(ctx, then) }, icon('lock'), text);
 }
 
 async function openProfile(ctx: AppContext, profile: Profile): Promise<void> {
@@ -168,7 +169,7 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
       done,
     ),
     first
-      ? parentLink(ctx, 'Har barnet spelat på en annan enhet? Hämta i föräldravyn')
+      ? parentLink(ctx, 'Har barnet spelat på en annan enhet? Hämta det här', () => showImport(ctx))
       : h('button', { class: 'link-button', type: 'button', 'data-back': '', onclick: () => void showProfiles(ctx) }, 'Tillbaka'),
   );
   show(ctx, view);

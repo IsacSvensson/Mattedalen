@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { GROUPS_KNOWN, answer, createProfile, nextStep, openParent, seedStates, type SeedState } from './helpers';
+import { GROUPS_KNOWN, answer, closeParent, createProfile, nextStep, openParent, parentSettings, seedStates, type SeedState } from './helpers';
 
 /** Every ×10 fact sits (bushes), so "Dela lika" is open. */
 function tens(): Record<string, SeedState> {
@@ -180,10 +180,11 @@ test('grown-ups choose how delat med is written', async ({ page }) => {
   await createProfile(page, 'Eli');
   await seedStates(page, tensAndSharing(), UNITS);
   await openParent(page);
+  await parentSettings(page);
   const sign = page.getByRole('combobox', { name: 'Skriv delat med som' });
   await expect(sign).toHaveValue('fraction');
   await sign.selectOption('obelus');
-  await page.getByRole('button', { name: /Tillbaka|Stäng/ }).first().click();
+  await closeParent(page);
   await page.locator('.profile-tile', { hasText: 'Eli' }).click();
   await page.getByRole('button', { name: /^Trädgården\./ }).click();
   await page.getByRole('button', { name: 'Vad roligt!' }).click();

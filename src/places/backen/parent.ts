@@ -14,12 +14,15 @@ import { showBrook } from './screens/brook';
 import { runBrookPlacement } from './screens/placement';
 import { keepTerms } from '../../shell/words';
 
+/** What the brook covers, for grown-ups. */
+export const BROOK_ABOUT = 'Addition och subtraktion inom 20, och likhetstecknet.';
+
 /**
- * Bäcken's part of the parent view: the addition table as a heat map, how much
- * of each part sits (plus and minus apart), what is hard right now, the most
- * common mix-ups, the scale (Vågen) by kind of task, and the start check.
+ * Bäcken's page in "För vuxna": the state (how much of each part sits, plus
+ * and minus apart, and the scale), what is hard right now and the mix-ups, the
+ * brook's check, the addition table as a heat map (folded), and the start check.
  */
-export async function brookParentSection(ctx: AppContext, profile: Profile): Promise<HTMLElement> {
+export async function brookParentPage(ctx: AppContext, profile: Profile): Promise<HTMLElement> {
   const deps = brookDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
@@ -41,8 +44,9 @@ export async function brookParentSection(ctx: AppContext, profile: Profile): Pro
   return h(
     'section',
     { class: 'place-section', 'aria-labelledby': 'place-brook-heading' },
-    h('h3', { id: 'place-brook-heading', class: 'place-heading' }, icon('steps'), 'Bäcken'),
-    h('p', { class: 'muted place-about' }, 'Addition och subtraktion inom 20, och likhetstecknet.'),
+    h('h2', { id: 'place-brook-heading', class: 'place-heading' }, icon('steps'), 'Bäcken'),
+    h('p', { class: 'muted place-about' }, BROOK_ABOUT),
+    h('h3', null, 'Läget'),
     h(
       'ul',
       { class: 'status-summary' },
@@ -55,9 +59,6 @@ export async function brookParentSection(ctx: AppContext, profile: Profile): Pro
       lastPlayed ? ` · senast ${formatDay(lastPlayed)}` : '',
       ` · ${unlocked.size} av ${pack.units.length} delar öppna`,
     ),
-    h('h4', null, 'Additionstabellen'),
-    h('p', { class: 'muted' }, 'Rad plus kolumn, 0–10. Minus finns i delarna nedan.'),
-    additionHeatmap(states, stats),
     h('h4', null, 'Delarna'),
     h(
       'ul',
@@ -71,15 +72,23 @@ export async function brookParentSection(ctx: AppContext, profile: Profile): Pro
         ),
       ),
     ),
-    h('h4', null, 'Svåra just nu'),
-    hardList(states, engine),
-    h('h4', null, 'Vanligaste förväxlingarna'),
-    confusionList(states),
     h('h4', null, 'Vågen'),
     scaleSummary(states),
-    h('h4', null, 'Bäckens koll'),
+    h('h3', null, 'Svåra just nu'),
+    hardList(states, engine),
+    h('h3', null, 'Vanligaste förväxlingarna'),
+    confusionList(states),
+    h('h3', null, 'Bäckens koll'),
     checkResults(sessionsAll.filter((x) => x.packId === pack.id && x.mode === 'check')),
-    h('h4', null, 'Startkoll'),
+    h(
+      'details',
+      { class: 'all-facts' },
+      h('summary', null, 'Alla fakta (värmekarta)'),
+      h('h4', null, 'Additionstabellen'),
+      h('p', { class: 'muted' }, 'Rad plus kolumn, 0–10. Minus finns i delarna ovan.'),
+      additionHeatmap(states, stats),
+    ),
+    h('h3', null, 'Startkoll'),
     h('p', { class: 'muted' }, 'En kort koll av vad barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
     h('button', { class: 'soft-button', type: 'button', onclick: () => void runBrookPlacement(ctx, profile, () => showBrook(ctx, profile)) }, 'Gör om startkollen vid bäcken'),
   );

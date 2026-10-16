@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, enterGarden, nextStep, openParent, seedStates, switchPlayer } from './helpers';
+import { answer, closeParent, createProfile, enterGarden, nextStep, openParent, parentSettings, seedStates, switchPlayer } from './helpers';
 
 const fluentTens = () => {
   const s: Record<string, { status: string; box: number }> = {};
@@ -88,9 +88,10 @@ test('questions can be read aloud in Swedish', async ({ page }) => {
   await createProfile(page, 'Alva');
   await switchPlayer(page);
   await openParent(page);
+  await parentSettings(page);
   await page.getByRole('checkbox', { name: /Läs upp frågorna/ }).check();
   await expect(page.locator('.voice-note')).toHaveText('');
-  await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+  await closeParent(page);
   await enterGarden(page, 'Alva');
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();
   await expect(nextStep(page)).toBeVisible();
@@ -137,10 +138,11 @@ for (const local of [false, true]) {
     await createProfile(page, 'Alva');
     await switchPlayer(page);
     await openParent(page);
+    await parentSettings(page);
     await page.getByRole('checkbox', { name: /Läs upp frågorna/ }).check();
     if (local) await expect(page.locator('.voice-note')).toHaveText('');
     else await expect(page.locator('.voice-note')).toContainText('bara röster på enheten');
-    await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+    await closeParent(page);
     await enterGarden(page, 'Alva');
     await page.getByRole('button', { name: 'Vattna trädgården' }).click();
     await answer(page);

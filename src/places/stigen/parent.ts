@@ -15,12 +15,15 @@ import { partProgress } from './logic';
 import { pack, pathDeps, pathHeld } from './pack';
 import { keepTerms } from '../../shell/words';
 
+/** What Stigen covers, for grown-ups. */
+export const PATH_ABOUT = 'Talen till 100: tiotal och ental, över tiotalet, dubbla och halvera.';
+
 /**
- * Stigen's part of the parent view: how much of each part sits, what is hard
- * right now (with the way the game helps, so grown-ups can use the same idea),
- * and the most common mix-ups.
+ * Stigen's page in "För vuxna": the state (how much of each part sits), what
+ * is hard right now (with the way the game helps, so grown-ups can use the same
+ * idea) and the mix-ups, Stigen's check, and the start check.
  */
-export async function pathParentSection(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement> {
+export async function pathParentPage(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement> {
   const deps = pathDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
@@ -35,9 +38,10 @@ export async function pathParentSection(ctx: AppContext, profile: Profile, save:
   return h(
     'section',
     { class: 'place-section', 'aria-labelledby': 'place-path-heading' },
-    h('h3', { id: 'place-path-heading', class: 'place-heading' }, icon('lantern'), 'Stigen'),
-    h('p', { class: 'muted place-about' }, 'Talen till 100: tiotal och ental, över tiotalet, dubbla och halvera.'),
+    h('h2', { id: 'place-path-heading', class: 'place-heading' }, icon('lantern'), 'Stigen'),
+    h('p', { class: 'muted place-about' }, PATH_ABOUT),
     open ? null : openingNote(save),
+    h('h3', null, 'Läget'),
     h(
       'ul',
       { class: 'status-summary' },
@@ -64,18 +68,18 @@ export async function pathParentSection(ctx: AppContext, profile: Profile, save:
         ),
       ),
     ),
-    h('h4', null, 'Svåra just nu'),
+    h('h3', null, 'Svåra just nu'),
     hardList(states, engine),
-    h('h4', null, 'Vanligaste förväxlingarna'),
+    h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states),
-    h('h4', null, 'Stigens koll'),
+    h('h3', null, 'Stigens koll'),
     checkResultsView(
       sessions.filter((x) => x.mode === 'check'),
       CHECK_CATEGORIES,
       'Samma sorts uppgifter ungefär var sjunde speldag på stigen, utan anpassning, så att det går att jämföra över tid. Uppgifterna dras från alla tal till 100, också sådana barnet inte har övat.',
       'Ingen koll än. Den första kommer andra dagen barnet är på stigen.',
     ),
-    h('h4', null, 'Startkoll'),
+    h('h3', null, 'Startkoll'),
     h('p', { class: 'muted' }, 'En kort koll av vad barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
     h('button', { class: 'soft-button', type: 'button', onclick: () => void runPathPlacement(ctx, profile, () => showPath(ctx, profile)) }, 'Gör om startkollen på stigen'),
   );

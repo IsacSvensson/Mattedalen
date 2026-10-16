@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, answerDerive, createProfile, nextStep, openParent, openPath, playedAt, seedStates, solve, type SeedState } from './helpers';
+import { answer, answerDerive, closeParent, createProfile, nextStep, openParent, openPath, parentPlace, playedAt, seedStates, solve, type SeedState } from './helpers';
 
 /**
  * Stigen, the numbers to 100 (docs/STIGEN.md): it opens when going over the
@@ -62,10 +62,11 @@ test('Stigen rests on the map until going over the ten sits at the brook, or a g
   await expect(path).toBeDisabled();
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentPlace(page, 'Stigen');
   const section = page.getByRole('region', { name: /^Stigen/ });
   await section.getByRole('button', { name: 'Öppna Stigen nu' }).click();
   await expect(section).toContainText('Stigen är öppen.');
-  await page.getByRole('button', { name: /Tillbaka|Stäng/ }).first().click();
+  await closeParent(page);
   await page.locator('.profile-tile', { hasText: 'Bo' }).click();
   await page.getByRole('button', { name: 'Stigen. Nya lyktor väntar på stigen.' }).click();
   await expect(page.getByRole('heading', { name: 'Kan du redan talen till 100?' })).toBeVisible();
@@ -115,6 +116,7 @@ test('Stigens koll comes on the second day on the path, and grown-ups see the re
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentPlace(page, 'Stigen');
   const row = page.getByRole('region', { name: /^Stigen/ }).locator('.check-results tbody tr');
   await expect(row).toHaveCount(1);
   await expect(row).toContainText('3 av 3');
@@ -259,6 +261,7 @@ test('grown-ups see the parts, what is hard and the mix-ups', async ({ page }) =
   );
   await page.goto('/');
   await openParent(page);
+  await parentPlace(page, 'Stigen');
   const section = page.locator('.place-section', { has: page.getByRole('heading', { name: 'Stigen' }) });
   await expect(section).toContainText('Hela tiotal30 av 30 sitter');
   await expect(section).toContainText('Tiotal och ental (förståelse)20 av 22 sitter');

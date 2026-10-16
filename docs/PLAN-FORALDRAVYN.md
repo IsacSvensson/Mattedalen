@@ -86,9 +86,25 @@ kollen. Till höger barnets inställningar på ett ställe.*
 
 | Fas | Innehåll |
 |---|---|
-| F1. Översikten och sidorna | Översikten, sidorna för plats, inställningar, enheten och hämta, bakåtknappen och delningen av `parentSection`. |
+| F1. Översikten och sidorna **(klar)** | Översikten, sidorna för plats, inställningar, enheten och hämta, bakåtknappen och delningen av `parentSection`. |
 | F2. Att göra och raderna | Listan över det som väntar på en vuxen, raderna per plats och ”Svårt just nu” med ”Visa alla”. |
 | F3. Verifiering | Skärmbilder i alla storlekar, testerna, dokumenten. |
+
+## Fynd från F1
+
+- **Sidorna har ingen egen adress.** Appen har inga adresser någon annanstans
+  heller. Telefonens bakåtknapp fungerar ändå: den trycker på sidans egen väg
+  tillbaka, som i resten av appen.
+- **Kryssrutan står nu på samma rad som sin text.** På en telefon hamnade den
+  ovanför texten.
+- **Länken för ett barn från en annan enhet** på startsidan leder efter
+  vuxenkoden direkt till ”Hämta ett barn”, inte till översikten.
+- **Platsernas inställningar** ligger bara på barnets inställningssida.
+  Platssidan har läget, det som är svårt, kollen, värmekartorna och
+  startkollen. ”Öppna Trädgården nu” och ”Öppna ×4 nu” står kvar på platsens
+  sida tills F2 för upp dem under ”Att göra”.
+- **Testerna** går till rätt sida med hjälpfunktioner (`parentPlace`,
+  `parentSettings`, `parentLink`, `parentBack`, `closeParent`).
 
 Loggexporten i R5 läggs i den nya strukturen, under barnets ”Flytta eller
 spara”.

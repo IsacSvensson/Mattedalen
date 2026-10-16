@@ -55,8 +55,12 @@ function divisionSignSetting(profile: Profile, save: SaveProfile): HTMLElement |
   );
 }
 
-/** Trädgården's part of the parent view: what the child knows of the tables, and the start check. */
-export async function gardenParentSection(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement> {
+/**
+ * Trädgården's page in "För vuxna": the state (Lika stora grupper, gånger,
+ * delat med, Dela lika), what is hard right now and the mix-ups, the garden's
+ * check, all facts as heat maps (folded), and the start check.
+ */
+export async function gardenParentPage(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement> {
   const deps = gardenDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
@@ -81,15 +85,11 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
   return h(
     'section',
     { class: 'place-section', 'aria-labelledby': 'place-garden-heading' },
-    h('h3', { id: 'place-garden-heading', class: 'place-heading' }, plantIcon('tree'), 'Trädgården'),
-    h('p', { class: 'muted place-about' }, `${pack.title} 1–10, och delat med.`),
+    h('h2', { id: 'place-garden-heading', class: 'place-heading' }, plantIcon('tree'), 'Trädgården'),
+    h('p', { class: 'muted place-about' }, GARDEN_ABOUT),
     open ? null : openingNote(save),
     waits.waitingNow.length ? waitingTables(ctx, profile, waits.waitingNow) : null,
-    h('h4', null, 'Lika stora grupper'),
-    h('p', { class: 'muted' }, 'Vad gånger betyder, före ×2: grupper, upprepad addition och att hoppa i steg.'),
-    groupSummary(states),
-    h('h4', null, 'Gånger'),
-    statusSummary(states, facts),
+    h('h3', null, 'Läget'),
     h(
       'p',
       { class: 'muted' },
@@ -97,7 +97,11 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
       lastPlayed ? ` · senast ${formatDay(lastPlayed)}` : '',
       ` · ${meta.unlockedUnitIds.length} av ${pack.units.length} delar öppna`,
     ),
-    heatmap(states, stats),
+    h('h4', null, 'Lika stora grupper'),
+    h('p', { class: 'muted' }, 'Vad gånger betyder, före ×2: grupper, upprepad addition och att hoppa i steg.'),
+    groupSummary(states),
+    h('h4', null, 'Gånger'),
+    statusSummary(states, facts),
     h('h4', null, 'Delat med'),
     h(
       'p',
@@ -105,40 +109,54 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
       'Delat med kommer för en familj (3 × 7, 7 × 3, 21 ÷ 3, 21 ÷ 7) när båda gångerfakta sitter. På plantorna syns det som blommor (övas), kart (flytande) och mogen frukt (automatiserad).',
     ),
     statusSummary(states, divisions),
-    divisionHeatmap(states, stats, sign),
     h('h4', null, 'Dela lika'),
     shareSummary(states),
-    h('h4', null, 'Svåra just nu'),
+    h('h3', null, 'Svåra just nu'),
     hardList(states, engine.config, today, sign),
-    h('h4', null, 'Vanligaste förväxlingarna'),
+    h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states, sign),
-    h('h4', null, 'Trädgårdens koll'),
+    h('h3', null, 'Trädgårdens koll'),
     checkResultsView(
       ownSessions.filter((x) => x.mode === 'check'),
       GARDEN_CHECK_CATEGORIES,
       'Samma sorts uppgifter ungefär var sjunde speldag i trädgården, utan anpassning, så att det går att jämföra över tid: gånger, delat med, saknad faktor och Dela lika med bild.',
       'Ingen koll än. Den första kommer andra dagen barnet är i trädgården.',
     ),
-    h('h4', null, 'Inställning'),
     h(
-      'div',
-      { class: 'settings' },
-      h(
-        'label',
-        { class: 'check' },
-        h('input', {
-          type: 'checkbox',
-          checked: profile.settings.allowFree,
-          onchange: (e: Event) => void save({ settings: { allowFree: (e.target as HTMLInputElement).checked } }),
-        }),
-        ' Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)',
-      ),
-      divisionSignSetting(profile, save),
-      waitSetting(ctx, profile, save),
+      'details',
+      { class: 'all-facts' },
+      h('summary', null, 'Alla fakta (värmekartor)'),
+      h('h4', null, 'Gånger'),
+      heatmap(states, stats),
+      h('h4', null, 'Delat med'),
+      divisionHeatmap(states, stats, sign),
     ),
-    h('h4', null, 'Startkoll'),
+    h('h3', null, 'Startkoll'),
     h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
     h('button', { class: 'soft-button', type: 'button', onclick: () => void showPlacementOffer(ctx, profile) }, 'Gör om startkollen'),
+  );
+}
+
+/** What the garden covers, for grown-ups. */
+export const GARDEN_ABOUT = `${pack.title} 1–10, och delat med.`;
+
+/** What a grown-up can choose for the garden, on the child's settings page. */
+export async function gardenParentSettings(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement> {
+  return h(
+    'div',
+    { class: 'settings' },
+    h(
+      'label',
+      { class: 'check' },
+      h('input', {
+        type: 'checkbox',
+        checked: profile.settings.allowFree,
+        onchange: (e: Event) => void save({ settings: { allowFree: (e.target as HTMLInputElement).checked } }),
+      }),
+      h('span', null, 'Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)'),
+    ),
+    divisionSignSetting(profile, save),
+    waitSetting(ctx, profile, save),
   );
 }
 
@@ -156,7 +174,7 @@ function waitSetting(ctx: AppContext, profile: Profile, save: SaveProfile): HTML
       checked: profile.settings.tablesWait !== false,
       onchange: (e: Event) => void save({ settings: { tablesWait: (e.target as HTMLInputElement).checked } }),
     }),
-    ' Tabellerna väntar på det de bygger på vid stigen',
+    h('span', null, 'Tabellerna väntar på det de bygger på vid stigen'),
   );
 }
 
@@ -195,7 +213,7 @@ function waitingTables(ctx: AppContext, profile: Profile, waiting: string[]): HT
   return h(
     'div',
     { class: 'notice garden-opening' },
-    h('p', null, `Tabellerna väntar på stigen tills det de bygger på sitter där, högst ${WAIT_PLAY_DAYS} speldagar. Det går att stänga av under Inställning.`),
+    h('p', null, `Tabellerna väntar på stigen tills det de bygger på sitter där, högst ${WAIT_PLAY_DAYS} speldagar. Det går att stänga av under barnets inställningar.`),
     list,
   );
 }

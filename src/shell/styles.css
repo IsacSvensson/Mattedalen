@@ -2691,6 +2691,22 @@ h1:focus {
   border-top: var(--outline);
 }
 
+/* On its own page the place needs no line above it, and its name is already in the top bar (kept for screen readers). */
+.parent-page .place-section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.parent-page .place-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .place-heading {
   display: flex;
   align-items: center;
@@ -2765,6 +2781,102 @@ h1:focus {
   border-radius: var(--r-card);
   border: var(--outline);
   background: var(--card);
+}
+
+/* A page below the overview: its name and the child it is about. */
+.parent-title h1 {
+  margin: 0;
+}
+
+.parent-title p {
+  margin: 0;
+}
+
+/* Rows that lead to a page: the overview's places and links. */
+.parent-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.parent-rows + .parent-rows {
+  margin-top: 12px;
+}
+
+.parent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: var(--outline);
+  border-radius: var(--r-tile);
+  background: var(--paper);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.parent-row:active {
+  transform: translateY(var(--press-depth));
+  box-shadow: none;
+}
+
+.parent-row-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+}
+
+.parent-row-icon .icon,
+.parent-row-icon .plant {
+  width: 32px;
+  height: 32px;
+}
+
+.parent-row-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.parent-row-text strong {
+  font-size: 1.05rem;
+}
+
+.parent-row-text .muted {
+  font-size: 0.92rem;
+}
+
+.parent-row-go {
+  flex: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+
+/* All facts as heat maps, folded so the page stays short. */
+.all-facts {
+  margin-top: 20px;
+  border-top: var(--stroke) solid var(--divider);
+  padding-top: 12px;
+}
+
+.all-facts > summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
 }
 
 .status-summary {
@@ -2895,6 +3007,17 @@ h1:focus {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+/* A checkbox stays on the same line as its words, however long they are. */
+.settings label.check {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.settings label.check input {
+  flex: none;
+  margin-top: 0.2em;
 }
 
 .settings input[type='text'],

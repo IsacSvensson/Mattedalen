@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { createProfile, openParent, switchPlayer } from './helpers';
+import { createProfile, openParent, parentBack, parentPlace, parentSettings, switchPlayer } from './helpers';
 
 /** Small phones: nothing may stick out of its container or make the page scroll sideways. */
 for (const width of [320, 360]) {
@@ -54,7 +54,14 @@ for (const width of [320, 360]) {
       await createProfile(page, 'Alexandra-Charlotte');
       await switchPlayer(page);
       await openParent(page);
+      await expectNoSidewaysScroll(page);
+      // Every page: a place with its heat maps open, and the child's settings.
+      await parentPlace(page, 'Trädgården');
       await expect(page.locator('#place-garden-heading')).toBeVisible();
+      await page.getByText('Alla fakta (värmekartor)').click();
+      await expectNoSidewaysScroll(page);
+      await parentBack(page);
+      await parentSettings(page);
       await expectNoSidewaysScroll(page);
     });
 

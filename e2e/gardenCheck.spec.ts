@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, createProfile, openParent, seedStates, solve, type SeedState } from './helpers';
+import { answer, createProfile, openParent, parentPlace, seedStates, solve, type SeedState } from './helpers';
 
 /** Trädgårdens koll, Öva en tabell with delat med, and delat med in the parent view. */
 
@@ -86,6 +86,7 @@ test('Trädgårdens koll comes on the second day in the garden, with all kinds o
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentPlace(page, 'Trädgården');
   const garden = page.getByRole('region', { name: 'Trädgården', exact: true });
   const row = garden.locator('.check-results tbody tr');
   await expect(row).toHaveCount(1);
@@ -133,8 +134,10 @@ test('grown-ups see delat med apart: counts, a heat map of its own and "Dela lik
     unlockedUnitIds: ['u10', 'delalika', 'd10', 'u2', 'd2'],
   });
   await openParent(page);
+  await parentPlace(page, 'Trädgården');
   const garden = page.getByRole('region', { name: 'Trädgården', exact: true });
-  await expect(garden.getByRole('heading', { name: 'Delat med' })).toBeVisible();
+  await expect(garden.getByRole('heading', { name: 'Delat med' }).first()).toBeVisible();
+  await garden.getByText('Alla fakta (värmekartor)').click();
   await expect(garden.getByRole('group', { name: 'Värmekarta över gångertabellen' })).toBeVisible();
   const divisions = garden.getByRole('group', { name: 'Värmekarta över delat med' });
   // Row 3 (÷ 3), column 7: 21 ÷ 3 = 7.

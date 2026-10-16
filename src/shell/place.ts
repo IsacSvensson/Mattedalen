@@ -57,8 +57,18 @@ export interface Place {
   isOpen?(ctx: AppContext, profile: Profile): Promise<boolean>;
   /** When a closed place opens, in words for the child, e.g. "Trädgården öppnar när …". */
   closedText?: string;
-  /** The place's part of the parent view for one child. */
-  parentSection(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement>;
+  /** The place's icon, e.g. in the parent view. */
+  icon(): Element;
+  /** What the place covers, in one line for grown-ups. */
+  about: string;
+  /**
+   * The place's page in "För vuxna" for one child, always in the same order
+   * (docs/PLAN-FORALDRAVYN.md): the state, what is hard right now and the mix-ups,
+   * the check over time, all facts (heat maps, folded), and the start check.
+   */
+  parentPage(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement>;
+  /** What a grown-up can choose for the place, on the child's settings page. Without it the place has nothing to choose. */
+  parentSettings?(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<HTMLElement | null>;
 }
 
 /** Whether a place is open to a child (a place without a rule always is). */

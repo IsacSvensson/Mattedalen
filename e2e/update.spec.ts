@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { createProfile, openParent, switchPlayer } from './helpers';
+import { createProfile, openParent, parentLink, switchPlayer } from './helpers';
 
 /*
  * Publishing a new version is simulated by changing the version in the served
@@ -84,6 +84,7 @@ test('grown-ups can look for an update and see the version', async ({ page }) =>
   await createProfile(page, 'Bo');
   await switchPlayer(page);
   await openParent(page);
+  await parentLink(page, 'Den här enheten');
   await expect(page.getByText(/^Appen: \d{4}-\d{2}-\d{2}/)).toBeVisible();
 
   const look = page.getByRole('button', { name: 'Sök efter uppdatering' });

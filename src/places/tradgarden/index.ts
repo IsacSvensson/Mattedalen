@@ -5,7 +5,7 @@ import { plantIcon } from '../../shell/components/plant';
 import type { Place, PlaceScene } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
 import { gardenDeps, pack } from './pack';
-import { gardenParentSection } from './parent';
+import { GARDEN_ABOUT, gardenParentPage, gardenParentSettings } from './parent';
 import { gardenIsOpen } from './isOpen';
 import { CLOSED_TEXT } from './opening';
 import { gardenPicture, knownTables, showGarden, startGarden } from './screens/garden';
@@ -21,7 +21,10 @@ export const tradgarden: Place = {
   scene: gardenScene,
   isOpen: (ctx, profile) => gardenIsOpen(ctx, profile),
   closedText: CLOSED_TEXT,
-  parentSection: gardenParentSection,
+  icon: () => plantIcon('tree'),
+  about: GARDEN_ABOUT,
+  parentPage: gardenParentPage,
+  parentSettings: gardenParentSettings,
 };
 
 async function gardenScene(ctx: AppContext, profile: Profile): Promise<PlaceScene> {

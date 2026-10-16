@@ -333,5 +333,37 @@ export async function openParent(page: Page, pin = '2580', link: RegExp = /För 
     await expect(page.getByRole('heading', { name: /Skriv koden igen/ })).toBeVisible();
   }
   await page.keyboard.type(pin);
-  await expect(page.getByRole('heading', { name: 'Föräldravy' })).toBeVisible();
+  // The overview, or "Hämta ett barn" from the link for a child from another device.
+  await expect(page.getByRole('heading', { name: /^(För vuxna|Hämta ett barn)$/, level: 1 })).toBeVisible();
+}
+
+/** In "För vuxna": from the overview to a place's page for the child shown (docs/PLAN-FORALDRAVYN.md). */
+export async function parentPlace(page: Page, place: 'Bäcken' | 'Stigen' | 'Trädgården'): Promise<void> {
+  await page.locator('.parent-overview .parent-row').filter({ has: page.locator('strong', { hasText: new RegExp(`^${place}$`) }) }).click();
+  await expect(page.getByRole('region', { name: new RegExp(`^${place}`) })).toBeVisible();
+}
+
+/** In "För vuxna": from the overview to the child's settings. */
+export async function parentSettings(page: Page): Promise<void> {
+  await page.getByRole('button', { name: /^Barnets inställningar/ }).click();
+  await expect(page.getByRole('heading', { name: / inställningar$/ })).toBeVisible();
+}
+
+/** In "För vuxna": from the overview to "Hämta ett barn" or "Den här enheten". */
+export async function parentLink(page: Page, title: 'Hämta ett barn' | 'Den här enheten'): Promise<void> {
+  await page.getByRole('button', { name: new RegExp(`^${title}`) }).click();
+  await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible();
+}
+
+/** Leaves "För vuxna" for the list of players, from the overview or a page of it. */
+export async function closeParent(page: Page): Promise<void> {
+  const back = page.locator('.parent-page').getByRole('button', { name: 'Tillbaka' });
+  if (await back.isVisible()) await back.click();
+  await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+}
+
+/** In "För vuxna": back from a page to the overview. */
+export async function parentBack(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Tillbaka' }).click();
+  await expect(page.getByRole('heading', { name: 'För vuxna' })).toBeVisible();
 }

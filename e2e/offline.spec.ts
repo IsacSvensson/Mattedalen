@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, openParent, switchPlayer } from './helpers';
+import { answer, createProfile, openParent, parentBack, parentLink, parentSettings, switchPlayer } from './helpers';
 
 test('works fully offline after the first visit, without any outside traffic', async ({ page, context, baseURL }) => {
   const origin = new URL(baseURL!).origin;
@@ -31,9 +31,12 @@ test('works fully offline after the first visit, without any outside traffic', a
   await page.getByRole('button', { name: 'Tillbaka till trädgården' }).click();
   await switchPlayer(page);
   await openParent(page);
+  await parentSettings(page);
   await page.getByRole('button', { name: 'Visa QR-kod' }).click();
   const qr = await page.locator('.qr-code svg').screenshot();
   await page.getByRole('button', { name: 'Klar' }).click();
+  await parentBack(page);
+  await parentLink(page, 'Hämta ett barn');
   await page.locator('input[type=file][accept="image/*"]').setInputFiles({ name: 'qr.png', mimeType: 'image/png', buffer: qr });
   await expect(page.getByRole('heading', { name: /Hämta Alva\?/ })).toBeVisible();
 
@@ -89,6 +92,7 @@ test('the licence link shows the licence texts, also offline', async ({ page, co
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
+  await parentLink(page, 'Den här enheten');
   const [tab] = await Promise.all([context.waitForEvent('page'), page.getByRole('link', { name: 'Licenser för ingående delar' }).click()]);
   await expect(tab.locator('body')).toContainText('Open Font License');
   await expect(tab.getByRole('heading', { name: 'Vem spelar?' })).toHaveCount(0);

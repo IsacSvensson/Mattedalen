@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, answerDerive, createProfile, enterGarden, nextStep, openParent, seedStates, type SeedState } from './helpers';
+import { answer, answerDerive, createProfile, enterGarden, nextStep, openParent, parentPlace, seedStates, type SeedState } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -64,6 +64,7 @@ test('grown-ups see which facts are hard and how the game helps', async ({ page 
     '8x8': { status: 'learning', box: 1, wrongDays: 3, introducedDay: '2026-01-20' },
   });
   await openParent(page);
+  await parentPlace(page, 'Trädgården');
   await expect(page.getByRole('region', { name: /^Trädgården/ }).getByRole('heading', { name: 'Svåra just nu' })).toBeVisible();
   await expect(page.locator('.hard-list li')).toHaveCount(1);
   await expect(page.locator('.hard-list li')).toContainText('8 × 8 = 64 – 8 × 8 = dubbla 4 × 8 = 32 + 32 = 64');
