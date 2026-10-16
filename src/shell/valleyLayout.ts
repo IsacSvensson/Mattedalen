@@ -33,7 +33,7 @@ export interface Spot {
 
 export const SPOTS: Record<string, Spot> = {
   // The arch over the brook, high up where the brook comes out of the hills; the sign on the bank.
-  backen: { art: { x: 100, y: 168, w: 300 }, sign: { x: 420, y: 196 }, notes: { x: 420, y: 250 }, box: { x: 90, y: 160, w: 640, h: 180 }, focusX: 480 },
+  backen: { art: { x: 100, y: 168, w: 300 }, sign: { x: 412, y: 196 }, notes: { x: 412, y: 250 }, box: { x: 90, y: 160, w: 640, h: 180 }, focusX: 530 },
   // The posts and lanterns along the far bank.
   stigen: { art: { x: 610, y: 400, w: 460 }, sign: { x: 700, y: 560 }, notes: { x: 700, y: 614 }, box: { x: 600, y: 390, w: 470, h: 290 }, focusX: 780 },
   // The whole bed on this side of the brook.

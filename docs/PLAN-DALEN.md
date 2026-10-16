@@ -17,13 +17,13 @@ På en surfplatta eller dator syns hela dalen på en gång.
 
 ## Bilder
 
-Bilderna är från en attrapp byggd av appens egna delar.
+Bilderna är skärmbilder från appen, för ett barn som har alla tre platser.
 
 ![Telefon: trädgården i bild, pilar mot platserna utanför; samma vy med ”I dag” öppen](img/karta-telefon.png)
 
 *Telefon, 360 px. Till vänster öppnar dalen vid trädgården. Pilarna i kanten
 pekar mot bäcken och stigen. Till höger har barnet tryckt på solen i hörnet,
-och ”I dag” visar vad som återstår.*
+och ”I dag” visar vad som återstår och att stigen vilar.*
 
 ![Surfplatta liggande: hela dalen på en gång](img/karta-bred.png)
 
@@ -102,7 +102,7 @@ och ”I dag” visar vad som återstår.*
 |---|---|
 | K1. Kartan **(klar)** | Kartan med platserna i full storlek, valvbron, bäcken och stenarna, dra runt på telefon, hela dalen på breda skärmar, pilar i kanten, startläge vid dagens plats. Ersätter scenerna från R3a. |
 | K2. I dag och vägen tillbaka **(klar)** | Solen i hörnet och kortet ”I dag” som startar passet. Tillbaka från en plats leder till kartan vid samma plats. |
-| K3. Verifiering | Skärmbilder i alla storlekar, tester för att dra, pilar, ”I dag” och skärmläsare, dokumenten. |
+| K3. Verifiering **(klar)** | Skärmbilder i alla storlekar, tester för att dra, pilar, ”I dag” och skärmläsare, dokumenten. |
 
 ## Fynd från K1
 
@@ -131,6 +131,24 @@ och ”I dag” visar vad som återstår.*
   Dagens plats gäller när barnet kommer från ”Vem spelar?”.
 - **På en telefon på 320 px** blir namnet ”Mattedalen” lite mindre, så att
   solen i andra hörnet får plats.
+
+## Fynd från K3
+
+- **Skärmbilder** av fyra lägen (nytt barn, tre platser, ”I dag” öppen och
+  trädgården som sover) i sex storlekar, från 320 px till dator. Sidan rullar
+  aldrig, varken i sidled eller nedåt.
+- **Raderna vid bäcken klipptes** på en telefon på 320 och 360 px. Raderna vid
+  en plats bryts nu i stället, och telefonen visar bäckens skylt och rader. Bron
+  ligger en bit till vänster, och barnet når den genom att dra.
+- **Uppläsningen fastnade** på en Samsung Galaxy S25 med Chrome och blev tyst
+  tills telefonen startades om. Talmotorn väcks nu före varje uppläsning, och en
+  uppläsning som inte börjar görs om en gång (se
+  [TRADGARDEN.md](TRADGARDEN.md)).
+- **Kartan lägger sig om** även när fönstret ändrar storlek. Två snabba
+  ändringar som slutar i samma storlek märktes annars inte, och kartan stod fel.
+- **Tester för skärmläsare och tangentbord:** platserna är en lista med skyltar,
+  bilderna finns i ord, pilarna är dolda och utanför tabbordningen, och en skylt
+  som får fokus rullas in i bild. Med minskad rörelse hoppar kartan direkt.
 
 ## Vad vi prövade
 

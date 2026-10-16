@@ -1174,7 +1174,8 @@ h1:focus {
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
-  max-width: 420px;
+  /* Narrow enough to fit a small phone beside the place's sign; longer lines wrap. */
+  max-width: 290px;
 }
 
 /* Today's state and what the child is on now: small paper labels in the grass. */

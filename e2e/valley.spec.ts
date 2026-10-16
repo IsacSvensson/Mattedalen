@@ -306,3 +306,40 @@ test('back from a place, the map stands at that place', async ({ page }) => {
   await expect(page.locator('.map-place.here .map-sign')).toHaveText('Trädgården');
   await expect(page.locator('.map-place.here .map-guide')).toHaveCount(1);
 });
+
+test.describe('the map for a screen reader and the keyboard', () => {
+  test.use({ viewport: { width: 360, height: 760 } });
+
+  test('the places are a list of signs, the pictures are words, and the pointers stay out of the way', async ({ page }) => {
+    await page.goto('/');
+    await createProfile(page, 'Alva');
+    await page.getByRole('button', { name: 'Till dalen' }).click();
+    const list = page.getByRole('list', { name: 'Platserna i dalen' });
+    await expect(list.getByRole('listitem')).toHaveCount(3);
+    await expect(list.getByRole('button')).toHaveText(['Bäcken', 'Stigen', 'Trädgården']);
+    // Every picture is hidden from a screen reader and said in words instead.
+    await expect(page.locator('.map-art:not([aria-hidden="true"])')).toHaveCount(0);
+    await expect(list.getByText(/^Bron har \d+ av \d+ stenar på plats\.$/)).toBeAttached();
+    await expect(list.getByText(/^På stigen lyser \d+ av \d+ lyktor\./)).toBeAttached();
+    await expect(list.getByText('Lådan väntar på de första fröna.')).toBeAttached();
+    // The pointers are a shortcut for those who see: hidden, and out of the tab order.
+    await page.locator('.map-view').evaluate((el) => el.scrollTo(el.scrollWidth, el.scrollHeight));
+    await expect(page.locator('.map-pointer').first()).toBeAttached();
+    await expect(page.locator('.map-pointers')).toHaveAttribute('aria-hidden', 'true');
+    expect(await page.locator('.map-pointer').evaluateAll((els) => els.every((el) => (el as HTMLElement).tabIndex === -1))).toBe(true);
+    // A sign that gets focus is scrolled into view.
+    await page.getByRole('button', { name: /^Bäcken\./ }).focus();
+    await expect.poll(() => inView(page, 'Bäcken')).toBe(true);
+  });
+
+  test('with reduced motion the map jumps instead of gliding', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await createProfile(page, 'Alva');
+    await page.getByRole('button', { name: 'Till dalen' }).click();
+    await page.locator('.map-view').evaluate((el) => el.scrollTo(el.scrollWidth, el.scrollHeight));
+    await page.locator('.map-pointer', { hasText: 'Bäcken' }).click();
+    // At once, without waiting for a glide.
+    expect(await inView(page, 'Bäcken')).toBe(true);
+  });
+});
