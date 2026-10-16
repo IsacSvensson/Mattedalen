@@ -1246,7 +1246,8 @@ h1:focus {
   font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 600;
-  transition: transform 0.08s, box-shadow 0.08s;
+  top: 0;
+  transition: top 0.08s, box-shadow 0.08s;
 }
 
 /* The posts, standing in the grass behind the sign. */
@@ -1276,8 +1277,12 @@ h1:focus {
   height: 22px;
 }
 
+/*
+ * Pressed by moving it down, not by a transform: a transform would make the sign
+ * its own stacking context, and the posts behind it would be drawn on top of it.
+ */
 .place:active .place-name {
-  transform: translateY(var(--press-depth));
+  top: var(--press-depth);
   box-shadow: none;
 }
 

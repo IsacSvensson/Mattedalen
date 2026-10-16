@@ -132,3 +132,19 @@ test('switching player from the garden goes through the valley', async ({ page }
   await switchPlayer(page);
   await expect(page.locator('.profile-tile', { hasText: 'Alva' })).toBeVisible();
 });
+
+test('a pressed sign keeps its posts behind it', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Bo');
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  const sign = page.locator('.place-garden .place-name');
+  const box = (await sign.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(200);
+  // Pressed by moving down, never by a transform: a transform would draw the posts on top of the sign.
+  const pressed = await sign.evaluate((el) => ({ transform: getComputedStyle(el).transform, top: getComputedStyle(el).top }));
+  expect(pressed.transform).toBe('none');
+  expect(pressed.top).not.toBe('0px');
+  await page.mouse.up();
+});
