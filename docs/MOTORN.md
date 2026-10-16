@@ -53,6 +53,8 @@ förkunskaper som kanter i en graf. Se ordningen i
   eller där någon fakta är påbörjad, hålls aldrig: det som är påbörjat stängs
   aldrig. Startkollen öppnar en hållen del bara om den klaras. Motorn vet inget om
   vad som håller; det räknar platsen ut, till exempel från en annan plats framsteg.
+  Platsen ger det via `GameDeps.held`, som används i passet och i startkollen.
+  Trädgårdens tabeller väntar så på Stigen, och Stigens delar på bäcken.
 - **Uteslutna fakta.** Ett pass kan få `excludedItemIds`. De frågas aldrig, inte
   ens som nya eller förfallna, och räknas inte heller när delar öppnas. En del
   där hälften hålls utanför (pilotens otränade halva) kan därför ändå öppna det

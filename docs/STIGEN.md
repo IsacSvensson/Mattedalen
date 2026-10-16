@@ -1,13 +1,23 @@
 # Stigen
 
-Stigen blir dalens tredje plats: talen till 100. Den ligger mellan Bäcken och
+Stigen är dalens tredje plats: talen till 100. Den ligger mellan Bäcken och
 Trädgården. Planen finns i [PLAN-HUNDRA.md](PLAN-HUNDRA.md). Innehållet
-(`src/content/hundred`) byggdes i fas H3 och platsen (`src/places/stigen`) i H4.
-Den slås på för alla i H5.
+(`src/content/hundred`) byggdes i fas H3, platsen (`src/places/stigen`) i H4 och
+kopplingen till de andra platserna i H5.
 
-Tills dess syns Stigen bara på en enhet där appen har öppnats med `?stigen` en
-gång (`src/shell/features.ts`). Valet sparas i webbläsaren på enheten. Med
-`?stigen=0` försvinner den igen.
+## Öppning och väntan
+
+- **Stigen öppnar** när Över tiotalet sitter vid bäcken (`PATH_OPENS_AFTER` i
+  `opening.ts`). Den öppnar också om barnet redan har börjat där, eller om en
+  vuxen öppnar den i föräldravyn. När den väl är öppen stängs den aldrig.
+- **Delar som väntar på bäcken:** varje del väntar på det den bygger på vid bäcken
+  (`BROOK_PREREQUISITES`). Dubbla och halvera väntar alltså på dubblorna vid bäcken.
+  Föräldravyn visar ”väntar på bäcken”.
+- **Trädgårdens tabeller väntar på Stigen**, men högst tre veckor. Se
+  [TRADGARDEN.md](TRADGARDEN.md#tabellerna-väntar-på-stigen).
+- **Dagens plan:** dalen har nu tre platser, och ett barn besöker högst två om
+  dagen. En plats som vilade i går kommer först i dag, så att Stigen inte går
+  förbi dag efter dag när den är ny och inget väntar på repetition där.
 
 ## Uppgifterna
 
@@ -169,11 +179,31 @@ bara var man börjar, så att hoppen inte avslöjar svaret.
 
 Svaren skrivs på stenar, som vid bäcken, och tiden räknas till första siffran.
 
+### Startkoll
+
+Första gången barnet kommer till Stigen erbjuds en startkoll, som vid bäcken:
+”Kan du redan talen till 100?”. Den prövar delarna i ordning och kan bara flytta
+fram barnet. Tiotal och ental (förståelse) prövas inte. En del som väntar på
+bäcken öppnar bara om barnet klarar den. En vuxen kan göra om startkollen i
+föräldravyn.
+
+### Stigens koll
+
+Ungefär var sjunde speldag på Stigen, och första gången andra speldagen, kommer
+Stigens koll före passet (`content/hundred/check.ts`). Det är 14 uppgifter, samma
+mall varje gång: tiotal och ental (2), ental och hela tiotal (2), plus över
+tiotalet (3), minus över tiotalet (3), dubbla och halvera (2) och tvåsiffrigt
+plus tvåsiffrigt (2). Uppgifterna dras från alla tal till 100, så de flesta har
+barnet inte övat. Kollen visar alltså också om sättet att tänka bär. ”Inte nu”
+skjuter den till en annan dag. Resultatet visas bara i föräldravyn.
+
 ### Föräldravyn
 
 Stigens del visar hur mycket som sitter, hur långt barnet har kommit i varje del,
-vad som är svårt just nu (med räknestigens sätt att tänka) och de vanligaste
-förväxlingarna. Startkollen och Stigens koll kommer i H5.
+vilka delar som väntar på bäcken, vad som är svårt just nu (med räknestigens sätt
+att tänka), de vanligaste förväxlingarna och Stigens koll. Där finns också
+knappen för att göra om startkollen, och ”Öppna Stigen nu” så länge Stigen inte
+är öppen.
 
 ## Simulering
 
@@ -185,8 +215,9 @@ minnas, också 40 + 30, fast barnet kan 4 + 3. Den är alltså försiktig.
   Efter ett halvår sitter 82–86 % av den delen och 92 % av Tvåsiffrigt plus
   tvåsiffrigt. Dubbla och halvera börjar efter två veckor.
 - **Ett starkt barn** börjar på Över tiotalet efter fyra veckor.
-- **Ett svagt barn** kommer inte fram till Över tiotalet på ett halvår. Det ska
-  vägas in i H5, när trädgårdens tabeller väntar på Stigen.
+- **Ett svagt barn** kommer inte fram till Över tiotalet på ett halvår. Därför
+  väntar trädgårdens tabeller högst tre veckor (se H5 i
+  [PLAN-HUNDRA.md](PLAN-HUNDRA.md#fynd-från-h5)).
 - **Ett barn som redan kan talen till 100** klarar startkollen för de första
   delarna och börjar på Över tiotalet inom två veckor.
 - Barnen svarar rätt på 80–93 % av frågorna (det svaga barnet 71 %).

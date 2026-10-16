@@ -10,6 +10,7 @@ import { engineFor, EXTRA_PRACTICE_MINUTES, loadProgress } from '../../../shell/
 import { showChallenge } from './challenge';
 import { showGarden } from './garden';
 import { showSession } from './session';
+import { gardenWaits } from '../held';
 import { gardenDeps, pack } from '../pack';
 
 export interface FocusProgress {
@@ -39,7 +40,8 @@ export async function showFocusPicker(ctx: AppContext, profile: Profile, selecte
   const sets = pack.focusSets ?? [];
   const engine = engineFor(profile, gardenDeps(ctx));
   const { states, meta } = await loadProgress(profile, gardenDeps(ctx), engine);
-  const unlocked = engine.unlockedUnits(states, meta);
+  const { held } = await gardenWaits(ctx, profile, { states, meta }, engine);
+  const unlocked = engine.unlockedUnits(states, meta, undefined, held);
 
   const panel = h('section', { class: 'focus-panel', 'aria-live': 'polite' }, h('p', { class: 'end-text' }, 'Tryck på en tabell.'));
   const tiles = sets.map((set) => {

@@ -36,13 +36,21 @@ for (const width of [320, 360]) {
       await createProfile(page, 'Alexandra-Charlotte');
       await page.getByRole('button', { name: 'Till dalen' }).click();
       await expect(page.locator('.valley-map')).toBeVisible();
-      await expect(page.locator('.place')).toHaveCount(2);
-      for (const place of ['.place-garden', '.place-brook']) await expectWithin(page, place, '.valley-ground');
+      await expect(page.locator('.place')).toHaveCount(3);
+      for (const place of ['.place-garden', '.place-brook', '.place-path']) await expectWithin(page, place, '.valley-ground');
       await expectWithin(page, '.valley-walker', '.valley-ground');
       await expectInside(page, '.place-status-row', 'main');
       await expectInside(page, '.valley-side .big-button', 'main');
       // What is drawn never overlaps: the animal, and each place's picture and sign.
-      const parts = ['.place-garden > :first-child', '.place-garden .place-name', '.place-brook > :first-child', '.place-brook .place-name', '.valley-walker'];
+      const parts = [
+        '.place-garden > :first-child',
+        '.place-garden .place-name',
+        '.place-brook > :first-child',
+        '.place-brook .place-name',
+        '.place-path > :first-child',
+        '.place-path .place-name',
+        '.valley-walker',
+      ];
       const boxes = await Promise.all(parts.map(async (sel) => (await page.locator(sel).boundingBox())!));
       for (let i = 0; i < parts.length; i++)
         for (let j = i + 1; j < parts.length; j++)

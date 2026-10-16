@@ -36,8 +36,17 @@ export const GROUPS_KNOWN: Record<string, SeedState> = Object.fromEntries(
 );
 
 /** Opens the garden for a child, as a grown-up does in the parent view, and reloads. */
-export async function openGarden(page: Page, name: string): Promise<void> {
-  await page.evaluate(async (who) => {
+export function openGarden(page: Page, name: string): Promise<void> {
+  return openPlaceFor(page, name, 'gardenOpen');
+}
+
+/** Opens Stigen for a child, as a grown-up does in the parent view, and reloads. */
+export function openPath(page: Page, name: string): Promise<void> {
+  return openPlaceFor(page, name, 'pathOpen');
+}
+
+async function openPlaceFor(page: Page, name: string, setting: 'gardenOpen' | 'pathOpen'): Promise<void> {
+  await page.evaluate(async ({ who, setting }) => {
     const db: IDBDatabase = await new Promise((r) => {
       const q = indexedDB.open('mattedalen');
       q.onsuccess = () => r(q.result);
@@ -49,11 +58,11 @@ export async function openGarden(page: Page, name: string): Promise<void> {
     const profile = profiles.find((p) => p.name === who)!;
     await new Promise((r) => {
       const tx = db.transaction('profiles', 'readwrite');
-      tx.objectStore('profiles').put({ ...profile, settings: { ...profile.settings, gardenOpen: true } });
+      tx.objectStore('profiles').put({ ...profile, settings: { ...profile.settings, [setting]: true } });
       tx.oncomplete = r;
     });
     db.close();
-  }, name);
+  }, { who: name, setting });
   await page.reload();
 }
 

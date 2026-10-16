@@ -1,4 +1,4 @@
-import type { DayKey } from '../engine';
+import { diffDays, type DayKey } from '../engine';
 
 /**
  * The day's plan: which places the child visits today and how many minutes
@@ -34,14 +34,16 @@ export interface DayPlan {
 }
 
 /**
- * Plans a day for the open places, given in map order. The places with the
- * most due come first when there are more than `MAX_PLACES_PER_DAY`; ties keep
- * the map order.
+ * Plans a day for the open places, given in map order. With more than
+ * `MAX_PLACES_PER_DAY` places, a place that rested yesterday comes first (so a
+ * newly opened place, with nothing due yet, is not passed over day after day);
+ * then the places with the most due; ties keep the map order.
  */
-export function planDay(day: DayKey, total: number, open: readonly PlaceLoad[]): DayPlan {
+export function planDay(day: DayKey, total: number, open: readonly PlaceLoad[], restedYesterday: readonly string[] = []): DayPlan {
+  const rested = (p: PlaceLoad) => (restedYesterday.includes(p.id) ? 0 : 1);
   const chosen = [...open]
     .map((load, order) => ({ load, order }))
-    .sort((a, b) => b.load.due - a.load.due || a.order - b.order)
+    .sort((a, b) => rested(a.load) - rested(b.load) || b.load.due - a.load.due || a.order - b.order)
     .slice(0, MAX_PLACES_PER_DAY)
     .sort((a, b) => a.order - b.order)
     .map(({ load }) => load);
@@ -66,6 +68,15 @@ export function planDay(day: DayKey, total: number, open: readonly PlaceLoad[]):
   }
   chosen.forEach((p, i) => (minutes[p.id] = least + whole[i]!));
   return { day, total, minutes };
+}
+
+/**
+ * The open places that rested yesterday: those not in yesterday's plan. Empty
+ * when the last plan is from another day (after a day off, nothing is owed).
+ */
+export function restedYesterday(last: DayPlan | undefined, today: DayKey, openIds: readonly string[]): string[] {
+  if (!last || diffDays(last.day, today) !== 1) return [];
+  return openIds.filter((id) => last.minutes[id] === undefined);
 }
 
 /** Whether a stored plan still holds: the same day, the same time, the same open places. */

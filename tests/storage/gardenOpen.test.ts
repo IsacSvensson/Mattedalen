@@ -21,3 +21,10 @@ describe('the garden in backups', () => {
     expect(parseExport(backup(EXPORT_FORMAT)).profile.settings.gardenOpen).toBeUndefined();
   });
 });
+
+describe('Stigen in backups', () => {
+  it('keeps a grown-up’s choice to open it, and is not opened for anyone else', () => {
+    expect(parseExport(backup(EXPORT_FORMAT, { pathOpen: true })).profile.settings.pathOpen).toBe(true);
+    expect(parseExport(backup(EXPORT_FORMAT, { pathOpen: 'ja' })).profile.settings.pathOpen).toBeUndefined();
+  });
+});

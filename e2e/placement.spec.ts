@@ -33,8 +33,10 @@ test('a new player who knows ×2, ×10, ×5 and ×1 starts at ×4', async ({ pag
   await expect(page.getByText('Vi fortsätter med ×4.')).toBeVisible();
   await page.getByRole('button', { name: 'Till trädgården' }).click();
   await expect(page.locator('.grid-cell.stage-bush')).toHaveCount(64);
-  // What builds on those tables is open (×4, ×3, ×9 and ×6); new facts still come in order, ×4 first.
-  await expect(page.locator('.grid-cell.stage-soil')).toHaveCount(30);
+  // ×4 is open: it waits for doubling and halving on Stigen, and a child who knows ×5 can halve.
+  // ×3, ×9 and ×6 wait for going over the ten on Stigen (at most three weeks).
+  await expect(page.locator('.grid-cell.stage-soil')).toHaveCount(11);
+  await expect(page.locator('.garden-next')).toHaveText('×3 kommer när du kan gå över tiotalet på stigen.');
 
   // The first new fact of the day comes from ×4 ("Lika stora grupper" counts as known: ×2 sits).
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();

@@ -20,6 +20,8 @@ import { CHALLENGE_MIN_FACTS, canChallenge as challengeOpen } from '../challenge
 import { showChallenge } from './challenge';
 import { showDuel } from './duel';
 import { showFocusPicker } from './focus';
+import { gardenWaits } from '../held';
+import { waitText } from '../waits';
 import { gardenDeps, pack } from '../pack';
 import { gardenOfferedKey, showPlacementOffer } from './placement';
 
@@ -36,7 +38,10 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
   // The first time in the garden, with nothing planted yet: offer the start check (once).
   const fresh = Object.values(states).every((s) => s.status === 'new');
   if (fresh && !(await ctx.store.getSetting<boolean>(gardenOfferedKey(profile)))) return showPlacementOffer(ctx, profile);
-  const unlockedUnits = new Set(engine.unlockedUnits(states, meta));
+  // Tables that wait for their part on Stigen are not dug yet (docs/PLAN-HUNDRA.md).
+  const waits = await gardenWaits(ctx, profile, { states, meta }, engine);
+  const unlockedUnits = new Set(engine.unlockedUnits(states, meta, undefined, waits.held));
+  const nextWaiting = pack.units.find((u) => waits.waitingNow.includes(u.id));
   const unlockedItemIds = new Set(pack.units.filter((u) => unlockedUnits.has(u.id)).flatMap((u) => u.itemIds));
   const asleep = engine.dailyDone(meta);
   // Trädgårdens koll comes first on the days it is due (about every seventh play day in the garden).
@@ -130,7 +135,11 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
       { class: 'garden-side' },
       info,
       // Before the first table: what comes first, so a bed of meadow is not a puzzle.
-      unlockedUnits.has('u2') ? null : h('p', { class: 'garden-next' }, icon('basket'), 'Först: lika stora grupper. Sedan planterar vi ×2.'),
+      unlockedUnits.has('u2')
+        ? nextWaiting
+          ? h('p', { class: 'garden-next' }, icon('lantern'), waitText(nextWaiting.id))
+          : null
+        : h('p', { class: 'garden-next' }, icon('basket'), 'Först: lika stora grupper. Sedan planterar vi ×2.'),
       h(
         'ul',
         { class: 'garden-counts', 'aria-label': 'Så här växer det' },

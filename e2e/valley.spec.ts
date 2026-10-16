@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { answer, createProfile, enterGarden, nextStep, openParent, seedStates, switchPlayer } from './helpers';
 
-/** The valley is the child's start page, with the garden and the brook. */
+/** The valley is the child's start page, with the garden, the brook and Stigen. */
 
 test('a child chooses their name and lands in the valley, and walks to the garden and back', async ({ page }) => {
   await page.goto('/');
@@ -9,9 +9,11 @@ test('a child chooses their name and lands in the valley, and walks to the garde
   // A new child goes straight on from the start check into the garden, as before.
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.getByRole('heading', { name: 'Mattedalen' })).toBeVisible();
-  await expect(page.locator('.place')).toHaveCount(2);
+  await expect(page.locator('.place')).toHaveCount(3);
   await expect(page.getByRole('button', { name: 'Trädgården. Nya frön väntar i trädgården.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Bäcken. Nya stenar väntar vid bäcken.' })).toBeVisible();
+  // Stigen rests until going over the ten sits at the brook.
+  await expect(page.getByRole('button', { name: 'Stigen. Stigen öppnar när du kan gå över tiotalet vid bäcken.' })).toBeDisabled();
   await expect(page.locator('.valley-walker')).toHaveClass(/at-place-garden/);
   // Nothing planted yet: dug earth, and the new seeds wait in their packet.
   await expect(page.locator('.mini-cell .plant:not(.plant-soil)')).toHaveCount(0);
@@ -53,7 +55,7 @@ test('the valley shows what the child knows: plants in the bed and a sunflower p
 
   const thirsty = page.getByRole('button', { name: 'Trädgården. Trädgården är törstig.' });
   await expect(thirsty).toBeVisible();
-  await expect(page.locator('.place-status')).toHaveText(['Trädgården är törstig.', 'Nya stenar väntar vid bäcken.']);
+  await expect(page.locator('.place-status')).toHaveText(['Trädgården är törstig.', 'Nya stenar väntar vid bäcken.', 'Stigen öppnar när du kan gå över tiotalet vid bäcken.']);
   // The furthest grown plants first: one tree, then bushes.
   await expect(page.locator('.mini-cell .plant:not(.plant-soil)')).toHaveCount(8);
   await expect(page.locator('.place-garden .seed-packet')).toHaveCount(0);
@@ -120,7 +122,7 @@ test('the valley can be read aloud', async ({ page }) => {
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: 'Läs upp' }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual([
-    'sv-SE: Nya frön väntar i trädgården. Nya stenar väntar vid bäcken.',
+    'sv-SE: Nya frön väntar i trädgården. Nya stenar väntar vid bäcken. Stigen öppnar när du kan gå över tiotalet vid bäcken.',
   ]);
 });
 

@@ -349,7 +349,7 @@ async function importQr(ctx: AppContext, text: string): Promise<void> {
     if (!answer) return;
     const profile =
       answer === 'replace' && existing
-        ? { ...existing, avatar: snap.avatar || existing.avatar, settings: { ...existing.settings, ...(snap.gardenOpen ? { gardenOpen: true } : {}) } }
+        ? { ...existing, avatar: snap.avatar || existing.avatar, settings: { ...existing.settings, ...(snap.gardenOpen ? { gardenOpen: true } : {}), ...(snap.pathOpen ? { pathOpen: true } : {}) } }
         : profileFromSnapshot(snap, crypto.randomUUID(), Date.now());
     await ctx.store.saveProfile(profile);
     for (const { place, states, meta } of restored) {

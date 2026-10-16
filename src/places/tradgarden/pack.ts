@@ -2,6 +2,7 @@ import { atLeast, systemClock, type ItemState } from '../../engine';
 import { createMultiplicationPack, GROUP_TASKS, groupId, tableFocusId } from '../../content/multiplication';
 import type { AppContext } from '../../shell/app';
 import type { GameDeps } from '../../shell/play';
+import { gardenWaits } from './held';
 
 /** Trädgården's content: the multiplication table 1–10, and delat med growing on it. */
 export const pack = createMultiplicationPack({ division: true });
@@ -22,5 +23,11 @@ export function knowsGroupsAlready(states: Record<string, ItemState>): Record<st
   return out;
 }
 
-/** Storage and pack for the engine, for one session or screen in the garden. */
-export const gardenDeps = (ctx: AppContext): GameDeps => ({ store: ctx.store, pack, share: 1 / ctx.places.length, prepare: knowsGroupsAlready });
+/** Storage and pack for the engine, for one session or screen in the garden. The tables wait for Stigen (`held.ts`). */
+export const gardenDeps = (ctx: AppContext): GameDeps => ({
+  store: ctx.store,
+  pack,
+  share: 1 / ctx.places.length,
+  prepare: knowsGroupsAlready,
+  held: async (profile, progress, engine) => (await gardenWaits(ctx, profile, progress, engine)).held,
+});

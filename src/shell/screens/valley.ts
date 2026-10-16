@@ -5,7 +5,7 @@ import { avatarIcon } from '../components/avatars';
 import { icon } from '../components/icons';
 import { scene } from '../components/scene';
 import { h, s } from '../dom';
-import { dayPlanKey, planDay, planHolds, rememberPlan, type DayPlan, type PlaceLoad } from '../dayPlan';
+import { dayPlanKey, planDay, planHolds, rememberPlan, restedYesterday, type DayPlan, type PlaceLoad } from '../dayPlan';
 import { placeIsOpen, type Place } from '../place';
 import { hasSwedishVoice, speak, speechSupported } from '../speech';
 import { showProfiles } from './profiles';
@@ -122,7 +122,8 @@ async function ensureDayPlan(ctx: AppContext, profile: Profile, open: PlaceLoad[
   const today = systemClock.today();
   const total = profile.settings.sessionMinutes;
   const saved = await ctx.store.getSetting<DayPlan>(dayPlanKey(profile.id));
-  const plan = planHolds(saved, today, total, open.map((p) => p.id)) ? saved : planDay(today, total, open);
+  const ids = open.map((p) => p.id);
+  const plan = planHolds(saved, today, total, ids) ? saved : planDay(today, total, open, restedYesterday(saved, today, ids));
   if (plan !== saved) await ctx.store.setSetting(dayPlanKey(profile.id), plan);
   rememberPlan(profile.id, plan);
   return plan;

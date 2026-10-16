@@ -4118,7 +4118,8 @@ h1:focus {
   width: clamp(100px, 30vw, 160px);
 }
 
-.place.mood-asleep .trail {
+.place.mood-asleep .trail,
+.place.mood-closed .trail {
   filter: saturate(0.6) brightness(0.8);
 }
 
@@ -4427,4 +4428,23 @@ h1:focus {
   .b10-svg {
     height: 72px;
   }
+}
+
+/* Tables that wait for Stigen, in the parent view: each with a way to open it now. */
+.waiting-tables {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.waiting-tables li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
 }

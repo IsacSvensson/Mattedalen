@@ -61,7 +61,8 @@ svår.
    tiotalen, ×3 och ×6 på att gå över ett tiotal, ×4 och ×7/×8 på att dubbla
    tvåsiffriga tal, och så vidare (se [Grafen](#grafen-mellan-platserna)). Det
    är samma regel som redan styr Bäckens delar och delat med: det som bygger på
-   något väntar tills det sitter.
+   något väntar tills det sitter. *Ändrat i H5:* en tabell väntar högst tre
+   veckor, se [Fynd från H5](#fynd-från-h5).
 3. **Gånger får en förståelsedel först: ”Lika stora grupper”.** Som Dela lika
    och Vågen: bedöms på rätt svar på olika dagar, aldrig på tid.
 4. **×2 kommer före ×10.** ×2 är dubblorna barnet just har lärt sig vid bäcken.
@@ -185,8 +186,8 @@ Tiokamrater, Över tiotalet ──▶ Över tiotalet ─────────
                                Tvåsiffrigt + tvåsiffrigt ────▶ Kvadrattal, ×7 och ×8
 ```
 
-Stigen öppnar när Över tiotalet sitter vid bäcken. I dag är det, tillsammans
-med dubblorna, villkoret för att Trädgården ska öppna.
+Stigen öppnar när Över tiotalet sitter vid bäcken. Trädgården öppnar redan när
+dubblorna sitter.
 
 ## Barn som redan spelar
 
@@ -231,7 +232,7 @@ med dubblorna, villkoret för att Trädgården ska öppna.
 | H2. Motorn **(klar)** | `heldUnitIds`, tester och simulering. |
 | H3. Stigens innehåll **(klar)** | Paketet: delar, fakta, former, räknestigar, felsvar. Bakom en flagga. |
 | H4. Stigen som plats **(klar)** | Skärmen med stolpar och lyktor, bilderna (stavar och kuber, tom tallinje, hundraplatta), kartan, föräldradelen. |
-| H5. Kopplingen | Tabellerna väntar på Stigen, raden i trädgården, startkoll, koll, QR och säkerhetskopior. Stigen slås på. |
+| H5. Kopplingen **(klar)** | Tabellerna väntar på Stigen, raden i trädgården, startkoll, koll, QR och säkerhetskopior. Stigen slås på. |
 | H6. Verifiering | e2e, skärmbilder i alla storlekar, dokumentation. |
 
 H1 kan byggas och släppas för sig. Den löser luckan om förståelse för gånger
@@ -323,14 +324,59 @@ direkt, även om Stigen dröjer.
   kartan, och säkerhetskopian tar med allt barnet har övat. Med flaggan kommer
   Stigen alltså med. Det prövas i H5.
 
+## Fynd från H5
+
+- **Simulering av hela dalen** (`tests/simulation/valley.ts`): ett simulerat
+  barn går på bäcken, i trädgården och på Stigen i ett år, med dagens plan som i
+  appen. Varje plats har sitt eget minne i modellen, så 40 + 30 får ingen hjälp av
+  4 + 3. Modellen är alltså försiktig.
+- **Hårda spärrar stoppade trädgården.** Om tabellerna väntar tills deras del på
+  Stigen sitter, hur länge det än tar, sitter ungefär hälften av gångerfakta efter
+  ett år för ett genomsnittligt barn (44–61 %), mot ungefär 90 % utan Stigen.
+  ×3, ×6 och ×9 hann inte börja alls.
+- **Därför ett tak:** en tabell väntar på Stigen högst tre veckor från den dag den
+  annars hade kunnat öppna (`WAIT_DAYS_MAX`).
+- **Det barnet visar i trädgården räknas.** Ett barn som kan ×5 kan halvera, så ×4
+  väntar inte på Dubbla och halvera. Det märktes i startkollen: ett barn som kan
+  ×2, ×10, ×5 och ×1 fick annars vänta på ×4.
+- **Med taket och den regeln** sitter 84–93 % av gångerfakta efter ett år (90–93 %
+  utan Stigen med samma barn), och 66–86 % efter ett halvår (84–90 %). Tabellerna
+  kommer i samma ordning som förut, några veckor senare. Kostnaden är mest att
+  dagen nu delas på tre platser.
+- **Stigen öppnar efter Över tiotalet vid bäcken**, som i planen. Vi prövade att
+  öppna den tidigare, när tiokamraterna och tio och några sitter. Då tog Stigen
+  tid från bäcken just när barnet lär sig gå över tiotalet där, trädgården
+  öppnade ungefär sex veckor senare och bara 35–42 % av gångerfakta satt efter
+  ett halvår.
+- **Ett genomsnittligt barn hinner sällan till Över tiotalet på Stigen** inom
+  ett år i modellen, eftersom Stigen bara får en del av dagen. ×3, ×6 och ×9
+  öppnar då genom taket. Ett starkt barn går över tiotalet på Stigen efter ungefär
+  16 veckor.
+- **Dagens plan med tre platser:** högst två platser om dagen, som förut. En plats
+  som vilade i går kommer först i dag. Annars valdes Stigen aldrig när den var
+  ny, eftersom inget väntade på repetition där.
+- **Stigens delar väntar på bäcken** (`BROOK_PREREQUISITES`), utan tak. När
+  Stigen öppnar efter Över tiotalet sitter det mesta redan vid bäcken. Det som
+  kan vänta är Dubbla och halvera, på dubblorna.
+- **Startkoll och koll** på Stigen fungerar som vid bäcken. Kollen har 14
+  uppgifter som dras från alla tal till 100.
+- **QR-koden** har en ny bit för att Stigen är öppen. Med alla tre platser och
+  alla fakta blir koden QR-version 14, mot 11 med två platser. Säkerhetskopian tar med
+  inställningen.
+- **Flaggan är borta.** Stigen finns för alla. Ett barn som inte har gått över
+  tiotalet vid bäcken ser Stigen vila på kartan med raden ”Stigen öppnar när du kan
+  gå över tiotalet vid bäcken.”
+
 ## Avgjorda frågor
 
 Avgjort enligt förslagen:
 
 1. **Namnet och bilden:** Stigen, med en stolpe vid varje tiotal och lyktor som
    tänds för delar som sitter.
-2. **Hårda spärrar:** nya tabeller väntar på sina delar på Stigen. Det som är
-   påbörjat stängs aldrig, och en vuxen kan öppna en tabell.
+2. **Spärrar:** nya tabeller väntar på sina delar på Stigen. Det som är
+   påbörjat stängs aldrig, och en vuxen kan öppna en tabell. *Ändrat i H5:*
+   väntan har ett tak på tre veckor, eftersom hårda spärrar stoppade trädgården
+   i simuleringen.
 3. **Trädgården öppnar efter dubblorna** vid bäcken.
 4. **×2 kommer före ×10.**
 5. **Talområdet är 0–100 nu.** 200 och 1000 kan bli en egen del senare.

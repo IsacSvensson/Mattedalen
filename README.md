@@ -7,13 +7,16 @@ bruk.
 
 > **Spela:** https://isacsvensson.github.io/Mattedalen/
 >
-> **Status:** Dalens karta är startsidan och har två platser: Bäcken (addition
-> och subtraktion inom 20), där ett nytt barn börjar, och Trädgården
-> (multiplikation och delat med), som öppnar senare. Delat med växer som
-> blommor och frukt på plantorna. Dagens tid delas efter vad som väntar på
-> repetition, och Bäckens koll och Trädgårdens koll mäter ungefär var sjunde
-> speldag vad barnet kan utan stöd. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
-> med hela dess historik. Härnäst kommer piloten, och inom 100 efter den, se
+> **Status:** Dalens karta är startsidan och har tre platser: Bäcken (addition
+> och subtraktion inom 20), där ett nytt barn börjar, Trädgården
+> (multiplikation och delat med), som öppnar när dubblorna sitter, och Stigen
+> (talen till 100), som öppnar när barnet kan gå över tiotalet vid bäcken.
+> Delat med växer som blommor och frukt på plantorna, och på Stigen tänds en
+> lykta för varje del. Trädgårdens tabeller väntar högst tre veckor på sin del på
+> Stigen. Dagens tid delas mellan högst två platser efter vad som väntar på
+> repetition, och varje plats har en koll som ungefär var sjunde speldag mäter
+> vad barnet kan utan stöd. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
+> med hela dess historik. Härnäst kommer piloten, se
 > [PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser).
 
 Mer att läsa:
@@ -31,7 +34,7 @@ Mer att läsa:
 - [docs/PLAN-HUNDRA.md](docs/PLAN-HUNDRA.md): förslag om talen till 100
   (Stigen) och en tydligare väg in i gånger, jämfört med hur skolan gör.
 - [docs/STIGEN.md](docs/STIGEN.md): Stigen, talen till 100: delar, former,
-  räknestigar, felsvar och platsen. Den syns bara med `?stigen` tills den slås på.
+  räknestigar, felsvar, platsen, öppningen, startkollen och kollen.
 
 ## Principer
 
@@ -123,7 +126,7 @@ src/
   places/
     tradgarden/             Trädgården: platsen, dess skärmar och dess del av föräldravyn
     backen/                 Bäcken: bron, tallinjen, tiotalsramen, vågen, skärmarna och föräldradelen
-    stigen/                 Stigen (talen till 100, bakom ?stigen): stolpar och lyktor, stavar och kuber, tom tallinje, hundraplatta
+    stigen/                 Stigen (talen till 100): stolpar och lyktor, stavar och kuber, tom tallinje, hundraplatta, startkoll och koll
 tests/
   engine/                   enhetstester för motorn (med ett glosor-paket)
   content/                  tester för innehållspaketen

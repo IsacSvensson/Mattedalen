@@ -19,6 +19,7 @@ export function transferOf(profile: Profile, packs: { pack: ContentPack; states:
     avatar: profile.avatar,
     sessionMinutes: profile.settings.sessionMinutes,
     gardenOpen: profile.settings.gardenOpen === true,
+    ...(profile.settings.pathOpen ? { pathOpen: true } : {}),
     ...(profile.settings.divisionSign && profile.settings.divisionSign !== 'fraction' ? { divisionSign: profile.settings.divisionSign } : {}),
     packs: packs.map(({ pack, states }) => ({ packId: pack.id, packVersion: pack.version, levels: pack.items.map((it) => levelOf(states[it.id])) })),
   };
@@ -51,7 +52,7 @@ export function progressFromSnapshot(snap: Pick<QrSnapshot, 'levels'>, engine: E
 }
 
 export function profileFromSnapshot(
-  snap: Pick<QrSnapshot, 'name' | 'avatar' | 'sessionMinutes'> & Pick<Partial<QrTransfer>, 'gardenOpen' | 'divisionSign'>,
+  snap: Pick<QrSnapshot, 'name' | 'avatar' | 'sessionMinutes'> & Pick<Partial<QrTransfer>, 'gardenOpen' | 'pathOpen' | 'divisionSign'>,
   id: string,
   now: number,
 ): Profile {
@@ -65,6 +66,7 @@ export function profileFromSnapshot(
       ...DEFAULT_SETTINGS,
       sessionMinutes: minutes,
       ...(snap.gardenOpen ? { gardenOpen: true } : {}),
+      ...(snap.pathOpen ? { pathOpen: true } : {}),
       ...(snap.divisionSign && snap.divisionSign !== 'fraction' ? { divisionSign: snap.divisionSign } : {}),
     },
   };

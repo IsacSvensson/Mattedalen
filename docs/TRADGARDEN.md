@@ -31,8 +31,38 @@ kopplade med `pairId`.
 Tabellerna är en graf (`TABLE_AFTER`): varje tabell öppnar när det dess
 strategier bygger på sitter. Nya fakta kommer ändå i ordningen ovan. ×2 kommer
 först eftersom det är dubblorna från bäcken; ×10 bygger på tiotal, som Stigen
-ska träna (se [PLAN-HUNDRA.md](PLAN-HUNDRA.md)). Varje fakta hör till den första
+tränar (se nedan). Varje fakta hör till den första
 enhet vars tabell den ingår i, så 2×10 lärs in med ×2, 3×7 med ×3 och 7×9 med ×9.
+
+### Tabellerna väntar på Stigen
+
+Räknestigarna räknar med tal upp till 100 (35 + 7, 60 − 6, 28 + 28). En tabell
+väntar därför på sin del på Stigen (`TABLES_WAIT` i `places/tradgarden/waits.ts`):
+
+| Tabell | Väntar på (Stigen) |
+|---|---|
+| ×10 | Hela tiotal |
+| ×5, ×4 | Dubbla och halvera |
+| ×3, ×9, ×6 | Över tiotalet |
+| Kvadrattalen, ×7 och ×8 | Tvåsiffrigt plus tvåsiffrigt |
+
+- En tabell väntar **högst tre veckor** (`WAIT_DAYS_MAX`) från den dag den annars
+  hade kunnat öppna. Simulerade barn visade att en väntan utan tak stoppar
+  trädgården i månader (se H5 i [PLAN-HUNDRA.md](PLAN-HUNDRA.md#fynd-från-h5)).
+  Dagen sparas per barn på enheten (`tableReady:<id>`). Den följer inte med i
+  säkerhetskopior eller QR-koder, så efter en flytt kan en tabell vänta upp till
+  tre veckor till.
+- **Det som är påbörjat stängs aldrig.** En tabell som redan är öppen, eller där
+  någon fakta är påbörjad, väntar inte. ×2 och ×1 väntar aldrig.
+- **Det barnet visar i trädgården räknas.** Sitter en tabell som behöver samma del
+  på Stigen, räknas delen som sittande. Ett barn som kan ×5 kan halvera, så ×4
+  väntar inte.
+- **I trädgården** står en rad under lådan om nästa tabell som väntar, till exempel
+  ”×6 kommer när du kan gå över tiotalet på stigen.”
+- **I föräldravyn** står de tabeller som väntar, var och en med en knapp för att
+  öppna den nu.
+- Väntan räknas ut av platsen (`held.ts`) och ges till motorn som `heldUnitIds`,
+  i passet, i startkollen och på skärmen. Motorn vet inget om Stigen.
 
 **Lika stora grupper** är en förståelsedel före ×2, som Dela lika och Vågen:
 korgar med lika många bär, upprepad addition (4 + 4 + 4 = 3 × 4), att hoppa i

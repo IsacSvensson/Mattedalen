@@ -31,6 +31,8 @@ import { engineFor, loadProgress } from '../../shell/play';
 import { factStats, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
 import { gardenDeps, pack } from './pack';
 import { gardenIsOpen } from './isOpen';
+import { gardenWaits, readyKey } from './held';
+import { OPENED_BY_ADULT, tableName, WAIT_DAYS_MAX, waitText } from './waits';
 import { showPlacementOffer } from './screens/placement';
 
 /** How delat med is written for this child; only once the garden has delat med. */
@@ -73,6 +75,7 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
   const today = systemClock.today();
   const lastPlayed = ownSessions.length ? ownSessions[ownSessions.length - 1]!.day : null;
   const open = await gardenIsOpen(ctx, profile, states);
+  const waits = await gardenWaits(ctx, profile, { states, meta }, engine);
 
   return h(
     'section',
@@ -80,6 +83,7 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
     h('h3', { id: 'place-garden-heading', class: 'place-heading' }, plantIcon('tree'), 'Trädgården'),
     h('p', { class: 'muted place-about' }, `${pack.title} 1–10, och delat med.`),
     open ? null : openingNote(save),
+    waits.waitingNow.length ? waitingTables(ctx, profile, waits.waitingNow) : null,
     h('h4', null, 'Lika stora grupper'),
     h('p', { class: 'muted' }, 'Vad gånger betyder, före ×2: grupper, upprepad addition och att hoppa i steg.'),
     groupSummary(states),
@@ -133,6 +137,47 @@ export async function gardenParentSection(ctx: AppContext, profile: Profile, sav
     h('h4', null, 'Startkoll'),
     h('p', { class: 'muted' }, 'En kort koll av vilka tabeller barnet redan kan. Den kan bara flytta fram barnet, aldrig bakåt.'),
     h('button', { class: 'soft-button', type: 'button', onclick: () => void showPlacementOffer(ctx, profile) }, 'Gör om startkollen'),
+  );
+}
+
+/**
+ * Tables that could open but wait for their part on Stigen (`TABLES_WAIT`), at
+ * most three weeks. A grown-up who knows the child is ready opens one here.
+ */
+function waitingTables(ctx: AppContext, profile: Profile, waiting: string[]): HTMLElement {
+  const list = h(
+    'ul',
+    { class: 'waiting-tables' },
+    pack.units
+      .filter((u) => waiting.includes(u.id))
+      .map((u) => {
+        const item: HTMLElement = h(
+          'li',
+          null,
+          h('span', null, waitText(u.id).replace(' när du kan', ' när barnet kan')),
+          h(
+            'button',
+            {
+              class: 'soft-button',
+              type: 'button',
+              onclick: async () => {
+                const key = readyKey(profile.id);
+                const ready = (await ctx.store.getSetting<Record<string, string>>(key)) ?? {};
+                await ctx.store.setSetting(key, { ...ready, [u.id]: OPENED_BY_ADULT });
+                item.replaceChildren(h('span', null, `${tableName(u.id)} är öppen.`));
+              },
+            },
+            `Öppna ${tableName(u.id)} nu`,
+          ),
+        );
+        return item;
+      }),
+  );
+  return h(
+    'div',
+    { class: 'notice garden-opening' },
+    h('p', null, `Tabellerna väntar på stigen tills det de bygger på sitter där, högst ${WAIT_DAYS_MAX / 7} veckor.`),
+    list,
   );
 }
 

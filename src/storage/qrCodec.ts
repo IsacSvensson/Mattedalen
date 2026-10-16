@@ -127,6 +127,8 @@ export interface QrTransfer {
   avatar: string;
   sessionMinutes: number;
   gardenOpen: boolean;
+  /** Stigen is open (bit 3 of the flags; older codes leave it out). */
+  pathOpen?: boolean;
   /** How "delat med" is written; the fraction bar when left out. */
   divisionSign?: 'fraction' | 'obelus' | 'slash';
   packs: QrPackLevels[];
@@ -142,7 +144,7 @@ export function encodeTransfer(t: QrTransfer): string {
   const bytes = [
     TRANSFER_VERSION,
     Math.max(0, Math.min(255, Math.round(t.sessionMinutes))),
-    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1),
+    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0),
     name.length,
     ...name,
     avatar.length,
@@ -201,7 +203,15 @@ export function decodeTransfer(text: string): QrTransfer {
   }
   if (i !== end) throw fail();
   const sign = SIGNS[(flags >> 1) & 3] ?? 'fraction';
-  return { name, avatar, sessionMinutes, gardenOpen: (flags & 1) === 1, ...(sign !== 'fraction' ? { divisionSign: sign } : {}), packs };
+  return {
+    name,
+    avatar,
+    sessionMinutes,
+    gardenOpen: (flags & 1) === 1,
+    ...((flags & 8) === 8 ? { pathOpen: true } : {}),
+    ...(sign !== 'fraction' ? { divisionSign: sign } : {}),
+    packs,
+  };
 }
 
 function truncateUtf8(s: string, max: number): Uint8Array {

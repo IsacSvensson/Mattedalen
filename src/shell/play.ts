@@ -44,6 +44,11 @@ export interface GameDeps {
    * next session.
    */
   prepare?: (states: Record<string, ItemState>) => Record<string, ItemState>;
+  /**
+   * Parts that wait for another place right now (`heldUnitIds`), e.g. a table
+   * in the garden that waits for its part on Stigen.
+   */
+  held?: (profile: Profile, progress: LoadedProgress, engine: Engine) => Promise<string[]>;
 }
 
 export { MIN_PLACE_MINUTES };
@@ -104,9 +109,11 @@ export class PlayController {
     if (mode === 'focus' && !focus) throw new Error('A focus session needs a focus set');
     const engine = engineFor(profile, deps);
     const { states, meta } = await loadProgress(profile, deps, engine);
+    const heldUnitIds = (await deps.held?.(profile, { states, meta }, engine)) ?? [];
     const session = engine.startSession({
       states,
       meta,
+      heldUnitIds,
       mode,
       focusItemIds: mode === 'focus' ? focus?.itemIds : undefined,
       durationMs: mode === 'daily' ? undefined : EXTRA_PRACTICE_MINUTES * 60_000,
@@ -207,12 +214,13 @@ export async function savePlacement(
   const clock = deps.clock ?? systemClock;
   const engine = engineFor(profile, deps);
   const loaded = await loadProgress(profile, deps, engine);
-  let placed = applyPlacement(part?.from ?? deps.pack, engine.config, result, loaded.states, loaded.meta, clock.today());
+  const held = (await deps.held?.(profile, loaded, engine)) ?? [];
+  let placed = applyPlacement(part?.from ?? deps.pack, engine.config, result, loaded.states, loaded.meta, clock.today(), held);
   if (part) {
     // A part of the pack: the open units are worked out on the whole pack.
     const states = part.adjust ? part.adjust(placed.states) : placed.states;
     const reached = [...loaded.meta.unlockedUnitIds, ...result.passedUnitIds, ...(result.failedUnitIds ?? [])];
-    placed = { states, meta: { ...loaded.meta, unlockedUnitIds: computeUnlocked(deps.pack.units, states, reached) } };
+    placed = { states, meta: { ...loaded.meta, unlockedUnitIds: computeUnlocked(deps.pack.units, states, reached, undefined, undefined, new Set(held)) } };
   }
   const now = clock.now();
   const sessionId = `placement-${now}`;

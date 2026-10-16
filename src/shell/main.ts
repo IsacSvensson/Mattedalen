@@ -5,7 +5,6 @@ import { tradgarden } from '../places/tradgarden';
 import { createProgressStore, importLegacyData, requestPersistence } from '../storage';
 import type { AppContext } from './app';
 import { plantSprite } from './components/plant';
-import { stigenEnabled } from './features';
 import { captureInstallPrompt, registerServiceWorker } from './pwa';
 import { showProfiles } from './screens/profiles';
 
@@ -23,8 +22,8 @@ async function start(): Promise<void> {
   const ctx: AppContext = {
     root,
     store,
-    // In map order: the garden first, as before; then the brook, and the path between them (while it is built, only with `?stigen`).
-    places: [tradgarden, backen, ...(stigenEnabled() ? [stigen] : [])],
+    // In map order: the garden first, as before; then the brook, and Stigen between them.
+    places: [tradgarden, backen, stigen],
     storageKind: kind,
     persist,
   };

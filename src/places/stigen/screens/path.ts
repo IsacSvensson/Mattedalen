@@ -9,7 +9,12 @@ import { showValley } from '../../../shell/screens/valley';
 import { genitive } from '../../../shell/words';
 import { currentPart, litCount, trail } from '../components/trail';
 import { lanterns, partProgress } from '../logic';
-import { pack, pathDeps } from '../pack';
+import { pack, pathDeps, pathHeld } from '../pack';
+import { pathCheckLaterKey } from '../check';
+import { showPathCheckOffer } from './check';
+import { offeredKey, showPathPlacementOffer } from './placement';
+import { checkDue } from '../../../shell/check';
+import { systemClock } from '../../../engine';
 import { showPathSession } from './session';
 
 /**
@@ -21,12 +26,22 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
   const deps = pathDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
-  const unlocked = new Set(engine.unlockedUnits(states, meta));
+  // The first time on Stigen, with nothing practised yet: offer the start check (once).
+  const fresh = Object.values(states).every((s) => s.status === 'new');
+  if (fresh && !(await ctx.store.getSetting<boolean>(offeredKey(profile)))) {
+    return showPathPlacementOffer(ctx, profile, () => showPath(ctx, profile));
+  }
+  const held = await pathHeld(ctx, profile);
+  const unlocked = new Set(engine.unlockedUnits(states, meta, undefined, held));
   const asleep = engine.dailyDone(meta);
   const lights = lanterns(pack, states, unlocked);
   const lit = litCount(lights);
   const parts = partProgress(pack, states, unlocked).filter((p) => p.open);
   const now = lights[currentPart(lights)];
+  // Stigens koll comes first on the days it is due (about every seventh play day on Stigen).
+  const checkFirst =
+    !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(pathCheckLaterKey(profile.id)));
+  const play = () => showPathSession(ctx, profile, 'daily');
 
   const actions = asleep
     ? h(
@@ -38,7 +53,7 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
     : h(
         'div',
         { class: 'garden-actions' },
-        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showPathSession(ctx, profile, 'daily') }, icon('lantern'), 'Gå på stigen'),
+        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void (checkFirst ? showPathCheckOffer(ctx, profile, play) : play()) }, icon('lantern'), 'Gå på stigen'),
       );
 
   const view = h(

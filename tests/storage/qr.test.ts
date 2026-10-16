@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { createEngine, emptyState, ManualClock, seededRng, type ItemState } from '../../src/engine';
 import { createAdditionPack } from '../../src/content/addition';
 import { createMultiplicationPack } from '../../src/content/multiplication';
+import { createHundredPack } from '../../src/content/hundred';
 import {
   base45Decode,
   base45Encode,
@@ -167,6 +168,30 @@ describe('a child with every place (MD1)', () => {
     const engine = createEngine({ pack: addition, clock, rng: seededRng(1) });
     const restored = progressFromSnapshot(t.packs[1]!, engine, clock.today());
     for (const it of addition.items) expect(levelOf(restored.states[it.id]), it.id).toBe(levelOf(brook[it.id]));
+  });
+
+  it('holds Stigen too, with the whole garden, and says whether Stigen is open', () => {
+    const garden = createMultiplicationPack({ division: true });
+    const hundred = createHundredPack();
+    const text = encodeTransfer(
+      transferOf({ ...profile, settings: { ...profile.settings, gardenOpen: true, pathOpen: true } }, [
+        { pack: garden, states: mixed(garden) },
+        { pack: addition, states: mixed(addition) },
+        { pack: hundred, states: mixed(hundred) },
+      ]),
+    );
+    // Three places with every item, still a code a phone camera reads from a screen.
+    expect(qrSvgMarkup(text).version).toBeLessThanOrEqual(15);
+    const { data, size } = render(text);
+    const t = decodeTransfer(jsQR(data, size, size)!.data);
+    expect(t).toMatchObject({ gardenOpen: true, pathOpen: true });
+    expect(t.packs.map((b) => [b.packId, b.levels.length])).toEqual([
+      ['multiplication', garden.items.length],
+      ['addition', addition.items.length],
+      ['hundred', hundred.items.length],
+    ]);
+    // An older code (no Stigen bit) reads as Stigen not opened by a grown-up.
+    expect(decodeTransfer(encodeTransfer(transferOf(profile, [{ pack: addition, states: mixed(addition) }]))).pathOpen).toBeUndefined();
   });
 
   it('opens a started unit and what it builds on, not every earlier unit', () => {

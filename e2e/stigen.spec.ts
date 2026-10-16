@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, answerDerive, createProfile, nextStep, openParent, seedStates, type SeedState } from './helpers';
+import { answer, answerDerive, createProfile, nextStep, openParent, openPath, seedStates, solve, type SeedState } from './helpers';
 
 /**
- * Stigen, the numbers to 100 (docs/STIGEN.md). While it is built it shows
- * only on a device that has opened the app with `?stigen`.
+ * Stigen, the numbers to 100 (docs/STIGEN.md): it opens when going over the
+ * ten sits at the brook, or when a grown-up opens it.
  */
 test.setTimeout(60_000);
 test.beforeEach(async ({ page }) => {
@@ -20,12 +20,13 @@ const WHOLE_TENS = [
   ...['50-20', '40-20', '70-30', '90-20', '80-50', '60-30', '100-40', '100-70'],
 ];
 
-/** A child at the brook, with Stigen shown on this device. */
+/** A child at the brook, with Stigen opened by a grown-up. */
 async function newChild(page: Page, name: string): Promise<void> {
-  await page.goto('/?stigen');
+  await page.goto('/');
   await createProfile(page, name, 'brook');
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: `${name}s bäck` })).toBeVisible();
+  await openPath(page, name);
 }
 
 async function toPath(page: Page, states: Record<string, SeedState>, unlockedUnitIds: string[]): Promise<void> {
@@ -33,6 +34,10 @@ async function toPath(page: Page, states: Record<string, SeedState>, unlockedUni
   await page.goto('/');
   await page.locator('.profile-tile').first().click();
   await page.getByRole('button', { name: /^Stigen\./ }).click();
+  // The start check is offered the first time; these children start from the beginning.
+  const offer = page.getByRole('heading', { name: 'Kan du redan talen till 100?' });
+  await expect(offer.or(page.locator('.path-trail'))).toBeVisible();
+  if (await offer.isVisible()) await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.locator('.path-trail')).toBeVisible();
 }
 
@@ -46,23 +51,95 @@ async function playUntil(page: Page, stop: ReturnType<Page['locator']>, max = 40
   await expect(stop).toBeVisible();
 }
 
-test('Stigen is only on the map of a device that asked for it', async ({ page }) => {
+test('Stigen rests on the map until going over the ten sits at the brook, or a grown-up opens it', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Bo', 'brook');
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await page.getByRole('button', { name: 'Till dalen' }).click();
-  await expect(page.locator('.place')).toHaveCount(2);
-  await page.goto('/?stigen');
-  await page.locator('.profile-tile').first().click();
-  await expect(page.getByRole('button', { name: 'Stigen. Nya lyktor väntar på stigen.' })).toBeVisible();
-  // Remembered on the device, and turned off again with ?stigen=0.
-  await page.goto('/');
-  await page.locator('.profile-tile').first().click();
-  await expect(page.locator('.place')).toHaveCount(3);
-  await page.goto('/?stigen=0');
-  await page.locator('.profile-tile').first().click();
-  await expect(page.locator('.place')).toHaveCount(2);
+  const path = page.getByRole('button', { name: 'Stigen. Stigen öppnar när du kan gå över tiotalet vid bäcken.' });
+  await expect(path).toBeDisabled();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await openParent(page);
+  const section = page.getByRole('region', { name: /^Stigen/ });
+  await section.getByRole('button', { name: 'Öppna Stigen nu' }).click();
+  await expect(section).toContainText('Stigen är öppen.');
+  await page.getByRole('button', { name: /Tillbaka|Stäng/ }).first().click();
+  await page.locator('.profile-tile', { hasText: 'Bo' }).click();
+  await page.getByRole('button', { name: 'Stigen. Nya lyktor väntar på stigen.' }).click();
+  await expect(page.getByRole('heading', { name: 'Kan du redan talen till 100?' })).toBeVisible();
 });
+
+test('the start check takes a child who knows the numbers to 100 along the path', async ({ page }) => {
+  await newChild(page, 'Ada');
+  await page.locator('.profile-tile').first().click();
+  await page.getByRole('button', { name: /^Stigen\./ }).click();
+  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  // Every answer right (as written, with its blank), on the stones of the number pad.
+  const done = page.getByRole('heading', { name: 'Bra jobbat!' });
+  for (let i = 0; i < 60; i++) {
+    await expect(done.or(page.locator('.numpad-key:not([disabled])').first())).toBeVisible();
+    if (await done.isVisible()) break;
+    const prompt = (await page.locator('.placement-run .prompt').getAttribute('data-prompt'))!;
+    for (const d of String(solve(prompt))) await page.locator('.numpad-key', { hasText: new RegExp(`^${d}$`) }).click();
+    await page.getByRole('button', { name: 'Svara' }).click();
+  }
+  await expect(done).toBeVisible();
+  await expect(page.locator('.placement-summary')).toContainText('hela tiotal');
+  await page.getByRole('button', { name: 'Till stigen' }).click();
+  await expect(page.locator('.trail.large .tr-glass.lit').first()).toBeVisible();
+});
+
+test('Stigens koll comes on the second day on the path, and grown-ups see the result', async ({ page }) => {
+  await newChild(page, 'Eja');
+  await playedAt(page, 'hundred', '2026-02-01');
+  await toPath(page, all(WHOLE_TENS), ['tiotal', 'tiental']);
+  await page.getByRole('button', { name: 'Gå på stigen' }).click();
+  await expect(page.getByRole('heading', { name: 'Stigens koll' })).toBeVisible();
+  await page.getByRole('button', { name: 'Börja kollen' }).click();
+  let n = 0;
+  const thanks = page.getByRole('heading', { name: 'Tack!' });
+  for (;;) {
+    await expect(thanks.or(page.locator('.numpad-key:not([disabled])').first())).toBeVisible();
+    if (await thanks.isVisible()) break;
+    const prompt = (await page.locator('.question.check .prompt').getAttribute('data-prompt'))!;
+    for (const d of String(solve(prompt))) await page.locator('.numpad-key', { hasText: new RegExp(`^${d}$`) }).click();
+    await page.getByRole('button', { name: 'Svara' }).click();
+    n++;
+  }
+  expect(n).toBe(14);
+  await page.getByRole('button', { name: 'Till stigen' }).click();
+  await expect(page.locator('.intro-card').or(page.locator('.question'))).toBeVisible();
+  await page.getByRole('button', { name: 'Tillbaka till stigen' }).click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await openParent(page);
+  const row = page.getByRole('region', { name: /^Stigen/ }).locator('.check-results tbody tr');
+  await expect(row).toHaveCount(1);
+  await expect(row).toContainText('3 av 3');
+});
+
+/** A day on a place earlier on, as the session record a played day leaves. */
+async function playedAt(page: Page, packId: string, day: string): Promise<void> {
+  await page.evaluate(
+    async ({ packId, day }) => {
+      const db: IDBDatabase = await new Promise((r) => {
+        const q = indexedDB.open('mattedalen');
+        q.onsuccess = () => r(q.result);
+      });
+      const profiles: { id: string }[] = await new Promise((r) => {
+        const q = db.transaction('profiles').objectStore('profiles').getAll();
+        q.onsuccess = () => r(q.result);
+      });
+      await new Promise((r) => {
+        const tx = db.transaction('sessions', 'readwrite');
+        tx.objectStore('sessions').put({ id: `daily-${day}`, profileId: profiles[0]!.id, packId, mode: 'daily', day, startedAt: 1, endedAt: 2, answered: 12, correct: 10, introduced: [] });
+        tx.oncomplete = r;
+      });
+      db.close();
+    },
+    { packId, day },
+  );
+}
 
 test('the path has a post at every ten and a lantern for each part, lit when it sits', async ({ page }) => {
   await newChild(page, 'Cia');
