@@ -14,6 +14,14 @@ redan kan stegen, i stället för samma väg för alla.
 - **Hjälpen ska vara barnets.** Raden under ett nytt frö och efter ett fel visar
   samma väg för alla. Den kan peka på fakta barnet inte kan än.
 
+## Bilder
+
+![Telefon: räknestigen till 7 × 8 via 5 × 8 och 2 × 8, och föräldravyns Svåra just nu](img/raknestig.png)
+
+*Telefon, 360 px. Barnet kan 5 × 8 och 2 × 8 men inte 7 × 4. Till vänster går
+räknestigen till 7 × 8 via femmorna och tvåorna, och rektangeln är delad i fem
+och två rader. Till höger visar föräldravyn samma väg.*
+
 ## Hur
 
 - **Varje svår fakta får flera vägar** (`strategiesFor` i
@@ -46,7 +54,7 @@ redan kan stegen, i stället för samma väg för alla.
 |---|---|
 | S3a. Vägarna och valet **(klar)** | Flera vägar per fakta, motorn väljer, räknestigen, rektangeln och raden följer vägen. Enhetstester. |
 | S3b. Föräldravyn och simuleringen **(klar)** | Svåra just nu visar barnets väg. Simuleringen mäter hur ofta en räknestig kan ges, före och efter. |
-| S3c. Verifiering | E2e för ett barn som kan 5 × 8 och 2 × 8 men inte 4 × 7, skärmbilder, dokumenten. |
+| S3c. Verifiering **(klar)** | E2e för ett barn som kan 5 × 8 och 2 × 8 men inte 4 × 7, skärmbilder, dokumenten. |
 
 ## Fallgropar
 
@@ -102,3 +110,13 @@ Andelen svåra fakta i trädgården där spelet inte kan ge någon räknestig, s
 - **Antalet räknestigar** ändras nästan inte (499 mot 507 på ett år för ett
   genomsnittligt barn). Taket är tre per pass och en per fakta och dag, och det
   nås redan. Andelen gångerfakta som sitter ändras inte heller.
+
+## Fynd från S3c
+
+- **E2e-testet** (`e2e/derive.spec.ts`) ger ett barn 5 × 8 och 2 × 8 som
+  flytande, men inte 7 × 4 eller 7 × 3. 7 × 8 är svår. Räknestigen går
+  5 × 8 → 2 × 8 → 40 + 16 → 7 × 8, och föräldravyn visar samma väg.
+- **Räknestigen ser ut som förut,** med ett steg till när vägen har två kända
+  fakta (”Och det här kan du också”). Inget nytt att lära sig för barnet.
+- **De gamla testerna** för räknestigen går igenom oförändrade. Ett barn som kan
+  tabellens egen väg får den, som förut.

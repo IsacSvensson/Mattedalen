@@ -17,10 +17,9 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **S3. Räknestig efter det barnet kan** | Räknestigen är fast per fakta. | [PLAN-RAKNESTIG](PLAN-RAKNESTIG.md) | S3a och S3b klara, S3c nästa |
-| 2 | **R4. Tvåsiffrigt minus tvåsiffrigt** | 75 − 23 saknas på Stigen. | Plan skrivs | |
-| 3 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#faser) | |
-| 4 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
+| 1 | **R4. Tvåsiffrigt minus tvåsiffrigt** | 75 − 23 saknas på Stigen. | Plan skrivs | |
+| 2 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#faser) | |
+| 3 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
 ## Efter piloten
 
@@ -28,6 +27,8 @@ Piloten avgör ordningen.
 
 - Trädgårdens former: räcker färre steg för en 7-åring?
 - Ett litet antal vardagsproblem i trädgården.
+- Räknestig över platsernas gränser: ×2 via bäckens dubblor och ×10 via Stigens
+  tiotal ([PLAN-RAKNESTIG](PLAN-RAKNESTIG.md#fynd-från-s3b)).
 - Analoga spel: brädspel, kortlekar och ett kort i veckan för att spela med en
   vuxen ([överlämningen](OVERLAMNING-MATTEDALEN.md#ordning)).
 - Talen till 1000 som fler delar på Stigen.
@@ -59,6 +60,7 @@ i, med ”I dag” i hörnet i stället för en stor knapp (se
 | – | Siffertangenterna skriver svaret vid flerval. | [TRADGARDEN](TRADGARDEN.md) |
 | S1 | Växterna tar ett steg i taget. Svar med stöd räknas för sig i föräldravyn. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#fynd-från-s1) |
 | R3 (K1–K3) | Dalen som en karta att dra runt i, med platserna i full storlek och ”I dag” i hörnet. | [PLAN-DALEN](PLAN-DALEN.md) |
+| S3 | Räknestigen tar den väg barnet kan: flera vägar per svår gångerfakta, och föräldravyn visar barnets väg. | [PLAN-RAKNESTIG](PLAN-RAKNESTIG.md) |
 | K4 | Zooma ut på kartan: nypa eller knappen i hörnet, ut till hela dalen. | [PLAN-DALEN](PLAN-DALEN.md#fynd-från-k4) |
 | S2 | Tid och långsamma barn: ”Ge mer tid” för vuxna, föreslås när barnet svarar rätt men långsamt. Trädet under 4 s, och dagarna räknas inom 30 dagar. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#fynd-från-s2) |
 | F (F1–F3) | För vuxna: en kort översikt med Att göra och en rad per plats, och egna sidor för platserna, barnets inställningar, enheten och att hämta ett barn. | [PLAN-FORALDRAVYN](PLAN-FORALDRAVYN.md) |

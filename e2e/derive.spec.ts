@@ -87,3 +87,47 @@ test('the helper walks any derivation path', async ({ page }) => {
   await expect(page.locator('.derive-step.current .derive-prompt')).toHaveText('10 × 6');
   expect(await answerDerive(page)).toBe('9×6');
 });
+
+test('räknestigen takes the way the child knows: 7 × 8 through the fives and twos, not 7 × 4', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Ella');
+  await seedStates(page, {
+    '5x8': fluent,
+    '2x8': fluent,
+    '10x8': fluent,
+    '5x2': fluent,
+    '2x5': fluent,
+    '10x2': fluent,
+    // The table's own way, dubbla 7 × 4, is not known yet; nor is 7 × 5 + 7 × 3.
+    '7x4': { status: 'learning', box: 1, dueDay: '2026-02-09', introducedDay: '2026-01-30' },
+    '7x8': { status: 'learning', box: 1, dueDay: '2026-02-02', wrongDays: 2, introducedDay: '2026-01-28' },
+  });
+  await enterGarden(page, 'Ella');
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  for (let i = 0; i < 25 && !(await page.locator('.question.derive').isVisible()); i++) {
+    await expect(nextStep(page)).toBeVisible();
+    if (await page.locator('.question.derive').isVisible()) break;
+    await answer(page);
+  }
+  const step = page.locator('.derive-step.current');
+  await expect(step.locator('.derive-prompt')).toHaveText('5 × 8');
+  await page.keyboard.type('40');
+  await page.keyboard.press('Enter');
+  await expect(step.locator('.derive-prompt')).toHaveText('2 × 8');
+  await expect(step.locator('.derive-label')).toHaveText('Och det här kan du också');
+  await page.keyboard.type('16');
+  await page.keyboard.press('Enter');
+  await expect(step.locator('.derive-prompt')).toHaveText('40 + 16');
+  await page.keyboard.type('56');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.derive-step.current.target .derive-prompt')).toHaveText('7 × 8');
+  await page.keyboard.type('56');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.numpad-display.correct')).toBeVisible();
+
+  // Grown-ups see the same way.
+  await page.goto('/');
+  await openParent(page);
+  await parentPlace(page, 'Trädgården');
+  await expect(page.locator('.hard-list li', { hasText: '7 × 8 = 56' })).toContainText('7 × 8 = 5 × 8 + 2 × 8 = 40 + 16 = 56');
+});
