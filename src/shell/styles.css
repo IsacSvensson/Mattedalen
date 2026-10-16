@@ -2865,6 +2865,58 @@ h1:focus {
   color: var(--ink-soft);
 }
 
+/* What waits for a grown-up, on top of the overview: warm, so it is seen first. */
+.parent-todo {
+  background: var(--hint);
+}
+
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.todo-list p {
+  flex: 1 1 220px;
+  margin: 0;
+}
+
+/* How much of a place sits: a bar under its row, with the count beside it. */
+.known-bar {
+  display: block;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--divider);
+  overflow: hidden;
+}
+
+.known-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--leaf);
+}
+
+.known-text {
+  font-variant-numeric: tabular-nums;
+}
+
+.show-all {
+  margin-top: 4px;
+}
+
 /* All facts as heat maps, folded so the page stays short. */
 .all-facts {
   margin-top: 20px;

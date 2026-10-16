@@ -5,7 +5,7 @@ import { plantIcon } from '../../shell/components/plant';
 import type { Place, PlaceScene } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
 import { gardenDeps, pack } from './pack';
-import { GARDEN_ABOUT, gardenParentPage, gardenParentSettings } from './parent';
+import { GARDEN_ABOUT, gardenParentPage, gardenParentSettings, gardenParentSummary } from './parent';
 import { gardenIsOpen } from './isOpen';
 import { CLOSED_TEXT } from './opening';
 import { gardenPicture, knownTables, showGarden, startGarden } from './screens/garden';
@@ -24,6 +24,7 @@ export const tradgarden: Place = {
   icon: () => plantIcon('tree'),
   about: GARDEN_ABOUT,
   parentPage: gardenParentPage,
+  parentSummary: gardenParentSummary,
   parentSettings: gardenParentSettings,
 };
 

@@ -292,13 +292,17 @@ Vyn heter **För vuxna** och är uppdelad i sidor (se
 [PLAN-FORALDRAVYN.md](docs/PLAN-FORALDRAVYN.md)). Telefonens bakåtknapp går ett
 steg tillbaka, från en sida till översikten.
 
-- **Översikten** visar barnen överst, **den här veckan** (övade minuter per dag
-  under 14 dagar och hur många dagar barnet spelat), en rad per plats och raden
-  **Barnets inställningar**. Längst ner finns **Hämta ett barn** och **Den här
-  enheten**.
-- **En plats** har alltid samma ordning: läget, svåra just nu, de vanligaste
-  förväxlingarna, platsens koll, alla fakta som värmekartor (ihopfällda) och
-  sist startkollen (`Place.parentPage`).
+- **Översikten** visar barnen överst, sedan **Att göra för dig** när något
+  väntar på en vuxen: en plats som kan öppnas tidigare, en tabell som väntar på
+  stigen, ett nytt kollresultat och lagring som webbläsaren kan radera. Det går
+  inte att avfärda; en sak försvinner när den är gjord. Sedan **den här
+  veckan** (övade minuter per dag under 14 dagar och hur många dagar barnet
+  spelat), en rad per plats med vad barnet är på, det som är svårast och en
+  stapel för hur mycket som sitter (`Place.parentSummary`), och raden **Barnets
+  inställningar**. Längst ner finns **Hämta ett barn** och **Den här enheten**.
+- **En plats** har alltid samma ordning: läget, svåra just nu (högst fem, med
+  ”Visa alla”), de vanligaste förväxlingarna, platsens koll, alla fakta som
+  värmekartor (ihopfällda) och sist startkollen (`Place.parentPage`).
 - **Barnets inställningar** samlar allt barnet har: namn, djur, passlängd
   10–15 minuter och uppläsning, sedan platsernas egna val
   (`Place.parentSettings`): fritt svar, hur delat med skrivs och om tabellerna

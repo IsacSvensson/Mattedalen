@@ -212,3 +212,70 @@ test('the phone back button goes from a page to the overview, then out of "För 
   await page.goBack();
   await expect(page.getByRole('heading', { name: 'Vem spelar?' })).toBeVisible();
 });
+
+test('"Att göra för dig" lists what waits for a grown-up, and a thing goes when it is done', async ({ page }) => {
+  await createProfile(page, 'Alva', 'brook');
+  await page.getByRole('button', { name: 'Börja från början' }).click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await openParent(page);
+  const todo = page.getByRole('region', { name: 'Att göra för dig' });
+  await expect(todo.getByText(/^Stigen: Stigen är inte öppen än\./)).toBeVisible();
+  await expect(todo.getByText(/^Trädgården: Trädgården är inte öppen än\./)).toBeVisible();
+  // Done here: the garden opens, and it goes from the list. It cannot be put away otherwise.
+  await todo.getByRole('button', { name: 'Öppna Trädgården nu' }).click();
+  await expect(page.getByRole('region', { name: 'Att göra för dig' }).getByText(/^Trädgården:/)).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Att göra för dig' }).getByText(/^Stigen:/)).toBeVisible();
+  await expect(page.getByRole('button', { name: /Dölj|Avfärda/ })).toHaveCount(0);
+
+  // A row per place: what the child is on, and how much sits.
+  const brook = page.locator('.place-row', { has: page.locator('strong', { hasText: /^Bäcken$/ }) });
+  await expect(brook).toContainText('Nu: Ett mer, ett mindre');
+  await expect(brook.locator('.known-text')).toHaveText(/^0 av \d+ sitter$/);
+});
+
+test('a new check result waits in "Att göra" until its place has been looked at', async ({ page }) => {
+  await createProfile(page, 'Alva');
+  await switchPlayer(page);
+  // A check done in the garden.
+  await page.evaluate(async () => {
+    const db: IDBDatabase = await new Promise((r) => {
+      const q = indexedDB.open('mattedalen');
+      q.onsuccess = () => r(q.result);
+    });
+    const profiles: { id: string }[] = await new Promise((r) => {
+      const q = db.transaction('profiles').objectStore('profiles').getAll();
+      q.onsuccess = () => r(q.result);
+    });
+    await new Promise((r) => {
+      const tx = db.transaction('sessions', 'readwrite');
+      tx.objectStore('sessions').put({ id: 'check-1', profileId: profiles[0]!.id, packId: 'multiplication', mode: 'check', day: '2026-02-02', startedAt: 1, endedAt: 2, answered: 0, correct: 0, introduced: [] });
+      tx.oncomplete = r;
+    });
+    db.close();
+  });
+  await openParent(page);
+  const todo = page.getByRole('region', { name: 'Att göra för dig' });
+  await expect(todo.getByText('Trädgården: Ett nytt kollresultat för Alva.')).toBeVisible();
+  await todo.getByRole('button', { name: 'Visa kollen' }).click();
+  await expect(page.getByRole('region', { name: /^Trädgården/ }).getByRole('heading', { name: 'Trädgårdens koll' })).toBeVisible();
+  await parentBack(page);
+  await expect(page.getByText('Ett nytt kollresultat för Alva.')).toHaveCount(0);
+});
+
+test('"Svåra just nu" shows five at first, and all with "Visa alla"', async ({ page }) => {
+  await createProfile(page, 'Bo');
+  const hard = { status: 'learning', box: 1, wrongDays: 3, introducedDay: '2026-01-20' };
+  await seedStates(page, Object.fromEntries(['3x6', '3x7', '3x8', '4x6', '4x7', '4x8', '6x7'].map((id) => [id, hard])));
+  await page.goto('/');
+  await openParent(page);
+  // The overview names the hardest one, the smallest first.
+  await expect(page.locator('.place-row', { has: page.locator('strong', { hasText: /^Trädgården$/ }) })).toContainText('Svårast: 3 × 6 = 18');
+  await parentPlace(page, 'Trädgården');
+  const list = page.locator('.hard-list li');
+  await expect(list).toHaveCount(7);
+  await expect(page.locator('.hard-list li:visible')).toHaveCount(5);
+  await page.getByRole('button', { name: 'Visa alla 7' }).click();
+  await expect(page.locator('.hard-list li:visible')).toHaveCount(7);
+  await expect(page.getByRole('button', { name: /^Visa alla/ })).toHaveCount(0);
+});

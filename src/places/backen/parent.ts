@@ -7,7 +7,9 @@ import { heatmapView } from '../../shell/components/heatmap';
 import { icon } from '../../shell/components/icons';
 import { h } from '../../shell/dom';
 import { engineFor, loadProgress } from '../../shell/play';
-import { factStats, factStatsText, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
+import { factStats, factStatsText, formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
+import { limitedList } from '../../shell/components/limitedList';
+import type { PlaceSummary } from '../../shell/place';
 import { partProgress } from './logic';
 import { brookDeps, pack } from './pack';
 import { showBrook } from './screens/brook';
@@ -148,25 +150,46 @@ const label = (id: ItemId) => {
   return formatFact(f.op, f.x, f.y);
 };
 
-/** Facts the child finds hard right now, with the way the game helps, so grown-ups can use the same idea. */
-function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElement {
+/** Facts the child finds hard right now, easiest first, with the way the game helps. */
+function hardFacts(states: Record<ItemId, ItemState>, engine: Engine): { text: string; strategy: string | undefined }[] {
   const today = systemClock.today();
-  const hard = Object.values(states).filter((s) => !isEqualityId(s.itemId) && isStruggling(s, today, engine.config.support));
+  return Object.values(states)
+    .filter((s) => !isEqualityId(s.itemId) && isStruggling(s, today, engine.config.support))
+    .map((s) => {
+      const f = parseFactId(s.itemId);
+      return { text: `${formatFact(f.op, f.x, f.y)} = ${f.answer}`, strategy: engine.item(s.itemId).hints.find((x) => x.kind === 'strategy')?.text, size: f.answer };
+    })
+    .sort((x, y) => x.size - y.size || x.text.localeCompare(y.text));
+}
+
+/** Facts the child finds hard right now, with the way the game helps, so grown-ups can use the same idea. At most five, with "Visa alla". */
+function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElement {
+  const hard = hardFacts(states, engine);
   if (hard.length === 0) return h('p', { class: 'muted' }, 'Inga just nu.');
   return h(
     'div',
     null,
     h('p', { class: 'muted' }, 'Fel på flera dagar, eller länge utan att fastna. De här tas i steg från det barnet redan kan (räknestigen), med tallinjen.'),
-    h(
+    limitedList(
       'ul',
-      { class: 'hard-list' },
-      hard.map((s) => {
-        const f = parseFactId(s.itemId);
-        const strategy = engine.item(s.itemId).hints.find((x) => x.kind === 'strategy')?.text;
-        return h('li', null, h('strong', null, `${formatFact(f.op, f.x, f.y)} = ${f.answer}`), strategy ? ` – ${keepTerms(strategy)}` : '');
-      }),
+      'hard-list',
+      hard.map(({ text, strategy }) => h('li', null, h('strong', null, text), strategy ? ` – ${keepTerms(strategy)}` : '')),
     ),
   );
+}
+
+/** Bäcken in the overview of "För vuxna": what the child is on, what is hardest, and how much sits. */
+export async function brookParentSummary(ctx: AppContext, profile: Profile): Promise<PlaceSummary> {
+  const deps = brookDeps(ctx);
+  const engine = engineFor(profile, deps);
+  const { states, meta } = await loadProgress(profile, deps, engine);
+  const hardest = hardFacts(states, engine)[0];
+  return {
+    now: partNow(pack, states, new Set(engine.unlockedUnits(states, meta))),
+    hardest: hardest ? [hardest.text] : null,
+    ...knownOf(pack, states),
+    todo: [],
+  };
 }
 
 function confusionList(states: Record<ItemId, ItemState>): HTMLElement {

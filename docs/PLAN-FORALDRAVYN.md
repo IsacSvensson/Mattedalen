@@ -87,7 +87,7 @@ kollen. Till höger barnets inställningar på ett ställe.*
 | Fas | Innehåll |
 |---|---|
 | F1. Översikten och sidorna **(klar)** | Översikten, sidorna för plats, inställningar, enheten och hämta, bakåtknappen och delningen av `parentSection`. |
-| F2. Att göra och raderna | Listan över det som väntar på en vuxen, raderna per plats och ”Svårt just nu” med ”Visa alla”. |
+| F2. Att göra och raderna **(klar)** | Listan över det som väntar på en vuxen, raderna per plats och ”Svårt just nu” med ”Visa alla”. |
 | F3. Verifiering | Skärmbilder i alla storlekar, testerna, dokumenten. |
 
 ## Fynd från F1
@@ -105,6 +105,22 @@ kollen. Till höger barnets inställningar på ett ställe.*
   sida tills F2 för upp dem under ”Att göra”.
 - **Testerna** går till rätt sida med hjälpfunktioner (`parentPlace`,
   `parentSettings`, `parentLink`, `parentBack`, `closeParent`).
+
+## Fynd från F2
+
+- **Varje plats har nu `parentSummary`**: vad barnet är på, det som är svårast,
+  hur mycket som sitter och det som väntar på en vuxen där. Raden i översikten
+  och ”Att göra” bygger på den.
+- **Ett nytt kollresultat** räknas i skalet, inte i platserna: översikten
+  jämför antalet koller med hur många den vuxna har sett. Att öppna platsens
+  sida är att se resultatet.
+- **Lagringen** kommer upp under ”Att göra” när webbläsaren kan radera datan,
+  med knappen för att be om beständig lagring. Det gäller för hela enheten, så
+  den står utan platsnamn.
+- **Det svåraste** skrivs med barnets tecken för delat med, som på platsens
+  sida.
+- **Svårt just nu** visar högst fem, de lättaste först, och ”Visa alla 7” för
+  resten.
 
 Loggexporten i R5 läggs i den nya strukturen, under barnets ”Flytta eller
 spara”.

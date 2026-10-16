@@ -7,7 +7,7 @@ import { pathIsOpen } from './isOpen';
 import { MOOD_TEXT, pathMood } from './logic';
 import { CLOSED_TEXT } from './opening';
 import { pack, pathDeps, pathHeld } from './pack';
-import { PATH_ABOUT, pathParentPage } from './parent';
+import { PATH_ABOUT, pathParentPage, pathParentSummary } from './parent';
 import { pathPicture, showPath, startPath } from './screens/path';
 
 /** Stigen: the numbers to 100, on the path between the brook and the garden. */
@@ -23,6 +23,7 @@ export const stigen: Place = {
   icon: () => icon('lantern'),
   about: PATH_ABOUT,
   parentPage: (ctx, profile, save) => pathParentPage(ctx, profile, save),
+  parentSummary: (ctx, profile, save) => pathParentSummary(ctx, profile, save),
 };
 
 async function pathScene(ctx: AppContext, profile: Profile): Promise<PlaceScene> {

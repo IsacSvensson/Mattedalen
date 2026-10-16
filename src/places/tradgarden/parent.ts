@@ -26,9 +26,10 @@ import type { AppContext } from '../../shell/app';
 import { plantIcon } from '../../shell/components/plant';
 import { heatmapView } from '../../shell/components/heatmap';
 import { h } from '../../shell/dom';
-import type { SaveProfile } from '../../shell/place';
+import type { PlaceSummary, SaveProfile } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
-import { factStats, factStatsText, formatDay, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
+import { factStats, factStatsText, formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, type FactStats } from '../../shell/stats';
+import { limitedList } from '../../shell/components/limitedList';
 import { gardenDeps, pack } from './pack';
 import { gardenIsOpen } from './isOpen';
 import { gardenWaits, saveTableReady, tableReady } from './held';
@@ -243,16 +244,21 @@ function openingNote(save: SaveProfile): HTMLElement {
   return note;
 }
 
-/**
- * Facts the child finds hard right now, with the way the game helps
- * ("räknestigen"): grown-ups can use the same idea when talking about it.
- */
-function hardList(states: Record<string, ItemState>, config: EngineConfig, today: string, sign: DivisionSign): HTMLElement {
-  // Multiplications and divisions, by the size of the number (a "Dela lika" task is never timed, so never hard this way).
-  const hard = Object.values(states)
+/** Multiplications and divisions the child finds hard right now, by the size of the number (a "Dela lika" task is never timed, so never hard this way). */
+function hardFacts(states: Record<string, ItemState>, config: EngineConfig, today: string): { text: string; strategy: string; size: number }[] {
+  return Object.values(states)
     .filter((s) => (isFactId(s.itemId) || isDivisionId(s.itemId)) && isStruggling(s, today, config.support))
     .map((s) => hardFact(s.itemId))
     .sort((x, y) => x.size - y.size || x.text.localeCompare(y.text));
+}
+
+/**
+ * Facts the child finds hard right now, with the way the game helps
+ * ("räknestigen"): grown-ups can use the same idea when talking about it.
+ * At most five, with "Visa alla".
+ */
+function hardList(states: Record<string, ItemState>, config: EngineConfig, today: string, sign: DivisionSign): HTMLElement {
+  const hard = hardFacts(states, config, today);
   if (hard.length === 0) return h('p', { class: 'muted' }, 'Inga just nu.');
   return h(
     'div',
@@ -262,12 +268,51 @@ function hardList(states: Record<string, ItemState>, config: EngineConfig, today
       { class: 'muted' },
       'Fel på flera dagar, eller länge utan att fastna. De här tas i steg från det barnet redan kan (räknestigen), och kommer sedan tillbaka utan hjälp.',
     ),
-    h(
+    limitedList(
       'ul',
-      { class: 'hard-list' },
+      'hard-list',
       hard.map(({ text, strategy }) => h('li', null, h('strong', null, mathNodes(text, sign)), ' – ', mathNodes(keepTerms(strategy), sign))),
     ),
   );
+}
+
+/**
+ * Trädgården in the overview of "För vuxna": what the child is on, what is
+ * hardest, how much sits, and what waits for a grown-up: opening the garden
+ * early, and tables that wait for their part on Stigen.
+ */
+export async function gardenParentSummary(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<PlaceSummary> {
+  const deps = gardenDeps(ctx);
+  const engine = engineFor(profile, deps);
+  const { states, meta } = await loadProgress(profile, deps, engine);
+  const open = await gardenIsOpen(ctx, profile, states);
+  const waits = await gardenWaits(ctx, profile, { states, meta }, engine);
+  const sign = profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN;
+  const hardest = hardFacts(states, engine.config, systemClock.today())[0];
+  const todo: PlaceSummary['todo'] = [];
+  if (!open)
+    todo.push({
+      text: 'Trädgården är inte öppen än. Den öppnar av sig själv när dubblorna sitter vid bäcken.',
+      action: { label: 'Öppna Trädgården nu', run: () => save({ settings: { gardenOpen: true } }) },
+    });
+  for (const u of pack.units.filter((x) => waits.waitingNow.includes(x.id)))
+    todo.push({
+      text: `${waitText(u.id).replace(' när du kan', ' när barnet kan')} Den väntar högst ${WAIT_PLAY_DAYS} speldagar.`,
+      action: {
+        label: `Öppna ${tableName(u.id)} nu`,
+        run: async () => {
+          const stored = (await ctx.store.getProfile(profile.id)) ?? profile;
+          await saveTableReady(ctx, profile, { ...(await tableReady(ctx, stored)), [u.id]: OPENED_BY_ADULT });
+        },
+      },
+    });
+  return {
+    now: open ? partNow(pack, states, new Set(engine.unlockedUnits(states, meta, undefined, waits.held))) : null,
+    // Written as on the page, with the child's sign for delat med.
+    hardest: hardest ? mathNodes(hardest.text, sign) : null,
+    ...knownOf(pack, states),
+    todo,
+  };
 }
 
 function hardFact(id: string): { text: string; strategy: string; size: number } {

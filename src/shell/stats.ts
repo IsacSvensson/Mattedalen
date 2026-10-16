@@ -1,4 +1,4 @@
-import { addDays, type DayKey, type ItemId, type ItemState } from '../engine';
+import { addDays, atLeast, type ContentPack, type DayKey, type ItemId, type ItemState } from '../engine';
 import type { AttemptDaySummary, SessionRecord, StoredAttempt } from '../storage';
 
 export interface DayMinutes {
@@ -91,4 +91,21 @@ export function formatDay(day: DayKey): string {
   const [, m, d] = day.split('-').map(Number) as [number, number, number];
   const months = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
   return `${d} ${months[m - 1]}`;
+}
+
+/**
+ * What the child is on in a place, for grown-ups: the first open part (in the
+ * pack's order) where less than about 80 % sits, or the last open part.
+ */
+export function partNow(pack: ContentPack, states: Record<ItemId, ItemState>, open: ReadonlySet<string>): string | null {
+  const parts = [...pack.units].sort((a, b) => a.order - b.order).filter((u) => open.has(u.id));
+  const sits = (id: ItemId) => atLeast(states[id]?.status ?? 'new', 'fluent');
+  const now = parts.find((u) => u.itemIds.filter(sits).length < 0.8 * u.itemIds.length) ?? parts.at(-1);
+  return now?.title ?? null;
+}
+
+/** How much of a place sits: facts at least fluent, of all its facts. */
+export function knownOf(pack: ContentPack, states: Record<ItemId, ItemState>): { known: number; total: number } {
+  const known = pack.items.filter((it) => atLeast(states[it.id]?.status ?? 'new', 'fluent')).length;
+  return { known, total: pack.items.length };
 }

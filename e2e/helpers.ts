@@ -357,9 +357,12 @@ export async function parentLink(page: Page, title: 'Hämta ett barn' | 'Den hä
 
 /** Leaves "För vuxna" for the list of players, from the overview or a page of it. */
 export async function closeParent(page: Page): Promise<void> {
+  const close = page.getByRole('button', { name: 'Stäng föräldravyn' });
   const back = page.locator('.parent-page').getByRole('button', { name: 'Tillbaka' });
-  if (await back.isVisible()) await back.click();
-  await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+  await expect(close.or(back)).toBeVisible();
+  // A page may go back to the overview by itself (after a child is brought in): then there is no way back to press.
+  if (await back.isVisible()) await back.click({ timeout: 2000 }).catch(() => undefined);
+  await close.click();
 }
 
 /** In "För vuxna": back from a page to the overview. */

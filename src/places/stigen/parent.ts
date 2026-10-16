@@ -10,7 +10,9 @@ import type { AppContext } from '../../shell/app';
 import { icon } from '../../shell/components/icons';
 import { h } from '../../shell/dom';
 import { engineFor, loadProgress } from '../../shell/play';
-import { formatDay, STATUS_TEXT, topConfusions } from '../../shell/stats';
+import { formatDay, knownOf, partNow, STATUS_TEXT, topConfusions } from '../../shell/stats';
+import { limitedList } from '../../shell/components/limitedList';
+import type { PlaceSummary } from '../../shell/place';
 import { partProgress } from './logic';
 import { pack, pathDeps, pathHeld } from './pack';
 import { keepTerms } from '../../shell/words';
@@ -108,23 +110,49 @@ function openingNote(save: SaveProfile): HTMLElement {
 }
 
 /** Tasks the child finds hard right now, with the way the game helps. */
-function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElement {
+function hardTasks(states: Record<ItemId, ItemState>, engine: Engine): { text: string; strategy: string | undefined }[] {
   const today = systemClock.today();
-  const hard = Object.values(states).filter((s) => isStruggling(s, today, engine.config.support));
+  return Object.values(states)
+    .filter((s) => isStruggling(s, today, engine.config.support))
+    .map((s) => ({ text: taskWithAnswer(parseTaskId(s.itemId)), strategy: engine.item(s.itemId).hints.find((x) => x.kind === 'strategy')?.text }));
+}
+
+/** Tasks the child finds hard right now, with the way the game helps. At most five, with "Visa alla". */
+function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElement {
+  const hard = hardTasks(states, engine);
   if (hard.length === 0) return h('p', { class: 'muted' }, 'Inga just nu.');
   return h(
     'div',
     null,
     h('p', { class: 'muted' }, 'Fel på flera dagar, eller länge utan att fastna. De här tas i steg via tiotalet (räknestigen), med en tom tallinje.'),
-    h(
+    limitedList(
       'ul',
-      { class: 'hard-list' },
-      hard.map((s) => {
-        const strategy = engine.item(s.itemId).hints.find((x) => x.kind === 'strategy')?.text;
-        return h('li', null, h('strong', null, taskWithAnswer(parseTaskId(s.itemId))), strategy ? ` – ${keepTerms(strategy)}` : '');
-      }),
+      'hard-list',
+      hard.map(({ text, strategy }) => h('li', null, h('strong', null, text), strategy ? ` – ${keepTerms(strategy)}` : '')),
     ),
   );
+}
+
+/** Stigen in the overview of "För vuxna": what the child is on, what is hardest, how much sits, and opening it early. */
+export async function pathParentSummary(ctx: AppContext, profile: Profile, save: SaveProfile): Promise<PlaceSummary> {
+  const deps = pathDeps(ctx);
+  const engine = engineFor(profile, deps);
+  const { states, meta } = await loadProgress(profile, deps, engine);
+  const hardest = hardTasks(states, engine)[0];
+  const open = await pathIsOpen(ctx, profile);
+  return {
+    now: open ? partNow(pack, states, new Set(engine.unlockedUnits(states, meta, undefined, await pathHeld(ctx, profile)))) : null,
+    hardest: hardest ? [hardest.text] : null,
+    ...knownOf(pack, states),
+    todo: open
+      ? []
+      : [
+          {
+            text: 'Stigen är inte öppen än. Den öppnar av sig själv när barnet kan gå över tiotalet vid bäcken.',
+            action: { label: 'Öppna Stigen nu', run: () => save({ settings: { pathOpen: true } }) },
+          },
+        ],
+  };
 }
 
 function confusionList(states: Record<ItemId, ItemState>): HTMLElement {

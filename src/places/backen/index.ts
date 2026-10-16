@@ -6,7 +6,7 @@ import type { Place, PlaceScene } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
 import { bridgeStones, brookMood, MOOD_TEXT, type BrookMood } from './logic';
 import { brookDeps, pack } from './pack';
-import { BROOK_ABOUT, brookParentPage } from './parent';
+import { BROOK_ABOUT, brookParentPage, brookParentSummary } from './parent';
 import { archBridge } from './components/bridge';
 import { brookPicture, showBrook, startBrook } from './screens/brook';
 
@@ -21,6 +21,7 @@ export const backen: Place = {
   icon: () => icon('steps'),
   about: BROOK_ABOUT,
   parentPage: (ctx, profile) => brookParentPage(ctx, profile),
+  parentSummary: (ctx, profile) => brookParentSummary(ctx, profile),
 };
 
 async function brookScene(ctx: AppContext, profile: Profile): Promise<PlaceScene> {
