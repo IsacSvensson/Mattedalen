@@ -101,7 +101,7 @@ och ”I dag” visar vad som återstår.*
 | Fas | Innehåll |
 |---|---|
 | K1. Kartan **(klar)** | Kartan med platserna i full storlek, valvbron, bäcken och stenarna, dra runt på telefon, hela dalen på breda skärmar, pilar i kanten, startläge vid dagens plats. Ersätter scenerna från R3a. |
-| K2. I dag och vägen tillbaka | Solen i hörnet och kortet ”I dag” som startar passet. Tillbaka från en plats leder till kartan vid samma plats. |
+| K2. I dag och vägen tillbaka **(klar)** | Solen i hörnet och kortet ”I dag” som startar passet. Tillbaka från en plats leder till kartan vid samma plats. |
 | K3. Verifiering | Skärmbilder i alla storlekar, tester för att dra, pilar, ”I dag” och skärmläsare, dokumenten. |
 
 ## Fynd från K1
@@ -117,6 +117,20 @@ och ”I dag” visar vad som återstår.*
 - **Stigen på kartan har ingen ram av himmel.** Ramen hör till stigens egen sida.
 - **Pilarna** prövas i ett test i många lägen på kartan: ingen pil ligger på en
   annan, på rubriken eller utanför skärmen.
+
+## Fynd från K2
+
+- **Varje plats har nu `start`**, som börjar dagens pass på samma sätt som
+  knappen på platsens sida: startkollen första gången, kollen när den är dags.
+  Knappen på sidan och raden i ”I dag” använder samma funktion.
+- **”I dag” visar ingen siffra,** inte heller i texten. Ett test kontrollerar
+  det.
+- **Kortet tar själv fokus när det öppnas,** inte första raden. Annars lyste
+  första raden upp som vald efter ett tryck på solen.
+- **Tillbaka från en plats står kartan där,** och djuret står vid den platsen.
+  Dagens plats gäller när barnet kommer från ”Vem spelar?”.
+- **På en telefon på 320 px** blir namnet ”Mattedalen” lite mindre, så att
+  solen i andra hörnet får plats.
 
 ## Vad vi prövade
 

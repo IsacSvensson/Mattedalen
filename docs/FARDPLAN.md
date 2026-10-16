@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **R3. Dalen som en karta att dra runt i** (K1–K3) | Platserna blev små symboler på den gamla kartan, och scenerna i R3a tappade dalen. | [PLAN-DALEN](PLAN-DALEN.md) | K1 klar, K2 nästa |
+| 1 | **R3. Dalen som en karta att dra runt i** (K1–K3) | Platserna blev små symboler på den gamla kartan, och scenerna i R3a tappade dalen. | [PLAN-DALEN](PLAN-DALEN.md) | K1–K2 klara, K3 nästa |
 | 2 | **F. Föräldravyn** (F1–F3) | Föräldravyn är en enda lång sida. Piloten behöver en vy som vuxna hittar i. | [PLAN-FORALDRAVYN](PLAN-FORALDRAVYN.md) | Plan klar |
 | 3 | **S2. Tid och långsamma barn** | Ett barn som svarar rätt men långsamt fastnar vid grodden. Måste avgöras före piloten. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#föreslagna-faser) | Simulering först |
 | 4 | **S3. Räknestig efter det barnet kan** | Räknestigen är fast per fakta. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#föreslagna-faser) | |

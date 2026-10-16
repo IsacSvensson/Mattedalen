@@ -31,10 +31,6 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
   }
   const asleep = engine.dailyDone(meta);
   const picture = brookPicture(states, new Set(engine.unlockedUnits(states, meta)));
-  // Bäckens koll comes first on the days it is due (about every seventh play day).
-  const checkFirst =
-    !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(checkLaterKey(profile.id)));
-  const play = () => showBrookSession(ctx, profile, 'daily');
 
   const actions = asleep
     ? h(
@@ -46,7 +42,7 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
     : h(
         'div',
         { class: 'garden-actions' },
-        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void (checkFirst ? showCheckOffer(ctx, profile, play) : play()) }, icon('steps'), 'Hoppa på stenarna'),
+        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void startBrook(ctx, profile) }, icon('steps'), 'Hoppa på stenarna'),
       );
 
   const view = h(
@@ -60,7 +56,7 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
         'div',
         { class: 'scene-title' },
         // The child's animal walks back to the valley, as in the garden.
-        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile) }, avatarIcon(profile.avatar)),
+        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile, { at: 'backen' }) }, avatarIcon(profile.avatar)),
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} bäck`),
       ),
     ),
@@ -69,6 +65,25 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
     h('div', { class: 'garden-side' }, picture.line, actions),
   );
   show(ctx, view);
+}
+
+/**
+ * Starts the day's session at the brook, as the button on its page does and
+ * as "I dag" in the valley does: the start check is offered the first time,
+ * and Bäckens koll comes first on the days it is due (about every seventh play day).
+ */
+export async function startBrook(ctx: AppContext, profile: Profile): Promise<void> {
+  const deps = brookDeps(ctx);
+  const engine = engineFor(profile, deps);
+  const { states, meta } = await loadProgress(profile, deps, engine);
+  const fresh = Object.values(states).every((s) => s.status === 'new');
+  if (fresh && !(await ctx.store.getSetting<boolean>(offeredKey(profile)))) {
+    return showBrookPlacementOffer(ctx, profile, () => showBrook(ctx, profile));
+  }
+  const play = () => showBrookSession(ctx, profile, 'daily');
+  const checkFirst =
+    !engine.dailyDone(meta) && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(checkLaterKey(profile.id)));
+  return checkFirst ? showCheckOffer(ctx, profile, play) : play();
 }
 
 /**

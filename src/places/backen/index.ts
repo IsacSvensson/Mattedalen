@@ -8,7 +8,7 @@ import { bridgeStones, brookMood, MOOD_TEXT, type BrookMood } from './logic';
 import { brookDeps, pack } from './pack';
 import { brookParentSection } from './parent';
 import { archBridge } from './components/bridge';
-import { brookPicture, showBrook } from './screens/brook';
+import { brookPicture, showBrook, startBrook } from './screens/brook';
 
 /** Bäcken: addition and subtraction within 20 on the stones over the brook, and the equal sign. */
 export const backen: Place = {
@@ -16,6 +16,7 @@ export const backen: Place = {
   name: 'Bäcken',
   pack,
   open: (ctx, profile) => showBrook(ctx, profile),
+  start: (ctx, profile) => startBrook(ctx, profile),
   scene: brookScene,
   parentSection: (ctx, profile) => brookParentSection(ctx, profile),
 };
@@ -37,7 +38,7 @@ async function brookScene(ctx: AppContext, profile: Profile): Promise<PlaceScene
     nameIcon: mood === 'asleep' ? icon('moon') : null,
     sunflowers: 0,
     landscapeText: null,
-    go: { label: 'Gå till bäcken', icon: 'steps' },
+    go: { label: 'Hoppa på stenarna', icon: 'steps' },
     due: engine.dueCount(states),
   };
 }

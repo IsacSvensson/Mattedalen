@@ -1267,6 +1267,175 @@ h1:focus {
   background: var(--card);
 }
 
+/* A narrow phone: the name a little smaller, so the sun in the other corner has room. */
+@media (max-width: 360px) {
+  .map-head h1 {
+    padding: 4px 12px;
+    font-size: 1.25rem;
+  }
+}
+
+/* "I dag" in the top right corner: a sun with a dot when something is left, and its card. */
+.today {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.today-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: var(--outline);
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
+  cursor: pointer;
+}
+
+.today-button .icon {
+  width: 34px;
+  height: 34px;
+}
+
+.today-button[aria-expanded='true'],
+.today-button:active {
+  transform: translateY(var(--press-depth));
+  box-shadow: none;
+}
+
+/* Something is left today: a small red dot, never a number. */
+.today-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--berry);
+}
+
+.today-card {
+  width: min(340px, calc(100vw - 24px));
+  padding: 14px 14px 12px;
+  border: var(--outline);
+  border-radius: var(--r-card);
+  background: var(--paper);
+  box-shadow: 0 14px 30px -10px rgba(50, 40, 20, 0.45);
+}
+
+.today-card:focus {
+  outline: none;
+}
+
+.today-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.today-head > .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.today-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.today-close {
+  width: 44px;
+  height: 44px;
+}
+
+.today-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-go {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: var(--outline);
+  border-radius: var(--r-tile);
+  background: var(--card);
+  box-shadow: 0 var(--press-depth) 0 var(--press-tone);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.today-go:active {
+  transform: translateY(var(--press-depth));
+  box-shadow: none;
+}
+
+.today-go-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.today-go-icon .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.today-go-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.today-go-text strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.today-go-text span {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.today-rest {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 4px 0;
+  color: var(--ink-soft);
+}
+
+.today-rest .icon {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
 /* The name on a small wooden sign on two posts, part of the landscape. */
 .place-name {
   --press-tone: var(--plank-edge);

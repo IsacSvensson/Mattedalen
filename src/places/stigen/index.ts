@@ -8,7 +8,7 @@ import { MOOD_TEXT, pathMood } from './logic';
 import { CLOSED_TEXT } from './opening';
 import { pack, pathDeps, pathHeld } from './pack';
 import { pathParentSection } from './parent';
-import { pathPicture, showPath } from './screens/path';
+import { pathPicture, showPath, startPath } from './screens/path';
 
 /** Stigen: the numbers to 100, on the path between the brook and the garden. */
 export const stigen: Place = {
@@ -16,6 +16,7 @@ export const stigen: Place = {
   name: 'Stigen',
   pack,
   open: (ctx, profile) => showPath(ctx, profile),
+  start: (ctx, profile) => startPath(ctx, profile),
   isOpen: (ctx, profile) => pathIsOpen(ctx, profile),
   closedText: CLOSED_TEXT,
   scene: pathScene,
@@ -39,7 +40,7 @@ async function pathScene(ctx: AppContext, profile: Profile): Promise<PlaceScene>
     nameIcon: mood === 'asleep' ? icon('moon') : null,
     sunflowers: 0,
     landscapeText: null,
-    go: { label: 'Gå till stigen', icon: 'lantern' },
+    go: { label: 'Gå på stigen', icon: 'lantern' },
     due: engine.dueCount(states),
   };
 }

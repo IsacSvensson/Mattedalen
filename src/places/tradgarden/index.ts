@@ -8,7 +8,7 @@ import { gardenDeps, pack } from './pack';
 import { gardenParentSection } from './parent';
 import { gardenIsOpen } from './isOpen';
 import { CLOSED_TEXT } from './opening';
-import { gardenPicture, knownTables, showGarden } from './screens/garden';
+import { gardenPicture, knownTables, showGarden, startGarden } from './screens/garden';
 import { gardenMood, MOOD_TEXT, type PlaceMood } from './valley';
 
 /** Trädgården: the multiplication table as a garden bed. */
@@ -17,6 +17,7 @@ export const tradgarden: Place = {
   name: 'Trädgården',
   pack,
   open: (ctx, profile) => showGarden(ctx, profile),
+  start: (ctx, profile) => startGarden(ctx, profile),
   scene: gardenScene,
   isOpen: (ctx, profile) => gardenIsOpen(ctx, profile),
   closedText: CLOSED_TEXT,
@@ -42,7 +43,7 @@ async function gardenScene(ctx: AppContext, profile: Profile): Promise<PlaceScen
     // Whole areas: one sunflower on the hill per table the child knows, as in the garden.
     sunflowers: known,
     landscapeText: known ? `Solrosor på kullen: ${known}, en för varje tabell du kan.` : null,
-    go: { label: 'Gå till trädgården', icon: 'can' },
+    go: { label: 'Vattna trädgården', icon: 'can' },
     due: engine.dueCount(states),
   };
 }

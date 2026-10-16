@@ -3,6 +3,7 @@ import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { avatarIcon } from '../components/avatars';
 import { icon } from '../components/icons';
+import { today as todayCard } from '../components/today';
 import { valleyMap } from '../components/valleyMap';
 import { h } from '../dom';
 import { dayPlanKey, planDay, planHolds, rememberPlan, restedYesterday, type DayPlan, type PlaceLoad } from '../dayPlan';
@@ -15,9 +16,11 @@ import { showProfiles } from './profiles';
  * (`components/valleyMap.ts`, docs/PLAN-DALEN.md). Only places that exist are
  * drawn, so nothing waits to be unlocked; a place that is not open yet rests on
  * the map. The map opens at today's place: the awake place with the most due
- * today (ties: the first in the valley). The child chooses where to go.
+ * today (ties: the first in the valley), or at the place the child comes back
+ * from (`at`). The child chooses where to go; "I dag" in the corner says what
+ * is left today and starts it.
  */
-export async function showValley(ctx: AppContext, profile: Profile): Promise<void> {
+export async function showValley(ctx: AppContext, profile: Profile, opts: { at?: string } = {}): Promise<void> {
   const maps = await placeMaps(ctx, profile);
   // The day's plan: at most two places, the time shared after what is due.
   const plan = await ensureDayPlan(ctx, profile, openLoads(maps));
@@ -33,9 +36,16 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
   const sunflowers = maps.reduce((n, m) => n + m.scene.sunflowers, 0);
   const voiceOn = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
   const spoken = maps.map(({ scene }) => scene.moodText).join(' ');
+  const at = maps.find((m) => m.place.id === opts.at) ?? today;
   const map = valleyMap(
     maps.map(({ place, scene, open }) => ({ id: place.id, name: place.name, open, scene, go: () => void go(place)() })),
-    { start: today.place.id, guide: avatarIcon(profile.avatar), sunflowers },
+    { start: at.place.id, guide: avatarIcon(profile.avatar), sunflowers },
+  );
+  // What is left today, today's place first; the places that rest today below.
+  const left = [...awake].sort((a, b) => b.scene.due - a.scene.due);
+  const card = todayCard(
+    left.map(({ place, scene }) => ({ icon: scene.go.icon, label: scene.go.label, note: scene.moodText, start: () => void place.start(ctx, profile) })),
+    maps.filter((m) => m.open && m.scene.mood === 'asleep').map(({ scene }) => ({ icon: icon('moon'), text: scene.moodText })),
   );
 
   const view = h(
@@ -52,6 +62,7 @@ export async function showValley(ctx: AppContext, profile: Profile): Promise<voi
         ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp', onclick: () => void speak(spoken) }, icon('speaker'))
         : null,
     ),
+    card,
     maps.map(({ scene }) => (scene.landscapeText ? h('p', { class: 'sr-only' }, scene.landscapeText) : null)),
   );
   show(ctx, view, () => map.cleanup());

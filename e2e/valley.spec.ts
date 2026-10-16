@@ -84,8 +84,13 @@ test('the valley shows what the child knows: plants in the bed and a sunflower p
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.getByRole('button', { name: 'Trädgården. Trädgården sover. Kom tillbaka i morgon!' })).toBeVisible();
   await expect(page.locator('.map-place.mood-asleep .map-sign .icon')).toHaveCount(1);
-  // The day now starts at the brook; the sleeping garden can still be visited.
-  await expect(page.locator('.map-place.here .map-sign')).toHaveText('Bäcken');
+  // Back from the garden, the map stands there; "I dag" now has only the brook left, and says the garden sleeps.
+  await expect(page.locator('.map-place.here .map-sign')).toHaveText('Trädgården');
+  await page.getByRole('button', { name: 'Det här kan du göra i dag' }).click();
+  const card = page.getByRole('dialog', { name: 'I dag' });
+  await expect(card.locator('.today-go strong')).toHaveText(['Hoppa på stenarna']);
+  await expect(card.locator('.today-rest')).toHaveText(['Trädgården sover. Kom tillbaka i morgon!']);
+  await page.keyboard.press('Escape');
   await enterGarden(page);
   await expect(page.getByText('Trädgården sover. Kom tillbaka i morgon!')).toBeVisible();
 });
@@ -253,4 +258,51 @@ test.describe('the map on a wide screen', () => {
     expect(bed.y + bed.height).toBeLessThanOrEqual(810);
     expect(await noPageScroll(page)).toBe(true);
   });
+});
+
+test('"I dag" in the corner says what is left today and starts it', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Alva');
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  // A sun with a dot: something is left today.
+  const sun = page.getByRole('button', { name: 'Det här kan du göra i dag' });
+  await expect(sun.locator('.today-dot')).toHaveCount(1);
+  const card = page.getByRole('dialog', { name: 'I dag' });
+  await expect(card).toBeHidden();
+  await sun.click();
+  await expect(card).toBeVisible();
+  // Today's place first: here nothing is due anywhere, so the first in the valley.
+  await expect(card.locator('.today-go strong')).toHaveText(['Hoppa på stenarna', 'Vattna trädgården']);
+  await expect(card).not.toContainText(/\d/);
+  // Escape and the close button put it away.
+  await page.keyboard.press('Escape');
+  await expect(card).toBeHidden();
+  await sun.click();
+  await card.getByRole('button', { name: 'Stäng' }).click();
+  await expect(card).toBeHidden();
+
+  // A row starts the day's session there: the first time at the brook, its start check is offered first.
+  await sun.click();
+  await card.getByRole('button', { name: /^Hoppa på stenarna/ }).click();
+  await expect(page.getByRole('heading', { name: 'Kan du redan lite plus och minus?' })).toBeVisible();
+  await page.getByRole('button', { name: 'Börja från början' }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas bäck' })).toBeVisible();
+  // Back to the map at the same place: the child's animal stands by the brook.
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await expect(page.locator('.map-place.here .map-sign')).toHaveText('Bäcken');
+
+  // In the garden the session starts at once.
+  await page.getByRole('button', { name: 'Det här kan du göra i dag' }).click();
+  await page.getByRole('dialog', { name: 'I dag' }).getByRole('button', { name: /^Vattna trädgården/ }).click();
+  await expect(page.locator('.session-progress')).toBeVisible();
+});
+
+test('back from a place, the map stands at that place', async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Alva');
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: /^Trädgården\./ }).click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await expect(page.locator('.map-place.here .map-sign')).toHaveText('Trädgården');
+  await expect(page.locator('.map-place.here .map-guide')).toHaveCount(1);
 });

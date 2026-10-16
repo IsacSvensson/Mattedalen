@@ -39,10 +39,6 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
   const fresh = Object.values(states).every((s) => s.status === 'new');
   if (fresh && !(await ctx.store.getSetting<boolean>(gardenOfferedKey(profile)))) return showPlacementOffer(ctx, profile);
   const asleep = engine.dailyDone(meta);
-  // Trädgårdens koll comes first on the days it is due (about every seventh play day in the garden).
-  const checkFirst =
-    !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(gardenCheckLaterKey(profile.id)));
-  const play = () => showSession(ctx, profile, 'daily');
 
   const sign = profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN;
   const info = h('p', { class: 'grid-info', 'aria-live': 'polite' }, ' ');
@@ -73,7 +69,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
         { class: 'garden-actions' },
         h(
           'button',
-          { class: 'big-button', type: 'button', autofocus: true, onclick: () => void (checkFirst ? showGardenCheckOffer(ctx, profile, play) : play()) },
+          { class: 'big-button', type: 'button', autofocus: true, onclick: () => void startGarden(ctx, profile) },
           icon('can'),
           'Vattna trädgården',
         ),
@@ -103,7 +99,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
         'div',
         { class: 'scene-title' },
         // The child's animal walks back to the valley; players are switched there.
-        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile) }, avatarIcon(profile.avatar)),
+        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile, { at: 'tradgarden' }) }, avatarIcon(profile.avatar)),
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} trädgård`),
       ),
     ),
@@ -124,6 +120,23 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
     ),
   );
   show(ctx, view);
+}
+
+/**
+ * Starts the day's session in the garden, as the button on its page does and
+ * as "I dag" in the valley does: the start check is offered the first time,
+ * and Trädgårdens koll comes first on the days it is due (about every seventh
+ * play day in the garden).
+ */
+export async function startGarden(ctx: AppContext, profile: Profile): Promise<void> {
+  const engine = engineFor(profile, gardenDeps(ctx));
+  const { states, meta } = await loadProgress(profile, gardenDeps(ctx), engine);
+  const fresh = Object.values(states).every((s) => s.status === 'new');
+  if (fresh && !(await ctx.store.getSetting<boolean>(gardenOfferedKey(profile)))) return showPlacementOffer(ctx, profile);
+  const play = () => showSession(ctx, profile, 'daily');
+  const checkFirst =
+    !engine.dailyDone(meta) && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(gardenCheckLaterKey(profile.id)));
+  return checkFirst ? showGardenCheckOffer(ctx, profile, play) : play();
 }
 
 /**

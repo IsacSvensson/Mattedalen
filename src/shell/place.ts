@@ -29,7 +29,7 @@ export interface PlaceScene {
   sunflowers: number;
   /** The same in words, for screen readers. */
   landscapeText: string | null;
-  /** The place's button, e.g. "Gå till trädgården". */
+  /** What the day's session is called in "I dag", e.g. "Vattna trädgården". */
   go: { label: string; icon: IconName };
   /** Items due for review today: the day's time is shared after this. */
   due: number;
@@ -45,6 +45,8 @@ export interface Place {
   pack: ContentPack;
   /** The place's own screen. */
   open(ctx: AppContext, profile: Profile): Promise<void>;
+  /** Starts the day's session there, with the start check or the check first when it is time ("I dag"). */
+  start(ctx: AppContext, profile: Profile): Promise<void>;
   /** The place's scene in the valley. */
   scene(ctx: AppContext, profile: Profile): Promise<PlaceScene>;
   /**

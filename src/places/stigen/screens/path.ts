@@ -35,10 +35,6 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
   const unlocked = new Set(engine.unlockedUnits(states, meta, undefined, held));
   const asleep = engine.dailyDone(meta);
   const picture = pathPicture(states, unlocked, avatarIcon(profile.avatar));
-  // Stigens koll comes first on the days it is due (about every seventh play day on Stigen).
-  const checkFirst =
-    !asleep && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(pathCheckLaterKey(profile.id)));
-  const play = () => showPathSession(ctx, profile, 'daily');
 
   const actions = asleep
     ? h(
@@ -50,7 +46,7 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
     : h(
         'div',
         { class: 'garden-actions' },
-        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void (checkFirst ? showPathCheckOffer(ctx, profile, play) : play()) }, icon('lantern'), 'Gå på stigen'),
+        h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void startPath(ctx, profile) }, icon('lantern'), 'Gå på stigen'),
       );
 
   const view = h(
@@ -64,7 +60,7 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
         'div',
         { class: 'scene-title' },
         // The child's animal walks back to the valley, as in the other places.
-        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile) }, avatarIcon(profile.avatar)),
+        h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile, { at: 'stigen' }) }, avatarIcon(profile.avatar)),
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} stig`),
       ),
     ),
@@ -73,6 +69,25 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
     h('div', { class: 'garden-side' }, picture.line, actions),
   );
   show(ctx, view);
+}
+
+/**
+ * Starts the day's session on Stigen, as the button on its page does and as
+ * "I dag" in the valley does: the start check is offered the first time, and
+ * Stigens koll comes first on the days it is due (about every seventh play day on Stigen).
+ */
+export async function startPath(ctx: AppContext, profile: Profile): Promise<void> {
+  const deps = pathDeps(ctx);
+  const engine = engineFor(profile, deps);
+  const { states, meta } = await loadProgress(profile, deps, engine);
+  const fresh = Object.values(states).every((s) => s.status === 'new');
+  if (fresh && !(await ctx.store.getSetting<boolean>(offeredKey(profile)))) {
+    return showPathPlacementOffer(ctx, profile, () => showPath(ctx, profile));
+  }
+  const play = () => showPathSession(ctx, profile, 'daily');
+  const checkFirst =
+    !engine.dailyDone(meta) && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(pathCheckLaterKey(profile.id)));
+  return checkFirst ? showPathCheckOffer(ctx, profile, play) : play();
 }
 
 /**

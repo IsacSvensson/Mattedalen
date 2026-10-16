@@ -101,8 +101,15 @@ full storlek (`src/shell/components/valleyMap.ts`, lägena i
 - **Navigering.** Kartan öppnar vid dagens plats: den plats som inte vilar och
   har mest att repetera i dag, vid lika den första. Där står barnets djur.
   Skylten och bilden leder till platsen. Djuret i platsens sidhuvud leder
-  tillbaka till dalen (”Till dalen”), och spelare byts med djuret uppe till
-  vänster i dalen. En ny spelare börjar vid bäcken, där startkollen erbjuds.
+  tillbaka till dalen (”Till dalen”), och då står kartan vid den platsen.
+  Spelare byts med djuret uppe till vänster i dalen. En ny spelare börjar vid
+  bäcken, där startkollen erbjuds.
+- **I dag** (`src/shell/components/today.ts`). Uppe till höger finns en sol med
+  en liten prick när något återstår i dag, aldrig en siffra. Ett tryck öppnar
+  ett litet kort med det som återstår, dagens plats först: ”Hoppa på stenarna”,
+  ”Gå på stigen”, ”Vattna trädgården”. En rad startar passet direkt
+  (`Place.start`), med startkollen första gången och kollen först när den är
+  dags. Platser som vilar står längst ner. När allt är gjort finns ingen sol.
 - **Dagens plan** (`src/shell/dayPlan.ts`). Passlängden i föräldravyn är hela
   dagens tid. Barnet besöker högst två platser om dagen och väljer själv
   ordningen. Varje plats får först 5 minuter, och resten delas efter hur mycket
