@@ -15,6 +15,7 @@ import { arrayView, partsOf } from '../components/arrayView';
 import { gardenDeps } from '../pack';
 import { showGarden } from './garden';
 import { showSessionEnd } from './sessionEnd';
+import { keepTerms } from '../../../shell/words';
 
 /** The square an item belongs to: a × b, or for ab ÷ b the rectangle of a rows of b. */
 function square(id: string): { a: number; b: number } {
@@ -48,7 +49,7 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
   /** The strategy, with delat med in the child's sign. */
   const strategyLine = (q: Question) => {
     const text = strategyText(q);
-    return text ? h('p', { class: 'strategy' }, mathNodes(text, profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN)) : null;
+    return text ? h('p', { class: 'strategy' }, mathNodes(keepTerms(text), profile.settings.divisionSign ?? DEFAULT_DIVISION_SIGN)) : null;
   };
   /** A division as its rectangle, built with fixed rows: 42 ÷ 6 is 6 in each row, how many rows? */
   const buildDivision = (q: Question, ready: () => void) => {

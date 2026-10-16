@@ -20,6 +20,7 @@ import { tenFrame } from '../components/tenFrame';
 import { brookDeps } from '../pack';
 import { showBrook } from './brook';
 import { showBrookEnd } from './sessionEnd';
+import { keepTerms } from '../../../shell/words';
 
 /** A session at the brook: hopping on the stones is answering questions. */
 export function showBrookSession(ctx: AppContext, profile: Profile, mode: SessionMode): Promise<void> {
@@ -73,7 +74,7 @@ function brookSession(ctx: AppContext, profile: Profile): SessionPlace {
         label: [icon('steps'), 'En ny sten'],
         spoken: `En ny sten. ${q.item.prompt}. ${spokenStops(stops)}`,
         body: h('div', { class: 'intro-pictures' }, numberLine({ stops, animate: true, onDone: ready }), frame),
-        after: [h('p', { class: 'intro-answer' }, `${q.item.prompt} = ${f.answer}`), strategy ? h('p', { class: 'strategy' }, strategy) : null],
+        after: [h('p', { class: 'intro-answer' }, `${q.item.prompt} = ${f.answer}`), strategy ? h('p', { class: 'strategy' }, keepTerms(strategy)) : null],
       };
     },
 

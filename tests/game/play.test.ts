@@ -5,6 +5,7 @@ import { DEFAULT_SETTINGS, MemoryProgressStore, type Profile } from '../../src/s
 import { EXTRA_PRACTICE_MINUTES, loadProgress, PlayController, type GameDeps } from '../../src/shell/play';
 import { genitive, knownTables } from '../../src/places/tradgarden/screens/garden';
 import { stageFor } from '../../src/shell/components/plant';
+import { keepTerms } from '../../src/shell/words';
 import { emptyState } from '../../src/engine';
 
 const profile: Profile = { id: 'p1', name: 'Alva', avatar: '🦊', createdAt: 0, settings: { ...DEFAULT_SETTINGS, sessionMinutes: 10 } };
@@ -166,6 +167,11 @@ describe('garden helpers', () => {
     expect(genitive('Alva')).toBe('Alvas');
     expect(genitive('Lars')).toBe('Lars');
     expect(genitive('Max')).toBe('Max');
+  });
+
+  it('keeps each term of a way of thinking on one line', () => {
+    expect(keepTerms('18 + 6 = 18 + 2 + 4 = 20 + 4 = 24.')).toBe('18\u00a0+\u00a06 = 18\u00a0+\u00a02\u00a0+\u00a04 = 20\u00a0+\u00a04 = 24.');
+    expect(keepTerms('52 − 6 = 52 − 2 − 4. 7 × 6 – nära!')).toBe('52\u00a0−\u00a06 = 52\u00a0−\u00a02\u00a0−\u00a04. 7\u00a0×\u00a06 – nära!');
   });
 });
 

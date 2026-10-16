@@ -34,6 +34,7 @@ import { gardenIsOpen } from './isOpen';
 import { gardenWaits, saveTableReady, tableReady } from './held';
 import { OPENED_BY_ADULT, tableName, WAIT_PLAY_DAYS, waitText } from './waits';
 import { showPlacementOffer } from './screens/placement';
+import { keepTerms } from '../../shell/words';
 
 /** How delat med is written for this child; only once the garden has delat med. */
 function divisionSignSetting(profile: Profile, save: SaveProfile): HTMLElement | null {
@@ -246,7 +247,7 @@ function hardList(states: Record<string, ItemState>, config: EngineConfig, today
     h(
       'ul',
       { class: 'hard-list' },
-      hard.map(({ text, strategy }) => h('li', null, h('strong', null, mathNodes(text, sign)), ' – ', mathNodes(strategy, sign))),
+      hard.map(({ text, strategy }) => h('li', null, h('strong', null, mathNodes(text, sign)), ' – ', mathNodes(keepTerms(strategy), sign))),
     ),
   );
 }

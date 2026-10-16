@@ -11,6 +11,7 @@ import { hundredChart } from '../components/hundredChart';
 import { pathDeps } from '../pack';
 import { showPath } from './path';
 import { showPathEnd } from './sessionEnd';
+import { keepTerms } from '../../../shell/words';
 
 /** A session on Stigen: walking from post to post is answering questions. */
 export function showPathSession(ctx: AppContext, profile: Profile, mode: SessionMode): Promise<void> {
@@ -92,7 +93,7 @@ function pathSession(ctx: AppContext, profile: Profile): SessionPlace {
       const build = buildTask(t);
       const answerLine = h('p', { class: 'intro-answer' }, taskWithAnswer(t));
       if (build) {
-        const after = [answerLine, h('p', { class: 'strategy' }, strategyOf(q) ?? '')];
+        const after = [answerLine, h('p', { class: 'strategy' }, keepTerms(strategyOf(q) ?? ''))];
         return {
           label: [icon('lantern'), unitOf(t) === 'tiental' ? 'Tiotal och ental' : 'Hela tiotal'],
           spoken: `${build.instruction} ${q.item.prompt}`,
@@ -109,7 +110,7 @@ function pathSession(ctx: AppContext, profile: Profile): SessionPlace {
         label: [icon('lantern'), 'Nytt på stigen'],
         spoken: `Nytt på stigen. ${q.item.prompt}.${line ? ` ${spokenStops(line.stops)}` : ''}`,
         body,
-        after: [answerLine, strategyOf(q) ? h('p', { class: 'strategy' }, strategyOf(q)!) : null],
+        after: [answerLine, strategyOf(q) ? h('p', { class: 'strategy' }, keepTerms(strategyOf(q)!)) : null],
       };
     },
 

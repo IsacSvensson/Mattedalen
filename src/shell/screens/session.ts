@@ -9,6 +9,7 @@ import { h, prefersReducedMotion, wait } from '../dom';
 import { PlayController, type GameDeps } from '../play';
 import { DEFAULT_DIVISION_SIGN, mathNodes, type DivisionSign } from '../divisionSign';
 import { hasSwedishVoice, speak, speechSupported, spokenText, stopSpeaking } from '../speech';
+import { keepTerms } from '../words';
 
 /** One step on a derivation path ("räknestigen"). Only the last step is the answer to the question. */
 export interface PathStep {
@@ -409,7 +410,7 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place
           h('p', { class: 'you-said' }, fb.given ? `Du svarade ${label(fb.given)}.` : 'Inget svar den här gången.', help.strategy ? ' Så här kan du tänka:' : ''),
           h('p', { class: `help-answer${isWords(answer) ? ' words' : ''}`, 'data-prompt': answer }, mathNodes(answer, divisionSign)),
           help.note ? h('p', { class: 'confusion-note' }, help.note) : null,
-          help.strategy ? h('p', { class: 'strategy' }, mathNodes(help.strategy, divisionSign)) : null,
+          help.strategy ? h('p', { class: 'strategy' }, mathNodes(keepTerms(help.strategy), divisionSign)) : null,
           help.visual ?? null,
         ),
         next,

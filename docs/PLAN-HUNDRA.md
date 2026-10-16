@@ -162,7 +162,7 @@ Tabellerna blir en graf, som Bäckens delar, i stället för en kedja:
 |---|---|---|
 | ×2 | Lika stora grupper | – |
 | ×10 | ×2 | Hela tiotal |
-| ×5 | ×10 | Dubbla och halvera |
+| ×5 | ×10 | – (*ändrat i R1*: femsteg kan de flesta barn) |
 | ×1 | ×2 | – |
 | ×4 | ×2 | Dubbla och halvera |
 | ×3 | ×2 | Över tiotalet |
@@ -181,13 +181,13 @@ gäller också mellan gånger och delat med.
 Bäcken                         Stigen                         Trädgården
 Tio och några ───────────────▶ Hela tiotal ──────────────────▶ ×10
 Dubblor och hälften ─────────────────────────────────────────▶ öppnar Trädgården
-                               Dubbla och halvera ───────────▶ ×5, ×4
+                               Dubbla och halvera ───────────▶ ×4
 Tiokamrater, Över tiotalet ──▶ Över tiotalet ────────────────▶ ×3, ×9, ×6
                                Tvåsiffrigt + tvåsiffrigt ────▶ Kvadrattal, ×7 och ×8
 ```
 
 Stigen öppnar när Över tiotalet sitter vid bäcken. Trädgården öppnar redan när
-dubblorna sitter.
+dubblorna sitter. Tabellerna väntar bara när Stigen är öppen (*ändrat i R2*).
 
 ## Barn som redan spelar
 
@@ -233,7 +233,7 @@ dubblorna sitter.
 | H3. Stigens innehåll **(klar)** | Paketet: delar, fakta, former, räknestigar, felsvar. Bakom en flagga. |
 | H4. Stigen som plats **(klar)** | Skärmen med stolpar och lyktor, bilderna (stavar och kuber, tom tallinje, hundraplatta), kartan, föräldradelen. |
 | H5. Kopplingen **(klar)** | Tabellerna väntar på Stigen, raden i trädgården, startkoll, koll, QR och säkerhetskopior. Stigen slås på. |
-| H6. Verifiering | e2e, skärmbilder i alla storlekar, dokumentation. |
+| H6. Verifiering **(klar)** | e2e, skärmbilder i alla storlekar, dokumentation. Se [PLAN-GRANSKNING.md](PLAN-GRANSKNING.md#fynd-från-h6). |
 
 H1 kan byggas och släppas för sig. Den löser luckan om förståelse för gånger
 direkt, även om Stigen dröjer.
@@ -290,7 +290,7 @@ direkt, även om Stigen dröjer.
   Tiotal och ental, eftersom 14 + 14 är 10 + 10 och 4 + 4.
 - **Hoppa tio** står efter Över tiotalet i ordningen. Den öppnar lika tidigt,
   men dess nya uppgifter kommer medan barnet väntar på att Över tiotalet ska
-  öppna. **Dubbla och halvera** har ett eget spår, så att trädgårdens ×5 och ×4
+  öppna. **Dubbla och halvera** har ett eget spår, så att trädgårdens ×4
   inte väntar på bron över tiotalet.
 - **60 − __ = 56** blev `60 − 4 = __` med formen `4 + __ = 60`. En form måste ha
   samma svar som uppgiften. Vägen upp är egna uppgifter: `37 + __ = 40`, med

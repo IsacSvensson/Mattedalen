@@ -3457,8 +3457,11 @@ h1:focus {
     padding: 14px 12px;
   }
 
-  .prompt {
-    font-size: clamp(2.4rem, 12dvh, 4rem);
+  /* Also for free answers and blanks: "30 + 30 = ?" on one line beside the number pad. */
+  .prompt,
+  .prompt.long,
+  .question.free .prompt {
+    font-size: clamp(2.2rem, 11dvh, 3.6rem);
   }
 
   .choice {

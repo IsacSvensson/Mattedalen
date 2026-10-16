@@ -34,9 +34,9 @@ gör det. Fynden från varje fas skrivs in här.
 
 | Fas | Innehåll |
 |---|---|
-| R1. Snabba rättelser | Siffrorna bort från barnens sidor. Nya ord på hjälpkortet. ×5 slutar vänta. Taket i speldagar. En vuxen kan stänga av väntan. Väntedatumen i QR-koden och säkerhetskopian. |
-| R2. Simuleringen igen | Fler slumpfrön, och svag, genomsnittlig och stark elev var för sig. Siffrorna i dokumenten uppdateras. |
-| H6. Verifiering | Stigen och R1: genomgång av hela flödet, skärmbilder i alla storlekar, dokumenten. |
+| R1. Snabba rättelser **(klar)** | Siffrorna bort från barnens sidor. Nya ord på hjälpkortet. ×5 slutar vänta. Taket i speldagar. En vuxen kan stänga av väntan. Väntedatumen i QR-koden och säkerhetskopian. |
+| R2. Simuleringen igen **(klar)** | Fler slumpfrön, och svag, genomsnittlig och stark elev var för sig. Siffrorna i dokumenten uppdateras. |
+| H6. Verifiering **(klar)** | Stigen och R1: genomgång av hela flödet, skärmbilder i alla storlekar, dokumenten. |
 | R3. Dalen som svepbar värld | En egen plan med skärmbilder, sedan bygget. |
 | R4. Tvåsiffrigt minus tvåsiffrigt | En egen del på Stigen. |
 | R5. Inför piloten | Loggexport som den vuxna väljer att skicka. Trädgårdens former som fråga till piloten. |
@@ -114,3 +114,20 @@ Gångerfakta som sitter:
 - Är Stigen värd en tredjedel av dagen för ett genomsnittligt barn, när den kostar
   ungefär fyra procentenheter av gångerfakta efter ett år? Svaret beror på vad
   barnet vinner i talen till 100, och det mäter Stigens koll.
+
+## Fynd från H6
+
+Hela flödet på Stigen gicks igenom i fem storlekar: 320 och 360 px bred
+telefon, liggande telefon (800 × 360), surfplatta (1080 × 810) och dator
+(1920 × 1040). Det gällde 17 skärmar, från kartan där Stigen vilar till
+föräldravyn. Ingen skärm går att rulla i sidled.
+
+Två saker rättades:
+
+- **Liggande telefon:** ”30 + 30 = ?” bröts så att frågetecknet hamnade på en
+  egen rad bredvid sifferknapparna. Frågan är nu lite mindre där och får plats
+  på en rad.
+- **Sättet att tänka** bröts mitt i ett led på smal telefon (”… = 20 +” och
+  ”4 = 24.” på nästa rad). Nu bryts raden bara vid likhetstecknen, på alla
+  platser och i föräldravyn.
+

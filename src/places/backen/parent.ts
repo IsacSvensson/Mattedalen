@@ -12,6 +12,7 @@ import { partProgress } from './logic';
 import { brookDeps, pack } from './pack';
 import { showBrook } from './screens/brook';
 import { runBrookPlacement } from './screens/placement';
+import { keepTerms } from '../../shell/words';
 
 /**
  * Bäcken's part of the parent view: the addition table as a heat map, how much
@@ -156,7 +157,7 @@ function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElemen
       hard.map((s) => {
         const f = parseFactId(s.itemId);
         const strategy = engine.item(s.itemId).hints.find((x) => x.kind === 'strategy')?.text;
-        return h('li', null, h('strong', null, `${formatFact(f.op, f.x, f.y)} = ${f.answer}`), strategy ? ` – ${strategy}` : '');
+        return h('li', null, h('strong', null, `${formatFact(f.op, f.x, f.y)} = ${f.answer}`), strategy ? ` – ${keepTerms(strategy)}` : '');
       }),
     ),
   );

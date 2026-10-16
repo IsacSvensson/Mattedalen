@@ -13,6 +13,7 @@ import { engineFor, loadProgress } from '../../shell/play';
 import { formatDay, STATUS_TEXT, topConfusions } from '../../shell/stats';
 import { partProgress } from './logic';
 import { pack, pathDeps, pathHeld } from './pack';
+import { keepTerms } from '../../shell/words';
 
 /**
  * Stigen's part of the parent view: how much of each part sits, what is hard
@@ -116,7 +117,7 @@ function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElemen
       { class: 'hard-list' },
       hard.map((s) => {
         const strategy = engine.item(s.itemId).hints.find((x) => x.kind === 'strategy')?.text;
-        return h('li', null, h('strong', null, taskWithAnswer(parseTaskId(s.itemId))), strategy ? ` – ${strategy}` : '');
+        return h('li', null, h('strong', null, taskWithAnswer(parseTaskId(s.itemId))), strategy ? ` – ${keepTerms(strategy)}` : '');
       }),
     ),
   );
