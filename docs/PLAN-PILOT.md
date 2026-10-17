@@ -50,9 +50,8 @@ om vad appen tränar och inte tränar.
 
 - **README:** ett kort avsnitt ”Vad appen tränar och inte tränar”.
 - **`docs/LGR22.md`:** appens delar mot det centrala innehållet i matematik för
-  åk 1–3. Skolverkets webbplats går inte att nå härifrån. Texten skrivs därför
-  utifrån kursplanens rubriker och markeras som ej avstämd, tills någon har
-  jämfört med Skolverkets text.
+  åk 1–3. Skolverkets webbplats gick inte att nå härifrån. Den första versionen
+  byggde därför på sökresultat, och stämdes sedan av mot Skolverkets PDF.
 
 ## Faser
 
@@ -95,9 +94,17 @@ om vad appen tränar och inte tränar.
   Appen tränar det mesta under taluppfattning och tals användning, och delar av
   algebra (likhetstecknet, obekanta tal, talföljder). Geometri, sannolikhet och
   statistik tränas inte alls, och problemlösning nästan inte.
-- **Källan:** Skolverkets webbplats gick inte att hämta från miljön, men
-  webbsökningen nådde den. Tre punkter under algebra och punkten om
-  positionssystemet är citerade så. Resten är med egna ord och ska jämföras
-  ordagrant. Sökresultaten var oense om dubbelt och hälften hör till årskurs 1–3,
-  och det står i texten.
-- **Kunskapskriterierna** för årskurs 3 är inte avstämda.
+- **Källan:** Skolverkets webbplats gick inte att hämta från miljön. Den första
+  versionen byggde på sökresultat och var till stor del med egna ord.
+- **Avstämd mot Skolverkets PDF** av kursplanen (GRGRMAT01). Varje punkt i det
+  centrala innehållet för årskurs 1–3 står nu ordagrant, och ett skript har
+  kontrollerat varje citat mot PDF:ens text.
+- **Det som rättades:** dubbelt och hälften hör till årskurs 1–3. Kursplanen
+  anger inget talområde, så talområdet 0–200 i PLAN-MINUS är borttaget. Pengar
+  nämns inte för årskurs 1–3. Punkten om räknesätten handlar om deras egenskaper
+  och samband. Tre punkter saknades: tal i elevnära situationer,
+  rimlighetsbedömning och stegvisa instruktioner (programmering). Appen tränar
+  den första lite och de andra inte alls.
+- **Kriterierna för årskurs 3** finns med. Appen övar huvudräkning, likheter,
+  att dela upp tal och dubbelt och hälften. Den bedömer inte barnet mot
+  kriterierna.

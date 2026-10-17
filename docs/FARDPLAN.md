@@ -41,9 +41,8 @@ försvinner när saken är gjord. Scenerna i R3a ersattes av en karta att dra ru
 i, med ”I dag” i hörnet i stället för en stor knapp (se
 [PLAN-DALEN](PLAN-DALEN.md#beslut)).
 
-| Fråga | Förslag |
-|---|---|
-| Avstämning mot Lgr22 | [LGR22.md](LGR22.md) bygger på sökresultat. Skolverkets webbplats kan inte hämtas från utvecklingsmiljön. Lägg till `www.skolverket.se` bland de tillåtna adresserna, eller jämför texten för hand. |
+Avstämningen mot Lgr22 är gjord mot Skolverkets PDF av kursplanen
+([LGR22](LGR22.md)). Den görs igen när den nya kursplanen kommer.
 
 ## Klart
 

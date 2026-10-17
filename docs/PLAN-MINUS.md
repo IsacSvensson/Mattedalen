@@ -7,8 +7,9 @@ En nionde del på Stigen: 75 − 23, 72 − 38 och 71 − 68. Den kommer efter
 
 - **Det saknas.** Stigen har plus och minus över tiotalet och tvåsiffrigt plus,
   men inget tvåsiffrigt minus (första granskningen, [PLAN-GRANSKNING](PLAN-GRANSKNING.md#faser)).
-- **Kursplanen** för åk 1–3 tar upp subtraktion med huvudräkning inom talområdet
-  0–200. Två sätt att tänka hör dit: att ta bort och att räkna upp (skillnad).
+- **Kursplanen** för åk 1–3 tar upp huvudräkning med de fyra räknesätten, och
+  räknesättens samband ([LGR22](LGR22.md#taluppfattning-och-tals-användning)).
+  Två sätt att tänka hör till minus: att ta bort och att räkna upp (skillnad).
 
 ## Bilder
 

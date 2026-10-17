@@ -51,8 +51,8 @@ matematik för årskurs 1–3.
   problemlösning, skriftliga metoder och överslagsräkning. Den ersätter inte
   samtalet om matematik, eller att räkna med konkret material tillsammans med
   någon.
-- **Jämförelsen med Lgr22** står i [docs/LGR22.md](docs/LGR22.md). Den är inte
-  ordagrant avstämd mot Skolverkets text än.
+- **Jämförelsen med Lgr22** står i [docs/LGR22.md](docs/LGR22.md). Den citerar
+  Skolverkets kursplan ordagrant och tar med kriterierna för årskurs 3.
 
 ## Principer
 
