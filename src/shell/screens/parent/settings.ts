@@ -11,6 +11,7 @@ import { qrSvgMarkup, transferOf } from '../../transfer';
 import { genitive } from '../../words';
 import { profileSaver, showParentPage } from './frame';
 import { showParent } from './parent';
+import { showPilotExport } from './pilot';
 
 /**
  * The child's settings in one place (docs/PLAN-FORALDRAVYN.md): name, animal,
@@ -45,6 +46,7 @@ export async function showChildSettings(ctx: AppContext, profileId: string): Pro
         { class: 'button-row' },
         h('button', { class: 'soft-button', type: 'button', onclick: () => void showQr(ctx, profile) }, 'Visa QR-kod'),
         h('button', { class: 'soft-button', type: 'button', onclick: () => void downloadBackup(ctx, profile) }, 'Spara säkerhetskopia (JSON)'),
+        h('button', { class: 'soft-button', type: 'button', onclick: () => void showPilotExport(ctx, profile.id) }, 'Fil till piloten…'),
       ),
       h('button', { class: 'link-button danger', type: 'button', onclick: () => void deleteProfile(ctx, profile) }, `Ta bort ${profile.name}…`),
     ),

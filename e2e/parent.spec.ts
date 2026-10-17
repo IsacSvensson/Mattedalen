@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, enterGarden, openParent, parentBack, parentLink, parentPlace, parentSettings, seedStates, switchPlayer, untilIntro } from './helpers';
+import { answer, createProfile, enterGarden, openParent, parentBack, parentLink, parentPlace, parentSettings, passIntro, seedStates, switchPlayer, untilIntro } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -306,4 +306,36 @@ test('"Ge mer tid": suggested for a child who is right but slow, and a choice in
   await expect(page.getByText('Sparat')).toBeVisible();
   await parentBack(page);
   await expect(page.getByRole('region', { name: 'Att göra för dig' }).getByRole('button', { name: 'Ge mer tid' })).toBeVisible();
+});
+
+test('"Fil till piloten": the child’s answers under a pilot code, without the name, saved on the device', async ({ page }) => {
+  await createProfile(page, 'Alva');
+  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
+  await untilIntro(page);
+  await passIntro(page);
+  await answer(page);
+  await expect(page.locator('.feedback, .numpad-display.correct, .choice.correct').first()).toBeVisible();
+  await page.goto('/');
+  await openParent(page);
+  await parentSettings(page);
+  await page.getByRole('button', { name: 'Fil till piloten…' }).click();
+  await expect(page.getByRole('heading', { name: 'Fil till piloten' })).toBeVisible();
+  await expect(page.getByText(/^Alla svar: \d+ stycken/)).toBeVisible();
+  await expect(page.getByText('Namnet Alva och djuret. Barnet heter bara pilotkoden i filen.')).toBeVisible();
+  // A code is needed, of letters and digits.
+  await page.getByRole('button', { name: 'Spara filen' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Skriv en pilotkod med bokstäver och siffror, till exempel P03.');
+  await page.getByRole('textbox', { name: 'Pilotkod' }).fill('p03');
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Spara filen' }).click()]);
+  expect(download.suggestedFilename()).toBe('mattedalen-pilot-P03-2026-02-02.json');
+  const text = await readFile((await download.path())!, 'utf8');
+  const file = JSON.parse(text);
+  expect(file).toMatchObject({ format: 'mattedalen-pilot', code: 'P03' });
+  expect(file.attempts.length).toBeGreaterThan(0);
+  expect(text).not.toContain('Alva');
+  // Back to the child's settings; the code is kept for the child.
+  await page.getByRole('button', { name: 'Tillbaka' }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas inställningar' })).toBeVisible();
+  await page.getByRole('button', { name: 'Fil till piloten…' }).click();
+  await expect(page.getByRole('textbox', { name: 'Pilotkod' })).toHaveValue('P03');
 });

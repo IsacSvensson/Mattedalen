@@ -65,6 +65,11 @@ for (const width of [320, 360]) {
       }
       await parentSettings(page);
       await expectNoSidewaysScroll(page);
+      // The file for the pilot, from the child's settings.
+      await page.getByRole('button', { name: 'Fil till piloten…' }).click();
+      await expect(page.getByRole('heading', { name: 'Fil till piloten' })).toBeVisible();
+      await expectNoSidewaysScroll(page);
+      await page.getByRole('button', { name: 'Tillbaka' }).click();
       await parentBack(page);
       for (const title of ['Den här enheten', 'Hämta ett barn'] as const) {
         await parentLink(page, title);

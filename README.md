@@ -279,6 +279,10 @@ webbläsaren (`e2e/legacy.spec.ts`).
 - **JSON-säkerhetskopia** med allt, även hela loggen. Den sparas som fil och
   öppnas på den andra enheten. Finns profilen redan väljer man mellan ”Ersätt”
   och ”Lägg till som kopia”.
+- **Fil till piloten** (`storage/pilot.ts`, [PLAN-PILOT](docs/PLAN-PILOT.md)):
+  barnets svar, pass och fakta under en pilotkod, utan namn, djur och profilens
+  id. Filen byggs av en lista över det som ska med. Den sparas på enheten, och
+  den vuxna väljer själv om den ska skickas.
 
 Båda vägarna testas i e2e mellan två separata webbläsarkontexter. QR-koden testas
 också i enhetstester genom att den ritas till pixlar och läses av med jsQR.
@@ -392,7 +396,8 @@ Appen sätter inga cookies och har ingen spårning, analys eller reklam. All dat
 (IndexedDB) och appens egna filer (Cache API) lagras bara på enheten och behövs
 för att tjänsten ska fungera. Därför krävs inget samtyckesformulär enligt lagen
 om elektronisk kommunikation (9 kap. 28 §). Ingen data lämnar enheten om inte
-föräldern själv exporterar den. Föräldravyn har en kort integritetstext.
+föräldern själv exporterar den, som säkerhetskopia, QR-kod eller fil till
+piloten. Filen till piloten har inget namn, bara en pilotkod. Föräldravyn har en kort integritetstext.
 Värden, GitHub Pages, loggar IP-adresser enligt GitHubs integritetspolicy.
 
 Uppläsningen använder bara röster som finns på enheten (`voice.localService`).

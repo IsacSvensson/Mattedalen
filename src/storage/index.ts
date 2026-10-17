@@ -11,6 +11,7 @@ export { maybeCompactLog } from './shared';
 export { IndexedDbProgressStore, openProgressDb, MIGRATIONS, DB_NAME, type Migration, type ProgressDB } from './idb';
 export { MemoryProgressStore } from './memory';
 export * from './legacy';
+export * from './pilot';
 
 export interface OpenedStore {
   store: ProgressStore;

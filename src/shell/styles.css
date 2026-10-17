@@ -4711,3 +4711,18 @@ h1:focus {
 .place-now strong {
   font-weight: 600;
 }
+
+/* "Fil till piloten": what is in the file, and the pilot code. */
+.pilot-list {
+  margin: 0 0 12px;
+  padding-left: 1.2em;
+  line-height: 1.5;
+}
+
+.pilot-page .form-error:empty {
+  display: none;
+}
+
+.pilot-page .form-error {
+  color: #a4552a;
+}
