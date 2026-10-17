@@ -340,7 +340,7 @@ test('"Fil till piloten": the child’s answers under a pilot code, without the 
   await expect(page.getByRole('textbox', { name: 'Pilotkod' })).toHaveValue('P03');
 });
 
-test('"Tyck till": a mail to the project from the grown-up’s own mail app, with the version and nothing about the child', async ({ page }) => {
+test('"Tyck till": a mail to the project from the grown-up’s own mail app, with the version and nothing about the child, and links to GitHub', async ({ page }) => {
   await createProfile(page, 'Alva');
   await page.goto('/');
   await openParent(page);
@@ -352,5 +352,8 @@ test('"Tyck till": a mail to the project from the grown-up’s own mail app, wit
   expect(body).toContain('Barnets ålder:');
   expect(body).toMatch(/Appens version: \S+/);
   expect(body).not.toContain('Alva');
+  // And the way to GitHub: an issue, or how to contribute.
+  await expect(page.getByRole('link', { name: 'Skapa ett ärende' })).toHaveAttribute('href', 'https://github.com/IsacSvensson/Mattedalen/issues/new');
+  await expect(page.getByRole('link', { name: 'Så bidrar du' })).toHaveAttribute('href', 'https://github.com/IsacSvensson/Mattedalen#bidra');
   await parentBack(page);
 });

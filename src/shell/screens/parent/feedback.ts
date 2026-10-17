@@ -6,6 +6,7 @@ import { showParentPage } from './frame';
 import { showParent } from './parent';
 
 export const FEEDBACK_EMAIL = 'matematikdalen@gmail.com';
+export const REPO_URL = 'https://github.com/IsacSvensson/Mattedalen';
 
 /** A mail to the project, written in the grown-up's own mail app: the app's version and a few questions, nothing about the child. */
 export function feedbackMailto(build = APP_BUILD): string {
@@ -24,7 +25,8 @@ export function feedbackMailto(build = APP_BUILD): string {
 /**
  * "Tyck till": the app tracks nothing, so what grown-ups tell is all the
  * project learns. The mail is written and sent from the grown-up's own mail
- * app; the app itself sends nothing.
+ * app; the app itself sends nothing. Below it, the way to GitHub: an issue,
+ * or the code itself (README, "Bidra").
  */
 export function showFeedback(ctx: AppContext, backTo?: string): void {
   showParentPage(
@@ -43,6 +45,16 @@ export function showFeedback(ctx: AppContext, backTo?: string): void {
         { class: 'muted' },
         'Mejlet skickas från ditt eget mejlprogram. Appen skickar ingenting själv, och inget om barnet följer med. Du behöver inte skriva barnets namn.',
       ),
+    ),
+    h(
+      'section',
+      { class: 'parent-section', 'aria-labelledby': 'contribute-heading' },
+      h('h2', { id: 'contribute-heading' }, 'Hjälp till på GitHub'),
+      h('p', null, 'Har du hittat ett fel eller fått en idé? Skapa ett ärende på GitHub. Ärenden syns för alla, så skriv inte barnets namn.'),
+      h('a', { class: 'soft-button', href: `${REPO_URL}/issues/new`, target: '_blank', rel: 'noopener' }, 'Skapa ett ärende'),
+      h('p', null, 'Koden är öppen. Kan du programmera, eller vet du mycket om matematik och barn, är du välkommen att bidra.'),
+      h('a', { class: 'soft-button', href: `${REPO_URL}#bidra`, target: '_blank', rel: 'noopener' }, 'Så bidrar du'),
+      h('p', { class: 'muted' }, 'Länkarna öppnar GitHub i webbläsaren. Där behövs ett konto för att skriva, och GitHubs egna villkor gäller.'),
     ),
   );
 }

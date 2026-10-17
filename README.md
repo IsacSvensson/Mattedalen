@@ -341,7 +341,9 @@ steg tillbaka, från en sida till översikten.
 - **Hämta ett barn**: QR-kod, säkerhetskopia och Gångerträdgården.
 - **Tyck till**: en knapp som öppnar ett mejl till matematikdalen@gmail.com i
   den vuxnas eget mejlprogram, med några frågor och appens version. Appen spårar
-  ingenting, så det de vuxna berättar är det enda projektet får veta.
+  ingenting, så det de vuxna berättar är det enda projektet får veta. Under den
+  finns länkar till GitHub: skapa ett ärende, eller läs hur man bidrar
+  ([Bidra](#bidra)).
 
 På **Trädgårdens** sida:
 
@@ -469,6 +471,26 @@ Playwright-tester vid varje push och pull request.
 Vad vi bygger och i vilken ordning står i [docs/FARDPLAN.md](docs/FARDPLAN.md):
 det som är klart, det som kommer härnäst, öppna beslut och det som väntar till
 efter piloten. Varje fas har en egen plan som länkas därifrån.
+
+## Bidra
+
+Alla får bidra: med kod, med kunskap om matematik och barn, eller med en rapport
+om något som inte fungerar. Appen länkar hit från ”Tyck till” i ”För vuxna”.
+
+- **Ett fel eller en idé:** skapa ett [ärende](https://github.com/IsacSvensson/Mattedalen/issues/new).
+  Ärenden syns för alla, så skriv inte barnets namn. Vill du skriva privat,
+  mejla matematikdalen@gmail.com.
+- **Kod:** gör en fork och en gren, och skicka en pull request. Kör
+  `npm run typecheck`, `npm test` och `npm run e2e` först (se
+  [Kom igång](#kom-igång)). Större ändringar börjar med en plan i `docs/`, som
+  de andra planerna i [FARDPLAN](docs/FARDPLAN.md).
+- **Det som inte ändras:** ingen data lämnar enheten av sig själv, och appen
+  har inga cookies, ingen spårning, ingen reklam och inga poäng. Beroendena hålls
+  få.
+- **Språk:** dokumenten skrivs på svenska med korta meningar. Koden och
+  kommentarerna skrivs på engelska.
+- **Licens:** ett bidrag får användas under samma licens som resten av
+  projektet (se nedan).
 
 ## Licens
 

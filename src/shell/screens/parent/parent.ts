@@ -56,7 +56,7 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
         { class: 'parent-rows' },
         pageRow({ icon: icon('phone'), title: 'Hämta ett barn', text: 'QR-kod, säkerhetskopia eller Gångerträdgården', onclick: () => void showImport(ctx, selected?.id) }),
         pageRow({ icon: icon('lock'), title: 'Den här enheten', text: 'Lagring, version, hemskärmen, integritet och vuxenkod', onclick: () => void showDevice(ctx, selected?.id) }),
-        pageRow({ icon: icon('mail'), title: 'Tyck till', text: 'Mejla oss om vad som fungerar och inte', onclick: () => showFeedback(ctx, selected?.id) }),
+        pageRow({ icon: icon('mail'), title: 'Tyck till', text: 'Mejla oss, eller hjälp till på GitHub', onclick: () => showFeedback(ctx, selected?.id) }),
       ),
     ),
   );
