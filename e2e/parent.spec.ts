@@ -36,7 +36,7 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
 
   // The overview: the week, and a row per place that leads to its page.
   await expect(page.getByText(/Senaste 7 dagarna: 1[23] minuter, 1 dag med spel\./)).toBeVisible();
-  await expect(page.locator('.parent-overview .parent-row strong')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Barnets inställningar', 'Hämta ett barn', 'Den här enheten']);
+  await expect(page.locator('.parent-overview .parent-row strong')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Barnets inställningar', 'Hämta ett barn', 'Den här enheten', 'Tyck till']);
   await parentPlace(page, 'Trädgården');
   const garden = page.getByRole('region', { name: /^Trädgården/ });
   await expect(garden.getByRole('heading', { name: 'Trädgården', exact: true })).toBeVisible();
@@ -338,4 +338,19 @@ test('"Fil till piloten": the child’s answers under a pilot code, without the 
   await expect(page.getByRole('heading', { name: 'Alvas inställningar' })).toBeVisible();
   await page.getByRole('button', { name: 'Fil till piloten…' }).click();
   await expect(page.getByRole('textbox', { name: 'Pilotkod' })).toHaveValue('P03');
+});
+
+test('"Tyck till": a mail to the project from the grown-up’s own mail app, with the version and nothing about the child', async ({ page }) => {
+  await createProfile(page, 'Alva');
+  await page.goto('/');
+  await openParent(page);
+  await parentLink(page, 'Tyck till');
+  await expect(page.getByText('matematikdalen@gmail.com')).toBeVisible();
+  const href = await page.getByRole('link', { name: 'Skriv ett mejl' }).getAttribute('href');
+  expect(href).toMatch(/^mailto:matematikdalen@gmail\.com\?subject=/);
+  const body = decodeURIComponent(new URL(href!).searchParams.get('body') ?? '');
+  expect(body).toContain('Barnets ålder:');
+  expect(body).toMatch(/Appens version: \S+/);
+  expect(body).not.toContain('Alva');
+  await parentBack(page);
 });

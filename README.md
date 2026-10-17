@@ -325,7 +325,8 @@ steg tillbaka, från en sida till översikten.
   veckan** (övade minuter per dag under 14 dagar och hur många dagar barnet
   spelat), en rad per plats med vad barnet är på, det som är svårast och en
   stapel för hur mycket som sitter (`Place.parentSummary`), och raden **Barnets
-  inställningar**. Längst ner finns **Hämta ett barn** och **Den här enheten**.
+  inställningar**. Längst ner finns **Hämta ett barn**, **Den här enheten** och
+  **Tyck till**.
 - **En plats** har alltid samma ordning: läget, svåra just nu (högst fem, med
   ”Visa alla”), de vanligaste förväxlingarna, platsens koll, alla fakta som
   värmekartor (ihopfällda) och sist startkollen (`Place.parentPage`).
@@ -338,6 +339,9 @@ steg tillbaka, från en sida till översikten.
 - **Den här enheten**: lagring, version och uppdatering, hemskärmen, integritet
   och vuxenkoden.
 - **Hämta ett barn**: QR-kod, säkerhetskopia och Gångerträdgården.
+- **Tyck till**: en knapp som öppnar ett mejl till matematikdalen@gmail.com i
+  den vuxnas eget mejlprogram, med några frågor och appens version. Appen spårar
+  ingenting, så det de vuxna berättar är det enda projektet får veta.
 
 På **Trädgårdens** sida:
 
@@ -415,7 +419,9 @@ Appen sätter inga cookies och har ingen spårning, analys eller reklam. All dat
 för att tjänsten ska fungera. Därför krävs inget samtyckesformulär enligt lagen
 om elektronisk kommunikation (9 kap. 28 §). Ingen data lämnar enheten om inte
 föräldern själv exporterar den, som säkerhetskopia, QR-kod eller fil till
-piloten. Filen till piloten har inget namn, bara en pilotkod. Föräldravyn har en kort integritetstext.
+piloten. Filen till piloten har inget namn, bara en pilotkod. Ett mejl under
+”Tyck till” skickas från den vuxnas eget mejlprogram, med appens version men
+inget om barnet. Föräldravyn har en kort integritetstext.
 Värden, GitHub Pages, loggar IP-adresser enligt GitHubs integritetspolicy.
 
 Uppläsningen använder bara röster som finns på enheten (`voice.localService`).

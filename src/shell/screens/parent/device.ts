@@ -91,6 +91,7 @@ async function deviceSection(ctx: AppContext, backTo?: string): Promise<HTMLElem
       { class: 'privacy' },
       h('li', null, 'Appen använder inga cookies och har ingen spårning, analys eller reklam.'),
       h('li', null, 'Barnens namn och framsteg sparas bara här på enheten. Inget skickas iväg – utom när du själv exporterar med QR-kod eller fil.'),
+      h('li', null, 'Under ”Tyck till” kan du mejla oss. Mejlet skickas från ditt eget mejlprogram, och inget om barnet följer med.'),
       h('li', null, 'Appen sparar sina egna filer på enheten så att den fungerar utan internet.'),
       h('li', null, 'Sidan ligger på GitHub Pages. Som alla webbservrar loggar GitHub besökares IP-adresser, enligt GitHubs integritetspolicy.'),
       h('li', null, 'Vill du radera allt? Ta bort barnen här ovanför, eller rensa webbplatsdata för sidan i webbläsarens inställningar.'),
