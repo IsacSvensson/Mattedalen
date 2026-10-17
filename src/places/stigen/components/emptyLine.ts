@@ -17,15 +17,20 @@ export interface EmptyLineOptions {
 
 const W = 360;
 const PAD = 26;
+/** Closer than this, two numbers under the line run together. */
+const LABEL_GAP = 24;
 
 export function emptyNumberLine({ stops, hops = true, animate = false, onDone }: EmptyLineOptions): HTMLElement {
   const lo = Math.floor(Math.min(...stops) / 10) * 10;
   let hi = Math.ceil(Math.max(...stops) / 10) * 10;
   if (hi === lo) hi += 10;
-  const height = hops ? 104 : 62;
-  const base = height - 30;
   const x = (n: number) => PAD + ((n - lo) / (hi - lo)) * (W - 2 * PAD);
   const shown = hops ? stops : stops.slice(0, 1);
+  // A number right beside the one before it (70 and 71 in 68 → 70 → 71) goes a row lower, so the two can be read.
+  const lower = shown.map((n, i) => i > 0 && Math.abs(x(n) - x(shown[i - 1]!)) < LABEL_GAP);
+  for (let i = 1; i < lower.length; i++) if (lower[i] && lower[i - 1]) lower[i] = false;
+  const height = (hops ? 104 : 62) + (lower.some(Boolean) ? 16 : 0);
+  const base = (hops ? 104 : 62) - 30;
   let markup = `<path class="el-line" d="M${PAD - 16} ${base} H${W - PAD + 16}"/>`;
   // The tens: a short mark and a quiet number, unless a landing point stands right beside it.
   for (let t = lo; t <= hi; t += 10) {
@@ -36,7 +41,7 @@ export function emptyNumberLine({ stops, hops = true, animate = false, onDone }:
   shown.forEach((n, i) => {
     markup +=
       `<circle class="el-stop${i === 0 ? ' start' : ''}" cx="${x(n)}" cy="${base}" r="${i === 0 ? 6 : 5}"/>` +
-      `<text class="el-stop-label" x="${x(n)}" y="${base + 22}">${n}</text>`;
+      `<text class="el-stop-label" x="${x(n)}" y="${base + (lower[i] ? 38 : 22)}">${n}</text>`;
   });
   if (hops) {
     stops.slice(1).forEach((to, i) => {

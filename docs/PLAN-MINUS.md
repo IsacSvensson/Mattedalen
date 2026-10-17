@@ -10,6 +10,14 @@ En nionde del på Stigen: 75 − 23, 72 − 38 och 71 − 68. Den kommer efter
 - **Kursplanen** för åk 1–3 tar upp subtraktion med huvudräkning inom talområdet
   0–200. Två sätt att tänka hör dit: att ta bort och att räkna upp (skillnad).
 
+## Bilder
+
+![Telefon: stigen med nio lyktor, räknestigen för 72 − 38 och hjälpkortet för 71 − 68](img/minus.png)
+
+*Telefon, 360 px. Till vänster stigen med nio lyktor, och djuret på väg mot den
+sista vid 100. I mitten räknestigen för 72 − 38: tiotalen först, sedan entalen.
+Till höger hjälpkortet efter fel svar på 71 − 68, med hoppen uppåt på tallinjen.*
+
 ## Hur
 
 - **Delen ”Tvåsiffrigt minus tvåsiffrigt”** (`tvasiffrminus`). Den öppnar när
@@ -40,7 +48,7 @@ En nionde del på Stigen: 75 − 23, 72 − 38 och 71 − 68. Den kommer efter
 | Fas | Innehåll |
 |---|---|
 | R4a. Innehållet **(klar)** | Delen, uppgifterna, stegen, strategierna, tallinjen, räknestigen, förväxlingen, kollen, lyktan, version 2. Enhetstester. |
-| R4b. Simulering och verifiering | Dalen simulerad med den nya delen: när den öppnar och sitter. E2e, skärmbilder och dokumenten. |
+| R4b. Verifiering **(klar)** | E2e, skärmbilder och dokumenten. Dalens simulering hoppades över: den skulle inte ändra något beslut. |
 
 ## Fallgropar
 
@@ -72,3 +80,18 @@ En nionde del på Stigen: 75 − 23, 72 − 38 och 71 − 68. Den kommer efter
   glömda) och ett tiotal fel. Varje felsvar har en egen förklaring.
 - **Kollen** har två uppgifter till, sist, så att de andra sorterna dras som förut.
 - **Den nionde lyktan** hänger på stolpen vid 100.
+
+## Fynd från R4b
+
+- **E2e-testet** (`e2e/stigen.spec.ts`) ger ett barn alla nio delar. Det går
+  igenom räknestigen för 72 − 38 (72 − 30, sedan 42 − 8) och svarar fel på
+  71 − 68. Hjälpkortet visar att räkna upp, med hoppen +2 och +1 på tallinjen.
+  Efter felet kan 71 − 68 komma som räknestig: 68 + 2, 71 − 70, 2 + 1.
+- **Tallinjen:** 70 och 71 skrevs ihop till ”7071”, eftersom hoppen är ritade i
+  skala. Nu hamnar ett tal en rad lägre när det står för nära talet före. Det
+  gäller alla tallinjer på Stigen, också 79 + 1 = 80.
+- **Hjälpkortet** sa samma sak två gånger för tal nära varandra. Förklaringen
+  till felet säger nu varför man räknar upp, och strategin hur.
+- **Den nionde lyktan** ryms på alla storlekar (320, 360, 800 × 360, 1080). Vid
+  den sista lyktan stod djuret på ramens kant. Nu står det före stolpen.
+- **Ingen sidledsscroll** på stigens sida i någon av storlekarna.

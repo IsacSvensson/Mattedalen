@@ -1,6 +1,6 @@
 import type { DistractorCandidate } from '../../engine';
 import { halfSplit } from './items';
-import { countsUp, crossesTen, formatFact, formOf, isTen, onesOf, taskAnswer, tenAbove, tenBelow, tensOf, type Task } from './tasks';
+import { countsUp, crossesTen, formatFact, formOf, isTen, onesOf, taskAnswer, tenBelow, tensOf, type Task } from './tasks';
 
 const MIN_CANDIDATES = 5;
 const MAX = 100;
@@ -144,7 +144,7 @@ export function hundredNote(t: Task, given: string): string | undefined {
       if (op === '+' && crossesTen(t) && g === answer - 10) return `Glöm inte det nya tiotalet: ${formatFact(op, x, y)} är mer än ${tenBelow(answer)}.`;
       if (op === '+' && !isTen(x) && y < 10 && g === x + 10 * y) return `${y} är ental. Lägg till dem till entalen i ${x}.`;
       if (op === '-' && y > 10 && !isTen(y)) {
-        if (countsUp(x, y) && g !== answer) return `${x} och ${y} ligger nära varandra. Räkna upp från ${y}: ${tenAbove(y) - y} till ${tenAbove(y)}, och vidare till ${x}.`;
+        if (countsUp(x, y)) return `${x} och ${y} ligger nära varandra. Det går fortare att räkna upp från ${y} än att ta bort ${y}.`;
         if (crossesTen(t) && g === onesTurned(x, y))
           return `Det går inte att ta ${onesOf(y)} från ${onesOf(x)}. Ta tiotalen först: ${formatFact('-', x, tenBelow(y))} = ${x - tenBelow(y)}, sedan ${formatFact('-', x - tenBelow(y), onesOf(y))}.`;
         if (g === x - onesOf(y)) return `Glöm inte tiotalen i ${y}: ${formatFact('-', x, tenBelow(y))} = ${x - tenBelow(y)} först.`;

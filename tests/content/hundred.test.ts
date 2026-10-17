@@ -342,7 +342,7 @@ describe('two-digit minus (docs/PLAN-MINUS.md)', () => {
     expect(values('75-23')).toContain('72');
     expect(confusionNote('72-38', '46')).toBe('Det går inte att ta 8 från 2. Ta tiotalen först: 72 − 30 = 42, sedan 42 − 8.');
     expect(confusionNote('75-23', '72')).toBe('Glöm inte tiotalen i 23: 75 − 20 = 55 först.');
-    expect(confusionNote('71-68', '17')).toBe('71 och 68 ligger nära varandra. Räkna upp från 68: 2 till 70, och vidare till 71.');
+    expect(confusionNote('71-68', '17')).toBe('71 och 68 ligger nära varandra. Det går fortare att räkna upp från 68 än att ta bort 68.');
     // A hop back of whole tens is told as in Hoppa tio.
     expect(confusionNote('75-20', '73')).toBe('20 är 2 tiotal. Hoppa tio 2 gånger.');
   });

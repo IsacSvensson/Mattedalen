@@ -53,6 +53,7 @@ Det finns sex slags uppgifter:
 | 6 | Hoppa tio | 33 | tiotal och ental | |
 | 7 | Dubbla och halvera (eget spår) | 36 | tiotal och ental | Dubblor och hälften |
 | 8 | Tvåsiffrigt plus tvåsiffrigt | 12 | hoppa tio, över tiotalet | |
+| 9 | Tvåsiffrigt minus tvåsiffrigt | 29 | tvåsiffrigt plus | |
 
 En del öppnar när cirka 80 % av varje del den kräver är flytande. Kolumnen ”Vid
 bäcken” är det som delen bygger på vid bäcken (`BROOK_PREREQUISITES`). Platsen
@@ -63,6 +64,11 @@ håller delen tills det sitter (H5). Motorn vet inget om bäcken.
 - **Dubbla och halvera** har ett eget spår. Nya dubblor och halvor kommer
   omväxlande med de andra delarna. Trädgårdens ×4 väntar på den här
   delen, inte på att gå över tiotalet.
+- **Tvåsiffrigt minus** ([PLAN-MINUS](PLAN-MINUS.md)) börjar med sina egna
+  steg: första hoppet bakåt (75 − 20) och upp till tiotalet (68 + __ = 70). Sedan
+  kommer uppgifter utan att gå över tiotalet (75 − 23), över tiotalet (72 − 38)
+  och tal nära varandra, där barnet räknar upp (71 − 68). Ett steg som en
+  tidigare del redan har stannar där.
 - **Tiotal och ental** är förståelse, som Vågen vid bäcken. Den bedöms på rätt
   svar på olika dagar och i olika former, aldrig på tid. Startkollen prövar den
   inte.
@@ -112,11 +118,14 @@ börjar i en uppgift som barnet redan kan:
 - **Över tiotalet:** 47 + 3 = 50 → 50 + 5 → 47 + 8
 - **Ner till tiotalet:** 52 − 2 = 50 → 50 − 4 → 52 − 6
 - **Tvåsiffrigt:** 47 + 30 = 77 → 77 + 6 → 47 + 36
+- **Tvåsiffrigt minus:** 72 − 30 = 42 → 42 − 8 → 72 − 38
+- **Räkna upp:** 68 + 2 = 70 → 71 − 70 = 1 → 2 + 1 → 71 − 68
 - **Dubbla:** 20 + 20 = 40 → 8 + 8 = 16 → 40 + 16 → 28 + 28
 - **Halvera:** hälften av 40 → hälften av 16 → 20 + 8 → hälften av 56
 
-Det första steget är alltid en uppgift på Stigen i en tidigare del. 8 + 8 är
-bäckens, och då är steget bara en uträkning.
+Det första steget är alltid en uppgift på Stigen, i en tidigare del eller först
+i samma del (tvåsiffrigt minus). 8 + 8 är bäckens, och då är steget bara en
+uträkning.
 
 ## Felsvar
 
@@ -132,14 +141,18 @@ något vänligt om det:
 | Halva varje siffra | hälften av 56 = 23 | Dela upp 56 i 40 och 16. |
 | Tiotal och ental bytta | 74 för 47 | Tiotalen står först. |
 | Entalen kvar i 14 ental | 3 tiotal och 14 ental = 34 | Det tiotalet ska också räknas. |
+| Minsta från största | 72 − 38 = 46 | Det går inte att ta 8 från 2. Ta tiotalen först: 72 − 30 = 42, sedan 42 − 8. |
+| Tiotalen glömda | 75 − 23 = 72 | Glöm inte tiotalen i 23: 75 − 20 = 55 först. |
+| Tal nära varandra | 71 − 68 = 17 | 71 och 68 ligger nära varandra. Det går fortare att räkna upp. |
 
 ## Platsen
 
 ### Stolparna och lyktorna
 
 Stigen är en sandig stig med en stolpe vid varje tiotal, från 10 till 100. Siffran
-står på en skylt överst på stolpen. Stolparna 20 till 90 bär en lykta var, en för
-varje del i ordning. Stigen börjar vid 10 och slutar vid 100.
+står på en skylt överst på stolpen. Stolparna 20 till 100 bär en lykta var, en
+för varje del i ordning. Stigen börjar vid 10 och slutar vid 100. Vid den sista
+lyktan står djuret före stolpen, så att det ryms innanför ramen.
 
 Lyktorna visar vad barnet kan, på samma sätt som bron vid bäcken och plantorna i
 trädgården:

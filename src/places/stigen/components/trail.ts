@@ -43,8 +43,8 @@ export function trail(lanterns: Lantern[], walker?: Element): HTMLElement {
   const at = currentPart(lanterns);
   const el = h('div', { class: 'trail large' }, largeTrail(lanterns));
   if (walker) {
-    // Between the post with the part's lantern and the next one.
-    const x = postX(at + 1) + 25.5;
+    // Between the post with the part's lantern and the next one; at the last post (100), on the way to it.
+    const x = postX(at + 1) + (postX(at + 1) + 25.5 > W - 30 ? -25.5 : 25.5);
     el.append(h('span', { class: 'trail-walker', style: `left:${((100 * x) / W).toFixed(1)}%`, 'aria-hidden': 'true' }, walker));
   }
   return el;

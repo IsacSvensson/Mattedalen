@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, answerDerive, closeParent, createProfile, nextStep, openParent, openPath, parentPlace, playedAt, seedStates, solve, type SeedState } from './helpers';
+import { answer, answerDerive, closeParent, createProfile, nextStep, openParent, openPath, parentPlace, passIntro, playedAt, seedStates, solve, type SeedState } from './helpers';
 
 /**
  * Stigen, the numbers to 100 (docs/STIGEN.md): it opens when going over the
@@ -268,4 +268,75 @@ test('grown-ups see the parts, what is hard and the mix-ups', async ({ page }) =
   await expect(section).toContainText('Tvåsiffrigt plus tvåsiffrigtinte öppen än');
   await expect(section.locator('.hard-list')).toContainText('52 − 6 = 46 – 52 − 6 = 52 − 2 − 4 = 50 − 4 = 46.');
   await expect(section.locator('.confusions')).toContainText('52 − 6 – svarade 54 (3 gånger)');
+});
+
+test('two-digit minus: tens away first in räknestigen, and counting up when the numbers are close (docs/PLAN-MINUS.md)', async ({ page }) => {
+  await newChild(page, 'Tove');
+  const parts = ['tiotal', 'tiental', 'ental', 'tilltio', 'overtio', 'hopptio', 'dubbla', 'tvasiffr', 'tvasiffrminus'];
+  await toPath(
+    page,
+    {
+      '72-30': fluent,
+      'next:68': fluent,
+      // Hard: wrong on two days, so it comes as a räknestig from 72 − 30.
+      '72-38': { status: 'learning', box: 1, dueDay: '2026-02-02', wrongDays: 2, introducedDay: '2026-01-25' },
+      // Known, and asked in its usual form: a wrong answer shows how to count up.
+      '71-68': { status: 'fluent', box: 2, dueDay: '2026-02-02', seen: 1 },
+    },
+    parts,
+  );
+  // Nine parts open: nine lanterns, the last on the post by 100.
+  await expect(page.locator('.trail.large .tr-glass')).toHaveCount(9);
+  await page.getByRole('button', { name: 'Gå på stigen' }).click();
+
+  let derived = false;
+  let counted = false;
+  for (let i = 0; i < 40 && !(derived && counted); i++) {
+    await expect(nextStep(page)).toBeVisible();
+    // Other parts are open too: their new tasks are introduced on the way.
+    if (await page.locator('.intro-card').isVisible()) {
+      await passIntro(page);
+      continue;
+    }
+    if (await page.locator('.question.derive').isVisible()) {
+      const step = page.locator('.derive-step.current');
+      // After a wrong answer 71 − 68 can come as a räknestig too: up to the ten, the rest, the hops together.
+      if ((await step.locator('.derive-prompt').textContent()) === '68 + 2') {
+        for (const [prompt, value] of [['68 + 2', '70'], ['71 − 70', '1'], ['2 + 1', '3']]) {
+          await expect(step.locator('.derive-prompt')).toHaveText(prompt!);
+          await page.keyboard.type(value!);
+          await page.keyboard.press('Enter');
+        }
+        await expect(page.locator('.derive-step.current.target .derive-prompt')).toHaveText('71 − 68');
+        await page.keyboard.type('3');
+        await page.keyboard.press('Enter');
+        continue;
+      }
+      await expect(step.locator('.derive-prompt')).toHaveText('72 − 30');
+      await expect(step.locator('.derive-label')).toHaveText('Hoppa tiotalen bakåt först');
+      await page.keyboard.type('42');
+      await page.keyboard.press('Enter');
+      await expect(step.locator('.derive-prompt')).toHaveText('42 − 8');
+      await page.keyboard.type('34');
+      await page.keyboard.press('Enter');
+      await expect(page.locator('.derive-step.current.target .derive-prompt')).toHaveText('72 − 38');
+      await page.keyboard.type('34');
+      await page.keyboard.press('Enter');
+      derived = true;
+      continue;
+    }
+    if ((await page.locator('.question .prompt').getAttribute('data-prompt').catch(() => null)) === '71 − 68 = __' && (await page.locator('.numpad').isVisible())) {
+      for (const d of '17') await page.locator('.numpad-key', { hasText: new RegExp(`^${d}$`) }).click();
+      await page.getByRole('button', { name: 'Svara' }).click();
+      const help = page.locator('.help-card');
+      await expect(help.locator('.confusion-note')).toHaveText('71 och 68 ligger nära varandra. Det går fortare att räkna upp från 68 än att ta bort 68.');
+      await expect(help.locator('.strategy')).toHaveText('Räkna upp från 68: 2 till 70 och 1 till 71. 2 + 1 = 3.');
+      await expect(help.locator('.nl-hop-label, .el-hop-label').first()).toBeAttached();
+      await page.getByRole('button', { name: 'Fortsätt' }).click();
+      counted = true;
+      continue;
+    }
+    await answer(page);
+  }
+  expect([derived, counted]).toEqual([true, true]);
 });
