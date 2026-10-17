@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a klar, R5b nästa |
+| 1 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
 | 2 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
 ## Efter piloten
@@ -43,7 +43,7 @@ i, med ”I dag” i hörnet i stället för en stor knapp (se
 
 | Fråga | Förslag |
 |---|---|
-| Avstämning mot Lgr22 | Skolverkets webbplats kan inte nås från utvecklingsmiljön. Lägg till `www.skolverket.se` bland de tillåtna adresserna, eller stäm av för hand. |
+| Avstämning mot Lgr22 | [LGR22.md](LGR22.md) bygger på sökresultat. Skolverkets webbplats kan inte hämtas från utvecklingsmiljön. Lägg till `www.skolverket.se` bland de tillåtna adresserna, eller jämför texten för hand. |
 
 ## Klart
 

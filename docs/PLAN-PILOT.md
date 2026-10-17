@@ -60,7 +60,7 @@ om vad appen tränar och inte tränar.
 |---|---|
 | R5a. Loggexporten **(klar)** | Sidan ”Fil till piloten”, pilotkoden, filen utan namn. Tester. |
 | R5b. Frågor till piloten | `docs/PILOT.md` med frågorna och hur filen skickas. |
-| S4. Appens syfte | README och `docs/LGR22.md`. |
+| S4. Appens syfte **(klar)** | README och `docs/LGR22.md`. |
 
 ## Fallgropar
 
@@ -87,3 +87,17 @@ om vad appen tränar och inte tränar.
   inte med i säkerhetskopian eller QR-koden.
 - **Sidan** ryms på 320 px utan sidledsscroll, och e2e-testet kontrollerar
   filens innehåll.
+
+## Fynd från S4
+
+- **README** har avsnittet ”Vad appen tränar och inte tränar”.
+- **`docs/LGR22.md`** går igenom kursplanens sex rubriker för årskurs 1–3.
+  Appen tränar det mesta under taluppfattning och tals användning, och delar av
+  algebra (likhetstecknet, obekanta tal, talföljder). Geometri, sannolikhet och
+  statistik tränas inte alls, och problemlösning nästan inte.
+- **Källan:** Skolverkets webbplats gick inte att hämta från miljön, men
+  webbsökningen nådde den. Tre punkter under algebra och punkten om
+  positionssystemet är citerade så. Resten är med egna ord och ska jämföras
+  ordagrant. Sökresultaten var oense om dubbelt och hälften hör till årskurs 1–3,
+  och det står i texten.
+- **Kunskapskriterierna** för årskurs 3 är inte avstämda.

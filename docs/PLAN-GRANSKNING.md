@@ -162,7 +162,7 @@ vad vi föreslår.
 | S1. Växternas övergångar | Ett fel tar ett steg ner, aldrig två. Regler och tester för alla sex övergångar. Samma kontroll för bron och lyktorna. Föräldravyn visar svar med stöd för sig. |
 | S2. Tid och långsamma barn | Simulera busken utan tidskrav, och tiden bara för trädet. Svag, genomsnittlig och stark elev, med tio frön. Beslut efter siffrorna. |
 | S3. Räknestig efter det barnet kan | Flera vägar per svår fakta. Stigen väljs efter vad barnet redan kan. |
-| S4. Appens syfte i dokumenten | Vad appen tränar och inte tränar. Stämma av mot Lgr22. |
+| S4. Appens syfte i dokumenten **(klar)** | Vad appen tränar och inte tränar. Stämma av mot Lgr22 ([LGR22](LGR22.md), [PLAN-PILOT](PLAN-PILOT.md#fynd-från-s4)). |
 
 S1 är ett fel i det barnet ser, och liten. Förslaget är att göra S1 före R3, och
 S2–S4 efter R3.

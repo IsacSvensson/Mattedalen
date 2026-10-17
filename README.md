@@ -17,7 +17,7 @@ bruk.
 > repetition, och varje plats har en koll som ungefär var sjunde speldag mäter
 > vad barnet kan utan stöd. Mattedalen bygger vidare på Gångerträdgården ([IsacSvensson/Multiplikation](https://github.com/IsacSvensson/Multiplikation))
 > med hela dess historik. Härnäst kommer piloten, se
-> [PLAN-BACKEN.md](docs/PLAN-BACKEN.md#faser).
+> [FARDPLAN.md](docs/FARDPLAN.md).
 
 Mer att läsa:
 
@@ -35,6 +35,24 @@ Mer att läsa:
   (Stigen) och en tydligare väg in i gånger, jämfört med hur skolan gör.
 - [docs/STIGEN.md](docs/STIGEN.md): Stigen, talen till 100: delar, former,
   räknestigar, felsvar, platsen, öppningen, startkollen och kollen.
+- [docs/LGR22.md](docs/LGR22.md): appens delar mot det centrala innehållet i
+  matematik för årskurs 1–3.
+
+## Vad appen tränar och inte tränar
+
+Mattedalen är ett komplement till undervisningen, inte hela kursplanen i
+matematik för årskurs 1–3.
+
+- **Den tränar** taluppfattning och huvudräkning: addition och subtraktion
+  inom 20, talen till 100 med tiotal och ental, multiplikation och division i
+  tabellerna 1–10, likhetstecknet och dubbelt och hälften. Barnet lär sig fakta så
+  att de sitter, och vägar från det kända till det okända (räknestigar).
+- **Den tränar inte** geometri, mätning, sannolikhet och statistik,
+  problemlösning, skriftliga metoder och överslagsräkning. Den ersätter inte
+  samtalet om matematik, eller att räkna med konkret material tillsammans med
+  någon.
+- **Jämförelsen med Lgr22** står i [docs/LGR22.md](docs/LGR22.md). Den är inte
+  ordagrant avstämd mot Skolverkets text än.
 
 ## Principer
 
