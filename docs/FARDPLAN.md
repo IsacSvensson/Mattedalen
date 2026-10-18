@@ -17,6 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
+| 0 | **MA och MB. Minustecknet och rimliga svar** | Fel i det barnet ser: en 6-åring räknade plus på minus, och 695 blev ett svarsalternativ. | [PLAN-MINUSTECKNET](PLAN-MINUSTECKNET.md) | MA klar, MB kvar |
 | 1 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
 | 2 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 

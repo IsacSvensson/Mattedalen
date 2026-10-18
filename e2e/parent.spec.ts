@@ -357,3 +357,46 @@ test('"Tyck till": a mail to the project from the grown-up’s own mail app, wit
   await expect(page.getByRole('link', { name: 'Så bidrar du' })).toHaveAttribute('href', 'https://github.com/IsacSvensson/Mattedalen#bidra');
   await parentBack(page);
 });
+
+test('plus read for minus: said in "Att göra" and on Bäcken’s page, and the facts it explains leave "Svåra just nu" (docs/PLAN-MINUSTECKNET.md)', async ({ page }) => {
+  await createProfile(page, 'Alva', 'brook');
+  const hard = { status: 'learning', box: 0, dueDay: '2026-02-02', wrongDays: 3, introducedDay: '2026-01-20' };
+  await seedStates(page, { '2-1': hard, '4-1': hard, '3-1': hard, '8+5': hard }, { packId: 'addition', unlockedUnitIds: ['ettmer', 'noll'] });
+  // Three minus facts answered with the sum in the last days; one other mistake.
+  await page.evaluate(async () => {
+    const db: IDBDatabase = await new Promise((r) => {
+      const q = indexedDB.open('mattedalen');
+      q.onsuccess = () => r(q.result);
+    });
+    const profiles: { id: string }[] = await new Promise((r) => {
+      const q = db.transaction('profiles').objectStore('profiles').getAll();
+      q.onsuccess = () => r(q.result);
+    });
+    const at = (day: number) => new Date(`2026-01-${day}T16:00:00`).getTime();
+    const answers = [
+      ['2-1', '3', at(28)],
+      ['4-1', '5', at(30)],
+      ['3-1', '4', at(31)],
+      ['8+5', '12', at(31)],
+    ] as const;
+    await new Promise((r) => {
+      const tx = db.transaction('attempts', 'readwrite');
+      for (const [itemId, given, ts] of answers)
+        tx.objectStore('attempts').add({ profileId: profiles[0]!.id, packId: 'addition', itemId, ts, sessionId: 's', format: 'choice', kind: 'due', given, correct: false, rtMs: 3000 });
+      tx.oncomplete = r;
+    });
+    db.close();
+  });
+  await page.goto('/');
+  await openParent(page);
+  const todo = page.getByRole('region', { name: 'Att göra för dig' });
+  await expect(todo.getByText('Bäcken: Alva verkar räkna plus när det står minus (3 − 1 blev 4).')).toBeVisible();
+  await todo.getByRole('button', { name: 'Visa Bäcken' }).click();
+  const brook = page.getByRole('region', { name: /^Bäcken/ });
+  await expect(brook.locator('.pattern-note')).toContainText('Alva svarar ofta summan när det står minus: 3 − 1 blev 4 och 4 − 1 blev 5. Minustecknet kan vara nytt.');
+  // The facts the pattern explains are not in the list; the other hard fact is.
+  await expect(brook.locator('.hard-list li strong')).toHaveText(['8 + 5 = 13']);
+  // Seen: it goes from "Att göra", and the page still says it.
+  await parentBack(page);
+  await expect(page.getByText('Alva verkar räkna plus när det står minus', { exact: false })).toHaveCount(0);
+});

@@ -12,6 +12,8 @@ export interface ParentTodo {
   text: string;
   /** What doing it takes, e.g. "Öppna Trädgården nu". Without one, the text is the whole thing. */
   action?: { label: string; run: () => Promise<void> };
+  /** Instead of an action: a button with this label that opens the place's own page, where the thing is explained. */
+  seePlace?: string;
 }
 
 /** A place in one row of the overview in "För vuxna" (docs/PLAN-FORALDRAVYN.md). */

@@ -3703,6 +3703,22 @@ a.soft-button {
   margin-top: 6px;
 }
 
+/* What a place has noticed about the child, above its hard facts: warm, like "Att göra". */
+.pattern-note {
+  background: var(--hint);
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.pattern-note p {
+  margin: 0;
+}
+
+.pattern-note p + p {
+  margin-top: 8px;
+}
+
 /* The way of thinking under the fact, never on the same line: a dash there read as one more minus. */
 .hard-way {
   display: block;

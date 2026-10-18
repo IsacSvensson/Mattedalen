@@ -1,5 +1,16 @@
-import { atLeast, isStruggling, systemClock, type Engine, type ItemId, type ItemState } from '../../engine';
-import { CHECK_CATEGORIES, EQUALITIES, equalityId, formatEquality, formatFact, isEqualityId, parseFactId } from '../../content/addition';
+import { atLeast, diffDays, isStruggling, systemClock, type Engine, type ItemId, type ItemState } from '../../engine';
+import {
+  CHECK_CATEGORIES,
+  EQUALITIES,
+  equalityId,
+  formatEquality,
+  formatFact,
+  isEqualityId,
+  parseFactId,
+  PLUS_FOR_MINUS_DAYS,
+  PLUS_FOR_MINUS_FACTS,
+  plusForMinus,
+} from '../../content/addition';
 import type { Profile, SessionRecord } from '../../storage';
 import type { AppContext } from '../../shell/app';
 import { checkResultsView } from '../../shell/components/checkResults';
@@ -18,6 +29,18 @@ import { wayFor } from '../../shell/words';
 
 /** What the brook covers, for grown-ups. */
 export const BROOK_ABOUT = 'Addition och subtraktion inom 20, och likhetstecknet.';
+
+/** The day a grown-up last read about plus for minus on Bäcken's page; "Att göra" asks again two weeks later if it is still there. */
+const plusForMinusSeenKey = (profileId: string) => `plusForMinusSeen:${profileId}`;
+
+type PlusForMinus = { itemId: ItemId; text: string }[];
+
+/** The minus facts the child has answered with the sum lately, when they are enough to be the pattern (docs/PLAN-MINUSTECKNET.md); otherwise none. */
+async function plusForMinusNow(ctx: AppContext, profile: Profile): Promise<PlusForMinus> {
+  const since = systemClock.now() - PLUS_FOR_MINUS_DAYS * 86_400_000;
+  const found = plusForMinus(await ctx.store.listAttempts(profile.id, { packId: pack.id, since }));
+  return found.length >= PLUS_FOR_MINUS_FACTS ? found : [];
+}
 
 /**
  * Bäcken's page in "För vuxna": the state (how much of each part sits, plus
@@ -42,6 +65,8 @@ export async function brookParentPage(ctx: AppContext, profile: Profile): Promis
   const unlocked = new Set(engine.unlockedUnits(states, meta));
   const lastPlayed = sessions.length ? sessions[sessions.length - 1]!.day : null;
   const parts = partProgress(pack, states, unlocked);
+  const minus = await plusForMinusNow(ctx, profile);
+  if (minus.length) await ctx.store.setSetting(plusForMinusSeenKey(profile.id), systemClock.today());
 
   return h(
     'section',
@@ -77,7 +102,7 @@ export async function brookParentPage(ctx: AppContext, profile: Profile): Promis
     h('h4', null, 'Vågen'),
     scaleSummary(states),
     h('h3', null, 'Svåra just nu'),
-    hardList(states, engine),
+    hardList(states, engine, minus, profile.name),
     h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states),
     h('h3', null, 'Bäckens koll'),
@@ -151,24 +176,32 @@ const label = (id: ItemId) => {
 };
 
 /** Facts the child finds hard right now, easiest first, with the way the game helps. */
-function hardFacts(states: Record<ItemId, ItemState>, engine: Engine): { text: string; strategy: string | undefined }[] {
+function hardFacts(states: Record<ItemId, ItemState>, engine: Engine): { id: ItemId; text: string; strategy: string | undefined }[] {
   const today = systemClock.today();
   return Object.values(states)
     .filter((s) => !isEqualityId(s.itemId) && isStruggling(s, today, engine.config.support))
     .map((s) => {
       const f = parseFactId(s.itemId);
-      return { text: `${formatFact(f.op, f.x, f.y)} = ${f.answer}`, strategy: engine.item(s.itemId).hints.find((x) => x.kind === 'strategy')?.text, size: f.answer };
+      return { id: s.itemId, text: `${formatFact(f.op, f.x, f.y)} = ${f.answer}`, strategy: engine.item(s.itemId).hints.find((x) => x.kind === 'strategy')?.text, size: f.answer };
     })
     .sort((x, y) => x.size - y.size || x.text.localeCompare(y.text));
 }
 
-/** Facts the child finds hard right now, with the way the game helps, so grown-ups can use the same idea. At most five, with "Visa alla". */
-function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElement {
-  const hard = hardFacts(states, engine);
-  if (hard.length === 0) return h('p', { class: 'muted' }, 'Inga just nu.');
+/**
+ * Facts the child finds hard right now, with the way the game helps, so
+ * grown-ups can use the same idea. At most five, with "Visa alla". When the
+ * child reads minus as plus, that is said first, and the facts it explains are
+ * left out of the list.
+ */
+function hardList(states: Record<ItemId, ItemState>, engine: Engine, minus: PlusForMinus, name: string): HTMLElement {
+  const explained = new Set(minus.map((m) => m.itemId));
+  const hard = hardFacts(states, engine).filter((x) => !explained.has(x.id));
+  const note = minus.length ? plusForMinusNote(minus, name) : null;
+  if (hard.length === 0) return h('div', null, note, h('p', { class: 'muted' }, note ? 'Inga andra just nu.' : 'Inga just nu.'));
   return h(
     'div',
     null,
+    note,
     h('p', { class: 'muted' }, 'Fel på flera dagar, eller länge utan att fastna. De här tas i steg från det barnet redan kan (räknestigen), med tallinjen.'),
     limitedList(
       'ul',
@@ -178,19 +211,36 @@ function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElemen
   );
 }
 
+/** Plus read for minus, in words and with a way to show what minus means. */
+function plusForMinusNote(minus: PlusForMinus, name: string): HTMLElement {
+  const [a, b] = minus;
+  return h(
+    'div',
+    { class: 'pattern-note' },
+    h('p', null, h('strong', null, `${name} svarar ofta summan när det står minus`), `: ${a!.text} och ${b!.text}. Minustecknet kan vara nytt.`),
+    h('p', null, 'Visa med fingrar eller saker att minus betyder att ta bort. 4 − 1: håll upp fyra fingrar och vik ner ett. Kvar är 3.'),
+  );
+}
+
 /** Bäcken in the overview of "För vuxna": what the child is on, what is hardest, and how much sits. */
 export async function brookParentSummary(ctx: AppContext, profile: Profile): Promise<PlaceSummary> {
   const deps = brookDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
-  const hardest = hardFacts(states, engine)[0];
+  const minus = await plusForMinusNow(ctx, profile);
+  const explained = new Set(minus.map((m) => m.itemId));
+  const hardest = hardFacts(states, engine).find((x) => !explained.has(x.id));
+  const seen = await ctx.store.getSetting<string>(plusForMinusSeenKey(profile.id));
+  const todo: PlaceSummary['todo'] = [];
+  if (minus.length && (seen === undefined || diffDays(seen, systemClock.today()) >= PLUS_FOR_MINUS_DAYS))
+    todo.push({ text: `${profile.name} verkar räkna plus när det står minus (${minus[0]!.text}).`, seePlace: 'Visa Bäcken' });
   return {
     now: partNow(pack, states, new Set(engine.unlockedUnits(states, meta))),
     hardest: hardest ? [hardest.text] : null,
     ...knownOf(pack, states),
     slow: slowButRight(engine, states),
     bestTimes: bestTimes(states),
-    todo: [],
+    todo,
   };
 }
 

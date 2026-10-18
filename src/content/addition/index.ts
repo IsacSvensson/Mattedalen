@@ -10,6 +10,7 @@ export * from './derive';
 export { additionDistractors, additionNote } from './distractors';
 export { presentFact } from './present';
 export * from './check';
+export * from './patterns';
 
 /** A unit opens when ~80 % of each prerequisite is at least "fluent". */
 export const UNLOCK_FRACTION = 0.8;

@@ -133,7 +133,11 @@ async function todoSection(ctx: AppContext, profile: Profile | undefined): Promi
     const save = profileSaver(ctx, profile, again);
     for (const place of ctx.places) {
       const summary = await place.parentSummary(ctx, profile, save);
-      for (const todo of summary.todo) items.push({ place: place.name, todo });
+      for (const todo of summary.todo)
+        items.push({
+          place: place.name,
+          todo: todo.seePlace && !todo.action ? { ...todo, action: { label: todo.seePlace, run: () => showParentPlace(ctx, profile.id, place.id) } } : todo,
+        });
       speeds.push(summary);
       const checks = await checkCount(ctx, profile.id, place);
       const seen = (await ctx.store.getSetting<number>(checksSeenKey(profile.id, place.id))) ?? 0;

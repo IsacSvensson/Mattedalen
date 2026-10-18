@@ -296,3 +296,29 @@ describe('new facts at the brook', () => {
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
   });
 });
+
+import { plusForMinus } from '../../src/content/addition';
+
+describe('plus read for minus (docs/PLAN-MINUSTECKNET.md)', () => {
+  const wrong = (itemId: string, given: string, ts: number) => ({ itemId, given, correct: false, ts });
+
+  it('finds the minus facts answered with the sum, newest first, once each', () => {
+    const found = plusForMinus([wrong('2-1', '3', 1), wrong('4-1', '5', 3), wrong('2-1', '3', 2), wrong('3-1', '4', 4)]);
+    expect(found).toEqual([
+      { itemId: '3-1', text: '3 − 1 blev 4' },
+      { itemId: '4-1', text: '4 − 1 blev 5' },
+      { itemId: '2-1', text: '2 − 1 blev 3' },
+    ]);
+  });
+
+  it('leaves out other wrong answers, plus facts, minus 0 and the scale', () => {
+    const found = plusForMinus([
+      wrong('4-1', '2', 1),
+      wrong('2+1', '1', 2),
+      wrong('5-0', '5', 3),
+      wrong('eq:3+4=__+5', '7', 4),
+      { itemId: '3-1', given: '2', correct: true, ts: 5 },
+    ]);
+    expect(found).toEqual([]);
+  });
+});

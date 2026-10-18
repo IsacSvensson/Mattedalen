@@ -150,6 +150,13 @@ tillbaka till dalen.
   värmekarta över additionstabellen 0–10, varje del med hur många plus- och
   minusfakta som sitter, svåra just nu med strategin, de vanligaste
   förväxlingarna, Vågen per uppgiftstyp och ”Gör om startkollen vid bäcken”.
+- **Plus i stället för minus.** Har minst tre olika minusfakta fått summan som
+  svar de senaste 14 dagarna, till exempel 2 − 1 = 3, står det först under
+  ”Svåra just nu”, med två exempel och ett tips: visa med fingrar att minus
+  betyder att ta bort. De fakta som mönstret förklarar står inte i listan. Det
+  står också i ”Att göra för dig” tills den vuxna har sett Bäckens sida, och
+  igen två veckor senare om det finns kvar. Minus noll räknas inte
+  ([PLAN-MINUSTECKNET](PLAN-MINUSTECKNET.md)).
 
 ## Bäckens koll (`check.ts`)
 
