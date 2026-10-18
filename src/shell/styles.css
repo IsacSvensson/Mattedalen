@@ -3747,6 +3747,26 @@ a.soft-button {
   margin-top: 6px;
 }
 
+/* What is new: a title and its points, in the box after an update and on its page. */
+.news-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+.news-item ul {
+  margin: 4px 0 0;
+  padding-left: 1.2em;
+}
+
+.news-item li + li {
+  margin-top: 4px;
+}
+
 /* What a place has noticed about the child, above its hard facts: warm, like "Att göra". */
 .pattern-note {
   background: var(--hint);

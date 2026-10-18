@@ -6,10 +6,12 @@ import { createProgressStore, importLegacyData, requestPersistence } from '../st
 import type { AppContext } from './app';
 import { plantSprite } from './components/plant';
 import { captureInstallPrompt, registerServiceWorker } from './pwa';
+import { showNewsIfAny } from './news';
 import { placeIsOpen } from './place';
 import { takeResume, type ParentPage, type Where } from './resume';
 import { showDevice } from './screens/parent/device';
 import { showFeedback } from './screens/parent/feedback';
+import { showNews } from './screens/parent/news';
 import { showImport } from './screens/parent/importPage';
 import { showParent, showParentPlace } from './screens/parent/parent';
 import { showPinGate } from './screens/parent/pinGate';
@@ -40,8 +42,9 @@ async function start(): Promise<void> {
   };
   // After an update's reload: back to the same screen (docs/PLAN-UPPDATERING.md).
   const back = takeResume();
-  if (back && (await resumeAt(ctx, back))) return;
-  await showProfiles(ctx);
+  if (!back || !(await resumeAt(ctx, back))) await showProfiles(ctx);
+  // What is new, over the first screen after an update (docs/PLAN-UPPDATERING.md).
+  await showNewsIfAny(ctx);
 }
 
 /** Opens the screen the app was on before the update; false when it is gone (then the app starts over). */
@@ -60,7 +63,13 @@ async function resumeAt(ctx: AppContext, where: Where): Promise<boolean> {
 }
 
 function parentPage(ctx: AppContext, page: ParentPage, profileId?: string, placeId?: string): Promise<void> {
-  if (!profileId) return page === 'device' ? showDevice(ctx) : page === 'import' ? showImport(ctx) : page === 'feedback' ? Promise.resolve(showFeedback(ctx)) : showParent(ctx);
+  if (!profileId) {
+    if (page === 'device') return showDevice(ctx);
+    if (page === 'import') return showImport(ctx);
+    if (page === 'feedback') return Promise.resolve(showFeedback(ctx));
+    if (page === 'news') return Promise.resolve(showNews(ctx));
+    return showParent(ctx);
+  }
   switch (page) {
     case 'place':
       return placeId ? showParentPlace(ctx, profileId, placeId) : showParent(ctx, profileId);
@@ -74,6 +83,9 @@ function parentPage(ctx: AppContext, page: ParentPage, profileId?: string, place
       return showImport(ctx, profileId);
     case 'feedback':
       showFeedback(ctx, profileId);
+      return Promise.resolve();
+    case 'news':
+      showNews(ctx, profileId);
       return Promise.resolve();
     default:
       return showParent(ctx, profileId);

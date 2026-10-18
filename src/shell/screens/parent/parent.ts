@@ -10,6 +10,7 @@ import { formatDay, minutesPerDay, slowFacts } from '../../stats';
 import { showProfiles } from '../profiles';
 import { showDevice } from './device';
 import { showFeedback } from './feedback';
+import { showNews } from './news';
 import { pageRow, profileSaver, showParentPage } from './frame';
 import type { ParentTodo, Place, PlaceSummary } from '../../place';
 import { showImport } from './importPage';
@@ -58,6 +59,7 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
         { class: 'parent-rows' },
         pageRow({ icon: icon('phone'), title: 'Hämta ett barn', text: 'QR-kod, säkerhetskopia eller Gångerträdgården', onclick: () => void showImport(ctx, selected?.id) }),
         pageRow({ icon: icon('lock'), title: 'Den här enheten', text: 'Lagring, version, hemskärmen, integritet och vuxenkod', onclick: () => void showDevice(ctx, selected?.id) }),
+        pageRow({ icon: icon('refresh'), title: 'Nytt i appen', text: 'Det som har ändrats, det senaste först', onclick: () => showNews(ctx, selected?.id) }),
         pageRow({ icon: icon('mail'), title: 'Tyck till', text: 'Mejla oss, eller hjälp till på GitHub', onclick: () => showFeedback(ctx, selected?.id) }),
       ),
     ),

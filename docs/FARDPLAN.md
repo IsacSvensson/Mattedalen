@@ -17,9 +17,8 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **U. Efter en uppdatering** | Man hamnar på ”Vem spelar?” efter en uppdatering och vet inte vad som är nytt. Tillbaka dit man var, och rutan ”Nytt i Mattedalen”. | [PLAN-UPPDATERING](PLAN-UPPDATERING.md) | U1 klar, U2 kvar (ett beslut) |
-| 2 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
-| 3 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
+| 1 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
+| 2 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
 ## Efter piloten
 
@@ -61,6 +60,7 @@ Avstämningen mot Lgr22 är gjord mot Skolverkets PDF av kursplanen
 | R3 (K1–K3) | Dalen som en karta att dra runt i, med platserna i full storlek och ”I dag” i hörnet. | [PLAN-DALEN](PLAN-DALEN.md) |
 | S3 | Räknestigen tar den väg barnet kan: flera vägar per svår gångerfakta, och föräldravyn visar barnets väg. | [PLAN-RAKNESTIG](PLAN-RAKNESTIG.md) |
 | R4 | Tvåsiffrigt minus tvåsiffrigt, en nionde del på Stigen: ta bort tiotalen först, och räkna upp när talen ligger nära varandra. | [PLAN-MINUS](PLAN-MINUS.md) |
+| U1–U2 | Efter en uppdatering: tillbaka till samma skärm, och rutan ”Nytt i Mattedalen” med sidan ”Nytt i appen” i ”För vuxna”. | [PLAN-UPPDATERING](PLAN-UPPDATERING.md) |
 | C1–C2 | Plus först vid bäcken: minus kommer när den första plusfaktan i familjen sitter, och första minus har ett kort som visar ta bort. | [PLAN-PLUSFORST](PLAN-PLUSFORST.md) |
 | MA–MB | Minustecknet och rimliga svar: vuxna ser när barnet räknar plus på minus, bara rimliga felsvar blir alternativ, och knappsatsen vid bäcken tar två siffror. | [PLAN-MINUSTECKNET](PLAN-MINUSTECKNET.md) |
 | K4 | Zooma ut på kartan: nypa eller knappen i hörnet, ut till hela dalen. | [PLAN-DALEN](PLAN-DALEN.md#fynd-från-k4) |

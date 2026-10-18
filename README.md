@@ -326,8 +326,8 @@ steg tillbaka, från en sida till översikten.
   veckan** (övade minuter per dag under 14 dagar och hur många dagar barnet
   spelat), en rad per plats med vad barnet är på, det som är svårast och en
   stapel för hur mycket som sitter (`Place.parentSummary`), och raden **Barnets
-  inställningar**. Längst ner finns **Hämta ett barn**, **Den här enheten** och
-  **Tyck till**.
+  inställningar**. Längst ner finns **Hämta ett barn**, **Den här enheten**,
+  **Nytt i appen** och **Tyck till**.
 - **En plats** har alltid samma ordning: läget, svåra just nu (högst fem, med
   ”Visa alla”), de vanligaste förväxlingarna, platsens koll, alla fakta som
   värmekartor (ihopfällda) och sist startkollen (`Place.parentPage`).
@@ -340,6 +340,9 @@ steg tillbaka, från en sida till översikten.
 - **Den här enheten**: lagring, version och uppdatering, hemskärmen, integritet
   och vuxenkoden.
 - **Hämta ett barn**: QR-kod, säkerhetskopia och Gångerträdgården.
+- **Nytt i appen**: det som har ändrats, per dag, det senaste först
+  (`src/shell/news.ts`). Efter en uppdatering visas de två senaste posterna som
+  enheten inte har sett i rutan ”Nytt i Mattedalen”.
 - **Tyck till**: en knapp som öppnar ett mejl till matematikdalen@gmail.com i
   den vuxnas eget mejlprogram, med några frågor och appens version. Appen spårar
   ingenting, så det de vuxna berättar är det enda projektet får veta. Under den
@@ -495,6 +498,8 @@ om något som inte fungerar. Appen länkar hit från ”Tyck till” i ”För v
   få.
 - **Språk:** dokumenten skrivs på svenska med korta meningar. Koden och
   kommentarerna skrivs på engelska.
+- **Nytt i appen:** en ändring som barn eller vuxna ser får en post i
+  `src/shell/news.ts`, i samma ändring.
 - **Licens:** ett bidrag får användas under samma licens som resten av
   projektet (se nedan).
 

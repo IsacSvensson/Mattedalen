@@ -38,7 +38,8 @@ export function choose<T extends string>(title: string, body: Child, options: Mo
     );
     document.addEventListener('keydown', onKey);
     document.body.append(overlay);
-    buttons[0]?.focus();
+    // Focused without scrolling, so a long box shows its title first.
+    buttons[0]?.focus({ preventScroll: true });
   });
 }
 

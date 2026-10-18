@@ -350,7 +350,7 @@ export async function parentSettings(page: Page): Promise<void> {
 }
 
 /** In "För vuxna": from the overview to "Hämta ett barn", "Den här enheten" or "Tyck till". */
-export async function parentLink(page: Page, title: 'Hämta ett barn' | 'Den här enheten' | 'Tyck till'): Promise<void> {
+export async function parentLink(page: Page, title: 'Hämta ett barn' | 'Den här enheten' | 'Tyck till' | 'Nytt i appen'): Promise<void> {
   await page.getByRole('button', { name: new RegExp(`^${title}`) }).click();
   await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible();
 }

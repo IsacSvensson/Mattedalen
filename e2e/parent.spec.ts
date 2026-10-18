@@ -36,7 +36,7 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
 
   // The overview: the week, and a row per place that leads to its page.
   await expect(page.getByText(/Senaste 7 dagarna: 1[23] minuter, 1 dag med spel\./)).toBeVisible();
-  await expect(page.locator('.parent-overview .parent-row strong')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Barnets inställningar', 'Hämta ett barn', 'Den här enheten', 'Tyck till']);
+  await expect(page.locator('.parent-overview .parent-row strong')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Barnets inställningar', 'Hämta ett barn', 'Den här enheten', 'Nytt i appen', 'Tyck till']);
   await parentPlace(page, 'Trädgården');
   const garden = page.getByRole('region', { name: /^Trädgården/ });
   await expect(garden.getByRole('heading', { name: 'Trädgården', exact: true })).toBeVisible();

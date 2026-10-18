@@ -58,14 +58,13 @@ ruta säger vad som är nytt.
 | Fas | Innehåll |
 |---|---|
 | U1. Tillbaka dit man var **(klar)** | Var man är, märket före omladdningen, att öppna samma skärm, vuxenkoden. E2e med en simulerad uppdatering. |
-| U2. Vad är nytt | Nyhetslistan, rutan, sidan i ”För vuxna” och de första posterna. E2e, skärmbilder och dokumenten. |
+| U2. Vad är nytt **(klar)** | Nyhetslistan, rutan, sidan i ”För vuxna” och de första posterna. E2e, skärmbilder och dokumenten. |
 
 ## Beslut som behövs
 
-1. **Var rutan ”Nytt i Mattedalen” visas.** Förslaget är på första skärmen efter
-   uppdateringen, vilken skärm det än är, utom under ett pass. Alternativen är
-   bara på ”Vem spelar?”, eller bara i ”För vuxna”. Rutan är skriven för vuxna,
-   och om barnet är den som ser den räcker ”Okej”.
+1. **Var rutan ”Nytt i Mattedalen” visas.** På första skärmen efter
+   uppdateringen, vilken skärm det än är, utom under ett pass (beslutat). Rutan
+   är skriven för vuxna, och om barnet är den som ser den räcker ”Okej”.
 2. **Tillbaka även vid en vanlig start?** Nej, bara efter en uppdatering
    (beslutat). Annars hamnar ett syskon i fel barns dal.
 
@@ -99,3 +98,27 @@ ruta säger vad som är nytt.
   från ”Den här enheten” till vuxenkoden och sedan samma sida. En vanlig
   omladdning efteråt börjar på ”Vem spelar?”. Reservvägarna testas i
   `e2e/resume.spec.ts`.
+
+## Fynd från U2
+
+![Telefon, 320 px: rutan ”Nytt i Mattedalen” och sidan ”Nytt i appen”](img/nytt.png)
+
+*Telefon, 320 px. Till vänster rutan efter en uppdatering, med de två senaste
+posterna och var resten finns. Till höger sidan ”Nytt i appen” i ”För vuxna”.*
+
+- **Nyhetslistan** (`src/shell/news.ts`) har fyra poster: tillbaka dit du var,
+  plus först vid bäcken, mer hjälp med minus och ”Tyck till”. En test kräver
+  att varje post har ett eget id, att de ligger med den senaste först och att
+  ingen har fler än tre punkter.
+- **Rutan** visas när appen startar, över första skärmen, om det finns poster som
+  enheten inte har sett. Den visar högst två, så att den ryms på en liten
+  telefon utan att knappen hamnar utanför, och säger hur många fler som finns
+  under ”Nytt i appen”. Efter ”Okej” räknas alla som sedda.
+- **Vem ser vad:** en ny enhet utan barn ser inga gamla nyheter. En enhet som
+  redan har barn men aldrig sett någon post, alltså en som uppdateras till den
+  här versionen, ser de två senaste.
+- **Dialogrutorna** fokuserar knappen utan att scrolla, så en lång ruta visar
+  sin rubrik först. Det gäller alla dialogrutor i appen.
+- **Sidan ”Nytt i appen”** finns i ”För vuxna”, efter ”Den här enheten”, med
+  posterna grupperade per dag. Den kommer också tillbaka efter en uppdatering,
+  som de andra sidorna.
