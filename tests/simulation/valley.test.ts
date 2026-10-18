@@ -47,7 +47,10 @@ describe('the valley with Stigen, simulated', () => {
   });
 
   it('would hold the later tables for months without the cap', () => {
-    for (const t of ['u3', 'usq', 'u78']) {
+    // ×3 started without being held in two of six seeds already before minus
+    // waited for plus, and seed 1 is one of them since (docs/PLAN-PLUSFORST.md,
+    // C1). The squares and ×7–×8 are held 7–15 weeks in every seed.
+    for (const t of ['usq', 'u78']) {
       expect(week(strongHard.firstDay[`multiplication:${t}`]) - week(strong.firstDay[`multiplication:${t}`]), t).toBeGreaterThanOrEqual(6);
     }
   });

@@ -351,3 +351,41 @@ describe('plausible answers (docs/PLAN-MINUSTECKNET.md)', () => {
     expect(five).toBeGreaterThan(50);
   });
 });
+
+describe('minus after plus (docs/PLAN-PLUSFORST.md)', () => {
+  it('a minus fact waits for the first plus fact of its family; plus waits for nothing', () => {
+    expect(byId.get('13-5')!.requires).toEqual(['8+5']);
+    expect(byId.get('13-8')!.requires).toEqual(['8+5']);
+    expect(byId.get('8-4')!.requires).toEqual(['4+4']);
+    expect(byId.get('5-0')!.requires).toEqual(['5+0']);
+    expect(byId.get('8+5')!.requires).toBeUndefined();
+    expect(createAdditionPack({ minusAfter: 'family' }).items.find((i) => i.id === '13-5')!.requires).toEqual(['8+5', '5+8']);
+    expect(createAdditionPack({ minusAfter: 'none' }).items.find((i) => i.id === '13-5')!.requires).toBeUndefined();
+  });
+
+  it('a new child meets no minus fact before its plus fact sits', () => {
+    const clock = new ManualClock(Date.UTC(2026, 1, 2, 15));
+    const engine = createEngine({ pack, clock, rng: seededRng(5) });
+    const session = engine.startSession({ states: engine.initialStates(), meta: engine.initialMeta() });
+    const introduced: string[] = [];
+    for (let q = session.next(); q; q = session.next()) {
+      if (q.kind === 'new') introduced.push(q.item.id);
+      session.submit(q.item.answer, 1500);
+      clock.advance(4000);
+    }
+    expect(introduced.length).toBeGreaterThan(3);
+    // A plus fact sits (a bush) on the second day at the earliest, so the first day is all plus.
+    expect(introduced.filter((id) => id.includes('-'))).toEqual([]);
+  });
+
+  it('the start check still asks about the brook’s parts, minus included', () => {
+    const placement = new Placement(pack, seededRng(2));
+    const asked: string[] = [];
+    for (let item = placement.next(); item; item = placement.next()) {
+      asked.push(item.id);
+      placement.submit(item.answer, 2000);
+    }
+    expect(asked.some((id) => id.includes('-'))).toBe(true);
+    expect(placement.result().passedUnitIds).toContain('ettmer');
+  });
+});

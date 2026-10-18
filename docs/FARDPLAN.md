@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **C. Plus först vid bäcken** | En 6-åring räknade plus på minus. Minus väntar på plus, och första minus får ett kort som visar ta bort. | [PLAN-PLUSFORST](PLAN-PLUSFORST.md) | Plan skriven, två beslut kvar |
+| 1 | **C. Plus först vid bäcken** | En 6-åring räknade plus på minus. Minus väntar på plus, och första minus får ett kort som visar ta bort. | [PLAN-PLUSFORST](PLAN-PLUSFORST.md) | C1 klar, C2 kvar |
 | 2 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
 | 3 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 

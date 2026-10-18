@@ -90,9 +90,10 @@ export class Placement {
     private readonly cfg: PlacementConfig = DEFAULT_PLACEMENT,
   ) {
     this.ordered = sortedUnits(pack.units);
-    // Understanding is not checked, nor parts whose items wait for others to sit
-    // first (items with `requires`).
-    const waits = (u: Unit) => u.itemIds.some((id) => pack.items.find((it) => it.id === id)?.requires?.length);
+    // Understanding is not checked, nor parts whose items all wait for others to
+    // sit first (items with `requires`, like delat med). A part where only some
+    // wait (minus after its plus, docs/PLAN-PLUSFORST.md) is checked as a whole.
+    const waits = (u: Unit) => u.itemIds.every((id) => pack.items.find((it) => it.id === id)?.requires?.length);
     this.units = this.ordered.filter((u) => u.itemIds.length > 0 && u.kind !== 'understanding' && !waits(u));
     this.itemById = new Map(pack.items.map((i) => [i.id, i]));
     this.loadUnit();

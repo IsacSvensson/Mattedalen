@@ -1,5 +1,5 @@
 import { createEngine, diffDays, isStruggling, knownPath, makeConfig, ManualClock, seededRng, type Engine, type ItemId, type ItemState, type LearnerMeta, type Rng, type StatusConfig } from '../../src/engine';
-import { createAdditionPack } from '../../src/content/addition';
+import { createAdditionPack, type MinusAfter } from '../../src/content/addition';
 import { createHundredPack } from '../../src/content/hundred';
 import { createMultiplicationPack, isDivisionId, isFactId, parseDivisionId, parseFactId } from '../../src/content/multiplication';
 import { planDay, restedYesterday, type DayPlan } from '../../src/shell/dayPlan';
@@ -37,6 +37,8 @@ export interface ValleyOptions {
   status?: Partial<StatusConfig>;
   /** `one`: every garden fact has only the table's own way, as before S3 (docs/PLAN-RAKNESTIG.md). */
   ways?: 'one' | 'all';
+  /** What the brook's minus facts wait for (docs/PLAN-PLUSFORST.md); the app's by default. */
+  minusAfter?: MinusAfter;
 }
 
 const BROOK_DIFFICULTY: Record<string, number> = {
@@ -85,6 +87,16 @@ export interface ValleyResult {
   weekly: WeekState[];
   /** The child's own speed: median time of the first two weeks' correct answers on what the child knew before (the brook's easiest parts). */
   knownRtMs: number | null;
+  /** The brook at the end of each week (docs/PLAN-PLUSFORST.md). */
+  brookWeekly: BrookWeek[];
+}
+
+/** The brook at the end of a week: shares of its plus and minus facts that sit, and the minus facts waiting for their plus. */
+export interface BrookWeek {
+  plus: number;
+  minus: number;
+  /** New minus facts in open parts whose plus facts do not sit yet. */
+  waiting: number;
 }
 
 /** The garden's multiplications at the end of a week: shares of all of them, and of the ones that sit. */
@@ -124,7 +136,7 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
     const learner = new SimulatedLearner(o.profile, seededRng(o.seed + 100 + k), difficulty, (i) => engine.item(i).pairId, (i) => engine.item(i).derivedFrom);
     return { id, engine, learner, states: engine.initialStates(), meta: engine.initialMeta(), openDay: null };
   };
-  const brookPack = createAdditionPack();
+  const brookPack = createAdditionPack({ minusAfter: o.minusAfter });
   const pathPack = createHundredPack();
   const gardenPack = createMultiplicationPack({ division: true });
   if (o.ways === 'one') for (const item of gardenPack.items) delete item.paths;
@@ -141,6 +153,9 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
   const sitDay: Record<string, number> = {};
   const timesHistory: number[] = [];
   const weekly: WeekState[] = [];
+  const brookWeekly: BrookWeek[] = [];
+  const plusIds = brookPack.items.filter((i) => /^\d+\+\d+$/.test(i.id));
+  const minusIds = brookPack.items.filter((i) => /^\d+-\d+$/.test(i.id));
   let weekRts: number[] = [];
   let weekDerives = 0;
   const knownRts: number[] = [];
@@ -237,6 +252,13 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
       });
       weekRts = [];
       weekDerives = 0;
+      const sitsAt = (st: ItemState | undefined) => st !== undefined && (st.status === 'fluent' || st.status === 'automatic');
+      const openParts = new Set(brook.engine.unlockedUnits(brook.states, brook.meta));
+      brookWeekly.push({
+        plus: share(plusIds.filter((i) => sitsAt(brook.states[i.id])).length, plusIds.length),
+        minus: share(minusIds.filter((i) => sitsAt(brook.states[i.id])).length, minusIds.length),
+        waiting: minusIds.filter((i) => openParts.has(i.unitId) && brook.states[i.id]!.status === 'new' && i.requires?.some((r) => !sitsAt(brook.states[r]))).length,
+      });
     }
   }
   return {
@@ -249,5 +271,6 @@ export function simulateValley(o: ValleyOptions): ValleyResult {
     correct,
     weekly,
     knownRtMs: knownRts.length ? knownRts.sort((a, b) => a - b)[Math.floor(knownRts.length / 2)]! : null,
+    brookWeekly,
   };
 }

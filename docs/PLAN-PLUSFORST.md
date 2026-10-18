@@ -53,7 +53,7 @@ bort.
 
 | Fas | Innehåll |
 |---|---|
-| C1. Minus väntar på plus | Kraven på minusfakta. Enhetstester. Simulering före och efter. |
+| C1. Minus väntar på plus **(klar)** | Kraven på minusfakta. Enhetstester. Simulering före och efter. |
 | C2. Det barnet ser | Kortet för första minus och den nya hjälptexten. E2e, skärmbilder och dokumenten. |
 
 ### Simuleringen i C1
@@ -70,14 +70,12 @@ Simuleringen kan visa vad det kostar i tid. Den kan inte visa nyttan, eftersom
 den simulerade eleven inte blandar ihop plus och minus. Nyttan syns först hos
 riktiga barn.
 
-## Beslut som behövs
+## Beslut
 
-1. **Båda plusfakta eller bara en?** Planen säger båda, som delat med. Bara den
-   första (8 + 5) gör att minus kommer tidigare. Simuleringen i C1 visar
-   skillnaden, och sedan väljer vi.
-2. **Alla barn eller bara nybörjare?** Planen säger alla, eftersom det knappt
-   märks för barn som kan plus. Alternativet är att det bara gäller barn som
-   valde ”Börja från början” vid startkollen.
+1. **Bara den första plusfaktan** (8 + 5 före 13 − 5 och 13 − 8). Planen sa båda,
+   som delat med, men då öppnade Stigen ungefär fyra veckor senare i
+   simuleringen. Med den första blev det ungefär en vecka (se fynden).
+2. **Alla barn.** Det märks knappt för barn som kan plus.
 
 ## Fallgropar
 
@@ -90,3 +88,42 @@ riktiga barn.
 - **E2e-tester** som räknar med en minusfakta tidigt vid bäcken kan behöva ändras.
 - **Mönstret från MA finns kvar.** Det fångar barn som redan har minus igång,
   och barn där kortet inte räckte.
+
+## Fynd från C1
+
+- **Regeln:** varje minusfakta har den första plusfaktan i sin familj som krav
+  (`requires`), som delat med har sina gångerfakta. 13 − 5 och 13 − 8 väntar på
+  8 + 5, och 8 − 4 på 4 + 4. Enhetstestet visar att ett nytt barn bara får plus
+  den första dagen, eftersom en plusfakta blir buske tidigast dag två.
+- **Startkollen hade slutat fråga.** Den hoppade över varje del där någon fakta
+  väntar på andra, vilket var till för delat med. Med den nya regeln hade den
+  hoppat över alla Bäckens delar. Nu hoppar den bara över delar där alla fakta
+  väntar. Det gäller fortfarande delarna med delat med, och startkollen vid
+  bäcken frågar som förut, minus också.
+- **Simuleringen,** hela dalen, åtta frön, 26 veckor, median (min–max)
+  (`PLUSFORST_REPORT=1`, `tests/simulation/plusforstReport.test.ts`):
+
+  | Genomsnittlig elev | Som förut | Efter första plus | Efter familjens plus |
+  |---|---|---|---|
+  | Trädgården öppnar, vecka | 5 (4–7) | 5 (3–8) | 6 (4–7) |
+  | Stigen öppnar, vecka | 12 (10–16) | 13 (8–19) | 16 (10–17) |
+  | Minus sitter, vecka 8 | 83 % | 72 % | 70 % |
+  | Minus sitter, vecka 26 | 95 % | 93 % | 92 % |
+  | Gånger sitter, vecka 26 | 74 % | 74 % | 75 % |
+  | Rätt svar | 82 % | 82 % | 82 % |
+
+  Den svaga och den långsamma eleven öppnar inte Stigen inom 26 veckor i någon
+  av varianterna, och minus sitter ungefär lika mycket vecka 26 (svag 62, 60 och
+  57 %, långsam 44, 49 och 46 %). Andelen rätt svar steg för båda: från 78 till
+  80–81 % och från 90 till 93 %.
+- **Kostnaden** är ungefär en vecka innan Stigen öppnar för ett genomsnittligt
+  barn, och minus sitter senare de första månaderna. Efter ett halvår är
+  skillnaden liten. Simuleringen kan inte visa nyttan: den simulerade eleven
+  blandar inte ihop plus och minus.
+- **Två simuleringstester ändrades,** med skälet i testet. Alla fakta vid bäcken
+  hinner introduceras inom tio veckor, inte nio. ×3 startar utan att hållas i
+  vissa frön redan före C1 (två av sex), och testet för hur länge tabellerna
+  hålls utan taket kontrollerar nu kvadraterna och ×7–×8, som hålls 7–15 veckor
+  i alla frön.
+- **Barn som redan har börjat:** minusfakta som redan är igång fortsätter. Nya
+  minusfakta väntar på sin plusfakta, som oftast redan sitter.

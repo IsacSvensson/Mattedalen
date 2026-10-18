@@ -102,7 +102,8 @@ describe('Bäcken: the start check gets a child to what is new (J4)', () => {
   it('meets the equal sign in other forms early, and every fact within about two months', () => {
     for (const r of average) {
       expect(r.firstEqualityDay).toBeLessThanOrEqual(21);
-      expect(r.allIntroducedDay).toBeLessThanOrEqual(9 * 7);
+      // Ten weeks: minus facts wait for the first plus of their family (docs/PLAN-PLUSFORST.md, C1); nine before.
+      expect(r.allIntroducedDay).toBeLessThanOrEqual(10 * 7);
     }
   });
 });

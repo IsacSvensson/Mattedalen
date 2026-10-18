@@ -1,7 +1,7 @@
-import type { ContentPack, ItemId, Unit } from '../../engine';
+import type { ContentPack, Item, ItemId, Unit } from '../../engine';
 import { buildEqualities, EQUALITIES, equalityDistractors, equalityId, equalityNote, type Equality } from './equality';
 import { additionDistractors, additionNote } from './distractors';
-import { buildFacts, parseFactId, UNIT_DEFS } from './facts';
+import { buildFacts, factId, familyOf, parseFactId, UNIT_DEFS } from './facts';
 import { presentFact } from './present';
 
 export * from './facts';
@@ -11,6 +11,35 @@ export { additionDistractors, additionNote } from './distractors';
 export { presentFact } from './present';
 export * from './check';
 export * from './patterns';
+
+/**
+ * What a minus fact waits for before it is introduced (docs/PLAN-PLUSFORST.md):
+ * the first plus fact of its family (`first`, the app's: 13 − 5 and 13 − 8
+ * after 8 + 5), both of them (`family`, as delat med; Stigen opened about four
+ * weeks later in the simulation), or nothing (as before). The other two are
+ * kept for the simulation.
+ */
+export type MinusAfter = 'family' | 'first' | 'none';
+
+export interface AdditionPackOptions {
+  minusAfter?: MinusAfter;
+}
+
+/**
+ * Minus after plus: 13 − 5 and 13 − 8 come when 8 + 5 sits (or 8 + 5 and
+ * 5 + 8, with `family`), much as a division comes when its multiplications
+ * sit. A child who has not met the minus sign learns the plus of the family
+ * first; for one who knows plus it changes little.
+ */
+function withMinusAfter(items: Item[], minusAfter: MinusAfter): Item[] {
+  if (minusAfter === 'none') return items;
+  return items.map((item) => {
+    if (!/^\d+-\d+$/.test(item.id)) return item;
+    const { a, b } = familyOf(parseFactId(item.id));
+    const plus = [factId('+', b, a), factId('+', a, b)];
+    return { ...item, requires: minusAfter === 'first' ? [plus[0]!] : [...new Set(plus)] };
+  });
+}
 
 /** A unit opens when ~80 % of each prerequisite is at least "fluent". */
 export const UNLOCK_FRACTION = 0.8;
@@ -34,8 +63,8 @@ export function confusionNote(id: ItemId, given: string): string | undefined {
  * Bäcken: addition and subtraction within 20 as fact families, and the equal
  * sign (Vågen). See docs/PLAN-BACKEN.md.
  */
-export function createAdditionPack(): ContentPack {
-  const items = [...buildFacts(), ...buildEqualities()];
+export function createAdditionPack({ minusAfter = 'first' }: AdditionPackOptions = {}): ContentPack {
+  const items = [...withMinusAfter(buildFacts(), minusAfter), ...buildEqualities()];
   const units: Unit[] = UNIT_DEFS.map((def, order) => ({
     id: def.id,
     title: def.title,
