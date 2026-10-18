@@ -17,7 +17,6 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 0 | **MA och MB. Minustecknet och rimliga svar** | Fel i det barnet ser: en 6-åring räknade plus på minus, och 695 blev ett svarsalternativ. | [PLAN-MINUSTECKNET](PLAN-MINUSTECKNET.md) | MA klar, MB kvar |
 | 1 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
 | 2 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
@@ -61,6 +60,7 @@ Avstämningen mot Lgr22 är gjord mot Skolverkets PDF av kursplanen
 | R3 (K1–K3) | Dalen som en karta att dra runt i, med platserna i full storlek och ”I dag” i hörnet. | [PLAN-DALEN](PLAN-DALEN.md) |
 | S3 | Räknestigen tar den väg barnet kan: flera vägar per svår gångerfakta, och föräldravyn visar barnets väg. | [PLAN-RAKNESTIG](PLAN-RAKNESTIG.md) |
 | R4 | Tvåsiffrigt minus tvåsiffrigt, en nionde del på Stigen: ta bort tiotalen först, och räkna upp när talen ligger nära varandra. | [PLAN-MINUS](PLAN-MINUS.md) |
+| MA–MB | Minustecknet och rimliga svar: vuxna ser när barnet räknar plus på minus, bara rimliga felsvar blir alternativ, och knappsatsen vid bäcken tar två siffror. | [PLAN-MINUSTECKNET](PLAN-MINUSTECKNET.md) |
 | K4 | Zooma ut på kartan: nypa eller knappen i hörnet, ut till hela dalen. | [PLAN-DALEN](PLAN-DALEN.md#fynd-från-k4) |
 | S2 | Tid och långsamma barn: ”Ge mer tid” för vuxna, föreslås när barnet svarar rätt men långsamt. Trädet under 4 s, och dagarna räknas inom 30 dagar. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#fynd-från-s2) |
 | F (F1–F3) | För vuxna: en kort översikt med Att göra och en rad per plats, och egna sidor för platserna, barnets inställningar, enheten och att hämta ett barn. | [PLAN-FORALDRAVYN](PLAN-FORALDRAVYN.md) |

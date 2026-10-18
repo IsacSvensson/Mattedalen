@@ -1,4 +1,4 @@
-import { mathRandomRng, Placement, systemClock } from '../../../engine';
+import { answerDigits, mathRandomRng, Placement, systemClock } from '../../../engine';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
@@ -82,7 +82,7 @@ export async function runBrookPlacement(ctx: AppContext, profile: Profile, back:
       const pad = numPad((v, firstDigitAt) => {
         pad.disable();
         resolve({ given: v, rtMs: Math.round((firstDigitAt ?? performance.now()) - shownAt) });
-      });
+      }, answerDigits(pack));
       stage.replaceChildren(h('div', { class: 'question free' }, h('div', { class: 'prompt-card card' }, promptView(prompt)), pad.el));
       setKey((e) => pad.onKey(e));
     });

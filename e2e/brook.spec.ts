@@ -273,3 +273,11 @@ async function expectNoSidewaysScroll(page: Page): Promise<void> {
   const content = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(content).toBeLessThanOrEqual(width);
 }
+
+test('the number pad at the brook takes two digits: no answer here is larger than 20 (docs/PLAN-MINUSTECKNET.md)', async ({ page }) => {
+  await createProfile(page, 'Bo');
+  await toBrook(page);
+  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  for (const d of '695') await page.locator('.numpad-key', { hasText: new RegExp(`^${d}$`) }).click();
+  await expect(page.locator('.numpad-display')).toHaveText('69');
+});

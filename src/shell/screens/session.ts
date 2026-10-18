@@ -1,4 +1,4 @@
-import type { Feedback, FocusSet, ItemId, Question, SessionMode, SessionSummary } from '../../engine';
+import { answerDigits, type Feedback, type FocusSet, type ItemId, type Question, type SessionMode, type SessionSummary } from '../../engine';
 import type { Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { icon } from '../components/icons';
@@ -195,7 +195,7 @@ export async function runSession(
     // Something to build first: then the item itself, still with support (no evidence).
     if (support && 'build' in support) await introduce(stage, q, (ready) => support.build(q, ready), setKeys);
     if (finished) return;
-    const { given, rtMs } = support && 'steps' in support ? await derive(stage, support.steps, support.visual, setKeys) : await ask(stage, q, place, setKeys);
+    const { given, rtMs } = support && 'steps' in support ? await derive(stage, support.steps, support.visual, setKeys, answerDigits(place.deps.pack)) : await ask(stage, q, place, setKeys);
     if (finished) return;
     const fb = await play.answer(given, rtMs);
     updateProgress();
@@ -258,7 +258,7 @@ const isWords = (prompt: string) => /[a-zåäö]{3}/i.test(prompt);
  * knows (5 × 7 = 35 → 35 + 7 → 6 × 7). A wrong step just shows the number and
  * the path goes on; only the last step is the answer to the question.
  */
-async function derive(stage: HTMLElement, steps: PathStep[], visual: Element, setKeys: SetKeys): Promise<{ given: string; rtMs: number }> {
+async function derive(stage: HTMLElement, steps: PathStep[], visual: Element, setKeys: SetKeys, digits: number): Promise<{ given: string; rtMs: number }> {
   const list = h('ol', { class: 'derive-steps' });
   const card = h('div', { class: 'derive-card card' }, h('p', { class: 'derive-title' }, icon('steps'), 'Räknestigen'), list, visual);
   const done: HTMLElement[] = [];
@@ -284,7 +284,7 @@ async function derive(stage: HTMLElement, steps: PathStep[], visual: Element, se
       const pad = numPad((value) => {
         pad.disable();
         resolve({ given: value, rtMs: Math.round(performance.now() - shownAt) });
-      });
+      }, digits);
       padSlot.replaceChildren(pad.el);
       setKeys((e) => pad.onKey(e));
     });
@@ -336,7 +336,7 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
     if (q.format === 'free') {
       const pad = numPad((value, firstDigitAt) => {
         if (done(value, firstDigitAt)) pad.disable();
-      });
+      }, answerDigits(place.deps.pack));
       stage.replaceChildren(h('div', { class: 'question free' }, prompt, pad.el));
       setKeys((e) => pad.onKey(e));
       return;

@@ -180,6 +180,11 @@ Utan fritt svar (inställning i föräldravyn) används ingen stig.
 **Svarsformat.** Nya fakta och fakta under inlärning frågas med flerval
 (4 alternativ). Flytande fakta frågas med fritt svar. Distraktorerna kommer från
 innehållspaketet, och barnets egna tidigare felsvar blandas in med hög vikt.
+Bara felsvar som kan vara ett svar i paketet blandas in: ord som ”ja” alltid,
+tal från 0 upp till paketets största svar (`plausibleAnswer`). Annars skulle en
+gissning som väljs igen komma tillbaka allt oftare. Knappsatsen tar lika många
+siffror som paketets största svar (`answerDigits`): två vid bäcken
+([PLAN-MINUSTECKNET](PLAN-MINUSTECKNET.md)).
 
 ## Återanvända motorn för annat innehåll
 

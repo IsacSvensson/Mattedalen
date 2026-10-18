@@ -1,6 +1,7 @@
 import { h } from '../dom';
 import { icon } from './icons';
 
+/** Digits the pad takes unless told otherwise (`answerDigits` of the pack). */
 const MAX_DIGITS = 3;
 
 export interface NumPad {
@@ -17,7 +18,7 @@ export interface NumPad {
  * answer to the first digit: a two-digit answer then takes no longer than a
  * one-digit one.
  */
-export function numPad(onSubmit: (value: string, firstDigitAt: number | null) => void): NumPad {
+export function numPad(onSubmit: (value: string, firstDigitAt: number | null) => void, maxDigits = MAX_DIGITS): NumPad {
   let value = '';
   let disabled = false;
   let firstDigitAt: number | null = null;
@@ -35,7 +36,7 @@ export function numPad(onSubmit: (value: string, firstDigitAt: number | null) =>
     ok.disabled = disabled || value === '';
   }
   function type(d: string) {
-    if (disabled || value.length >= MAX_DIGITS) return;
+    if (disabled || value.length >= maxDigits) return;
     firstDigitAt ??= performance.now();
     value = value === '0' ? d : value + d;
     update();

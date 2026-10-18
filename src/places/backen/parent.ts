@@ -1,4 +1,4 @@
-import { atLeast, diffDays, isStruggling, systemClock, type Engine, type ItemId, type ItemState } from '../../engine';
+import { atLeast, diffDays, isStruggling, plausibleAnswer, systemClock, type Engine, type ItemId, type ItemState } from '../../engine';
 import {
   CHECK_CATEGORIES,
   EQUALITIES,
@@ -161,7 +161,9 @@ function describeFact(id: ItemId, s: ItemState | undefined, st: FactStats | unde
   const f = parseFactId(id);
   const parts = [`${formatFact(f.op, f.x, f.y)} = ${f.answer}: ${STATUS_TEXT[s?.status ?? 'new']}`];
   parts.push(...factStatsText(st));
-  const worst = Object.entries(s?.confusions ?? {}).sort((x, y) => y[1] - x[1])[0];
+  const worst = Object.entries(s?.confusions ?? {})
+    .filter(([given]) => plausibleAnswer(pack, given))
+    .sort((x, y) => y[1] - x[1])[0];
   if (worst) parts.push(`vanligaste felsvar ${worst[0]}`);
   return parts.join(' · ');
 }
@@ -245,7 +247,7 @@ export async function brookParentSummary(ctx: AppContext, profile: Profile): Pro
 }
 
 function confusionList(states: Record<ItemId, ItemState>): HTMLElement {
-  const list = topConfusions(states, 8, label);
+  const list = topConfusions(states, 8, label, (given) => plausibleAnswer(pack, given));
   if (!list.length) return h('p', { class: 'muted' }, 'Inga förväxlingar ännu.');
   const said = (given: string) => (given === 'ja' ? 'Ja' : given === 'nej' ? 'Nej' : given);
   return h(

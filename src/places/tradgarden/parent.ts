@@ -1,4 +1,4 @@
-import { atLeast, isStruggling, knownPath, systemClock, type Engine, type ItemState } from '../../engine';
+import { atLeast, isStruggling, knownPath, plausibleAnswer, systemClock, type Engine, type ItemState } from '../../engine';
 import {
   divisionId,
   divisionStrategy,
@@ -358,7 +358,9 @@ function heatmap(states: Record<string, ItemState>, stats: Map<string, FactStats
 function describe(fact: string, s: ItemState | undefined, st: FactStats | undefined): string {
   const parts = [`${fact}: ${STATUS_TEXT[s?.status ?? 'new']}`];
   parts.push(...factStatsText(st));
-  const worst = Object.entries(s?.confusions ?? {}).sort((x, y) => y[1] - x[1])[0];
+  const worst = Object.entries(s?.confusions ?? {})
+    .filter(([given]) => plausibleAnswer(pack, given))
+    .sort((x, y) => y[1] - x[1])[0];
   if (worst) parts.push(`vanligaste felsvar ${worst[0]}`);
   return parts.join(' · ');
 }
@@ -434,7 +436,7 @@ function shareSummary(states: Record<string, ItemState>): HTMLElement {
 }
 
 function confusionList(states: Record<string, ItemState>, sign: DivisionSign): HTMLElement {
-  const list = topConfusions(states, 8, factLabel);
+  const list = topConfusions(states, 8, factLabel, (given) => plausibleAnswer(pack, given));
   if (!list.length) return h('p', { class: 'muted' }, 'Inga förväxlingar ännu.');
   return h(
     'ol',

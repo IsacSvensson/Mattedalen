@@ -322,3 +322,32 @@ describe('plus read for minus (docs/PLAN-MINUSTECKNET.md)', () => {
     expect(found).toEqual([]);
   });
 });
+
+import { answerDigits, buildChoices as choicesFor, emptyState as freshState, maxAnswer, plausibleAnswer, seededRng as rngFor } from '../../src/engine';
+import { createAdditionPack as brookPack } from '../../src/content/addition';
+import { createMultiplicationPack } from '../../src/content/multiplication';
+
+describe('plausible answers (docs/PLAN-MINUSTECKNET.md)', () => {
+  const brook = brookPack();
+
+  it('the brook answers 0–20 on two digits; the garden 0–100 on three', () => {
+    expect(maxAnswer(brook)).toBe(20);
+    expect(answerDigits(brook)).toBe(2);
+    expect(answerDigits(createMultiplicationPack())).toBe(3);
+    expect(plausibleAnswer(brook, '20')).toBe(true);
+    expect(plausibleAnswer(brook, '695')).toBe(false);
+    expect(plausibleAnswer(brook, 'ja')).toBe(true);
+  });
+
+  it('a guess picked again is never an option; a real mix-up still is', () => {
+    const item = brook.items.find((it) => it.id === '0+4')!;
+    const state = { ...freshState('0+4'), status: 'learning' as const, confusions: { '695': 7, '5': 1 } };
+    let five = 0;
+    for (let seed = 0; seed < 100; seed++) {
+      const choices = choicesFor(brook, item, state, rngFor(seed), 4);
+      expect(choices).not.toContain('695');
+      if (choices.includes('5')) five++;
+    }
+    expect(five).toBeGreaterThan(50);
+  });
+});

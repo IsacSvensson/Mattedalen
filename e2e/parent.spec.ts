@@ -400,3 +400,15 @@ test('plus read for minus: said in "Att göra" and on Bäcken’s page, and the 
   await parentBack(page);
   await expect(page.getByText('Alva verkar räkna plus när det står minus', { exact: false })).toHaveCount(0);
 });
+
+test('a guess is no mix-up: "Vanligaste förväxlingarna" at the brook shows only answers that could be one (docs/PLAN-MINUSTECKNET.md)', async ({ page }) => {
+  await createProfile(page, 'Alva', 'brook');
+  const wrong = { status: 'learning', box: 0, dueDay: '2026-02-09', introducedDay: '2026-01-20' };
+  await seedStates(page, { '0+4': { ...wrong, confusions: { '695': 7, '5': 2 } } }, { packId: 'addition', unlockedUnitIds: ['ettmer', 'noll'] });
+  await page.goto('/');
+  await openParent(page);
+  await parentPlace(page, 'Bäcken');
+  const list = page.locator('.confusions li');
+  await expect(list).toHaveCount(1);
+  await expect(list).toHaveText('0 + 4: svarade 5 (2 gånger)');
+});

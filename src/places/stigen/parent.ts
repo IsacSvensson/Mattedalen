@@ -1,4 +1,4 @@
-import { isStruggling, systemClock, type Engine, type ItemId, type ItemState } from '../../engine';
+import { isStruggling, plausibleAnswer, systemClock, type Engine, type ItemId, type ItemState } from '../../engine';
 import { CHECK_CATEGORIES, parseTaskId, taskPrompt, taskWithAnswer } from '../../content/hundred';
 import { checkResultsView } from '../../shell/components/checkResults';
 import type { SaveProfile } from '../../shell/place';
@@ -158,7 +158,12 @@ export async function pathParentSummary(ctx: AppContext, profile: Profile, save:
 }
 
 function confusionList(states: Record<ItemId, ItemState>): HTMLElement {
-  const list = topConfusions(states, 8, (id) => taskPrompt(parseTaskId(id)).replace(/__/g, '?'));
+  const list = topConfusions(
+    states,
+    8,
+    (id) => taskPrompt(parseTaskId(id)).replace(/__/g, '?'),
+    (given) => plausibleAnswer(pack, given),
+  );
   if (!list.length) return h('p', { class: 'muted' }, 'Inga förväxlingar ännu.');
   return h(
     'ol',

@@ -1,4 +1,4 @@
-import { mathRandomRng, systemClock } from '../../../engine';
+import { answerDigits, mathRandomRng, systemClock } from '../../../engine';
 import { buildCheck, summarizeCheck, type CheckAnswer } from '../../../content/addition';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
@@ -82,7 +82,7 @@ export async function runCheck(ctx: AppContext, profile: Profile, then: () => Pr
       const pad = numPad((v, firstDigitAt) => {
         pad.disable();
         resolve({ given: v, rtMs: Math.round((firstDigitAt ?? performance.now()) - shownAt) });
-      });
+      }, answerDigits(pack));
       const label = item.category === 'equality' ? h('p', { class: 'ask-label' }, 'Vad ska stå i rutan?') : null;
       stage.replaceChildren(h('div', { class: 'question free check' }, h('div', { class: 'prompt-card card' }, label, promptView(item.prompt)), pad.el));
       setKey((e) => pad.onKey(e));

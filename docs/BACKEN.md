@@ -157,6 +157,9 @@ tillbaka till dalen.
   står också i ”Att göra för dig” tills den vuxna har sett Bäckens sida, och
   igen två veckor senare om det finns kvar. Minus noll räknas inte
   ([PLAN-MINUSTECKNET](PLAN-MINUSTECKNET.md)).
+- **Rimliga svar.** Knappsatsen vid bäcken tar två siffror, eftersom inget svar
+  är större än 20. Ett tidigare felsvar blir bara svarsalternativ, och syns bara
+  bland förväxlingarna, om det är ett tal från 0 till 20.
 
 ## Bäckens koll (`check.ts`)
 

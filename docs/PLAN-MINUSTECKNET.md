@@ -53,7 +53,7 @@ jag först trodde om räknestigen på knappsatsen stämde alltså inte.
 | Fas | Innehåll |
 |---|---|
 | MA. Mönstret **(klar)** | Mönstret, förklaringen på Bäckens sida och ”Att göra”. Enhetstester och e2e. |
-| MB. Rimliga svar | Svarsalternativen, knappsatsen och förväxlingarna. Enhetstester och e2e. |
+| MB. Rimliga svar **(klar)** | Svarsalternativen, knappsatsen och förväxlingarna. Enhetstester och e2e. |
 
 En lugnare start för nybörjare, med plus först och minus när plus sitter, är ett
 eget beslut (C). Den kommer efter de här två, om det behövs.
@@ -82,3 +82,18 @@ listan; minusfakta som mönstret förklarar är borta.*
 - **Det som barnet ser är oförändrat** i den här fasen. Hjälpkortet säger
   fortfarande ”Här ska det vara minus”. Det som ändras för barnet kommer i MB
   och, om det behövs, i C.
+
+## Fynd från MB
+
+- **Svarsalternativen:** ett tidigare felsvar blandas bara in om det kan vara
+  ett svar i platsens paket. Gränsen räknas ut ur paketet själv: det största
+  svaret är 20 vid bäcken och 100 på Stigen och i trädgården. Enhetstestet
+  ger 0 + 4 felsvaren 695 (sju gånger) och 5 (en gång). 695 kommer aldrig med
+  bland alternativen, och 5 kommer med i mer än hälften av frågorna.
+- **Knappsatsen** tar lika många siffror som det största svaret: två vid bäcken,
+  i passet, på räknestigen, i startkollen och i kollen. Trycker barnet 6, 9
+  och 5 står det 69.
+- **Förväxlingarna och värmekartan** i ”För vuxna” visar bara rimliga felsvar,
+  på alla tre platserna.
+- **Inget raderas.** 695 ligger kvar i barnets data, men används inte och visas
+  inte.
