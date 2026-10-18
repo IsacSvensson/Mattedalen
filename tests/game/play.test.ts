@@ -5,7 +5,7 @@ import { DEFAULT_SETTINGS, MemoryProgressStore, type Profile } from '../../src/s
 import { EXTRA_PRACTICE_MINUTES, loadProgress, PlayController, type GameDeps } from '../../src/shell/play';
 import { genitive, knownTables } from '../../src/places/tradgarden/screens/garden';
 import { stageFor } from '../../src/shell/components/plant';
-import { keepTerms } from '../../src/shell/words';
+import { keepTerms, wayFor } from '../../src/shell/words';
 import { emptyState } from '../../src/engine';
 
 const profile: Profile = { id: 'p1', name: 'Alva', avatar: '🦊', createdAt: 0, settings: { ...DEFAULT_SETTINGS, sessionMinutes: 10 } };
@@ -172,6 +172,12 @@ describe('garden helpers', () => {
   it('keeps each term of a way of thinking on one line', () => {
     expect(keepTerms('18 + 6 = 18 + 2 + 4 = 20 + 4 = 24.')).toBe('18\u00a0+\u00a06 = 18\u00a0+\u00a02\u00a0+\u00a04 = 20\u00a0+\u00a04 = 24.');
     expect(keepTerms('52 − 6 = 52 − 2 − 4. 7 × 6 – nära!')).toBe('52\u00a0−\u00a06 = 52\u00a0−\u00a02\u00a0−\u00a04. 7\u00a0×\u00a06 – nära!');
+  });
+
+  it('shows the way under a hard fact without repeating the fact', () => {
+    expect(wayFor('1 − 1 = 0', '1 − 1 = 0: allt tas bort.')).toBe('Allt tas bort.');
+    expect(wayFor('3 − 2 = 1', '3 och 2 står bredvid varandra: 3 − 2 = 1.')).toBe('3 och 2 står bredvid varandra: 3\u00a0−\u00a02 = 1.');
+    expect(wayFor('7 × 8 = 56', '7 × 8 = 5 × 8 + 2 × 8 = 40 + 16 = 56')).toBe('7\u00a0×\u00a08 = 5\u00a0×\u00a08\u00a0+\u00a02\u00a0×\u00a08 = 40\u00a0+\u00a016 = 56');
   });
 });
 

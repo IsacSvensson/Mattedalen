@@ -35,7 +35,7 @@ import { gardenIsOpen } from './isOpen';
 import { gardenWaits, saveTableReady, tableReady } from './held';
 import { OPENED_BY_ADULT, tableName, WAIT_PLAY_DAYS, waitText } from './waits';
 import { showPlacementOffer } from './screens/placement';
-import { keepTerms } from '../../shell/words';
+import { wayFor } from '../../shell/words';
 
 /** How delat med is written for this child; only once the garden has delat med. */
 function divisionSignSetting(profile: Profile, save: SaveProfile): HTMLElement | null {
@@ -272,7 +272,7 @@ function hardList(states: Record<string, ItemState>, engine: Engine, today: stri
     limitedList(
       'ul',
       'hard-list',
-      hard.map(({ text, strategy }) => h('li', null, h('strong', null, mathNodes(text, sign)), ' – ', mathNodes(keepTerms(strategy), sign))),
+      hard.map(({ text, strategy }) => h('li', null, h('strong', null, mathNodes(text, sign)), h('span', { class: 'muted hard-way' }, mathNodes(wayFor(text, strategy), sign)))),
     ),
   );
 }
@@ -439,6 +439,6 @@ function confusionList(states: Record<string, ItemState>, sign: DivisionSign): H
   return h(
     'ol',
     { class: 'confusions' },
-    list.map((c) => h('li', null, h('strong', null, mathNodes(c.fact, sign)), ` – svarade ${c.given} `, h('span', { class: 'muted' }, `(${c.count} ${c.count === 1 ? 'gång' : 'gånger'})`))),
+    list.map((c) => h('li', null, h('strong', null, mathNodes(c.fact, sign)), `: svarade ${c.given} `, h('span', { class: 'muted' }, `(${c.count} ${c.count === 1 ? 'gång' : 'gånger'})`))),
   );
 }

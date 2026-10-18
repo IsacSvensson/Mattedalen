@@ -15,7 +15,7 @@ import { limitedList } from '../../shell/components/limitedList';
 import type { PlaceSummary } from '../../shell/place';
 import { partProgress } from './logic';
 import { pack, pathDeps, pathHeld } from './pack';
-import { keepTerms } from '../../shell/words';
+import { wayFor } from '../../shell/words';
 
 /** What Stigen covers, for grown-ups. */
 export const PATH_ABOUT = 'Talen till 100: tiotal och ental, över tiotalet, dubbla och halvera.';
@@ -128,7 +128,7 @@ function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElemen
     limitedList(
       'ul',
       'hard-list',
-      hard.map(({ text, strategy }) => h('li', null, h('strong', null, text), strategy ? ` – ${keepTerms(strategy)}` : '')),
+      hard.map(({ text, strategy }) => h('li', null, h('strong', null, text), strategy ? h('span', { class: 'muted hard-way' }, wayFor(text, strategy)) : null)),
     ),
   );
 }
@@ -163,6 +163,6 @@ function confusionList(states: Record<ItemId, ItemState>): HTMLElement {
   return h(
     'ol',
     { class: 'confusions' },
-    list.map((c) => h('li', null, h('strong', null, c.fact), ` – svarade ${c.given} `, h('span', { class: 'muted' }, `(${c.count} ${c.count === 1 ? 'gång' : 'gånger'})`))),
+    list.map((c) => h('li', null, h('strong', null, c.fact), `: svarade ${c.given} `, h('span', { class: 'muted' }, `(${c.count} ${c.count === 1 ? 'gång' : 'gånger'})`))),
   );
 }

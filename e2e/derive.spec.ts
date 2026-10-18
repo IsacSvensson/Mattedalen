@@ -67,7 +67,8 @@ test('grown-ups see which facts are hard and how the game helps', async ({ page 
   await parentPlace(page, 'Trädgården');
   await expect(page.getByRole('region', { name: /^Trädgården/ }).getByRole('heading', { name: 'Svåra just nu' })).toBeVisible();
   await expect(page.locator('.hard-list li')).toHaveCount(1);
-  await expect(page.locator('.hard-list li')).toContainText('8 × 8 = 64 – 8 × 8 = dubbla 4 × 8 = 32 + 32 = 64');
+  await expect(page.locator('.hard-list li strong')).toHaveText('8 × 8 = 64');
+  await expect(page.locator('.hard-list li .hard-way')).toHaveText('8 × 8 = dubbla 4 × 8 = 32 + 32 = 64');
 });
 
 test('the helper walks any derivation path', async ({ page }) => {

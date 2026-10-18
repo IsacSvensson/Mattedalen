@@ -266,8 +266,8 @@ test('grown-ups see the parts, what is hard and the mix-ups', async ({ page }) =
   await expect(section).toContainText('Hela tiotal30 av 30 sitter');
   await expect(section).toContainText('Tiotal och ental (förståelse)20 av 22 sitter');
   await expect(section).toContainText('Tvåsiffrigt plus tvåsiffrigtinte öppen än');
-  await expect(section.locator('.hard-list')).toContainText('52 − 6 = 46 – 52 − 6 = 52 − 2 − 4 = 50 − 4 = 46.');
-  await expect(section.locator('.confusions')).toContainText('52 − 6 – svarade 54 (3 gånger)');
+  await expect(section.locator('.hard-list li', { hasText: '52 − 6 = 46' }).locator('.hard-way')).toHaveText('52 − 6 = 52 − 2 − 4 = 50 − 4 = 46.');
+  await expect(section.locator('.confusions')).toContainText('52 − 6: svarade 54 (3 gånger)');
 });
 
 test('two-digit minus: tens away first in räknestigen, and counting up when the numbers are close (docs/PLAN-MINUS.md)', async ({ page }) => {

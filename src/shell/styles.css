@@ -3699,6 +3699,15 @@ a.soft-button {
   line-height: 1.6;
 }
 
+.hard-list li + li {
+  margin-top: 6px;
+}
+
+/* The way of thinking under the fact, never on the same line: a dash there read as one more minus. */
+.hard-way {
+  display: block;
+}
+
 .scene-title h1.long-name {
   font-size: clamp(1rem, 4.4vw, 1.6rem);
 }

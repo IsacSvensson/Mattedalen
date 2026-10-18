@@ -14,7 +14,7 @@ import { partProgress } from './logic';
 import { brookDeps, pack } from './pack';
 import { showBrook } from './screens/brook';
 import { runBrookPlacement } from './screens/placement';
-import { keepTerms } from '../../shell/words';
+import { wayFor } from '../../shell/words';
 
 /** What the brook covers, for grown-ups. */
 export const BROOK_ABOUT = 'Addition och subtraktion inom 20, och likhetstecknet.';
@@ -173,7 +173,7 @@ function hardList(states: Record<ItemId, ItemState>, engine: Engine): HTMLElemen
     limitedList(
       'ul',
       'hard-list',
-      hard.map(({ text, strategy }) => h('li', null, h('strong', null, text), strategy ? ` – ${keepTerms(strategy)}` : '')),
+      hard.map(({ text, strategy }) => h('li', null, h('strong', null, text), strategy ? h('span', { class: 'muted hard-way' }, wayFor(text, strategy)) : null)),
     ),
   );
 }
@@ -202,7 +202,7 @@ function confusionList(states: Record<ItemId, ItemState>): HTMLElement {
     'ol',
     { class: 'confusions' },
     list.map((c) =>
-      h('li', null, h('strong', null, c.fact), ` – svarade ${said(c.given)} `, h('span', { class: 'muted' }, `(${c.count} ${c.count === 1 ? 'gång' : 'gånger'})`)),
+      h('li', null, h('strong', null, c.fact), `: svarade ${said(c.given)} `, h('span', { class: 'muted' }, `(${c.count} ${c.count === 1 ? 'gång' : 'gånger'})`)),
     ),
   );
 }

@@ -10,3 +10,15 @@ export function genitive(name: string): string {
 export function keepTerms(text: string): string {
   return text.replace(/ ([+−×]) /g, ' $1 ');
 }
+
+/**
+ * The way the game helps with a hard fact, shown on its own line under the fact
+ * in "För vuxna". A dash between them read as one more minus sign
+ * ("1 − 1 = 0 – 1 − 1 = 0: allt tas bort."), and a way that starts by repeating
+ * the fact drops the repeat ("Allt tas bort.").
+ */
+export function wayFor(fact: string, strategy: string): string {
+  const own = `${fact}: `;
+  const rest = strategy.startsWith(own) ? strategy.slice(own.length) : strategy;
+  return keepTerms(rest.charAt(0).toUpperCase() + rest.slice(1));
+}
