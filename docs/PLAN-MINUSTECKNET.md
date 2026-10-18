@@ -56,7 +56,7 @@ jag först trodde om räknestigen på knappsatsen stämde alltså inte.
 | MB. Rimliga svar **(klar)** | Svarsalternativen, knappsatsen och förväxlingarna. Enhetstester och e2e. |
 
 En lugnare start för nybörjare, med plus först och minus när plus sitter, är ett
-eget beslut (C). Den kommer efter de här två, om det behövs.
+eget beslut (C): [PLAN-PLUSFORST](PLAN-PLUSFORST.md).
 
 ## Fallgropar
 
