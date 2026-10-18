@@ -12,6 +12,7 @@ import { genitive } from '../../words';
 import { profileSaver, showParentPage } from './frame';
 import { showParent } from './parent';
 import { showPilotExport } from './pilot';
+import { setWhere } from '../../resume';
 
 /**
  * The child's settings in one place (docs/PLAN-FORALDRAVYN.md): name, animal,
@@ -21,6 +22,7 @@ import { showPilotExport } from './pilot';
 export async function showChildSettings(ctx: AppContext, profileId: string): Promise<void> {
   const profile = await ctx.store.getProfile(profileId);
   if (!profile) return showParent(ctx);
+  setWhere({ kind: 'parent', page: 'settings', profileId });
   const save = profileSaver(ctx, profile, () => showChildSettings(ctx, profileId));
   const places = (
     await Promise.all(

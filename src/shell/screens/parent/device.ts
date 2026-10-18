@@ -7,9 +7,11 @@ import { APP_BUILD, checkForUpdate, installGuide } from '../../pwa';
 import { showParentPage } from './frame';
 import { showParent } from './parent';
 import { choosePin } from './pinGate';
+import { setWhere } from '../../resume';
 
 /** "Den här enheten": storage, version and updates, the home screen, privacy and the grown-ups' code. */
 export async function showDevice(ctx: AppContext, backTo?: string): Promise<void> {
+  setWhere({ kind: 'parent', page: 'device', profileId: backTo });
   showParentPage(ctx, { title: 'Den här enheten', back: () => void showParent(ctx, backTo) }, await deviceSection(ctx, backTo));
 }
 

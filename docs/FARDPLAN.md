@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **U. Efter en uppdatering** | Man hamnar på ”Vem spelar?” efter en uppdatering och vet inte vad som är nytt. Tillbaka dit man var, och rutan ”Nytt i Mattedalen”. | [PLAN-UPPDATERING](PLAN-UPPDATERING.md) | Plan skriven, två beslut kvar |
+| 1 | **U. Efter en uppdatering** | Man hamnar på ”Vem spelar?” efter en uppdatering och vet inte vad som är nytt. Tillbaka dit man var, och rutan ”Nytt i Mattedalen”. | [PLAN-UPPDATERING](PLAN-UPPDATERING.md) | U1 klar, U2 kvar (ett beslut) |
 | 2 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
 | 3 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 

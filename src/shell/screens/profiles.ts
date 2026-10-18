@@ -11,11 +11,13 @@ import { AVATAR_KEYS, avatarIcon, avatarName } from '../components/avatars';
 import { icon } from '../components/icons';
 import { plantIcon } from '../components/plant';
 import { scene } from '../components/scene';
+import { setWhere } from '../resume';
 
 /** The animals a player can be (stored as emoji, drawn as pictures). */
 export const AVATARS = AVATAR_KEYS;
 
 export async function showProfiles(ctx: AppContext): Promise<void> {
+  setWhere(null);
   const profiles = await ctx.store.listProfiles();
   if (profiles.length === 0) return showNewProfile(ctx, true);
 

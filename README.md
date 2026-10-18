@@ -399,6 +399,11 @@ varför det minskar risken att data raderas om appen läggs på hemskärmen.
   - Föräldravyn visar vilken version som körs (byggdatum och commit) och har
     knappen ”Sök efter uppdatering”, som söker direkt och startar om med den nya
     versionen.
+  - **Tillbaka dit man var** (`resume.ts`). Efter omladdningen för en
+    uppdatering öppnar appen samma skärm för samma barn: dalen, en plats eller
+    sidan i ”För vuxna”, där vuxenkoden frågas igen. Det sparas i sessionStorage
+    precis före omladdningen och gäller bara inom fem minuter. En vanlig start
+    börjar på ”Vem spelar?” ([PLAN-UPPDATERING](docs/PLAN-UPPDATERING.md)).
   `sw.js` hämtas alltid förbi webbläsarens cache (`updateViaCache: 'none'`), och
   installationen hämtar varje fil med `cache: 'reload'`.
 - **Installation.** En vänlig banderoll på startsidan och en guide i

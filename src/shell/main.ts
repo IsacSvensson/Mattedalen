@@ -6,7 +6,17 @@ import { createProgressStore, importLegacyData, requestPersistence } from '../st
 import type { AppContext } from './app';
 import { plantSprite } from './components/plant';
 import { captureInstallPrompt, registerServiceWorker } from './pwa';
+import { placeIsOpen } from './place';
+import { takeResume, type ParentPage, type Where } from './resume';
+import { showDevice } from './screens/parent/device';
+import { showFeedback } from './screens/parent/feedback';
+import { showImport } from './screens/parent/importPage';
+import { showParent, showParentPlace } from './screens/parent/parent';
+import { showPinGate } from './screens/parent/pinGate';
+import { showPilotExport } from './screens/parent/pilot';
+import { showChildSettings } from './screens/parent/settings';
 import { showProfiles } from './screens/profiles';
+import { showValley } from './screens/valley';
 
 async function start(): Promise<void> {
   const root = document.getElementById('app');
@@ -28,7 +38,46 @@ async function start(): Promise<void> {
     storageKind: kind,
     persist,
   };
+  // After an update's reload: back to the same screen (docs/PLAN-UPPDATERING.md).
+  const back = takeResume();
+  if (back && (await resumeAt(ctx, back))) return;
   await showProfiles(ctx);
+}
+
+/** Opens the screen the app was on before the update; false when it is gone (then the app starts over). */
+async function resumeAt(ctx: AppContext, where: Where): Promise<boolean> {
+  if (where.kind === 'parent') {
+    // "För vuxna" asks for the grown-ups' code again, then opens the same page.
+    await showPinGate(ctx, () => parentPage(ctx, where.page, where.profileId, where.placeId));
+    return true;
+  }
+  const profile = await ctx.store.getProfile(where.profileId);
+  if (!profile) return false;
+  const place = where.kind === 'place' ? ctx.places.find((p) => p.id === where.placeId) : undefined;
+  if (place && (await placeIsOpen(place, ctx, profile))) await place.open(ctx, profile);
+  else await showValley(ctx, profile, place ? { at: place.id } : {});
+  return true;
+}
+
+function parentPage(ctx: AppContext, page: ParentPage, profileId?: string, placeId?: string): Promise<void> {
+  if (!profileId) return page === 'device' ? showDevice(ctx) : page === 'import' ? showImport(ctx) : page === 'feedback' ? Promise.resolve(showFeedback(ctx)) : showParent(ctx);
+  switch (page) {
+    case 'place':
+      return placeId ? showParentPlace(ctx, profileId, placeId) : showParent(ctx, profileId);
+    case 'settings':
+      return showChildSettings(ctx, profileId);
+    case 'pilot':
+      return showPilotExport(ctx, profileId);
+    case 'device':
+      return showDevice(ctx, profileId);
+    case 'import':
+      return showImport(ctx, profileId);
+    case 'feedback':
+      showFeedback(ctx, profileId);
+      return Promise.resolve();
+    default:
+      return showParent(ctx, profileId);
+  }
 }
 
 void start();

@@ -10,6 +10,7 @@ import { dayPlanKey, planDay, planHolds, rememberPlan, restedYesterday, type Day
 import { placeIsOpen, type Place } from '../place';
 import { hasSwedishVoice, speak, speechSupported } from '../speech';
 import { showProfiles } from './profiles';
+import { setWhere } from '../resume';
 
 /**
  * The valley: the child's start page, a map with every place at full size
@@ -21,6 +22,7 @@ import { showProfiles } from './profiles';
  * is left today and starts it.
  */
 export async function showValley(ctx: AppContext, profile: Profile, opts: { at?: string } = {}): Promise<void> {
+  setWhere({ kind: 'valley', profileId: profile.id });
   const maps = await placeMaps(ctx, profile);
   // The day's plan: at most two places, the time shared after what is due.
   const plan = await ensureDayPlan(ctx, profile, openLoads(maps));

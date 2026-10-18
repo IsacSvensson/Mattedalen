@@ -9,9 +9,11 @@ import { formatDay } from '../../stats';
 import { profileFromSnapshot, progressFromSnapshot } from '../../transfer';
 import { showParentPage } from './frame';
 import { showParent } from './parent';
+import { setWhere } from '../../resume';
 
 /** "Hämta ett barn": a QR code, a backup or Gångerträdgården (docs/PLAN-FORALDRAVYN.md). */
 export async function showImport(ctx: AppContext, backTo?: string): Promise<void> {
+  setWhere({ kind: 'parent', page: 'import', profileId: backTo });
   showParentPage(ctx, { title: 'Hämta ett barn', back: () => void showParent(ctx, backTo) }, importSection(ctx, await legacyNote(ctx)));
 }
 

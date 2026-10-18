@@ -24,6 +24,7 @@ import { gardenWaits } from '../held';
 import { waitText } from '../waits';
 import { gardenDeps, pack } from '../pack';
 import { gardenOfferedKey, showPlacementOffer } from './placement';
+import { setWhere } from '../../../shell/resume';
 
 const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
   seed: 'frön',
@@ -33,6 +34,7 @@ const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
 };
 
 export async function showGarden(ctx: AppContext, profile: Profile, highlight?: Set<ItemId>): Promise<void> {
+  setWhere({ kind: 'place', profileId: profile.id, placeId: 'tradgarden' });
   const engine = engineFor(profile, gardenDeps(ctx));
   const { states, meta } = await loadProgress(profile, gardenDeps(ctx), engine);
   // The first time in the garden, with nothing planted yet: offer the start check (once).

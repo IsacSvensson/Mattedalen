@@ -1,5 +1,6 @@
 import { h, s } from './dom';
 import { icon } from './components/icons';
+import { markResume } from './resume';
 
 // --- service worker -------------------------------------------------------
 
@@ -41,7 +42,7 @@ export async function registerServiceWorker(): Promise<void> {
         return;
       }
       if (busy) reloadWhenFree = true;
-      else location.reload();
+      else reloadIntoUpdate();
     });
     if (reg.waiting && hadController && !busy) {
       // Downloaded during an earlier visit: start the new version now, before
@@ -84,6 +85,12 @@ export async function registerServiceWorker(): Promise<void> {
   }
 }
 
+/** Into the new version, and back to the same screen afterwards (docs/PLAN-UPPDATERING.md). */
+function reloadIntoUpdate(): void {
+  markResume();
+  location.reload();
+}
+
 function pageLoaded(): Promise<void> {
   if (document.readyState === 'complete') return Promise.resolve();
   return new Promise((resolve) => window.addEventListener('load', () => resolve(), { once: true }));
@@ -112,7 +119,7 @@ export function applyUpdate(): void {
 export function setScreenBusy(isBusy: boolean): void {
   busy = isBusy;
   if (!busy && reloadWhenFree) {
-    location.reload();
+    reloadIntoUpdate();
     return;
   }
   renderUpdateBar();

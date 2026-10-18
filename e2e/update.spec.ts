@@ -37,7 +37,7 @@ test.afterEach(() => {
   if (original) writeFileSync(SW, original);
 });
 
-test('a new version is offered on any screen except during a game, and taken into use', async ({ page }) => {
+test('a new version is offered on any screen except during a game, taken into use, and the app comes back to the same place', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
@@ -56,8 +56,12 @@ test('a new version is offered on any screen except during a game, and taken int
   await expect(update).toBeVisible();
   await update.click();
   await expect.poll(async () => (await cacheNames(page)).join()).toContain('mattedalen-aaaaaaaaaaaa');
-  await expect(page.getByRole('heading', { name: 'Vem spelar?' })).toBeVisible();
+  // Back in the garden, not at "Vem spelar?" (docs/PLAN-UPPDATERING.md).
+  await expect(page.getByRole('heading', { name: 'Alvas trädgård' })).toBeVisible();
   await expect(page.locator('#update-bar')).toHaveCount(0);
+  // An ordinary start begins at "Vem spelar?" as before.
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Vem spelar?' })).toBeVisible();
 });
 
 test('a version downloaded earlier is started when the app opens again', async ({ page }) => {
@@ -94,6 +98,10 @@ test('grown-ups can look for an update and see the version', async ({ page }) =>
   publish('cccccccccccc');
   await look.click();
   await expect.poll(async () => (await cacheNames(page)).join()).toBe('mattedalen-cccccccccccc');
+  // Back on the same page of "För vuxna", after the grown-ups' code again.
+  await expect(page.getByRole('heading', { name: 'Vuxenkod' })).toBeVisible();
+  await page.keyboard.type('2580');
+  await expect(page.getByRole('heading', { name: 'Den här enheten', level: 1 })).toBeVisible();
 });
 
 test('a page open since the very first visit also starts the new version', async ({ page }) => {

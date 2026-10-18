@@ -16,6 +16,7 @@ import { offeredKey, showPathPlacementOffer } from './placement';
 import { checkDue } from '../../../shell/check';
 import { systemClock, type ItemId, type ItemState } from '../../../engine';
 import { showPathSession } from './session';
+import { setWhere } from '../../../shell/resume';
 
 /**
  * Stigen: the path with a post at every ten and a lantern for every part, and
@@ -23,6 +24,7 @@ import { showPathSession } from './session';
  * is on. The daily session is walking on the path.
  */
 export async function showPath(ctx: AppContext, profile: Profile): Promise<void> {
+  setWhere({ kind: 'place', profileId: profile.id, placeId: 'stigen' });
   const deps = pathDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);

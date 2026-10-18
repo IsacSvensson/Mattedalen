@@ -15,12 +15,14 @@ import { checkDue, checkLaterKey } from '../check';
 import { showCheckOffer } from './check';
 import { offeredKey, showBrookPlacementOffer } from './placement';
 import { showBrookSession } from './session';
+import { setWhere } from '../../../shell/resume';
 
 /**
  * Bäcken: the bridge the child builds, one block per part, and what sits of
  * each part. The daily session is hopping on the stones.
  */
 export async function showBrook(ctx: AppContext, profile: Profile): Promise<void> {
+  setWhere({ kind: 'place', profileId: profile.id, placeId: 'backen' });
   const deps = brookDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);

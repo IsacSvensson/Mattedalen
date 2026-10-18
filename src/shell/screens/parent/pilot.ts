@@ -5,6 +5,7 @@ import { h } from '../../dom';
 import { APP_BUILD } from '../../pwa';
 import { showParentPage } from './frame';
 import { showChildSettings } from './settings';
+import { setWhere } from '../../resume';
 
 /** The pilot code a grown-up gave the child last time, so it is there the next time. */
 const codeKey = (profileId: string) => `pilotCode:${profileId}`;
@@ -17,6 +18,7 @@ const codeKey = (profileId: string) => `pilotCode:${profileId}`;
 export async function showPilotExport(ctx: AppContext, profileId: string): Promise<void> {
   const profile = await ctx.store.getProfile(profileId);
   if (!profile) return showChildSettings(ctx, profileId);
+  setWhere({ kind: 'parent', page: 'pilot', profileId });
   const saved = (await ctx.store.getSetting<string>(codeKey(profileId))) ?? '';
   const data = await ctx.store.export(profileId);
   const answers = data.attempts.length + (data.daySummaries ?? []).reduce((n, d) => n + d.attempts, 0);

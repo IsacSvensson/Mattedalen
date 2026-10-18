@@ -4,6 +4,7 @@ import { h } from '../../dom';
 import { APP_BUILD } from '../../pwa';
 import { showParentPage } from './frame';
 import { showParent } from './parent';
+import { setWhere } from '../../resume';
 
 export const FEEDBACK_EMAIL = 'matematikdalen@gmail.com';
 export const REPO_URL = 'https://github.com/IsacSvensson/Mattedalen';
@@ -29,6 +30,7 @@ export function feedbackMailto(build = APP_BUILD): string {
  * or the code itself (README, "Bidra").
  */
 export function showFeedback(ctx: AppContext, backTo?: string): void {
+  setWhere({ kind: 'parent', page: 'feedback', profileId: backTo });
   showParentPage(
     ctx,
     { title: 'Tyck till', back: () => void showParent(ctx, backTo) },

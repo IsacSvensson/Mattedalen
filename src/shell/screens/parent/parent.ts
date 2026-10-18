@@ -14,6 +14,7 @@ import { pageRow, profileSaver, showParentPage } from './frame';
 import type { ParentTodo, Place, PlaceSummary } from '../../place';
 import { showImport } from './importPage';
 import { showChildSettings } from './settings';
+import { setWhere } from '../../resume';
 
 /**
  * "För vuxna" (docs/PLAN-FORALDRAVYN.md): a short overview with the children,
@@ -22,6 +23,7 @@ import { showChildSettings } from './settings';
 export async function showParent(ctx: AppContext, selectedId?: string): Promise<void> {
   const profiles = await ctx.store.listProfiles();
   const selected = profiles.find((p) => p.id === selectedId) ?? profiles[0];
+  setWhere({ kind: 'parent', page: 'overview', profileId: selected?.id });
 
   const view = h(
     'main',
@@ -102,6 +104,7 @@ export async function showParentPlace(ctx: AppContext, profileId: string, placeI
   const profile = await ctx.store.getProfile(profileId);
   const place = ctx.places.find((p) => p.id === placeId);
   if (!profile || !place) return showParent(ctx, profileId);
+  setWhere({ kind: 'parent', page: 'place', profileId, placeId });
   await ctx.store.setSetting(checksSeenKey(profileId, place.id), await checkCount(ctx, profileId, place));
   const save = profileSaver(ctx, profile, () => showParentPlace(ctx, profileId, placeId));
   showParentPage(ctx, { title: place.name, subtitle: profile.name, back: () => void showParent(ctx, profileId) }, await place.parentPage(ctx, profile, save));
