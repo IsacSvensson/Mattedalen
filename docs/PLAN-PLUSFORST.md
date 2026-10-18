@@ -54,7 +54,7 @@ bort.
 | Fas | Innehåll |
 |---|---|
 | C1. Minus väntar på plus **(klar)** | Kraven på minusfakta. Enhetstester. Simulering före och efter. |
-| C2. Det barnet ser | Kortet för första minus och den nya hjälptexten. E2e, skärmbilder och dokumenten. |
+| C2. Det barnet ser **(klar)** | Kortet för första minus och den nya hjälptexten. E2e, skärmbilder och dokumenten. |
 
 ### Simuleringen i C1
 
@@ -127,3 +127,27 @@ riktiga barn.
   i alla frön.
 - **Barn som redan har börjat:** minusfakta som redan är igång fortsätter. Nya
   minusfakta väntar på sin plusfakta, som oftast redan sitter.
+
+## Fynd från C2
+
+![Telefon, 320 px: kortet ”Nytt: minus” och hjälpkortet efter 2 − 1 = 3](img/plusforst.png)
+
+*Telefon, 320 px. Till vänster kortet för barnets första minusfakta: två stenar,
+den sista överkryssad, hoppet bakåt och ”Minus betyder att ta bort”. Till höger
+hjälpkortet när barnet svarar summan, 3.*
+
+- **Kortet ”Nytt: minus”** kommer före barnets första minusfakta, en gång. Om
+  barnet redan har någon minusfakta igång kommer det inte. Det behövs ingen ny
+  data: appen ser efter i barnets framsteg när passet börjar.
+- **Stenarna** är lika många som talet man tar från, i rader om tio. De sista
+  hoppar bort och blir svaga och överkryssade. Med reducerad rörelse är de
+  överkryssade från början. Bilden är så stor som stenarna kräver, inte hela
+  kortets bredd.
+- **Uppläsningen** säger ”Nytt: minus. Minus betyder att ta bort. 2 − 1. 2, ta
+  bort 1. Kvar är 1.”
+- **Hjälpkortet** efter summan på en minusfakta säger vad minus betyder i
+  stället för ”Här ska det vara minus”. Stigen har kvar sin gamla text, eftersom
+  barnen där redan räknar med minus.
+- **E2e-testet** ger ett barn alla plusfakta i ”Ett mer, ett mindre” och spelar
+  tills kortet kommer. Det kontrollerar stenarna, de överkryssade och texten.
+  Kortet och hjälpkortet ryms på 320 och 360 px utan sidledsscroll.

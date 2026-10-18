@@ -13,7 +13,9 @@ import type { Profile } from '../../../storage';
 import type { AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
 import { h } from '../../../shell/dom';
-import { runSession, type SessionPlace } from '../../../shell/screens/session';
+import { runSession, type IntroParts, type SessionPlace } from '../../../shell/screens/session';
+import { loadProgress } from '../../../shell/play';
+import { takeAway } from '../components/takeAway';
 import { balance } from '../components/balance';
 import { numberLine } from '../../../shell/components/numberLine';
 import { tenFrame } from '../components/tenFrame';
@@ -23,8 +25,28 @@ import { showBrookEnd } from './sessionEnd';
 import { keepTerms } from '../../../shell/words';
 
 /** A session at the brook: hopping on the stones is answering questions. */
-export function showBrookSession(ctx: AppContext, profile: Profile, mode: SessionMode): Promise<void> {
-  return runSession(ctx, profile, brookSession(ctx, profile), mode);
+export async function showBrookSession(ctx: AppContext, profile: Profile, mode: SessionMode): Promise<void> {
+  const { states } = await loadProgress(profile, brookDeps(ctx));
+  const minusStarted = Object.values(states).some((s) => isMinusFact(s.itemId) && s.status !== 'new');
+  return runSession(ctx, profile, brookSession(ctx, profile, minusStarted), mode);
+}
+
+const isMinusFact = (id: string) => /^\d+-\d+$/.test(id);
+
+/**
+ * The child's first minus fact (docs/PLAN-PLUSFORST.md): before the usual card,
+ * what minus means. The stones that are taken away, then the hop back.
+ */
+function firstMinusIntro(q: Question, ready: () => void): IntroParts {
+  const f = parseFactId(q.item.id);
+  const { stops } = landings(f);
+  const words = `${f.x}, ta bort ${f.y}. Kvar är ${f.answer}.`;
+  return {
+    label: [icon('steps'), 'Nytt: minus'],
+    spoken: `Nytt: minus. Minus betyder att ta bort. ${q.item.prompt}. ${words}`,
+    body: h('div', { class: 'intro-pictures' }, takeAway(f.x, f.y), numberLine({ stops, animate: true, onDone: ready })),
+    after: [h('p', { class: 'intro-answer' }, `${q.item.prompt} = ${f.answer}`), h('p', { class: 'strategy' }, `Minus betyder att ta bort: ${words}`)],
+  };
 }
 
 const equalities = new Map<string, Equality>(EQUALITIES.map((e) => [equalityId(e), e]));
@@ -37,7 +59,8 @@ const tenFrameOf = (q: Question) => {
   return data ? tenFrame(data.a, data.b) : null;
 };
 
-function brookSession(ctx: AppContext, profile: Profile): SessionPlace {
+function brookSession(ctx: AppContext, profile: Profile, minusStarted: boolean): SessionPlace {
+  let minusMet = minusStarted;
   /** The number line with every hop, for help and derivation paths. */
   const hopsOf = (q: Question) => numberLine({ stops: landings(parseFactId(q.item.id)).stops });
   const picture = (q: Question): Element => {
@@ -65,6 +88,10 @@ function brookSession(ctx: AppContext, profile: Profile): SessionPlace {
           body: balance(e),
           after: [h('p', { class: 'strategy' }, 'Likhetstecknet betyder: lika mycket på båda sidor.')],
         };
+      }
+      if (!minusMet && isMinusFact(q.item.id)) {
+        minusMet = true;
+        return firstMinusIntro(q, ready);
       }
       const f = parseFactId(q.item.id);
       const { stops } = landings(f);

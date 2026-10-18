@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { createAdditionPack } from '../src/content/addition';
 import { answerDerive, createProfile, nextStep, seedStates, type SeedState } from './helpers';
 
 /** Bäcken: addition and subtraction within 20, and the equal sign (Vågen). */
@@ -280,4 +281,31 @@ test('the number pad at the brook takes two digits: no answer here is larger tha
   await page.getByRole('button', { name: 'Gör startkollen' }).click();
   for (const d of '695') await page.locator('.numpad-key', { hasText: new RegExp(`^${d}$`) }).click();
   await expect(page.locator('.numpad-display')).toHaveText('69');
+});
+
+test('the first minus fact comes after its plus, with a card that shows minus as taking away (docs/PLAN-PLUSFORST.md)', async ({ page }) => {
+  await createProfile(page, 'Alva');
+  await toBrook(page);
+  await page.getByRole('button', { name: 'Börja från början' }).click();
+  // Every plus fact of "Ett mer, ett mindre" sits; none of its minus facts has started.
+  const plus = createAdditionPack().items.filter((i) => i.unitId === 'ettmer' && i.id.includes('+'));
+  await seedStates(page, Object.fromEntries(plus.map((i) => [i.id, { status: 'fluent', box: 3, dueDay: '2026-02-09' }])), { packId: 'addition', unlockedUnitIds: ['ettmer', 'noll'] });
+  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await page.getByRole('button', { name: /^Bäcken\./ }).click();
+  await page.getByRole('button', { name: 'Hoppa på stenarna' }).click();
+
+  const intro = page.locator('.intro-card');
+  for (let i = 0; i < 20; i++) {
+    await expect(nextStep(page).or(intro)).toBeVisible();
+    if (await intro.isVisible()) break;
+    await answerBrook(page);
+  }
+  await expect(intro.getByText('Nytt: minus')).toBeVisible();
+  const [x, y] = (await intro.locator('.intro-answer').textContent())!.match(/\d+/g)!.map(Number);
+  await expect(intro.locator('.take-away .ta-stone')).toHaveCount(x!);
+  await expect(intro.locator('.take-away .ta-stone.gone')).toHaveCount(y!);
+  await expect(intro.locator('.strategy')).toHaveText(new RegExp(`^Minus betyder att ta bort: ${x}, ta bort ${y}\\. Kvar är ${x! - y!}\\.$`));
+  // Then the question itself, answered like any other.
+  await answerBrook(page);
+  await expect(page.locator('.prompt-card.is-right')).toBeVisible();
 });

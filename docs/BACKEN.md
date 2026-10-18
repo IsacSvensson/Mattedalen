@@ -39,8 +39,11 @@ den första del som passar: noll, ett mer, tio, dubblor, tiokamrater, små summo
 **Minus väntar på plus.** En minusfakta kommer först när den första plusfaktan i
 familjen sitter: 13 − 5 och 13 − 8 kommer när 8 + 5 sitter. Ett barn som inte
 har mött minustecknet lär sig plus först, och för ett barn som kan plus ändras
-nästan inget. Startkollen frågar som förut, minus också
-([PLAN-PLUSFORST](PLAN-PLUSFORST.md)).
+nästan inget. Startkollen frågar som förut, minus också. Barnets första
+minusfakta kommer med ett eget kort, ”Nytt: minus”: stenar där de sista tas
+bort, hoppet bakåt och ”Minus betyder att ta bort: 2, ta bort 1. Kvar är 1.”
+Svarar barnet summan på en minusfakta säger hjälpkortet ”3 är 2 + 1. Minus
+betyder att ta bort: 2, ta bort 1.” ([PLAN-PLUSFORST](PLAN-PLUSFORST.md)).
 
 Ett mer kommer först, så att barnets första fakta är 1 + 1 och inte 0 + 0.
 Inom noll kommer 0 + 0 och 0 − 0 sist. Noll, ett mer och tio och några är nästan

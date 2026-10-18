@@ -1863,6 +1863,50 @@ h1:focus {
   stroke-width: 3;
 }
 
+/* Minus as taking away: stones, and the last ones hop away and are crossed out. */
+.take-away {
+  width: min(100%, calc(var(--per) * 44px));
+}
+
+.take-away-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.ta-stone circle {
+  fill: var(--i-red);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.ta-stone.gone {
+  opacity: 0.3;
+  animation: ta-away 0.9s ease-out 0.4s backwards;
+}
+
+.ta-cross {
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+@keyframes ta-away {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+}
+
 /* Vågen: a level scale with both sides written on it. */
 .balance {
   position: relative;

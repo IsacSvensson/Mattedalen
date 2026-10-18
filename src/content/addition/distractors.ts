@@ -51,7 +51,8 @@ export function additionNote(f: Fact, given: string): string | undefined {
   if (given.trim() === '' || !Number.isInteger(g) || g === answer) return undefined;
   if (g === answer + 1 || g === answer - 1) return `${g} är ett ${g > answer ? 'för mycket' : 'för lite'} – nära!`;
   if (op === '+' && g === Math.abs(x - y)) return `${g} är ${formatFact('-', Math.max(x, y), Math.min(x, y))}. Här ska det vara plus.`;
-  if (op === '-' && g === x + y) return `${g} är ${formatFact('+', x, y)}. Här ska det vara minus.`;
+  // Plus read for minus: say what minus means (docs/PLAN-PLUSFORST.md).
+  if (op === '-' && g === x + y) return `${g} är ${formatFact('+', x, y)}. Minus betyder att ta bort: ${x}, ta bort ${y}.`;
   if (op === '-' && x > 10 && y > x % 10 && g === 10 + (y - (x % 10)))
     return `${x % 10} räcker inte till ${y}. Gå ner till 10 först: ${x} − ${x % 10} = 10.`;
   if (op === '+' && crossesTen(f) && g === answer - 10) return `Glöm inte tiotalet: ${formatFact(op, x, y)} är mer än 10.`;

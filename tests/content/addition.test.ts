@@ -153,7 +153,7 @@ describe('wrong answers from known misconceptions', () => {
     expect(confusionNote('9+4', '3')).toMatch(/tiotalet/);
     expect(confusionNote('9+4', '5')).toMatch(/plus/);
     expect(confusionNote('8+5', '7')).toBeUndefined();
-    expect(confusionNote('9-4', '13')).toMatch(/minus/);
+    expect(confusionNote('9-4', '13')).toMatch(/Minus betyder att ta bort/);
   });
 
   it('for the equal sign: the left side worked out (12) and everything added (20)', () => {
@@ -387,5 +387,12 @@ describe('minus after plus (docs/PLAN-PLUSFORST.md)', () => {
     }
     expect(asked.some((id) => id.includes('-'))).toBe(true);
     expect(placement.result().passedUnitIds).toContain('ettmer');
+  });
+});
+
+describe('help after plus read for minus (docs/PLAN-PLUSFORST.md)', () => {
+  it('says what minus means', () => {
+    expect(confusionNote('2-1', '3')).toBe('3 är 2 + 1. Minus betyder att ta bort: 2, ta bort 1.');
+    expect(confusionNote('13-5', '18')).toBe('18 är 13 + 5. Minus betyder att ta bort: 13, ta bort 5.');
   });
 });
