@@ -23,8 +23,11 @@ skickas av appen själv.
 - **Första gången:** när enheten har fem speldagar.
 - **Sedan:** tidigast 90 dagar efter förra frågan, och bara om enheten har minst
   fem nya speldagar sedan dess. En enhet som har slutat användas får ingen fråga.
-- **Aldrig samtidigt** som rutan ”Nytt i Mattedalen”. Har den visats sedan appen
-  startade väntar frågan till nästa gång ”För vuxna” öppnas.
+- **Frågan går före ”Nytt i Mattedalen”** (beslutat). Ska båda visas på samma
+  gång kommer frågan först, och ”Nytt i Mattedalen” direkt när den har stängts.
+  Det händer när appen efter en uppdatering öppnar ”För vuxna” igen. Annars
+  visas ”Nytt i Mattedalen” som förut över första skärmen, och frågan när ”För
+  vuxna” öppnas.
 
 ### Var
 
