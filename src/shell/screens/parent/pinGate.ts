@@ -3,6 +3,7 @@ import { h } from '../../dom';
 import { icon } from '../../components/icons';
 import { showProfiles } from '../profiles';
 import { showParent } from './parent';
+import { askIfDue } from '../../ask';
 
 const PIN_KEY = 'parentPin';
 const PIN_LENGTH = 4;
@@ -12,11 +13,18 @@ const PIN_LENGTH = 4;
  * (the data is on the device anyway), it just keeps children from wandering
  * in by accident. `then` is where it leads: the overview, or a page of it.
  */
-export async function showPinGate(ctx: AppContext, then: () => Promise<void> = () => showParent(ctx)): Promise<void> {
+export async function showPinGate(ctx: AppContext, then: () => Promise<void> = () => showParent(ctx), afterAsk?: () => Promise<void>): Promise<void> {
+  // Inside "För vuxna", where it is surely a grown-up: the question how it is going, when it is due (docs/PLAN-FRAGA.md).
+  const enter = async () => {
+    await then();
+    // A choice takes the question away from "Att göra": the page is drawn again.
+    if (await askIfDue(ctx)) await then();
+    await afterAsk?.();
+  };
   const pin = await ctx.store.getSetting<string>(PIN_KEY);
-  if (!pin) return choosePin(ctx, then);
+  if (!pin) return choosePin(ctx, enter);
   pinScreen(ctx, 'Vuxenkod', 'Skriv in koden för att komma till föräldravyn.', async (entered, retry) => {
-    if (entered === pin) await then();
+    if (entered === pin) await enter();
     else retry('Fel kod. Försök igen.');
   }, true);
 }

@@ -3747,6 +3747,19 @@ a.soft-button {
   margin-top: 6px;
 }
 
+/* "Hur går det?": three answers side by side, wrapping on a narrow phone. */
+.ask-answers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ask-box p {
+  margin: 0;
+}
+
 /* What is new: a title and its points, in the box after an update and on its page. */
 .news-list {
   margin: 0;

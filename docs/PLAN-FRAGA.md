@@ -68,7 +68,7 @@ En post i `src/shell/news.ts` när rutan finns: ”Appen frågar ibland hur det 
 
 | Fas | Innehåll |
 |---|---|
-| T1. Frågan | Regeln för när, rutan, raden i ”Att göra”, mejlet med svaret, de tre valen och posten i ”Nytt i appen”. Enhetstester för regeln, e2e, skärmbilder och dokumenten. |
+| T1. Frågan **(klar)** | Regeln för när, rutan, raden i ”Att göra”, mejlet med svaret, de tre valen och posten i ”Nytt i appen”. Enhetstester för regeln, e2e, skärmbilder och dokumenten. |
 
 ## Fallgropar
 
@@ -81,3 +81,32 @@ En post i `src/shell/news.ts` när rutan finns: ”Appen frågar ibland hur det 
 - **E2e-tester** som öppnar ”För vuxna” efter många speldagar får en ruta i
   vägen. De behöver ett sätt att stänga den, eller data där frågan redan är
   besvarad.
+
+## Fynd från T1
+
+![Telefon, 320 px: rutan ”Hur går det med Mattedalen?” och raden i ”Att göra för dig”](img/fragan.png)
+
+*Telefon, 320 px. Till vänster rutan när ”För vuxna” öppnas. Till höger raden i
+”Att göra för dig” med knappen ”Svara”, som finns kvar om rutan stängs utan
+val.*
+
+- **Regeln** (`src/shell/ask.ts`) räknar speldagar ur passen för alla barn på
+  enheten. Enhetstester visar fem dagar för första frågan, 90 dagar och fem nya
+  speldagar för nästa, två ”Inte nu” med en vecka emellan och sedan ett kvartal,
+  och att ”Fråga inte igen” gäller för alltid.
+- **Svaren** är riktiga länkar till mejlet i ”Tyck till”, med ”Hur går det? Så
+  där” överst. Appen öppnar inget själv; den vuxna trycker.
+- **Stängs rutan utan val,** med Escape eller utanför, ändras ingenting, och
+  raden i ”Att göra” står kvar. Efter ett val ritas sidan om, så att raden
+  försvinner direkt.
+- **Ordningen efter en uppdatering:** appen öppnar ”För vuxna” igen, frågar
+  efter vuxenkoden, visar frågan och sedan ”Nytt i Mattedalen”. E2e-testet
+  kontrollerar ordningen.
+- **”Nytt i Mattedalen” räknas som sedd när den visas,** inte först efter
+  ”Okej”. Testerna visade att rutan annars kunde komma igen om appen laddades
+  om direkt efter ”Okej”.
+- **En ny enhet räknas före Gångerträdgården.** Barn som följer med därifrån
+  vid första starten gjorde att enheten såg ut som en gammal enhet, och rutan
+  ”Nytt i Mattedalen” visades. Nu avgör appen om enheten är ny innan barnen
+  hämtas.
+- **”Nytt i appen”** har en post om frågan.

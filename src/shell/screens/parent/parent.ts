@@ -11,6 +11,7 @@ import { showProfiles } from '../profiles';
 import { showDevice } from './device';
 import { showFeedback } from './feedback';
 import { showNews } from './news';
+import { askIsDue, askNow } from '../../ask';
 import { pageRow, profileSaver, showParentPage } from './frame';
 import type { ParentTodo, Place, PlaceSummary } from '../../place';
 import { showImport } from './importPage';
@@ -153,6 +154,11 @@ async function todoSection(ctx: AppContext, profile: Profile | undefined): Promi
         });
     }
   }
+  if (profile && (await askIsDue(ctx)))
+    items.push({
+      place: null,
+      todo: { text: 'Hur går det med Mattedalen? Berätta gärna. Appen spårar ingenting, så det du berättar är det enda vi får veta.', action: { label: 'Svara', run: async () => void (await askNow(ctx)) } },
+    });
   const slow = slowFacts(speeds);
   if (profile && !profile.settings.moreTime && slow >= SLOW_FACTS)
     items.push({

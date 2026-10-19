@@ -320,8 +320,9 @@ steg tillbaka, från en sida till översikten.
 - **Översikten** visar barnen överst, sedan **Att göra för dig** när något
   väntar på en vuxen: en plats som kan öppnas tidigare, en tabell som väntar på
   stigen, ett nytt kollresultat, ett barn som svarar rätt men långsamt (”Ge mer
-  tid”), ett barn som räknar plus när det står minus vid bäcken och lagring som
-  webbläsaren kan radera. Det går
+  tid”), ett barn som räknar plus när det står minus vid bäcken, frågan hur det
+  går (efter fem speldagar och sedan högst en gång per kvartal,
+  [PLAN-FRAGA](docs/PLAN-FRAGA.md)) och lagring som webbläsaren kan radera. Det går
   inte att avfärda; en sak försvinner när den är gjord. Sedan **den här
   veckan** (övade minuter per dag under 14 dagar och hur många dagar barnet
   spelat), en rad per plats med vad barnet är på, det som är svårast och en

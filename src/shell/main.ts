@@ -28,6 +28,8 @@ async function start(): Promise<void> {
   document.body.prepend(plantSprite());
 
   const { store, kind } = await createProgressStore();
+  // A device without children shows no old news, also when children come from Gångerträdgården below.
+  const newDevice = (await store.listProfiles()).length === 0;
   // Children who played Gångerträdgården on this device come along on the first start.
   if (kind === 'indexeddb') await importLegacyData(store);
   const persist = await requestPersistence();
@@ -42,16 +44,21 @@ async function start(): Promise<void> {
   };
   // After an update's reload: back to the same screen (docs/PLAN-UPPDATERING.md).
   const back = takeResume();
+  if (back?.kind === 'parent') {
+    // Back in "För vuxna": the question how it is going first, then what is new (docs/PLAN-FRAGA.md).
+    await resumeAt(ctx, back, () => showNewsIfAny(ctx, newDevice));
+    return;
+  }
   if (!back || !(await resumeAt(ctx, back))) await showProfiles(ctx);
   // What is new, over the first screen after an update (docs/PLAN-UPPDATERING.md).
-  await showNewsIfAny(ctx);
+  await showNewsIfAny(ctx, newDevice);
 }
 
 /** Opens the screen the app was on before the update; false when it is gone (then the app starts over). */
-async function resumeAt(ctx: AppContext, where: Where): Promise<boolean> {
+async function resumeAt(ctx: AppContext, where: Where, afterAsk?: () => Promise<void>): Promise<boolean> {
   if (where.kind === 'parent') {
     // "För vuxna" asks for the grown-ups' code again, then opens the same page.
-    await showPinGate(ctx, () => parentPage(ctx, where.page, where.profileId, where.placeId));
+    await showPinGate(ctx, () => parentPage(ctx, where.page, where.profileId, where.placeId), afterAsk);
     return true;
   }
   const profile = await ctx.store.getProfile(where.profileId);

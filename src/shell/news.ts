@@ -17,6 +17,15 @@ export interface NewsItem {
 
 export const NEWS: readonly NewsItem[] = [
   {
+    id: '2026-10-19-fragan',
+    day: '2026-10-19',
+    title: 'Appen frågar ibland hur det går',
+    points: [
+      'När du öppnar ”För vuxna” efter fem speldagar, och sedan högst en gång per kvartal, frågar appen hur det går. Ett tryck öppnar ett mejl som du skickar själv.',
+      'Du kan svara, vänta eller säga att den inte ska fråga igen.',
+    ],
+  },
+  {
     id: '2026-10-18-uppdatering',
     day: '2026-10-18',
     title: 'Tillbaka dit du var',
@@ -70,15 +79,16 @@ export function newsItemView(item: NewsItem): HTMLElement {
 
 /**
  * The box "Nytt i Mattedalen", on the first screen after an update, when
- * there are posts this device has not seen. A new device has seen everything:
- * no old news on the first start. A device that already has children but
- * never saw a post (the version before this list) sees the newest ones.
+ * there are posts this device has not seen. A new device (no children when the
+ * app started, before any came from Gångerträdgården) has seen everything: no
+ * old news on the first start. A device that already has children but never
+ * saw a post (the version before this list) sees the newest ones.
  */
-export async function showNewsIfAny(ctx: AppContext): Promise<void> {
+export async function showNewsIfAny(ctx: AppContext, newDevice: boolean): Promise<void> {
   const newest = NEWS[0];
   if (!newest) return;
   const seen = await ctx.store.getSetting<string>(NEWS_SEEN_KEY);
-  if (seen === undefined && (await ctx.store.listProfiles()).length === 0) {
+  if (seen === undefined && newDevice) {
     await ctx.store.setSetting(NEWS_SEEN_KEY, newest.id);
     return;
   }
@@ -86,6 +96,8 @@ export async function showNewsIfAny(ctx: AppContext): Promise<void> {
   if (!fresh.length) return;
   const shown = fresh.slice(0, NEWS_IN_BOX);
   const more = fresh.length - shown.length;
+  // Seen once shown: the box never comes twice, even if the app is closed before "Okej".
+  await ctx.store.setSetting(NEWS_SEEN_KEY, newest.id);
   await choose(
     'Nytt i Mattedalen',
     h(
@@ -97,5 +109,4 @@ export async function showNewsIfAny(ctx: AppContext): Promise<void> {
     [{ value: 'ok', label: 'Okej', primary: true }],
     { cancel: false },
   );
-  await ctx.store.setSetting(NEWS_SEEN_KEY, newest.id);
 }

@@ -9,9 +9,10 @@ import { setWhere } from '../../resume';
 export const FEEDBACK_EMAIL = 'matematikdalen@gmail.com';
 export const REPO_URL = 'https://github.com/IsacSvensson/Mattedalen';
 
-/** A mail to the project, written in the grown-up's own mail app: the app's version and a few questions, nothing about the child. */
-export function feedbackMailto(build = APP_BUILD): string {
+/** A mail to the project, written in the grown-up's own mail app: the app's version and a few questions, nothing about the child. `answer` is the grown-up's answer to "Hur går det?" (docs/PLAN-FRAGA.md). */
+export function feedbackMailto(build = APP_BUILD, answer?: string): string {
   const body = [
+    ...(answer ? [`Hur går det? ${answer}`, ''] : []),
     'Barnets ålder:',
     'Det här var roligt:',
     'Det här var tråkigt eller svårt:',
