@@ -15,7 +15,7 @@ blir tydligare vad man ska göra, hur man hittar och vad framstegen betyder.
 | E3. Mindre läsning för barnet | Högtalarknapp på hjälpkorten och första skärmen, kortare hjälptext, en hand som visar draget på kartan, och skylten för dagens plats som rör sig. | Mellan |
 | E4. Förklaringar vid behov | ”Vad betyder växterna?” (och stenarna och lyktorna) med bilder, vad ”sitter” betyder, en mening per barn och ”Så kan du hjälpa till”, säkerhetskopian efter vad man vill göra, och en påminnelse varje månad. | Mellan |
 
-E2–E4 planeras i detalj när E1 är klar. Varje fas kommer först i testversionen
+E2 är planerad nedan. E3 och E4 planeras i detalj när E2 är klar. Varje fas kommer först i testversionen
 ([PLAN-TESTVERSION](PLAN-TESTVERSION.md)) och släpps när den är provad.
 
 ## E1. Snabba rättelser
@@ -81,17 +81,14 @@ En post: ”Enklare ord för vuxna”. Diagrammet visar senaste veckan, solen he
 - **Skärmläsaren:** solen heter ”I dag. Det här kan du göra i dag” och diagrammet
   läser upp veckodag och minuter.
 
-## Beslut som behövs
+### Beslut för E1 (tagna)
 
-Jag går på förslagen nedan om du inte säger annat.
+1. **”I dag” på solen** (beslutat), inte i en bredare knapp. En bredare knapp
+   tränger raden längst upp på 320 px.
+2. **Veckodagar** under staplarna (beslutat).
+3. **”Tid per dag”** (beslutat), inte ”Dagens övningstid”.
 
-1. **”I dag” under solen** (förslag), eller solen och texten i en bredare knapp.
-   En bredare knapp tränger raden längst upp på 320 px.
-2. **Veckodagar** under staplarna (förslag), eller datum som i dag.
-3. **”Tid per dag”** (förslag), eller ”Dagens övningstid” som granskningen
-   föreslog.
-
-## Fallgropar
+### Fallgropar i E1
 
 - **Ordet ”sitter”** står kvar i E1. Vad det betyder förklaras i E4, så att
   förklaringen stämmer med motorns regler.
@@ -122,3 +119,134 @@ de nya orden.*
 - **Inget sticker ut åt sidan** i 320 och 360 px, eller på surfplatta.
 - **Tester:** e2e för diagrammet, ”I dag”, ”Tid per dag”, exemplet för
   tabellerna och de nya texterna. Ett enhetstest för veckodagarna.
+
+## E2. Första starten för den vuxna
+
+En kort start för den vuxna, första gången appen öppnas på en enhet. Den går att
+hoppa över. Sedan lämnar den vuxna över till barnet.
+
+### Varför
+
+- **Den vuxna möts aldrig av appen.** Första skärmen frågar ”Vad heter du?” och
+  är till för barnet. ”För vuxna” är en liten länk längst ned.
+- **Barnet får frågor som är till för den vuxna.** ”Kan du redan lite plus och
+  minus?” är svår att svara på om man är sex år. Ett barn som inte kan läsa
+  väljer en knapp på måfå.
+- **Uppläsningen är avstängd från början** och finns bara under barnets
+  inställningar. Ett barn som inte läser själv får läsa allt.
+- **Vuxenkoden, tiden per dag och hemskärmen** hittar man bara om man letar.
+- **Granskningen frågade samma sak:** vad tränar appen, hur länge, var följer
+  jag barnet, och var sparas framstegen.
+
+### När
+
+- **Bara på en enhet utan barn.** En enhet som redan har barn, också barn som
+  följde med från Gångerträdgården, får ingen start för vuxna.
+- **En gång.** Starten räknas som gjord när den är klar eller överhoppad. Det
+  sparas i en inställning på enheten.
+- **”Ny spelare” senare** fungerar som i dag: barnet skriver sitt namn och får
+  frågan om startkollen. Se beslut 4.
+
+### Stegen
+
+Högst fem skärmar, med prickar som visar var man är. Varje skärm har ”Hoppa
+över”, som går direkt till barnets skärm som i dag.
+
+1. **Välkommen.** Rubrik: ”Hej! Det här är för dig som vuxen.” Fyra korta rader:
+   - **Vad:** taluppfattning, plus och minus och tabellerna, i små steg efter det
+     barnet kan.
+   - **Hur länge:** 10–15 minuter om dagen. Appen säger när det räcker.
+   - **Följa barnet:** under ”För vuxna” längst ned, bakom en kod.
+   - **Var:** allt sparas bara på den här enheten. Inget skickas, och inget
+     spåras.
+
+   Knappar: ”Kom igång” och ”Hoppa över”. Här står också ”Har barnet spelat på
+   en annan enhet? Hämta det här”, som i dag finns på barnets skärm.
+2. **Hemskärmen**, bara om appen inte redan är tillagd. Samma guide som i dag,
+   med knappen ”Installera appen” där det går. På iPhone och iPad står först:
+   ”Lägg till appen på hemskärmen först och börja där. Appen på hemskärmen har
+   egen lagring, så det du gör här i Safari följer inte med.” Knappar: ”Klar”
+   och ”Fortsätt här”.
+3. **Vuxenkoden.** ”Välj fyra siffror som barnen inte känner till. Koden skyddar
+   inställningarna.” Samma knappsats som i dag, två gånger. ”Senare” hoppar
+   över; då väljs koden första gången ”För vuxna” öppnas, som i dag.
+4. **Om barnet.** På en skärm:
+   - **Barnets namn** (fältet ”Namn”).
+   - **”Läser barnet själv?”** ”Ja” eller ”Inte än”. ”Inte än” slår på
+     uppläsningen. Finns ingen svensk röst på enheten står det i stället vad
+     som saknas, med samma text som i inställningarna, och frågan visas inte.
+   - **”Kan barnet redan lite plus och minus?”** ”Ja eller kanske” ger
+     startkollen. ”Nej” börjar från början. Barnet får då inte frågan själv.
+   - **Tid per dag**, 10–15 minuter, med 12 förvalt.
+
+   Knappen: ”Lämna över till Bosse”.
+5. **Lämna över.** En skärm för barnet: ”Hej Bosse! Välj ditt djur.” Djuren som
+   i dag, och knappen ”Klar”. Sedan bäcken: startkollen direkt om den vuxna
+   valde den, annars första passet.
+
+### Det som sparas
+
+- **På enheten:** att starten är gjord, och vuxenkoden om den valdes.
+- **För barnet:** namnet, djuret, uppläsningen, tiden per dag och att frågan om
+  startkollen är besvarad. Samma inställningar som finns i dag. Inget nytt om
+  barnet.
+
+### ”Så fungerar Mattedalen” i ”För vuxna”
+
+Samma fyra rader som i steg 1 blir en sida i ”För vuxna”, efter ”Tyck till”.
+Familjer som redan har barn får läsa dem där. E4 bygger vidare på sidan med vad
+växterna och ”sitter” betyder.
+
+### Nytt i appen
+
+En post: ”En start för vuxna”. Nya enheter börjar med en kort start för den
+vuxna, och ”Så fungerar Mattedalen” finns i ”För vuxna”.
+
+### Tester och kontroll
+
+- **E2e:**
+  - en ny enhet visar starten, och en enhet med barn gör det inte;
+  - ”Hoppa över” på varje steg ger barnets skärm som i dag;
+  - hela vägen sparar namn, djur, uppläsning, tid per dag och vuxenkod, och
+    startkollen kommer direkt när den valdes, utan frågan till barnet;
+  - hemskärmssteget saknas när appen redan är tillagd;
+  - iPhone-texten visas för en iPhone;
+  - ”Hämta det här” finns kvar och fungerar;
+  - starten kommer bara en gång, också efter en omladdning mitt i;
+  - testversionen visar sin rad även här.
+- **Hjälpfunktionen för testerna:** 27 e2e-filer skapar barn med
+  `createProfile`. Den hoppar över starten, så att de övriga testerna inte
+  ändras.
+- **Skärmbilder** i 320 och 360 px och på surfplatta, för varje steg. Inget får
+  sticka ut åt sidan, och knapparna ska synas utan att man scrollar på 320 × 640.
+
+### Beslut som behövs för E2
+
+Jag går på förslagen om du inte säger annat.
+
+1. **Den vuxna skriver namnet, barnet väljer djur** (förslag). Annars gör barnet
+   båda som i dag, och den vuxnas frågor kommer efteråt.
+2. **”Läser barnet själv?”** (förslag) i stället för en ruta ”Läs upp”. Frågan
+   handlar om barnet, inte om tekniken.
+3. **Hemskärmen före barnet** (förslag), med ”Fortsätt här” för den som vill.
+   På iPhone och iPad är det viktigt, se fallgroparna.
+4. **”Ny spelare” som i dag** (förslag) i E2. Ett syskon som läggs till senare
+   får frågan om startkollen själv. En senare fas kan låta den vuxna svara även
+   där, bakom koden.
+5. **Sidan ”Så fungerar Mattedalen”** i ”För vuxna” (förslag), så att familjer som
+   redan har barn också får texten.
+
+### Fallgropar i E2
+
+- **iPhone och iPad:** appen på hemskärmen har egen lagring, skild från Safari.
+  Ett barn som läggs till i Safari finns inte i appen på hemskärmen. Därför
+  kommer hemskärmen före barnet, och texten säger varför.
+- **En vuxen som hoppar över** ska inte fastna. Barnets skärm, frågan om
+  startkollen och vuxenkoden fungerar som i dag.
+- **Ett barn som hittar starten** kan trycka sig igenom. Det är ofarligt: allt
+  går att ändra i ”För vuxna”, och vuxenkoden kan väljas igen.
+- **Testversionen** har egna barn, så den visar starten för vuxna första gången
+  den öppnas på en enhet. Det är rätt, och ett bra sätt att prova starten.
+- **Barnets skärm i dag** har ”Vad heter du?” och djuren. Med beslut 1 delas den
+  i två: namnet hos den vuxna och djuret hos barnet. ”Ny spelare” behåller båda.
+
