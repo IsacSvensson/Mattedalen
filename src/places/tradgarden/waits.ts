@@ -104,8 +104,14 @@ const PATH_SKILL: Record<string, string> = {
 
 export const tableName = (unitId: string) => TABLE_NAME[unitId] ?? unitId;
 
+const skillFor = (unitId: string) => (TABLES_WAIT[unitId] ?? []).map((id) => PATH_SKILL[id] ?? id).join(' och ');
+
 /** "×6 kommer när du kan gå över tiotalet på stigen." */
 export function waitText(unitId: string): string {
-  const skill = (TABLES_WAIT[unitId] ?? []).map((id) => PATH_SKILL[id] ?? id).join(' och ');
-  return `${tableName(unitId)} kommer när du kan ${skill} på stigen.`;
+  return `${tableName(unitId)} kommer när du kan ${skillFor(unitId)} på stigen.`;
+}
+
+/** For the grown-ups' setting, from the same list: "kommer ×4 när barnet kan dubbla och halvera." */
+export function waitExample(unitId = 'u4'): string {
+  return `kommer ${tableName(unitId)} när barnet kan ${skillFor(unitId)}.`;
 }

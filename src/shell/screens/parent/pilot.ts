@@ -57,7 +57,7 @@ export async function showPilotExport(ctx: AppContext, profileId: string): Promi
         h('li', null, `Alla svar: ${answers} stycken, med rätt eller fel, svaret och tiden.`),
         h('li', null, `Alla pass: ${data.sessions.length} stycken.`),
         h('li', null, 'Hur varje fakta ligger till, på varje plats.'),
-        h('li', null, 'Inställningarna som påverkar övningen, till exempel passlängden och ”Ge mer tid”.'),
+        h('li', null, 'Inställningarna som påverkar övningen, till exempel tid per dag och ”Ge mer tid”.'),
         h('li', null, 'Appens version.'),
       ),
       h('h2', null, 'Det här finns inte i filen'),

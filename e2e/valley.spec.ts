@@ -350,9 +350,11 @@ test('"I dag" in the corner says what is left today and starts it', async ({ pag
   await page.goto('/');
   await createProfile(page, 'Alva');
   await page.getByRole('button', { name: 'Till dalen' }).click();
-  // A sun with a dot: something is left today.
-  const sun = page.getByRole('button', { name: 'Det här kan du göra i dag' });
+  // A sun with a dot: something is left today. The words "I dag" under it, inside the corner.
+  const sun = page.getByRole('button', { name: 'I dag. Det här kan du göra i dag' });
   await expect(sun.locator('.today-dot')).toHaveCount(1);
+  await expect(sun.locator('.today-label')).toHaveText('I dag');
+  await expect(sun.locator('.today-label')).toBeInViewport({ ratio: 1 });
   const card = page.getByRole('dialog', { name: 'I dag' });
   await expect(card).toBeHidden();
   await sun.click();

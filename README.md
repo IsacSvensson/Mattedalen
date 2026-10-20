@@ -126,12 +126,12 @@ full storlek (`src/shell/components/valleyMap.ts`, lägena i
   Spelare byts med djuret uppe till vänster i dalen. En ny spelare börjar vid
   bäcken, där startkollen erbjuds.
 - **I dag** (`src/shell/components/today.ts`). Uppe till höger finns en sol med
-  en liten prick när något återstår i dag, aldrig en siffra. Ett tryck öppnar
+  texten ”I dag” och en liten prick när något återstår i dag, aldrig en siffra. Ett tryck öppnar
   ett litet kort med det som återstår, dagens plats först: ”Hoppa på stenarna”,
   ”Gå på stigen”, ”Vattna trädgården”. En rad startar passet direkt
   (`Place.start`), med startkollen första gången och kollen först när den är
   dags. Platser som vilar står längst ner. När allt är gjort finns ingen sol.
-- **Dagens plan** (`src/shell/dayPlan.ts`). Passlängden i föräldravyn är hela
+- **Dagens plan** (`src/shell/dayPlan.ts`). ”Tid per dag” i föräldravyn är hela
   dagens tid. Barnet besöker högst två platser om dagen och väljer själv
   ordningen. Varje plats får först 5 minuter, och resten delas efter hur mycket
   som är förfallet till repetition där, inte rakt hälften. Planen görs vid
@@ -226,7 +226,7 @@ blockerat, till exempel i vissa privata lägen. Båda körs mot samma kontraktst
 
 | Objektlager | Nyckel | Innehåll |
 |---|---|---|
-| `profiles` | `id` | namn, avatar, inställningar (passlängd, mer tid, uppläsning, fritt svar) |
+| `profiles` | `id` | namn, avatar, inställningar (tid per dag, mer tid, uppläsning, fritt svar) |
 | `progress` | `[profileId, packId]` | alla `ItemState` + `LearnerMeta` |
 | `attempts` | autoinkrement, index `[profileId, ts]` | svarsloggen |
 | `sessions` | `[profileId, id]` | ett litet kvitto per pass (minuter per dag, resultat) |
@@ -283,7 +283,7 @@ webbläsaren (`e2e/legacy.spec.ts`).
 ## Flytta mellan enheter
 
 - **QR-kod** (`storage/qrCodec.ts`, formatet `MD1:`). Koden innehåller namn, djur,
-  passlängd, om Trädgården och Stigen är öppna, om tabellerna väntar på Stigen
+  tid per dag, om Trädgården och Stigen är öppna, om tabellerna väntar på Stigen
   och vilken dag de kunde ha öppnat, om barnet har mer tid, och ett block per plats: innehållspaketets id
   och version och status per fakta i 3 bitar (status plus ungefärlig
   Leitner-låda). Allt skyddas med CRC-8. Datan base45-kodas, så att QR-kodens
@@ -323,16 +323,15 @@ steg tillbaka, från en sida till översikten.
   tid”), ett barn som räknar plus när det står minus vid bäcken, frågan hur det
   går (efter fem speldagar och sedan högst en gång per kvartal,
   [PLAN-FRAGA](docs/PLAN-FRAGA.md)) och lagring som webbläsaren kan radera. Det går
-  inte att avfärda; en sak försvinner när den är gjord. Sedan **den här
-  veckan** (övade minuter per dag under 14 dagar och hur många dagar barnet
-  spelat), en rad per plats med vad barnet är på, det som är svårast och en
+  inte att avfärda; en sak försvinner när den är gjord. Sedan **senaste 7 dagarna** (övade
+  minuter per veckodag och hur många dagar barnet spelat), en rad per plats med vad barnet är på, det som är svårast och en
   stapel för hur mycket som sitter (`Place.parentSummary`), och raden **Barnets
   inställningar**. Längst ner finns **Hämta ett barn**, **Den här enheten**,
   **Nytt i appen** och **Tyck till**.
 - **En plats** har alltid samma ordning: läget, svåra just nu (högst fem, med
   ”Visa alla”), de vanligaste förväxlingarna, platsens koll, alla fakta som
   värmekartor (ihopfällda) och sist startkollen (`Place.parentPage`).
-- **Barnets inställningar** samlar allt barnet har: namn, djur, passlängd
+- **Barnets inställningar** samlar allt barnet har: namn, djur, tid per dag
   10–15 minuter, **Ge mer tid** (dubbel tid för buske och träd, för ett barn som
   svarar rätt men långsamt) och uppläsning, sedan platsernas egna val
   (`Place.parentSettings`): fritt svar, hur delat med skrivs och om tabellerna

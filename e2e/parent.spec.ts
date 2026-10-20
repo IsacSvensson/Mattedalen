@@ -34,8 +34,13 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   await switchPlayer(page);
   await openParent(page);
 
-  // The overview: the week, and a row per place that leads to its page.
-  await expect(page.getByText(/Senaste 7 dagarna: 1[23] minuter, 1 dag med spel\./)).toBeVisible();
+  // The overview: the last seven days, by weekday, and a row per place that leads to its page.
+  await expect(page.getByRole('heading', { name: 'Senaste 7 dagarna' })).toBeVisible();
+  const weekdays = await page.locator('.minutes-day').allTextContents();
+  expect(weekdays).toHaveLength(7);
+  expect(new Set(weekdays).size).toBe(7);
+  for (const d of weekdays) expect(['mån', 'tis', 'ons', 'tor', 'fre', 'lör', 'sön']).toContain(d);
+  await expect(page.getByText(/^1[23] minuter, 1 dag med spel\.$/)).toBeVisible();
   await expect(page.locator('.parent-overview .parent-row strong')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Barnets inställningar', 'Hämta ett barn', 'Den här enheten', 'Nytt i appen', 'Tyck till']);
   await parentPlace(page, 'Trädgården');
   const garden = page.getByRole('region', { name: /^Trädgården/ });
@@ -47,7 +52,7 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   await expect(garden.getByRole('button', { name: 'Gör om startkollen' })).toBeVisible();
   // The settings are not here but on the child's settings page.
   await expect(garden.getByRole('checkbox')).toHaveCount(0);
-  await expect(garden.getByRole('combobox', { name: 'Passlängd' })).toHaveCount(0);
+  await expect(garden.getByRole('combobox', { name: 'Tid per dag' })).toHaveCount(0);
   // All facts, folded: one heat map for the multiplications and one for delat med.
   await expect(garden.locator('.heat-cell.heat-learning-0').first()).toBeHidden();
   await garden.getByText('Alla fakta (värmekartor)').click();
@@ -69,9 +74,9 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
 
   // The child's settings, every place's on the same page.
   await parentSettings(page);
-  await expect(page.getByRole('region', { name: 'Trädgården' }).getByRole('checkbox', { name: /Fritt svar/ })).toBeChecked();
-  await page.getByRole('combobox', { name: 'Passlängd' }).selectOption('15');
-  await expect(page.getByRole('combobox', { name: 'Passlängd' })).toHaveValue('15');
+  await expect(page.getByRole('region', { name: 'Trädgården' }).getByRole('checkbox', { name: /Skriva svaret själv/ })).toBeChecked();
+  await page.getByRole('combobox', { name: 'Tid per dag' }).selectOption('15');
+  await expect(page.getByRole('combobox', { name: 'Tid per dag' })).toHaveValue('15');
   await page.getByRole('textbox', { name: 'Namn' }).fill('Alva-Li');
   await page.getByRole('button', { name: 'Spara', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Alva-Lis inställningar' })).toBeVisible();
@@ -299,7 +304,7 @@ test('"Ge mer tid": suggested for a child who is right but slow, and a choice in
   await parentSettings(page);
   const more = page.getByRole('checkbox', { name: 'Ge mer tid' });
   await expect(more).toBeChecked();
-  await expect(page.getByText(/En buske kräver då svar under 10 s i stället för 5 s, och ett träd under 8 s i stället för 4 s\./)).toBeVisible();
+  await expect(page.getByText(/Växterna växer då också med lite längre svarstid: en buske med svar under 10 s i stället för 5 s, och ett träd under 8 s i stället för 4 s\./)).toBeVisible();
   // Off again: the suggestion comes back. (The first "Sparat" goes first, so the next one is this one.)
   await expect(page.locator('.toast')).toHaveCount(0);
   await more.uncheck();

@@ -48,12 +48,14 @@ export function today(items: TodayItem[], resting: { icon: Element; text: string
     {
       class: 'today-button',
       type: 'button',
-      'aria-label': 'Det här kan du göra i dag',
+      'aria-label': 'I dag. Det här kan du göra i dag',
       'aria-expanded': 'false',
       'aria-controls': 'today-card',
       onclick: () => toggle(card.hidden !== false),
     },
     icon('sun'),
+    // The word under the sun: a seven-year-old does not know a sun is a button.
+    h('span', { class: 'today-label', 'aria-hidden': 'true' }, 'I dag'),
     h('span', { class: 'today-dot', 'aria-hidden': 'true' }),
   );
   const el = h('div', { class: 'today' }, button, card);

@@ -69,8 +69,10 @@ test('a grown-up can turn the waiting off, and the garden follows its own order'
   // Turned off on the child's settings page.
   await parentBack(page);
   await parentSettings(page);
-  const wait = page.getByRole('checkbox', { name: /Tabellerna väntar/ });
+  const wait = page.getByRole('checkbox', { name: /Vänta med en tabell/ });
   await expect(wait).toBeChecked();
+  // The example comes from the same list as the waiting itself.
+  await expect(wait).toHaveAccessibleName(/Till exempel kommer ×4 när barnet kan dubbla och halvera\.$/);
   await wait.uncheck();
   await closeParent(page);
   await enterGarden(page, 'Cia');

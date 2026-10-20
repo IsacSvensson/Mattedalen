@@ -17,6 +17,16 @@ export interface NewsItem {
 
 export const NEWS: readonly NewsItem[] = [
   {
+    id: '2026-10-20-enklare',
+    day: '2026-10-20',
+    title: 'Enklare ord för vuxna',
+    points: [
+      'Diagrammet i ”För vuxna” visar de senaste 7 dagarna, med veckodagar.',
+      '”Passlängd” heter ”Tid per dag”, och inställningarna säger med vanliga ord vad de gör.',
+      'Solen i hörnet av kartan har fått texten ”I dag”.',
+    ],
+  },
+  {
     id: '2026-10-19-fragan',
     day: '2026-10-19',
     title: 'Appen frågar ibland hur det går',

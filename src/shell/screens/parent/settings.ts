@@ -93,14 +93,14 @@ function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
     h(
       'label',
       null,
-      'Passlängd ',
+      'Tid per dag ',
       h(
         'select',
-        { 'aria-label': 'Passlängd', onchange: (e: Event) => void save({ settings: { sessionMinutes: Number((e.target as HTMLSelectElement).value) } }) },
+        { 'aria-label': 'Tid per dag', onchange: (e: Event) => void save({ settings: { sessionMinutes: Number((e.target as HTMLSelectElement).value) } }) },
         [10, 11, 12, 13, 14, 15].map((m) => h('option', { value: m, selected: m === profile.settings.sessionMinutes }, `${m} minuter`)),
       ),
     ),
-    h('p', { class: 'muted' }, 'Passlängden är hela dagens tid. Den delas mellan dagens platser efter hur mycket som ska repeteras.'),
+    h('p', { class: 'muted' }, 'Hur länge barnet övar per dag, allt tillsammans. Appen delar tiden mellan platserna efter vad som behöver repeteras.'),
     h(
       'label',
       { class: 'check' },
@@ -114,7 +114,7 @@ function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
     h(
       'p',
       { class: 'muted' },
-      `För ett barn som svarar rätt men långsamt. En buske kräver då svar under ${sec(more.fluentRtMs)} i stället för ${sec(rules.fluentRtMs)}, och ett träd under ${sec(more.automaticRtMs)} i stället för ${sec(rules.automaticRtMs)}. Det som redan har vuxit står kvar om du slår av det.`,
+      `För ett barn som svarar rätt men långsamt. Växterna växer då också med lite längre svarstid: en buske med svar under ${sec(more.fluentRtMs)} i stället för ${sec(rules.fluentRtMs)}, och ett träd under ${sec(more.automaticRtMs)} i stället för ${sec(rules.automaticRtMs)}. Det som redan har vuxit står kvar om du slår av det.`,
     ),
     h(
       'label',
@@ -125,7 +125,7 @@ function settingsForm(profile: Profile, save: SaveProfile): HTMLElement {
         disabled: !speechSupported(),
         onchange: (e: Event) => void save({ settings: { readAloud: (e.target as HTMLInputElement).checked } }),
       }),
-      h('span', null, 'Läs upp frågorna och dalens platser (svenska)'),
+      h('span', null, 'Läs upp frågorna och platserna med en svensk röst på enheten'),
     ),
     voiceNote,
   );

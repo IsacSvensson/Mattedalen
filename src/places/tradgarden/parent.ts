@@ -33,7 +33,7 @@ import { limitedList } from '../../shell/components/limitedList';
 import { gardenDeps, pack } from './pack';
 import { gardenIsOpen } from './isOpen';
 import { gardenWaits, saveTableReady, tableReady } from './held';
-import { OPENED_BY_ADULT, tableName, WAIT_PLAY_DAYS, waitText } from './waits';
+import { OPENED_BY_ADULT, tableName, WAIT_PLAY_DAYS, waitExample, waitText } from './waits';
 import { showPlacementOffer } from './screens/placement';
 import { wayFor } from '../../shell/words';
 
@@ -154,7 +154,7 @@ export async function gardenParentSettings(ctx: AppContext, profile: Profile, sa
         checked: profile.settings.allowFree,
         onchange: (e: Event) => void save({ settings: { allowFree: (e.target as HTMLInputElement).checked } }),
       }),
-      h('span', null, 'Fritt svar med sifferknappar när en fakta sitter (annars bara flerval)'),
+      h('span', null, 'Skriva svaret själv när barnet kan en fakta, i stället för att välja bland svar'),
     ),
     divisionSignSetting(profile, save),
     waitSetting(ctx, profile, save),
@@ -175,7 +175,7 @@ function waitSetting(ctx: AppContext, profile: Profile, save: SaveProfile): HTML
       checked: profile.settings.tablesWait !== false,
       onchange: (e: Event) => void save({ settings: { tablesWait: (e.target as HTMLInputElement).checked } }),
     }),
-    h('span', null, 'Tabellerna väntar på det de bygger på vid stigen'),
+    h('span', null, `Vänta med en tabell tills barnet kan det den bygger på vid Stigen. Till exempel ${waitExample()}`),
   );
 }
 

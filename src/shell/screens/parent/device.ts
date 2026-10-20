@@ -22,10 +22,10 @@ async function deviceSection(ctx: AppContext, backTo?: string): Promise<HTMLElem
     ctx.storageKind === 'memory'
       ? 'Webbläsaren tillåter inte sparande just nu (privat läge?). Framstegen försvinner när sidan stängs.'
       : persist === 'persisted'
-        ? 'Beständig lagring är på: webbläsaren raderar inte datan för att frigöra utrymme.'
+        ? 'Framstegen behålls: webbläsaren rensar dem inte när enheten får ont om plats.'
         : persist === 'unsupported'
-          ? 'Webbläsaren stöder inte beständig lagring.'
-          : 'Beständig lagring är inte beviljad. Webbläsaren kan radera datan om utrymmet tar slut.';
+          ? 'Webbläsaren kan inte lova att behålla framstegen. Spara en säkerhetskopia ibland, under barnets inställningar.'
+          : 'Webbläsaren kan rensa sparad data när enheten får ont om plats. Be den att behålla barnens framsteg.';
   return h(
     'section',
     { class: 'parent-section', 'aria-labelledby': 'device-heading' },
@@ -40,11 +40,11 @@ async function deviceSection(ctx: AppContext, backTo?: string): Promise<HTMLElem
             type: 'button',
             onclick: async () => {
               const result = await requestPersistence();
-              toast(result === 'persisted' ? 'Beständig lagring är på' : 'Webbläsaren sa nej – lägg till appen på hemskärmen och försök igen');
+              toast(result === 'persisted' ? 'Framstegen behålls' : 'Webbläsaren sa nej – lägg till appen på hemskärmen och försök igen');
               await showDevice(ctx, backTo);
             },
           },
-          'Be om beständig lagring',
+          'Behåll framstegen',
         )
       : null,
     h('h3', null, 'Version'),

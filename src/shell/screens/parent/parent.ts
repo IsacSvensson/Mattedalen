@@ -6,7 +6,7 @@ import { avatarIcon } from '../../components/avatars';
 import { toast } from '../../components/modal';
 import { icon } from '../../components/icons';
 import { h } from '../../dom';
-import { formatDay, minutesPerDay, slowFacts } from '../../stats';
+import { formatDay, minutesPerDay, slowFacts, weekdayShort } from '../../stats';
 import { showProfiles } from '../profiles';
 import { showDevice } from './device';
 import { showFeedback } from './feedback';
@@ -68,21 +68,20 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
   show(ctx, view);
 }
 
-/** One child: the week, a row per place, and the child's settings. */
+/** One child: the last seven days, a row per place, and the child's settings. */
 async function childOverview(ctx: AppContext, profile: Profile): Promise<HTMLElement> {
   const sessions = await ctx.store.listSessions(profile.id);
   const today = systemClock.today();
-  const days = minutesPerDay(sessions, today, 14);
-  const week = days.slice(-7);
+  const week = minutesPerDay(sessions, today, 7);
   const played = week.filter((d) => d.minutes > 0).length;
 
   return h(
     'section',
     { class: 'parent-section', 'aria-labelledby': 'child-heading' },
     h('h2', { id: 'child-heading', class: 'child-heading' }, h('span', { class: 'avatar-badge small' }, avatarIcon(profile.avatar)), profile.name),
-    h('h3', null, 'Den här veckan'),
-    minutesChart(days),
-    h('p', { class: 'muted' }, `Senaste 7 dagarna: ${week.reduce((s, d) => s + d.minutes, 0)} minuter, ${played} ${played === 1 ? 'dag' : 'dagar'} med spel.`),
+    h('h3', null, 'Senaste 7 dagarna'),
+    minutesChart(week),
+    h('p', { class: 'muted' }, `${week.reduce((s, d) => s + d.minutes, 0)} minuter, ${played} ${played === 1 ? 'dag' : 'dagar'} med spel.`),
     h('h3', null, 'Platserna'),
     h(
       'ul',
@@ -95,7 +94,7 @@ async function childOverview(ctx: AppContext, profile: Profile): Promise<HTMLEle
       pageRow({
         icon: icon('grownup'),
         title: 'Barnets inställningar',
-        text: 'Namn, passlängd, mer tid, uppläsning, platsernas val, flytta eller spara',
+        text: 'Namn, tid per dag, mer tid, uppläsning, platsernas val, flytta eller spara',
         onclick: () => void showChildSettings(ctx, profile.id),
       }),
     ),
@@ -173,12 +172,12 @@ async function todoSection(ctx: AppContext, profile: Profile | undefined): Promi
     items.push({
       place: null,
       todo: {
-        text: 'Webbläsaren kan radera barnens framsteg om utrymmet tar slut.',
+        text: 'Webbläsaren kan rensa sparad data när enheten får ont om plats. Be den att behålla barnens framsteg.',
         action: {
-          label: 'Be om beständig lagring',
+          label: 'Behåll framstegen',
           run: async () => {
             const result = await requestPersistence();
-            toast(result === 'persisted' ? 'Beständig lagring är på' : 'Webbläsaren sa nej – lägg till appen på hemskärmen och försök igen');
+            toast(result === 'persisted' ? 'Framstegen behålls' : 'Webbläsaren sa nej – lägg till appen på hemskärmen och försök igen');
             await again();
           },
         },
@@ -255,14 +254,14 @@ function minutesChart(days: { day: string; minutes: number }[]): HTMLElement {
     { class: 'minutes' },
     h(
       'div',
-      { class: 'minutes-chart', role: 'img', 'aria-label': days.map((d) => `${formatDay(d.day)}: ${d.minutes} min`).join(', ') },
+      { class: 'minutes-chart', role: 'img', 'aria-label': days.map((d) => `${weekdayShort(d.day)} ${formatDay(d.day)}: ${d.minutes} min`).join(', ') },
       days.map((d) =>
         h(
           'div',
-          { class: 'minutes-bar', title: `${formatDay(d.day)}: ${d.minutes} min` },
+          { class: 'minutes-bar', title: `${weekdayShort(d.day)} ${formatDay(d.day)}: ${d.minutes} min` },
           h('span', { class: 'minutes-value' }, d.minutes || ''),
           h('span', { class: 'minutes-fill', style: `height:${(d.minutes / max) * 100}%` }),
-          h('span', { class: 'minutes-day' }, formatDay(d.day).split(' ')[0]),
+          h('span', { class: 'minutes-day' }, weekdayShort(d.day)),
         ),
       ),
     ),

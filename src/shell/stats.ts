@@ -92,6 +92,12 @@ export const STATUS_TEXT: Record<ItemState['status'], string> = {
   automatic: 'automatiserad',
 };
 
+/** "mån", "tis" … for a day, as under the bars of the last seven days. */
+export function weekdayShort(day: DayKey): string {
+  const [y, m, d] = day.split('-').map(Number) as [number, number, number];
+  return ['sön', 'mån', 'tis', 'ons', 'tor', 'fre', 'lör'][new Date(Date.UTC(y, m - 1, d)).getUTCDay()]!;
+}
+
 export function formatDay(day: DayKey): string {
   const [, m, d] = day.split('-').map(Number) as [number, number, number];
   const months = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];

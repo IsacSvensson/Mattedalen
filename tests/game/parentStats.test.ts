@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyState } from '../../src/engine';
-import { factStats, factStatsText, formatDay, minutesPerDay, topConfusions } from '../../src/shell/stats';
+import { factStats, factStatsText, formatDay, minutesPerDay, topConfusions, weekdayShort } from '../../src/shell/stats';
 import type { SessionRecord, StoredAttempt } from '../../src/storage';
 
 const session = (day: string, minutes: number): SessionRecord => ({
@@ -57,5 +57,9 @@ describe('parent statistics', () => {
 
   it('formats days in Swedish', () => {
     expect(formatDay('2026-10-03')).toBe('3 okt');
+  });
+
+  it('names the weekday, as under the bars of the last seven days', () => {
+    expect(['2026-10-19', '2026-10-20', '2026-10-24', '2026-10-25', '2027-01-01'].map(weekdayShort)).toEqual(['mån', 'tis', 'lör', 'sön', 'fre']);
   });
 });

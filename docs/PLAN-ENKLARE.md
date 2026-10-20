@@ -10,7 +10,7 @@ blir tydligare vad man ska göra, hur man hittar och vad framstegen betyder.
 
 | Fas | Innehåll | Storlek |
 |---|---|---|
-| E1. Snabba rättelser | Diagrammet visar 7 dagar, ”I dag” får text, ”Passlängd” blir ”Tid per dag”, och inställningarna får enklare ord. | Liten |
+| E1. Snabba rättelser **(klar)** | Diagrammet visar 7 dagar, ”I dag” får text, ”Passlängd” blir ”Tid per dag”, och inställningarna får enklare ord. | Liten |
 | E2. Första starten för den vuxna | En kort introduktion som går att hoppa över: vad appen tränar, tid per dag, uppläsning, var ”För vuxna” finns och var datan sparas. Den vuxna väljer startkollen. Sedan ”Lämna över till barnet”. | Mellan |
 | E3. Mindre läsning för barnet | Högtalarknapp på hjälpkorten och första skärmen, kortare hjälptext, en hand som visar draget på kartan, och skylten för dagens plats som rör sig. | Mellan |
 | E4. Förklaringar vid behov | ”Vad betyder växterna?” (och stenarna och lyktorna) med bilder, vad ”sitter” betyder, en mening per barn och ”Så kan du hjälpa till”, säkerhetskopian efter vad man vill göra, och en påminnelse varje månad. | Mellan |
@@ -99,3 +99,26 @@ Jag går på förslagen nedan om du inte säger annat.
   e2e-tester måste ändras i samma ändring.
 - **Nyheten** kommer först i testversionen. Den vanliga appen får den när E1
   släpps.
+
+## Fynd från E1
+
+![Telefon, 320 px: ”I dag” på solen, diagrammet med veckodagar och trädgårdens inställningar](img/enklare.png)
+
+*Telefon, 320 px. Till vänster ”I dag” på solen i kartans hörn. I mitten
+diagrammet med de senaste 7 dagarna. Till höger trädgårdens inställningar med
+de nya orden.*
+
+- **Diagrammet** visar 7 staplar med veckodagar, i dag sist. Skärmläsaren läser
+  veckodag, datum och minuter.
+- **”I dag”** står på en liten skylt över solens nederkant, inte under den.
+  Kartans pilar börjar 84 px ned, och en text under solen hade krockat med dem.
+  Rutan som öppnas har flyttats ned lite, så att skylten syns.
+- **”Tid per dag”** står i barnets inställningar, i raden i översikten, i
+  piloten och i README.
+- **Lagringen** heter ”Behåll framstegen” både i ”Att göra” och under ”Den här
+  enheten”, med samma förklaring.
+- **Tabellerna:** exemplet ”kommer ×4 när barnet kan dubbla och halvera” hämtas
+  ur samma lista som det barnet ser i trädgården.
+- **Inget sticker ut åt sidan** i 320 och 360 px, eller på surfplatta.
+- **Tester:** e2e för diagrammet, ”I dag”, ”Tid per dag”, exemplet för
+  tabellerna och de nya texterna. Ett enhetstest för veckodagarna.

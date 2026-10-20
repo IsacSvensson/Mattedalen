@@ -1333,7 +1333,8 @@ h1:focus {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
+  /* Room for the sign under the sun. */
+  gap: 18px;
 }
 
 .today-button {
@@ -1352,6 +1353,24 @@ h1:focus {
 .today-button .icon {
   width: 34px;
   height: 34px;
+  margin-top: -10px;
+}
+
+/* "I dag" on a small sign over the sun's lower edge, inside the corner: the map's pointers start below it. */
+.today-label {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 7px;
+  border: var(--outline);
+  border-radius: 999px;
+  background: var(--card);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  line-height: 18px;
+  white-space: nowrap;
+  color: var(--ink);
 }
 
 .today-button[aria-expanded='true'],
@@ -3141,7 +3160,7 @@ h1:focus {
 
 .minutes-chart {
   display: grid;
-  grid-template-columns: repeat(14, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 4px;
   height: 120px;
   align-items: end;
