@@ -10,10 +10,14 @@
 const PRECACHE = __PRECACHE__;
 const VERSION = __VERSION__;
 // Gångerträdgården lives on the same origin and deletes every cache named
-// `gangertradgarden-*` but its own, so this prefix must stay different.
-const CACHE_PREFIX = 'mattedalen-';
+// `gangertradgarden-*` but its own, so this prefix must stay different. The
+// test version has its own prefix (see vite.config.ts).
+const CACHE_PREFIX = __CACHE_PREFIX__;
 const CACHE = `${CACHE_PREFIX}${VERSION}`;
 const SHELL = './index.html';
+// The test version lives in ./test/ with its own worker (docs/PLAN-TESTVERSION.md):
+// this one leaves it alone, also before that worker is installed.
+const TEST_VERSION = new URL('./test/', self.registration.scope).href;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -42,6 +46,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.href.startsWith(TEST_VERSION)) return;
 
   if (request.mode === 'navigate') {
     // Single-page app: a navigation gets the cached shell, unless it opens one

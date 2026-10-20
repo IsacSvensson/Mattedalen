@@ -1,38 +1,70 @@
 name: Publicera på GitHub Pages
 
-# Publishes the default branch. Requires Settings → Pages → Source: "GitHub Actions".
+# Publishes both versions as one site (docs/PLAN-TESTVERSION.md):
+# - the real app, from the `release` branch, at /Mattedalen/,
+# - the test version, from the default branch, at /Mattedalen/test/.
+# Requires Settings → Pages → Source: "GitHub Actions".
+#
+# Every run is in the default branch's context (a push to it, the button, or a
+# finished "Släpp"), so the github-pages environment allows the deployment.
 on:
   push:
   workflow_dispatch:
+  workflow_run:
+    workflows: [Släpp]
+    types: [completed]
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# One queue per branch: a skipped run for another branch must never cancel
-# the real deployment. Deployments are not cancelled half-way.
+# One queue for the whole site: each run builds both versions, so a newer
+# waiting run may replace an older one. Deployments are not cancelled half-way.
 concurrency:
-  group: pages-${{ github.ref_name }}
+  group: pages
   cancel-in-progress: false
 
 jobs:
   build:
-    if: github.ref_name == github.event.repository.default_branch
+    if: >-
+      github.ref_name == github.event.repository.default_branch &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - id: test
+        uses: actions/checkout@v5
+      - id: release
+        uses: actions/checkout@v5
+        with:
+          ref: release
+          path: release
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
+          cache-dependency-path: |
+            package-lock.json
+            release/package-lock.json
+      - name: Testversionen (main)
+        run: |
+          npm ci
+          npm test
+          npm run build -- --mode staging --outDir dist-test
+        env:
+          APP_SHA: ${{ steps.test.outputs.commit }}
+      - name: Den vanliga appen (release)
+        working-directory: release
+        run: |
+          npm ci
+          npm run build
+        env:
+          APP_SHA: ${{ steps.release.outputs.commit }}
+      - run: cp -r dist-test release/dist/test
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: release/dist
 
   deploy:
     needs: build

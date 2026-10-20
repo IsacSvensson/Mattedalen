@@ -445,13 +445,25 @@ den skickar ljud från enheten.
 
 ## Publicering på GitHub Pages
 
-`.github/workflows/deploy.yml` bygger och publicerar repots **standardgren**
-(`main`) vid varje push. Det kan också startas manuellt under *Actions → Publicera på GitHub
-Pages → Run workflow*. Enhetstesterna körs först. Engångsinställning: välj
-**Settings → Pages → Build and deployment → Source: GitHub Actions** i repot.
-Appen hamnar då på `https://<användare>.github.io/<repo>/`.
-`.github/workflows/ci.yml` kör typkontroll, enhetstester, bygge och
-Playwright-tester vid varje push och pull request.
+Två versioner på samma sida ([PLAN-TESTVERSION](docs/PLAN-TESTVERSION.md)):
+
+- **Den vanliga appen** på `https://isacsvensson.github.io/Mattedalen/`, från
+  grenen `release`.
+- **Testversionen** på `https://isacsvensson.github.io/Mattedalen/test/`, från
+  `main`. Den har en rand längst upp, heter ”Mattedalen test” och har egna barn,
+  skilda från den vanliga appens.
+
+`.github/workflows/deploy.yml` bygger båda och publicerar dem vid varje push till
+`main`, när ”Släpp” är klar, och med *Actions → Publicera på GitHub Pages → Run
+workflow*. Enhetstesterna körs först.
+
+**Att släppa** det som finns i testversionen: *Actions → Släpp → Run workflow*
+(`.github/workflows/release.yml`). Det flyttar `release` fram till `main`. En
+push direkt till `release` fungerar också. `release` får aldrig egna ändringar.
+
+Engångsinställning: välj **Settings → Pages → Build and deployment → Source:
+GitHub Actions** i repot. `.github/workflows/ci.yml` kör typkontroll,
+enhetstester, bygge och Playwright-tester vid varje push och pull request.
 
 ## Tester
 

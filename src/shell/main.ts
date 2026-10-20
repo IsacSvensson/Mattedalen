@@ -2,6 +2,7 @@ import './styles.css';
 import { backen } from '../places/backen';
 import { stigen } from '../places/stigen';
 import { tradgarden } from '../places/tradgarden';
+import { STAGING } from '../staging';
 import { createProgressStore, importLegacyData, requestPersistence } from '../storage';
 import type { AppContext } from './app';
 import { plantSprite } from './components/plant';
@@ -26,6 +27,8 @@ async function start(): Promise<void> {
   captureInstallPrompt();
   void registerServiceWorker();
   document.body.prepend(plantSprite());
+  // The test version's stripe along the top (docs/PLAN-TESTVERSION.md).
+  if (STAGING) document.documentElement.classList.add('staging');
 
   const { store, kind } = await createProgressStore();
   // A device without children shows no old news, also when children come from Gångerträdgården below.

@@ -30,13 +30,19 @@ export const APP_BUILD: string = typeof __APP_BUILD__ === 'string' ? __APP_BUILD
  */
 export async function registerServiceWorker(): Promise<void> {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
-  let hadController = !!navigator.serviceWorker.controller;
+  // Only this app's own worker counts. The test version in ./test/ is inside
+  // the real app's scope: it can open under (or be claimed by) that worker,
+  // and its own first install is no update.
+  const ownWorker = new URL('./sw.js', location.href).href;
+  const ownController = () => navigator.serviceWorker.controller?.scriptURL === ownWorker;
+  let hadController = ownController();
   try {
     const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
     registration = reg;
     // The first install takes control without a reload; later versions reload
     // the page (also in a page that was opened before the first install).
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!ownController()) return;
       if (!hadController && !waiting) {
         hadController = true;
         return;
@@ -62,7 +68,7 @@ export async function registerServiceWorker(): Promise<void> {
       if (!worker) return;
       const check = () => {
         // Only an update (not the first install) needs the user's go-ahead.
-        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+        if (worker.state === 'installed' && ownController()) {
           waiting = worker;
           notify();
         }

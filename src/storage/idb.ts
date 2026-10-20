@@ -3,9 +3,11 @@ import type { ProfileExport } from './backup';
 import { summarizeAttempts } from './compact';
 import type { AttemptQuery, ImportOptions, ProgressStore } from './ProgressStore';
 import { exportProfile, prepareImport } from './shared';
+import { STAGING } from '../staging';
 import type { AttemptDaySummary, Profile, Progress, SessionRecord, StoredAttempt } from './types';
 
-export const DB_NAME = 'mattedalen';
+/** The test version keeps its own children, apart from the real app's on the same origin. */
+export const DB_NAME = STAGING ? 'mattedalen-test' : 'mattedalen';
 
 export interface ProgressDB extends DBSchema {
   profiles: { key: string; value: Profile };

@@ -13,7 +13,8 @@ export default defineConfig({
     { name: 'phone', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
-    command: 'npx vite build && npx vite preview --port 4173 --strictPort',
+    // The real app at /, and the test version in /test/, as on GitHub Pages (docs/PLAN-TESTVERSION.md).
+    command: 'npx vite build && npx vite build --mode staging --outDir dist/test && npx vite preview --port 4173 --strictPort',
     url: 'http://localhost:4173/',
     reuseExistingServer: !process.env.CI,
   },

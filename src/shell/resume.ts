@@ -5,6 +5,8 @@
  * an update, that is kept in sessionStorage, which lasts through a reload in
  * the same tab but not past closing the app. An ordinary start begins as before.
  */
+import { STAGING } from '../staging';
+
 export type ParentPage = 'overview' | 'place' | 'settings' | 'device' | 'import' | 'feedback' | 'news' | 'pilot';
 
 export type Where =
@@ -12,7 +14,7 @@ export type Where =
   | { kind: 'place'; profileId: string; placeId: string }
   | { kind: 'parent'; page: ParentPage; profileId?: string; placeId?: string };
 
-const KEY = 'mattedalen:resume';
+const KEY = STAGING ? 'mattedalen-test:resume' : 'mattedalen:resume';
 
 /** A reload later than this after the mark starts over: it was not the update's. */
 export const RESUME_WITHIN_MS = 5 * 60_000;

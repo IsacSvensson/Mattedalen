@@ -67,3 +67,4 @@ Avstämningen mot Lgr22 är gjord mot Skolverkets PDF av kursplanen
 | K4 | Zooma ut på kartan: nypa eller knappen i hörnet, ut till hela dalen. | [PLAN-DALEN](PLAN-DALEN.md#fynd-från-k4) |
 | S2 | Tid och långsamma barn: ”Ge mer tid” för vuxna, föreslås när barnet svarar rätt men långsamt. Trädet under 4 s, och dagarna räknas inom 30 dagar. | [PLAN-GRANSKNING](PLAN-GRANSKNING.md#fynd-från-s2) |
 | F (F1–F3) | För vuxna: en kort översikt med Att göra och en rad per plats, och egna sidor för platserna, barnets inställningar, enheten och att hämta ett barn. | [PLAN-FORALDRAVYN](PLAN-FORALDRAVYN.md) |
+| Test | En testversion på `/test/` från main, och den vanliga appen från `release`. Egna barn och egna sparade filer. | [PLAN-TESTVERSION](PLAN-TESTVERSION.md) |

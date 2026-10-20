@@ -1,3 +1,4 @@
+import { STAGING } from '../../staging';
 import { DEFAULT_SETTINGS, type Profile } from '../../storage';
 import { show, type AppContext } from '../app';
 import { h } from '../dom';
@@ -44,6 +45,7 @@ export async function showProfiles(ctx: AppContext): Promise<void> {
         h('span', { class: 'profile-name' }, 'Ny spelare'),
       ),
     ),
+    stagingNotice(),
     storageNotice(ctx),
     await installBanner(ctx),
     parentLink(ctx),
@@ -156,6 +158,7 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
     { class: 'screen new-profile has-scene' },
     scene({ height: 96 }),
     first ? h('p', { class: 'welcome' }, plantIcon('sprout'), 'Välkommen till Mattedalen!') : null,
+    first ? stagingNotice() : null,
     h('h1', null, 'Vad heter du?'),
     h(
       'form',
@@ -175,6 +178,11 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
       : h('button', { class: 'link-button', type: 'button', 'data-back': '', onclick: () => void showProfiles(ctx) }, 'Tillbaka'),
   );
   show(ctx, view);
+}
+
+/** In the test version: its children are its own, apart from the real app's. */
+function stagingNotice(): HTMLElement | null {
+  return STAGING ? h('p', { class: 'notice staging-notice' }, 'Testversion. Barnen här är skilda från den vanliga appen.') : null;
 }
 
 /** Small note for grown-ups when progress cannot be saved. */

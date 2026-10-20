@@ -1,0 +1,33 @@
+name: Släpp
+
+# Lets everyone have what is in the test version (docs/PLAN-TESTVERSION.md).
+# - The button (Actions → Släpp → Run workflow) moves `release` to the newest
+#   commit on the default branch, forward only.
+# - Pushing `release` directly works too.
+# Either way, "Publicera på GitHub Pages" runs when this has finished.
+on:
+  workflow_dispatch:
+  push:
+    branches: [release]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  forward:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+      - name: Flytta release fram till main
+        if: github.event_name == 'workflow_dispatch'
+        run: git push origin HEAD:refs/heads/release
+      - name: Klart
+        run: echo "release är nu ${{ github.event_name == 'workflow_dispatch' && 'samma som main' || github.sha }}"
