@@ -16,8 +16,10 @@ const CACHE_PREFIX = __CACHE_PREFIX__;
 const CACHE = `${CACHE_PREFIX}${VERSION}`;
 const SHELL = './index.html';
 // The test version lives in ./test/ with its own worker (docs/PLAN-TESTVERSION.md):
-// this one leaves it alone, also before that worker is installed.
-const TEST_VERSION = new URL('./test/', self.registration.scope).href;
+// this one leaves it alone, also before that worker is installed. Its address
+// without the last slash would otherwise get this app's shell, with this app's
+// children, so it is sent on to ./test/.
+const TEST_VERSION = new URL('./test/', self.registration.scope);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -46,7 +48,11 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.href.startsWith(TEST_VERSION)) return;
+  if (url.pathname === TEST_VERSION.pathname.slice(0, -1)) {
+    if (request.mode === 'navigate') event.respondWith(Response.redirect(TEST_VERSION.href, 301));
+    return;
+  }
+  if (url.pathname.startsWith(TEST_VERSION.pathname)) return;
 
   if (request.mode === 'navigate') {
     // Single-page app: a navigation gets the cached shell, unless it opens one

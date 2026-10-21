@@ -95,8 +95,15 @@ spelar?”. Inget sticker ut åt sidan.*
   gamla data. Nu hämtar bara den vanliga appen dem, och testversionen börjar utan
   barn. Barn som redan kopierats till testversionen tas bort där, under barnets
   inställningar. Det påverkar inte den vanliga appen.
+- **Adressen utan snedstreck** (`/test`) gav den vanliga appen, med de riktiga
+  barnen. Den vanliga appens offlinedel släppte bara förbi `/test/`, och för
+  `/test` svarade den med sin egen app. Ändringar där gjordes alltså i den
+  vanliga appen. Nu skickar offlinedelen `/test` vidare till `/test/`. Rättelsen
+  sitter i den vanliga appens offlinedel och når telefonerna med nästa släpp.
+  Fram till dess: använd adressen med snedstreck.
 - **E2e** (`e2e/staging.spec.ts`): testversionen syns och heter rätt, barnen hålls
   isär i båda riktningarna, den vanliga appens offlinedel lämnar `/test/` i fred,
-  båda har sina egna sparade filer, båda fungerar utan nät, och barnen från
-  Gångerträdgården följer bara med till den vanliga appen. Testservern
+  båda har sina egna sparade filer, båda fungerar utan nät, barnen från
+  Gångerträdgården följer bara med till den vanliga appen, och `/test` utan
+  snedstreck öppnar testversionen. Testservern
   serverar båda, som på GitHub Pages.

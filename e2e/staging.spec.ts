@@ -66,3 +66,14 @@ test('children from Gångerträdgården come along to the real app only, never t
   await expect(page.locator('.profile-tile:not(.add)')).toHaveText(['Alva']);
 });
 
+test("the test version's address without the last slash opens the test version, not the real app", async ({ page }) => {
+  await page.goto('/');
+  await createProfile(page, 'Alva', 'brook');
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+  await page.goto('/test');
+  await expect(page).toHaveURL(/\/test\/$/);
+  await expect(page.locator('html.staging')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(page.getByText('Alva')).toHaveCount(0);
+});
+
