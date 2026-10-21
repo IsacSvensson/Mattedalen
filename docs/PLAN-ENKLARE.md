@@ -15,7 +15,7 @@ blir tydligare vad man ska göra, hur man hittar och vad framstegen betyder.
 | E3. Mindre läsning för barnet **(klar)** | Högtalarknapp på hjälpkorten och första skärmen, kortare hjälptext, en hand som visar draget på kartan, och skylten för dagens plats som rör sig. | Mellan |
 | E4. Förklaringar vid behov | ”Vad betyder växterna?” (och stenarna och lyktorna) med bilder, vad ”sitter” betyder, en mening per barn och ”Så kan du hjälpa till”, säkerhetskopian efter vad man vill göra, och en påminnelse varje månad. | Mellan |
 
-E4 planeras i detalj när E3 är provad. Varje fas kommer först i testversionen
+E4 är planerad nedan. Varje fas kommer först i testversionen
 ([PLAN-TESTVERSION](PLAN-TESTVERSION.md)) och släpps när den är provad.
 
 ## E1. Snabba rättelser
@@ -444,4 +444,142 @@ och en tankebubbla.*
 - **Tester:** `e2e/reading.spec.ts` med raden i ”Att göra”, högtalaren vid
   bäcken, uppläsningen av hjälpkortet och frågan om startkollen, skylten, minskade
   rörelser och handen. `tests/game/strategyLength.test.ts` för längden.
+
+## E4. Förklaringar vid behov
+
+Barn och vuxna ska kunna förstå vad bilderna och orden betyder när de undrar,
+utan att få en lektion varje gång appen öppnas.
+
+### Varför
+
+- **Bilderna förklaras inte.** Ett frö, en planta, en buske och ett träd i
+  trädgården, stenarna i bron och lyktorna på Stigen visar vad barnet kan. Men
+  ingenstans står det vad de betyder.
+- **”Sitter” är appens eget ord.** ”94 av 100 sitter” kan läsas som att barnet
+  klarar 94 procent av allt. Det betyder att barnet har visat en fakta tillräckligt
+  många gånger, enligt appens regler.
+- **Den vuxna ser siffror men inte vad hen kan göra.** ”Svåra just nu” visar
+  faktan och tankesättet, men inte vad man kan säga vid middagen.
+- **Säkerhetskopian är teknisk.** ”Visa QR-kod” och ”Spara säkerhetskopia
+  (JSON)” står bredvid varandra, och ingenting påminner om att spara.
+
+### Hur
+
+#### 1. ”Vad betyder bilderna?” för barnet
+
+- **En liten knapp med frågetecken** på varje plats sida, bredvid platsens namn.
+  Den öppnar ett kort med bilder och några få ord:
+  - **Trädgården:** frö ”Nytt”, planta ”Du övar”, buske ”Du kan det”, träd ”Du
+    kan det snabbt”. För delat med: blomma, kart och mogen frukt på samma sätt.
+  - **Bäcken:** ”En sten för varje del. Den fylls när du kan delen.”
+  - **Stigen:** ”En lykta för varje del. Den lyser när du kan delen.”
+- **Bilderna är appens egna,** så att barnet känner igen dem. Inga tider och inga
+  siffror på barnets kort.
+- **Kortet läses upp** när uppläsningen är på.
+- **Det visas bara när barnet trycker,** aldrig av sig självt.
+
+#### 2. Vad ”sitter” betyder, för den vuxna
+
+- **Sidan ”Så fungerar Mattedalen”** får ett avsnitt ”Växterna, stenarna och
+  lyktorna”. Där står vad varje bild betyder och appens regler, med vardagliga ord:
+  - **Sitter** (buske, kart): rätt svar under 5 sekunder på två olika dagar.
+  - **Automatiserad** (träd, mogen frukt): rätt svar under 4 sekunder på tre
+    olika dagar, utan svarsalternativ.
+  - Svaren räknas inom 30 dagar.
+  - Med ”Ge mer tid” gäller 10 och 8 sekunder.
+- **Där ”sitter” står** i översikten och på platsernas sidor blir ordet en länk
+  till avsnittet.
+- **Måttet förklaras:** ”94 av 100 sitter” gäller faktana i Mattedalen, inte allt
+  i matematiken.
+
+Reglerna läses ur motorns inställningar, så att texten alltid stämmer.
+
+#### 3. En mening per barn
+
+Överst i barnets del av översikten, före diagrammet:
+
+> Bosse spelade 4 av de senaste 7 dagarna, i snitt 11 minuter. Nu: Tiokamrater
+> vid bäcken och ×2 i trädgården.
+
+Bara det som går att räkna fram ur passen och det barnet övar på nu. Inget omdöme
+som ”det går bra”, eftersom appen inte kan veta det.
+
+#### 4. ”Så kan du hjälpa till”
+
+- **En rad per plats** som barnet övar på i dag, under meningen: ett kort tips för
+  den del barnet är på nu, med en fråga att ställa hemma.
+  - Exempel för ”Tiokamrater”: ”Fråga vid middagen: vilket tal blir 10 med 7?
+    Tiokamrater är två tal som blir 10 tillsammans.”
+  - Exempel för ×4: ”×4 är dubbelt av dubbelt. Fråga: vad är dubbelt av 6? Och
+    dubbelt av det?”
+- **Ett tips per del.** Bäcken har 10 delar och Stigen 9. Trädgården har 11
+  tabeller, och delat med får samma tips som sin tabell. Det blir ungefär 30
+  tips.
+- **Tipsen skrivs i samma ton som tankesätten** och bygger på dem. Du granskar dem
+  i testversionen innan de släpps.
+- **”Svåra just nu”** får samma tips under listan, när en svår fakta hör till
+  delen.
+
+#### 5. Säkerhetskopian efter vad man vill göra
+
+- **Två knappar** i barnets inställningar, i stället för QR och JSON:
+  - **”Flytta till en annan enhet”**: förklarar de två vägarna. QR-koden går
+    snabbt och tar med vad som sitter. Filen tar med allt, också historiken.
+  - **”Spara en kopia”**: sparar filen och säger var den hamnar och hur den
+    hämtas tillbaka (”För vuxna → Hämta ett barn → Säkerhetskopia”).
+- **De tekniska orden** (QR, JSON) kommer först i nästa steg.
+
+#### 6. Påminnelse om säkerhetskopian
+
+- **En rad i ”Att göra”:** ”Spara en kopia av Bosses framsteg. Allt finns bara på
+  den här enheten.”, med knappen ”Spara en kopia”.
+- **När:** efter fem speldagar utan någon kopia, och sedan när det har gått 30
+  dagar sedan den senaste.
+- **Appen minns** bara dagen för den senaste kopian, per barn. Den kan inte veta
+  var filen hamnade.
+
+### Nytt i appen
+
+En post: ”Förklaringar”. Frågetecknet vid platserna, vad ”sitter” betyder, en
+mening och tips per barn, och den nya säkerhetskopian.
+
+### Tester och kontroll
+
+- **Enhetstester:**
+  - meningen per barn för några olika veckor;
+  - att varje del i varje plats har ett tips;
+  - att reglerna i texten kommer från motorns inställningar.
+- **E2e:**
+  - frågetecknet öppnar kortet vid alla tre platserna, och det läses upp;
+  - länken från ”sitter” går till avsnittet;
+  - meningen och tipset står i översikten och följer delen barnet är på;
+  - de två knapparna för säkerhetskopian, och att filen hämtas tillbaka;
+  - påminnelsen kommer efter fem speldagar, försvinner när en kopia sparas och
+    kommer igen efter 30 dagar.
+- **Skärmbilder** i 320 och 360 px och på surfplatta: kortet vid varje plats,
+  översikten med meningen och tipsen, och säkerhetskopian. Inget får sticka ut åt
+  sidan.
+
+### Beslut som behövs för E4
+
+Jag går på förslagen om du inte säger annat.
+
+1. **Inget omdöme i meningen per barn** (förslag), bara det som går att räkna.
+2. **Jag skriver de ungefär 30 tipsen** (förslag), och du läser dem i
+   testversionen. En lärare eller specialpedagog kan gärna läsa dem också.
+3. **Frågetecknet vid platsens namn** (förslag), eller bara förklaringen i ”För
+   vuxna”.
+4. **Påminnelsen efter fem speldagar och sedan var 30:e dag** (förslag).
+
+### Fallgropar i E4
+
+- **Fel förklaring är värre än ingen.** Reglerna läses därför ur motorn, och ett
+  test kräver att texten och motorn säger samma sak.
+- **Tipsen är innehåll.** De behöver stämma med tankesätten och åldern, och de
+  ändras när delarna ändras. Testet som kräver ett tips per del fångar en ny del
+  utan tips.
+- **Filen på telefonen** hamnar på olika ställen på Android och iPhone. Texten
+  säger var den brukar hamna och hur den hämtas tillbaka, utan att lova mer.
+- **Fler rader i ”Att göra”** kan bli många. Påminnelsen kommer högst en gång i
+  månaden och försvinner när kopian är sparad.
 
