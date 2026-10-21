@@ -7,6 +7,7 @@ import { bloomIcon, plantIcon } from '../../../shell/components/plant';
 import { h } from '../../../shell/dom';
 import { showGarden } from './garden';
 import { showSession } from './session';
+import { readShown } from '../../../shell/components/readAloud';
 
 /** The soft ending: no score and no counts, just what grew today (the garden then shows it, highlighted). */
 export function showSessionEnd(ctx: AppContext, profile: Profile, summary: SessionSummary, focus?: FocusSet): void {
@@ -37,4 +38,5 @@ export function showSessionEnd(ctx: AppContext, profile: Profile, summary: Sessi
       : null,
   );
   show(ctx, view);
+  void readShown(ctx, profile, { auto: true });
 }

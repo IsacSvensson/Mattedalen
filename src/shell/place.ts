@@ -14,6 +14,8 @@ export interface ParentTodo {
   action?: { label: string; run: () => Promise<void> };
   /** Instead of an action: a button with this label that opens the place's own page, where the thing is explained. */
   seePlace?: string;
+  /** A second answer beside the action, as a link, e.g. "Bosse läser själv". */
+  also?: { label: string; run: () => Promise<void> };
 }
 
 /** A place in one row of the overview in "För vuxna" (docs/PLAN-FORALDRAVYN.md). */

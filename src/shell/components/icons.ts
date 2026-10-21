@@ -45,6 +45,23 @@ const ICONS = {
     paths: [['M4 9.5h3.5L12 5.5v13l-4.5-4H4a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5Z', 'var(--i-yellow)'], ['M15.5 9a4 4 0 0 1 0 6'], ['M18 6.5a7.5 7.5 0 0 1 0 11']],
   },
   arrow: { paths: [['M5 12h13'], ['M13 6.5 18.5 12 13 17.5']] },
+  // A hand that shows the drag on the map, the first times (docs/PLAN-ENKLARE.md, E3).
+  hand: {
+    paths: [
+      [
+        'M8.5 12V4.8a1.6 1.6 0 0 1 3.2 0V11l.1-1.6a1.5 1.5 0 0 1 3 .1V11l.1-.8a1.5 1.5 0 0 1 3 .2v1.2l.2-.4a1.4 1.4 0 0 1 2.7.6v3.7c0 3.6-2.6 6.2-6.2 6.2h-1.4c-1.9 0-3.3-.8-4.5-2.3l-3.2-4a1.6 1.6 0 0 1 2.5-2Z',
+        'var(--card)',
+      ],
+    ],
+  },
+  // A thought: in front of a way to think on the help card, instead of words.
+  think: {
+    paths: [
+      ['M7 15.5a4 4 0 0 1-.8-7.9 5 5 0 0 1 9.4-1.4 3.9 3.9 0 0 1 3.4 6.6 3.5 3.5 0 0 1-4.2 2.7Z', 'var(--card)'],
+      ['M6.5 18.5a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z', 'var(--card)'],
+      ['M4 21.3a.8.8 0 1 0 0-1.6.8.8 0 0 0 0 1.6Z', 'var(--card)'],
+    ],
+  },
   back: { paths: [['M19 12H6'], ['M11 6.5 5.5 12l5.5 5.5']] },
   close: { paths: [['M6 6l12 12'], ['M18 6 6 18']] },
   check: { paths: [['M5 12.5l4.5 4.5L19 7.5']] },

@@ -17,6 +17,7 @@ import { checkDue } from '../../../shell/check';
 import { systemClock, type ItemId, type ItemState } from '../../../engine';
 import { showPathSession } from './session';
 import { setWhere } from '../../../shell/resume';
+import { readShown } from '../../../shell/components/readAloud';
 
 /**
  * Stigen: the path with a post at every ten and a lantern for every part, and
@@ -71,6 +72,7 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
     h('div', { class: 'garden-side' }, picture.line, actions),
   );
   show(ctx, view);
+  void readShown(ctx, profile, { into: '.scene-title' });
 }
 
 /**

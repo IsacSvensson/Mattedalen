@@ -216,8 +216,8 @@ export function buildShareItems(): Item[] {
         kind: 'strategy',
         text:
           t.kind === 'share'
-            ? `Lägg en i taget i varje korg tills det är slut: ${t.answer} i varje.`
-            : `Fyll en korg i taget med ${t.by}: det blir ${t.answer} korgar.`,
+            ? `Dela ut en i taget: ${t.answer} i varje korg.`
+            : `Fyll korgar med ${t.by} i varje: ${t.answer} korgar.`,
       },
     ],
     formats: ['choice'],

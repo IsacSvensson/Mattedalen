@@ -4,6 +4,7 @@ import { show, type AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
 import { h } from '../../../shell/dom';
 import { showBrook } from './brook';
+import { readShown } from '../../../shell/components/readAloud';
 
 /** The soft ending at the brook: no score and no counts, just what was built today. */
 export function showBrookEnd(ctx: AppContext, profile: Profile, summary: SessionSummary): void {
@@ -24,4 +25,5 @@ export function showBrookEnd(ctx: AppContext, profile: Profile, summary: Session
     h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showBrook(ctx, profile) }, 'Till bäcken'),
   );
   show(ctx, view);
+  void readShown(ctx, profile, { auto: true });
 }

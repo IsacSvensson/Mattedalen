@@ -67,7 +67,7 @@ test('a new device: what the app is, the home screen, the code and the child, th
   await page.getByRole('button', { name: 'Välj groda' }).click();
   await page.getByRole('button', { name: 'Klar' }).click();
   await expect(page.locator('.placement-run')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Kan du redan lite plus och minus?' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toHaveCount(0);
 
   const db = await readDb(page);
   expect(db.profiles).toHaveLength(1);

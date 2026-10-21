@@ -372,7 +372,7 @@ test('"I dag" in the corner says what is left today and starts it', async ({ pag
   // A row starts the day's session there: the first time at the brook, its start check is offered first.
   await sun.click();
   await card.getByRole('button', { name: /^Hoppa på stenarna/ }).click();
-  await expect(page.getByRole('heading', { name: 'Kan du redan lite plus och minus?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toBeVisible();
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: 'Alvas bäck' })).toBeVisible();
   // Back to the map at the same place: the child's animal stands by the brook.

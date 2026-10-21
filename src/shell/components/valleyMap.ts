@@ -38,9 +38,15 @@ const EDGE = 8;
 
 /**
  * `start`: today's place, where the map opens and the child's animal (`guide`)
- * stands. `sunflowers`: one on the hills per table the child knows.
+ * stands. `sunflowers`: one on the hills per table the child knows. `nudge`:
+ * the place first in "I dag", whose sign sways until the child taps or drags
+ * the map. `hint`: a hand shows the drag, on a map larger than the screen;
+ * `onMoved` is told the first time the child moves the map (docs/PLAN-ENKLARE.md, E3).
  */
-export function valleyMap(places: MapPlace[], opts: { start: string; guide: Element; sunflowers: number }): ValleyMap {
+export function valleyMap(
+  places: MapPlace[],
+  opts: { start: string; guide: Element; sunflowers: number; nudge?: string; hint?: boolean; onMoved?: () => void },
+): ValleyMap {
   const shown = places.filter((p) => SPOTS[p.id]);
   const land = s('svg', { class: 'map-land', 'aria-hidden': 'true' });
   // A drag that moved the map is not a tap on what it started on.
@@ -55,7 +61,7 @@ export function valleyMap(places: MapPlace[], opts: { start: string; guide: Elem
     const sign = h(
       'button',
       {
-        class: 'place-name map-sign',
+        class: `place-name map-sign${p.id === opts.nudge ? ' nudge' : ''}`,
         id: `map-${p.id}`,
         type: 'button',
         'aria-label': `${p.name}. ${sc.moodText}`,
@@ -287,12 +293,27 @@ export function valleyMap(places: MapPlace[], opts: { start: string; guide: Elem
     }
   }
 
+  // The sign of today's place sways, and the hand shows the drag, until the child taps or moves the map.
+  let hand: HTMLElement | null = null;
+  let moved = false;
+  const calm = () => {
+    el.querySelector('.map-sign.nudge')?.classList.remove('nudge');
+    hand?.remove();
+    hand = null;
+  };
+  el.addEventListener('pointerdown', calm);
+
   let frame = 0;
   const onScroll = () => {
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => {
       updatePointers();
       if (byItself) return;
+      if (!moved) {
+        moved = true;
+        calm();
+        opts.onMoved?.();
+      }
       const mx = (view.scrollLeft + view.clientWidth / 2) / scale - offset();
       const my = (view.scrollTop + view.clientHeight / 2) / scale - offsetY();
       const dist = (b: Box) => Math.hypot(b.x + b.w / 2 - mx, b.y + b.h / 2 - my);
@@ -408,6 +429,11 @@ export function valleyMap(places: MapPlace[], opts: { start: string; guide: Elem
     mount() {
       layout();
       resized?.observe(view);
+      if (opts.hint && !fits) {
+        hand = h('div', { class: 'map-hand', 'aria-hidden': 'true' }, icon('hand'));
+        hand.addEventListener('animationend', () => calm());
+        el.append(hand);
+      }
     },
     cleanup() {
       document.removeEventListener('keydown', onKey);

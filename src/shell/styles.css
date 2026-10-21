@@ -518,6 +518,29 @@ h1:focus {
   height: 40px;
 }
 
+/* The thought in front of a way to think on the help card (docs/PLAN-ENKLARE.md, E3). */
+.strategy-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+}
+
+.strategy-row .think .icon {
+  width: 30px;
+  height: 30px;
+  margin-top: 2px;
+}
+
+/* A speaker in the top corner of a screen a child reads (docs/PLAN-ENKLARE.md, E3). */
+.screen-speak {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 5;
+  background: var(--card);
+}
+
 /* The grown-ups' first start (docs/PLAN-ENKLARE.md, E2). */
 .intro h1 {
   margin: 0;
@@ -1281,6 +1304,90 @@ h1:focus {
 
 .map-place.mood-asleep .garden-bed {
   filter: saturate(0.75) brightness(0.92);
+}
+
+/* Today's place: its sign sways a little, until the child taps or moves the map (docs/PLAN-ENKLARE.md, E3). */
+.map-sign.nudge {
+  animation: sign-sway 2.8s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes sign-sway {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0);
+  }
+  70% {
+    transform: rotate(-4deg);
+  }
+  80% {
+    transform: rotate(4deg);
+  }
+  90% {
+    transform: rotate(-2deg);
+  }
+}
+
+/* The hand that shows the drag, the first times on a map larger than the screen. */
+.map-hand {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  z-index: 3;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  pointer-events: none;
+  animation: hand-drag 1.6s ease-in-out 0.6s 3 both;
+}
+
+.map-hand .icon {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.15));
+}
+
+@keyframes hand-drag {
+  0% {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(60px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-60px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-sign.nudge {
+    animation: none;
+    outline: 4px solid var(--sun);
+    outline-offset: 3px;
+  }
+
+  /* The hand stands still a moment, then goes. */
+  .map-hand {
+    animation: hand-still 3s linear both;
+  }
+
+  @keyframes hand-still {
+    0%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
 }
 
 .map-sign-row {

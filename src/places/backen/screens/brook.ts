@@ -16,6 +16,7 @@ import { showCheckOffer } from './check';
 import { offeredKey, showBrookPlacementOffer } from './placement';
 import { showBrookSession } from './session';
 import { setWhere } from '../../../shell/resume';
+import { readShown } from '../../../shell/components/readAloud';
 
 /**
  * Bäcken: the bridge the child builds, one block per part, and what sits of
@@ -67,6 +68,7 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
     h('div', { class: 'garden-side' }, picture.line, actions),
   );
   show(ctx, view);
+  void readShown(ctx, profile, { into: '.scene-title' });
 }
 
 /**

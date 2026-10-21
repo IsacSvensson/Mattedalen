@@ -39,12 +39,24 @@ export async function showValley(ctx: AppContext, profile: Profile, opts: { at?:
   const voiceOn = profile.settings.readAloud && speechSupported() && (await hasSwedishVoice());
   const spoken = maps.map(({ scene }) => scene.moodText).join(' ');
   const at = maps.find((m) => m.place.id === opts.at) ?? today;
-  const map = valleyMap(
-    maps.map(({ place, scene, open }) => ({ id: place.id, name: place.name, open, scene, go: () => void go(place)() })),
-    { start: at.place.id, guide: avatarIcon(profile.avatar), sunflowers },
-  );
   // What is left today, today's place first; the places that rest today below.
   const left = [...awake].sort((a, b) => b.scene.due - a.scene.due);
+  // The hand that shows the drag: the first times, until the child has moved the map (docs/PLAN-ENKLARE.md, E3).
+  const hintKey = mapHintKey(profile.id);
+  const hintState = (await ctx.store.getSetting<MapHint>(hintKey)) ?? { shown: 0 };
+  const hint = !hintState.moved && hintState.shown < MAP_HINTS;
+  if (hint) await ctx.store.setSetting(hintKey, { ...hintState, shown: hintState.shown + 1 });
+  const map = valleyMap(
+    maps.map(({ place, scene, open }) => ({ id: place.id, name: place.name, open, scene, go: () => void go(place)() })),
+    {
+      start: at.place.id,
+      guide: avatarIcon(profile.avatar),
+      sunflowers,
+      nudge: left[0]?.place.id,
+      hint,
+      onMoved: () => void ctx.store.setSetting(hintKey, { shown: MAP_HINTS, moved: true }),
+    },
+  );
   const card = todayCard(
     left.map(({ place, scene }) => ({ icon: scene.go.icon, label: scene.go.label, note: scene.moodText, start: () => void place.start(ctx, profile) })),
     maps.filter((m) => m.open && m.scene.mood === 'asleep').map(({ scene }) => ({ icon: icon('moon'), text: scene.moodText })),
@@ -70,6 +82,14 @@ export async function showValley(ctx: AppContext, profile: Profile, opts: { at?:
   show(ctx, view, () => map.cleanup());
   map.mount();
 }
+
+/** The hand on the map, per child: how many times it has come, and whether the child has moved the map. */
+interface MapHint {
+  shown: number;
+  moved?: boolean;
+}
+export const MAP_HINTS = 3;
+export const mapHintKey = (profileId: string) => `mapHint:${profileId}`;
 
 const placeMaps = (ctx: AppContext, profile: Profile) =>
   Promise.all(ctx.places.map(async (place) => ({ place, scene: await place.scene(ctx, profile), open: await placeIsOpen(place, ctx, profile) })));

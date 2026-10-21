@@ -398,7 +398,12 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place
   const label = (value: string) => place.choiceLabel?.(value) ?? value;
   // The help shows the item in its usual form, whatever form it was asked in.
   const answer = helpAnswer(q.item.prompt, label(fb.expected));
-  if (voiceOn) void speak(answer);
+  // Fewer lines (docs/PLAN-ENKLARE.md, E3): "Du svarade 4." only when the note does not already say 4.
+  const given = fb.given ? label(fb.given) : '';
+  const saysGiven = !!help.note && !!given && help.note.startsWith(`${given} `);
+  // The whole card is read aloud, and the speaker in the top band reads it again.
+  currentPrompt = [answer, help.note, help.strategy].filter(Boolean).join('. ');
+  if (voiceOn) void speak(currentPrompt);
   await new Promise<void>((resolve) => {
     const next = h('button', { class: 'big-button', type: 'button', onclick: () => resolve() }, 'Fortsätt', icon('arrow', 'on-primary'));
     // The help takes the place of the question: the answer is in it.
@@ -409,10 +414,17 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place
         h(
           'div',
           { class: 'help-card card' },
-          h('p', { class: 'you-said' }, fb.given ? `Du svarade ${label(fb.given)}.` : 'Inget svar den här gången.', help.strategy ? ' Så här kan du tänka:' : ''),
+          saysGiven ? null : h('p', { class: 'you-said' }, given ? `Du svarade ${given}.` : 'Inget svar den här gången.'),
           h('p', { class: `help-answer${isWords(answer) ? ' words' : ''}`, 'data-prompt': answer }, mathNodes(answer, divisionSign)),
           help.note ? h('p', { class: 'confusion-note' }, help.note) : null,
-          help.strategy ? h('p', { class: 'strategy' }, mathNodes(keepTerms(help.strategy), divisionSign)) : null,
+          help.strategy
+            ? h(
+                'div',
+                { class: 'strategy-row' },
+                h('span', { class: 'think' }, icon('think'), h('span', { class: 'sr-only' }, 'Så här kan du tänka:')),
+                h('p', { class: 'strategy' }, mathNodes(keepTerms(help.strategy), divisionSign)),
+              )
+            : null,
           help.visual ?? null,
         ),
         next,
@@ -426,5 +438,7 @@ async function showFeedback(stage: HTMLElement, q: Question, fb: Feedback, place
       }
     });
   });
+  // On to the next question: the card is not read to its end.
+  stopSpeaking();
   setKeys(undefined);
 }

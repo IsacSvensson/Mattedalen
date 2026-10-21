@@ -17,6 +17,16 @@ export interface NewsItem {
 
 export const NEWS: readonly NewsItem[] = [
   {
+    id: '2026-10-21-lasa',
+    day: '2026-10-21',
+    title: 'Mindre att läsa för barnen',
+    points: [
+      'Hjälpen vid fel svar har färre rader, och med uppläsning läses hela hjälpen upp. Ändskärmen och frågan om startkollen läses också upp.',
+      'Frågan om startkollen heter ”Vill du visa vad du redan kan?”.',
+      'På kartan visar en hand hur man drar, och skylten för dagens plats gungar lite.',
+    ],
+  },
+  {
     id: '2026-10-21-start',
     day: '2026-10-21',
     title: 'En start för vuxna',

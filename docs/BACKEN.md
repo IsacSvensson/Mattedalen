@@ -146,9 +146,11 @@ tillbaka till dalen.
 - **Tid.** Vid tvåsiffriga svar mäts tiden till första siffran (J5).
 - **Räknestigen** visar tallinjen med startstenen men utan hopp, eftersom hoppen
   skulle avslöja svaret på stegen.
-- **Hjälpkortet** visar ”Du svarade 12. Så här kan du tänka:”, faktan med svaret
-  (luckan ifylld), en eventuell förklaring av förväxlingen, strategin och
-  tallinjen med hoppen, eller vågen.
+- **Hjälpkortet** visar faktan med svaret (luckan ifylld), en eventuell
+  förklaring av förväxlingen, strategin med en tankebubbla framför, och
+  tallinjen med hoppen, eller vågen. ”Du svarade 12.” står bara när
+  förklaringen inte redan börjar med barnets svar
+  ([PLAN-ENKLARE](PLAN-ENKLARE.md#e3-mindre-läsning-för-barnet)).
 - **Smal telefon.** Under 560 px visar tallinjen ett fönster med 11 stenar runt
   hoppen i stället för hela 0–20.
 - **Dagens tid** delas efter hur mycket som är förfallet till repetition på varje

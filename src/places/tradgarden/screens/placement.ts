@@ -12,6 +12,7 @@ import { savePlacement } from '../../../shell/play';
 import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../../../shell/speech';
 import { showGarden } from './garden';
 import { gardenDeps, pack } from '../pack';
+import { readShown } from '../../../shell/components/readAloud';
 
 /** Set once the garden's start check has been offered to a child, so it is offered only once. */
 export const gardenOfferedKey = (profile: Profile) => `gardenCheckOffered:${profile.id}`;
@@ -22,17 +23,19 @@ export async function showPlacementOffer(ctx: AppContext, profile: Profile): Pro
   const view = h(
     'main',
     { class: 'screen session-end placement-offer' },
-    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon('search')),
-    h('h1', null, 'Kan du redan lite gånger?'),
-    h('p', { class: 'end-text' }, 'Gör en snabb startkoll, så vet trädgården var du ska börja. Svara på det du kan – det gör inget om du inte kan allt!'),
+    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, plantIcon('sprout')),
+    // Words a child can answer (docs/PLAN-ENKLARE.md, E3); what it is about, in two words under them.
+    h('h1', null, 'Vill du visa vad du redan kan?'),
+    h('p', { class: 'end-text' }, 'Gånger.'),
     h(
       'div',
       { class: 'garden-actions' },
-      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runPlacement(ctx, profile) }, 'Gör startkollen', icon('arrow', 'on-primary')),
+      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runPlacement(ctx, profile) }, 'Ja!', icon('arrow', 'on-primary')),
       h('button', { class: 'soft-button', type: 'button', onclick: () => void showGarden(ctx, profile) }, 'Börja från början'),
     ),
   );
   show(ctx, view);
+  void readShown(ctx, profile, { auto: true });
 }
 
 /**
@@ -155,6 +158,7 @@ export async function runPlacement(ctx: AppContext, profile: Profile): Promise<v
       h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showGarden(ctx, profile, passed) }, 'Till trädgården'),
     ),
   );
+  void readShown(ctx, profile, { auto: true });
 }
 
 /** How much of the check is about the multiplications (the rest is delat med, when there is any). */

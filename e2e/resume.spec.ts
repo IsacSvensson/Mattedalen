@@ -51,5 +51,5 @@ test('the brook, open from the start, comes back as the brook', async ({ page })
   await createProfile(page, 'Alva', 'brook');
   const id = await profileId(page);
   await reloadAsAfterUpdate(page, { kind: 'place', profileId: id, placeId: 'backen' });
-  await expect(page.getByRole('heading', { name: 'Alvas bäck' }).or(page.getByRole('heading', { name: 'Kan du redan lite plus och minus?' }))).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Alvas bäck' }).or(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' }))).toBeVisible();
 });

@@ -21,6 +21,11 @@ function swedishVoice(): SpeechSynthesisVoice | undefined {
   return voices.find((v) => v.lang === LANG) ?? voices.find((v) => v.lang.toLowerCase().startsWith('sv'));
 }
 
+/** A Swedish voice among the voices already loaded, without waiting for more (asking also starts the loading). */
+export function swedishVoiceLoaded(): boolean {
+  return swedishVoice() !== undefined;
+}
+
 /** Voices load asynchronously in some browsers. True if a Swedish voice on the device exists. */
 export async function hasSwedishVoice(): Promise<boolean> {
   const s = synth();

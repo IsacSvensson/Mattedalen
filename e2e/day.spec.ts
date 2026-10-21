@@ -83,7 +83,7 @@ test('a new child starts at the brook; the garden rests until a grown-up opens i
   // Now it is open, and the garden's own start check is offered on the first visit.
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: 'Trädgården. Nya frön väntar i trädgården.' }).click();
-  await expect(page.getByRole('heading', { name: 'Kan du redan lite gånger?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toBeVisible();
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: 'Alvas trädgård' })).toBeVisible();
   // … only once.

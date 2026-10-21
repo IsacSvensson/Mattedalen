@@ -7,6 +7,7 @@ import { scene } from '../components/scene';
 import { detectPlatform, installGuide, isStandalone } from '../pwa';
 import { hasSwedishVoice, speechSupported } from '../speech';
 import { setWhere } from '../resume';
+import { readsSelfKey } from '../components/readAloud';
 import { showImport } from './parent/importPage';
 import { choosePin, hasPin } from './parent/pinGate';
 import { avatarGrid, FIRST_AVATAR, parentLink, showNewProfile, stagingNotice, startNewChild } from './profiles';
@@ -227,10 +228,13 @@ function handOver(flow: Flow): void {
   let avatar = FIRST_AVATAR;
   const done = async () => {
     await ctx.store.setSetting(INTRO_KEY, 'done');
+    const id = crypto.randomUUID();
+    // Answered here: the question about read-aloud in "Att göra" is not asked again.
+    if (a.reads !== null) await ctx.store.setSetting(readsSelfKey(id), a.reads);
     await startNewChild(
       ctx,
       {
-        id: crypto.randomUUID(),
+        id,
         name,
         avatar,
         createdAt: Date.now(),

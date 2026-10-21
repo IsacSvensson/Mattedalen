@@ -195,7 +195,7 @@ Svaren skrivs på stenar, som vid bäcken, och tiden räknas till första siffra
 ### Startkoll
 
 Första gången barnet kommer till Stigen erbjuds en startkoll, som vid bäcken:
-”Kan du redan talen till 100?”. Den prövar delarna i ordning och kan bara flytta
+”Vill du visa vad du redan kan?”, med ”Talen till 100.” under. Den prövar delarna i ordning och kan bara flytta
 fram barnet. Tiotal och ental (förståelse) prövas inte. En del som väntar på
 bäcken öppnar bara om barnet klarar den. En vuxen kan göra om startkollen i
 föräldravyn.

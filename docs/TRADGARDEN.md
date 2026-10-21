@@ -150,8 +150,9 @@ inget hämtas utifrån.
   tar den väg barnet kan bäst. Kan barnet ingen väg än visas tabellens egen
   ([PLAN-RAKNESTIG](PLAN-RAKNESTIG.md)).
 - **Återkoppling.** Vid rätt svar blir frågekortet grönt, svaret visas och en
-  liten planta dyker upp. Vid fel ersätts frågan av ett hjälpkort: ”Du svarade 54.
-  Så här kan du tänka:”, rätt svar, strategin och den färgade rektangeln. Aldrig
+  liten planta dyker upp. Vid fel ersätts frågan av ett hjälpkort: rätt svar, strategin
+  med en tankebubbla framför och den färgade rektangeln. ”Du svarade 54.” står
+  bara när förklaringen inte redan börjar med svaret. Aldrig
   bara ”fel” och aldrig rött. Är felsvaret en typisk förväxling får barnet en vänlig
   förklaring (”48 är 8 × 6 – nära!”, ”7 är 3 + 4. Här ska det vara 3 gånger 4.”).
   Felsvaret loggas som förväxling.

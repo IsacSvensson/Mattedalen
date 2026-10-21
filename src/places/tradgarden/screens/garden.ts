@@ -25,6 +25,7 @@ import { waitText } from '../waits';
 import { gardenDeps, pack } from '../pack';
 import { gardenOfferedKey, showPlacementOffer } from './placement';
 import { setWhere } from '../../../shell/resume';
+import { readShown } from '../../../shell/components/readAloud';
 
 const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
   seed: 'frön',
@@ -122,6 +123,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
     ),
   );
   show(ctx, view);
+  void readShown(ctx, profile, { into: '.scene-title' });
 }
 
 /**

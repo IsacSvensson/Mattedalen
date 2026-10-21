@@ -26,7 +26,7 @@ async function answerCheck(page: import('@playwright/test').Page, known: number[
 async function toGardenCheck(page: import('@playwright/test').Page, name: string): Promise<void> {
   await page.locator('.profile-tile', { hasText: name }).click();
   await page.getByRole('button', { name: /^Trädgården\./ }).click();
-  await expect(page.getByRole('heading', { name: 'Kan du redan lite gånger?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toBeVisible();
 }
 
 test('a new player who knows ×2, ×10, ×5 and ×1 starts at ×4', async ({ page }) => {
@@ -36,7 +36,7 @@ test('a new player who knows ×2, ×10, ×5 and ×1 starts at ×4', async ({ pag
   await openPath(page, 'Alva');
   await openGarden(page, 'Alva');
   await toGardenCheck(page, 'Alva');
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   await answerCheck(page, [10, 2, 5, 1]);
 
   await expect(page.getByText('Du kan redan ×2, ×10, ×5 och ×1', { exact: false })).toBeVisible();
@@ -59,7 +59,7 @@ test('a child who knows ×2 but answers slowly still starts after it', async ({ 
   await page.goto('/');
   // A new child starts at the brook; the garden's start check comes on the first visit there.
   await createProfile(page, 'Sixten', 'garden-check');
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   await answerCheck(page, [2], 9000);
   await expect(page.getByText('Du kan ×2 – de blev plantor', { exact: false })).toBeVisible();
   await expect(page.getByText('Vi fortsätter med ×10.')).toBeVisible();
@@ -72,7 +72,7 @@ test('a beginner is told kindly and starts from the beginning', async ({ page })
   await page.goto('/');
   // A new child starts at the brook; the garden's start check comes on the first visit there.
   await createProfile(page, 'Bo', 'garden-check');
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   await answerCheck(page, []);
   await expect(page.getByText('Nu vet trädgården var vi ska börja', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Till trädgården' }).click();
@@ -83,7 +83,7 @@ test('the check can be redone from the parent view and never moves a child back'
   await page.goto('/');
   // A new child starts at the brook; the garden's start check comes on the first visit there.
   await createProfile(page, 'Alva', 'garden-check');
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   await answerCheck(page, [10, 2]);
   await page.getByRole('button', { name: 'Till trädgården' }).click();
   await expect(page.locator('.grid-cell.stage-bush')).toHaveCount(36);
@@ -92,7 +92,7 @@ test('the check can be redone from the parent view and never moves a child back'
   await openParent(page);
   await parentPlace(page, 'Trädgården');
   await page.getByRole('button', { name: 'Gör om startkollen', exact: true }).click();
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   await answerCheck(page, []);
   await page.getByRole('button', { name: 'Till trädgården' }).click();
   await expect(page.locator('.grid-cell.stage-bush')).toHaveCount(36);
@@ -101,7 +101,7 @@ test('the check can be redone from the parent view and never moves a child back'
 test('the start check goes on with delat med for the tables the child just showed', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Vera', 'garden-check');
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   await answerCheck(page, [10, 2], 0, true);
 
   await expect(page.getByText('Du kan redan ×2 och ×10', { exact: false })).toBeVisible();
@@ -117,7 +117,7 @@ test('the start check goes on with delat med for the tables the child just showe
 test('without delat med the check stops after the multiplications, and nothing is placed for it', async ({ page }) => {
   await page.goto('/');
   await createProfile(page, 'Wilma', 'garden-check');
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   await answerCheck(page, [10, 2], 0, false);
   await expect(page.getByText('Du kan redan ×2 och ×10', { exact: false })).toBeVisible();
   await expect(page.getByText(/Du kan dela med/)).toHaveCount(0);

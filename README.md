@@ -126,7 +126,14 @@ full storlek (`src/shell/components/valleyMap.ts`, lägena i
   sina första frön, vara törstig när dagens pass inte är gjort, eller sova när
   passet är klart. Inget vissnar, och inga dagar räknas.
 - **Uppläsning.** Har barnet uppläsning påslagen finns en knapp som läser upp
-  platsernas lägen.
+  platsernas lägen. Platsernas sidor, ändskärmarna och frågan om startkollen har
+  också en högtalarknapp, och ändskärmarna och frågan läses upp direkt
+  (`src/shell/components/readAloud.ts`).
+- **Handen och skylten** ([PLAN-ENKLARE](docs/PLAN-ENKLARE.md#e3-mindre-läsning-för-barnet)).
+  På en karta som är större än skärmen visar en hand draget de första gångerna,
+  högst tre, tills barnet har dragit kartan. Skylten för platsen som står först i
+  ”I dag” gungar tills barnet trycker eller drar. Med minskade rörelser står
+  handen stilla, och skylten får en gul kant.
 - **Bakåtknappen** (telefonens eller webbläsarens) går ett steg tillbaka i
   stället för att stänga appen: den trycker på skärmens egen väg tillbaka, som
   hemknappen i ett pass eller djuret som går till dalen (`backTarget` i

@@ -35,7 +35,7 @@ async function toPath(page: Page, states: Record<string, SeedState>, unlockedUni
   await page.locator('.profile-tile').first().click();
   await page.getByRole('button', { name: /^Stigen\./ }).click();
   // The start check is offered the first time; these children start from the beginning.
-  const offer = page.getByRole('heading', { name: 'Kan du redan talen till 100?' });
+  const offer = page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' });
   // Stigen's own page, not its scene in the valley (which draws the same trail).
   const own = page.getByRole('heading', { name: /s? stig$/ });
   await expect(offer.or(own)).toBeVisible();
@@ -69,14 +69,14 @@ test('Stigen rests on the map until going over the ten sits at the brook, or a g
   await closeParent(page);
   await page.locator('.profile-tile', { hasText: 'Bo' }).click();
   await page.getByRole('button', { name: 'Stigen. Nya lyktor väntar på stigen.' }).click();
-  await expect(page.getByRole('heading', { name: 'Kan du redan talen till 100?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toBeVisible();
 });
 
 test('the start check takes a child who knows the numbers to 100 along the path', async ({ page }) => {
   await newChild(page, 'Ada');
   await page.locator('.profile-tile').first().click();
   await page.getByRole('button', { name: /^Stigen\./ }).click();
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   // Every answer right (as written, with its blank), on the stones of the number pad.
   const done = page.getByRole('heading', { name: 'Bra jobbat!' });
   for (let i = 0; i < 60; i++) {

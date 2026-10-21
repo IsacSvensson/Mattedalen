@@ -4,6 +4,7 @@ import { show, type AppContext } from '../../../shell/app';
 import { icon } from '../../../shell/components/icons';
 import { h } from '../../../shell/dom';
 import { showPath } from './path';
+import { readShown } from '../../../shell/components/readAloud';
 
 /** The soft ending on Stigen: no score and no counts, just what was met and what sits today. */
 export function showPathEnd(ctx: AppContext, profile: Profile, summary: SessionSummary): void {
@@ -24,4 +25,5 @@ export function showPathEnd(ctx: AppContext, profile: Profile, summary: SessionS
     h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void showPath(ctx, profile) }, 'Till stigen'),
   );
   show(ctx, view);
+  void readShown(ctx, profile, { auto: true });
 }

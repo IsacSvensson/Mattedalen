@@ -12,10 +12,10 @@ blir tydligare vad man ska göra, hur man hittar och vad framstegen betyder.
 |---|---|---|
 | E1. Snabba rättelser **(klar)** | Diagrammet visar 7 dagar, ”I dag” får text, ”Passlängd” blir ”Tid per dag”, och inställningarna får enklare ord. | Liten |
 | E2. Första starten för den vuxna **(klar)** | En kort introduktion som går att hoppa över: vad appen tränar, tid per dag, uppläsning, var ”För vuxna” finns och var datan sparas. Den vuxna väljer startkollen. Sedan ”Lämna över till barnet”. | Mellan |
-| E3. Mindre läsning för barnet | Högtalarknapp på hjälpkorten och första skärmen, kortare hjälptext, en hand som visar draget på kartan, och skylten för dagens plats som rör sig. | Mellan |
+| E3. Mindre läsning för barnet **(klar)** | Högtalarknapp på hjälpkorten och första skärmen, kortare hjälptext, en hand som visar draget på kartan, och skylten för dagens plats som rör sig. | Mellan |
 | E4. Förklaringar vid behov | ”Vad betyder växterna?” (och stenarna och lyktorna) med bilder, vad ”sitter” betyder, en mening per barn och ”Så kan du hjälpa till”, säkerhetskopian efter vad man vill göra, och en påminnelse varje månad. | Mellan |
 
-E3 är planerad nedan. E4 planeras i detalj när E3 är klar. Varje fas kommer först i testversionen
+E4 planeras i detalj när E3 är provad. Varje fas kommer först i testversionen
 ([PLAN-TESTVERSION](PLAN-TESTVERSION.md)) och släpps när den är provad.
 
 ## E1. Snabba rättelser
@@ -380,9 +380,9 @@ En post: ”Mindre att läsa för barnen”, med de viktigaste ändringarna.
 - **Skärmbilder** i 320 och 360 px och på surfplatta: hjälpkortet före och efter,
   handen på kartan, och den gungande skylten. Inget får sticka ut åt sidan.
 
-### Beslut som behövs för E3
+### Beslut för E3 (tagna)
 
-Jag går på förslagen om du inte säger annat.
+Förslagen nedan gäller.
 
 1. **”Du svarade 4.” stryks när meningen redan nämner 4** (förslag). Att barnet
    ser sitt eget svar är viktigt, och då står det fortfarande på kortet.
@@ -406,4 +406,42 @@ Jag går på förslagen om du inte säger annat.
   vad testerna förväntar sig. Det görs i samma ändring.
 - **Uppläsning som pratar för mycket** blir tjatig. Det som läses upp är kortet
   som syns, inget mer, och det avbryts när barnet trycker vidare.
+
+## Fynd från E3
+
+![Telefon, 320 px: frågan om startkollen, handen och skylten på kartan, och hjälpkortet](img/mindre-lasning.png)
+
+*Telefon, 320 px. Från vänster: frågan om startkollen med de nya orden, kartan
+med handen och den gungande skylten vid Bäcken, och hjälpkortet med färre rader
+och en tankebubbla.*
+
+- **Tankesätten var redan korta.** Mätningen räknade orden bredvid talen: högst
+  8 vid bäcken och Stigen. I trädgården hade korgarna i ”Dela lika” 9 och 13 ord.
+  De skrevs om till ”Dela ut en i taget: 3 i varje korg.” och ”Fyll korgar med 4
+  i varje: 3 korgar.”. Ett enhetstest håller alla tankesätt på högst 8 ord.
+- **Hjälpkortet:** ”Du svarade 3.” står bara när meningen om svaret inte redan
+  börjar med 3. ”Så här kan du tänka:” är en tankebubbla, och orden finns kvar
+  för skärmläsare.
+- **Uppläsningen** läser svaret, meningen och tankesättet. Högtalarknappen i
+  passets överkant läser upp kortet igen; kortet har ingen egen knapp, så att det
+  inte blir två likadana. Uppläsningen tystnar när barnet trycker vidare.
+- **Kortet ”Nytt: minus”** lästes redan upp, som alla introkort.
+- **Platsernas sidor, ändskärmarna, frågan om startkollen och skärmen efter
+  startkollen** har fått en högtalarknapp. Ändskärmarna och frågan läses upp
+  direkt, eftersom de alltid kommer efter ett tryck. Platsernas sidor läses bara
+  med knappen, så att de inte pratar varje gång barnet går dit.
+- **Frågan om startkollen** heter ”Vill du visa vad du redan kan?” i alla tre
+  platserna, med platsens bild och två ord om vad den gäller.
+- **Handen** visas bara när kartan är större än skärmen. På surfplattan i testerna
+  syns hela dalen, och där kommer ingen hand.
+- **Skylten** gungar vid den plats som står först i ”I dag”, med en kort gungning
+  ungefär var tredje sekund.
+- **Raden i ”Att göra”** väntar inte på enhetens röster. Den ser bara de röster
+  som redan är laddade, och annars kommer den nästa gång ”För vuxna” öppnas. En
+  första version väntade en stund på rösterna; då hann sidan ritas om ovanpå
+  nästa skärm, vilket ett test fångade. Svarade den vuxna
+  på läsfrågan i starten för vuxna kommer raden aldrig.
+- **Tester:** `e2e/reading.spec.ts` med raden i ”Att göra”, högtalaren vid
+  bäcken, uppläsningen av hjälpkortet och frågan om startkollen, skylten, minskade
+  rörelser och handen. `tests/game/strategyLength.test.ts` för längden.
 

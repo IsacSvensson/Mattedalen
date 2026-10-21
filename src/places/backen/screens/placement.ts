@@ -8,6 +8,7 @@ import { savePlacement } from '../../../shell/play';
 import { promptView } from '../../../shell/screens/session';
 import { hasSwedishVoice, speak, speechSupported, stopSpeaking } from '../../../shell/speech';
 import { brookDeps, pack } from '../pack';
+import { readShown } from '../../../shell/components/readAloud';
 
 /** Set once the start check at the brook has been offered to a child, so it is offered only once. */
 export const offeredKey = (profile: Profile) => `brookCheckOffered:${profile.id}`;
@@ -25,17 +26,19 @@ export function showBrookPlacementOffer(ctx: AppContext, profile: Profile, back:
   const view = h(
     'main',
     { class: 'screen session-end placement-offer' },
-    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon('search')),
-    h('h1', null, 'Kan du redan lite plus och minus?'),
-    h('p', { class: 'end-text' }, 'Gör en snabb startkoll, så vet bäcken var du ska börja. Svara på det du kan – det gör inget om du inte kan allt!'),
+    h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon('steps')),
+    // Words a child can answer (docs/PLAN-ENKLARE.md, E3); what it is about, in two words under them.
+    h('h1', null, 'Vill du visa vad du redan kan?'),
+    h('p', { class: 'end-text' }, 'Plus och minus.'),
     h(
       'div',
       { class: 'garden-actions' },
-      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runBrookPlacement(ctx, profile, back) }, 'Gör startkollen', icon('arrow', 'on-primary')),
+      h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void runBrookPlacement(ctx, profile, back) }, 'Ja!', icon('arrow', 'on-primary')),
       h('button', { class: 'soft-button', type: 'button', onclick: () => void decline() }, 'Börja från början'),
     ),
   );
   show(ctx, view);
+  void readShown(ctx, profile, { auto: true });
 }
 
 /**
@@ -112,6 +115,7 @@ export async function runBrookPlacement(ctx: AppContext, profile: Profile, back:
       h('button', { class: 'big-button', type: 'button', autofocus: true, onclick: () => void back() }, 'Till bäcken'),
     ),
   );
+  void readShown(ctx, profile, { auto: true });
 }
 
 /** "noll, ett mer och tio och några" */

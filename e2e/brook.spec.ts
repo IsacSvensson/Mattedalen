@@ -90,7 +90,7 @@ function knowsTheEasyParts(): Record<string, SeedState> {
 test('the first visit offers the start check once; from the beginning, two parts of the bridge are open', async ({ page }) => {
   await createProfile(page, 'Alva');
   await toBrook(page);
-  await expect(page.getByRole('heading', { name: 'Kan du redan lite plus och minus?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toBeVisible();
   await page.getByRole('button', { name: 'Börja från början' }).click();
 
   await expect(page.getByRole('heading', { name: 'Alvas bäck' })).toBeVisible();
@@ -112,7 +112,7 @@ test('the first visit offers the start check once; from the beginning, two parts
 test('the start check lays what the child already knows into the bridge', async ({ page }) => {
   await createProfile(page, 'Bo');
   await toBrook(page);
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   // Free answers, no marks and no clock; every answer right.
   const done = page.getByRole('button', { name: 'Till bäcken' });
   for (let i = 0; i < 80 && !(await done.isVisible()); i++) {
@@ -152,9 +152,16 @@ test('a session: a new stone hops to its landing points, then a question, and he
   await answerBrook(page);
   await expect(page.locator('.prompt-card.is-right')).toBeVisible();
 
-  // A wrong answer: what the child said, the right answer and the stones, never "fel".
+  // A wrong answer: what the child said, the right answer and the stones, never "fel". What the
+  // child said stands once: in "Du svarade …", or first in the word about it (docs/PLAN-ENKLARE.md, E3).
   await answerBrook(page, false);
-  await expect(page.locator('.help-card .you-said')).toContainText('Du svarade');
+  const said = page.locator('.help-card .you-said');
+  const note = page.locator('.help-card .confusion-note');
+  await expect(said.or(note).first()).toBeVisible();
+  if (await note.isVisible()) {
+    const given = /^(\d+) /.exec((await note.textContent()) ?? '')?.[1];
+    await expect(said).toHaveCount(given ? 0 : 1);
+  } else await expect(said).toContainText('Du svarade');
   await expect(page.locator('.help-card .help-answer')).toHaveText(/^\d+ [+−] \d+ = \d+$|=/);
   await expect(page.locator('.help-card .number-line')).toBeVisible();
   await expect(page.getByText(/^fel$/i)).toHaveCount(0);
@@ -278,7 +285,7 @@ async function expectNoSidewaysScroll(page: Page): Promise<void> {
 test('the number pad at the brook takes two digits: no answer here is larger than 20 (docs/PLAN-MINUSTECKNET.md)', async ({ page }) => {
   await createProfile(page, 'Bo');
   await toBrook(page);
-  await page.getByRole('button', { name: 'Gör startkollen' }).click();
+  await page.getByRole('button', { name: 'Ja!' }).click();
   for (const d of '695') await page.locator('.numpad-key', { hasText: new RegExp(`^${d}$`) }).click();
   await expect(page.locator('.numpad-display')).toHaveText('69');
 });

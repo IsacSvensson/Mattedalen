@@ -11,13 +11,13 @@ export async function createProfile(page: Page, name: string, start: 'garden' | 
   await page.getByRole('textbox', { name: 'Namn' }).fill(name);
   await page.getByRole('button', { name: 'Välj sköldpadda' }).click();
   await page.getByRole('button', { name: 'Klar' }).click();
-  await expect(page.getByRole('heading', { name: 'Kan du redan lite plus och minus?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toBeVisible();
   if (start === 'brook') return;
   await openGarden(page, name);
   await page.locator('.profile-tile', { hasText: name }).click();
   await page.getByRole('button', { name: /^Trädgården\./ }).click();
   // The garden's own start check is offered the first time (`'garden-check'` stops there); most tests start from scratch.
-  await expect(page.getByRole('heading', { name: 'Kan du redan lite gånger?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toBeVisible();
   if (start === 'garden-check') return;
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: new RegExp(`${name}s? trädgård`) })).toBeVisible();
@@ -382,3 +382,39 @@ export async function parentBack(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Tillbaka' }).click();
   await expect(page.getByRole('heading', { name: 'För vuxna' })).toBeVisible();
 }
+
+/** A Swedish voice on the device, as a stand-in: what is said is kept in `window.spoken`. */
+export async function fakeSwedishVoice(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    (window as unknown as { spoken: string[] }).spoken = spoken;
+    class FakeUtterance {
+      lang = '';
+      rate = 1;
+      voice: unknown = null;
+      onstart: (() => void) | null = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(public text: string) {}
+    }
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: FakeUtterance });
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: {
+        getVoices: () => [{ lang: 'sv-SE', name: 'Alva', localService: true }],
+        speak: (u: FakeUtterance) => {
+          spoken.push(u.text);
+          setTimeout(() => {
+            u.onstart?.();
+            u.onend?.();
+          }, 10);
+        },
+        cancel: () => undefined,
+        resume: () => undefined,
+        addEventListener: () => undefined,
+      },
+    });
+  });
+}
+
+/** Everything read aloud so far (with `fakeSwedishVoice`). */
+export const spoken = (page: Page) => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken.join(' | '));

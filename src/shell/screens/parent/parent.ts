@@ -18,6 +18,8 @@ import type { ParentTodo, Place, PlaceSummary } from '../../place';
 import { showImport } from './importPage';
 import { showChildSettings } from './settings';
 import { setWhere } from '../../resume';
+import { readsSelfKey } from '../../components/readAloud';
+import { speechSupported, swedishVoiceLoaded } from '../../speech';
 
 /**
  * "För vuxna" (docs/PLAN-FORALDRAVYN.md): a short overview with the children,
@@ -160,6 +162,17 @@ async function todoSection(ctx: AppContext, profile: Profile | undefined): Promi
       place: null,
       todo: { text: 'Hur går det med Mattedalen? Berätta gärna. Appen spårar ingenting, så det du berättar är det enda vi får veta.', action: { label: 'Svara', run: async () => void (await askNow(ctx)) } },
     });
+  // Read-aloud for a child from before the grown-ups' first start, once (docs/PLAN-ENKLARE.md, E3). Only
+  // voices already loaded: waiting for them would hold up the page (a later visit has them).
+  if (profile && !profile.settings.readAloud && speechSupported() && swedishVoiceLoaded() && !(await ctx.store.getSetting<boolean>(readsSelfKey(profile.id))))
+    items.push({
+      place: null,
+      todo: {
+        text: `Läser ${profile.name} själv? Appen kan läsa upp frågorna med en svensk röst på enheten.`,
+        action: { label: 'Slå på uppläsning', run: () => profileSaver(ctx, profile, again)({ settings: { readAloud: true } }) },
+        also: { label: `${profile.name} läser själv`, run: () => ctx.store.setSetting(readsSelfKey(profile.id), true) },
+      },
+    });
   const slow = slowFacts(speeds);
   if (profile && !profile.settings.moreTime && slow >= SLOW_FACTS)
     items.push({
@@ -195,26 +208,18 @@ async function todoSection(ctx: AppContext, profile: Profile | undefined): Promi
       { class: 'todo-list' },
       items.map(({ place, todo }) => {
         const action = todo.action;
+        const answer = (run: () => Promise<void>) => async (e: Event) => {
+          (e.currentTarget as HTMLButtonElement).disabled = true;
+          await run();
+          // Done: it goes from the list. A page of its own has been shown instead.
+          if (document.querySelector('.parent-overview')) await again();
+        };
         return h(
           'li',
           null,
           h('p', null, place ? h('strong', null, `${place}: `) : null, todo.text),
-          action
-            ? h(
-                'button',
-                {
-                  class: 'soft-button',
-                  type: 'button',
-                  onclick: async (e: Event) => {
-                    (e.currentTarget as HTMLButtonElement).disabled = true;
-                    await action.run();
-                    // Done: it goes from the list. A page of its own has been shown instead.
-                    if (document.querySelector('.parent-overview')) await again();
-                  },
-                },
-                action.label,
-              )
-            : null,
+          action ? h('button', { class: 'soft-button', type: 'button', onclick: answer(action.run) }, action.label) : null,
+          todo.also ? h('button', { class: 'link-button', type: 'button', onclick: answer(todo.also.run) }, todo.also.label) : null,
         );
       }),
     ),
