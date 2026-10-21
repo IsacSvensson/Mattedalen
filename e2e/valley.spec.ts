@@ -231,6 +231,24 @@ test.describe('the map on a phone', () => {
     expect(bad).toEqual([]);
   });
 
+  test('a little less height (the browser\'s bar, a bar in the app) leaves the map where the child put it', async ({ page }) => {
+    await page.goto('/');
+    await createProfile(page, 'Alva');
+    await page.getByRole('button', { name: 'Till dalen' }).click();
+    const view = page.locator('.map-view');
+    await view.evaluate((el) => {
+      el.dispatchEvent(new PointerEvent('pointerdown'));
+      el.scrollTo(130, 200);
+    });
+    await expect.poll(() => view.evaluate((el) => [el.scrollLeft, el.scrollTop])).toEqual([130, 200]);
+    // The scroll is seen by the map, as a drag would be, before the screen changes.
+    await view.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    const size = page.viewportSize()!;
+    await page.setViewportSize({ width: size.width, height: size.height - 56 });
+    await page.waitForTimeout(300);
+    expect(await view.evaluate((el) => [el.scrollLeft, el.scrollTop])).toEqual([130, 200]);
+  });
+
   test('a turned phone stays at the same place', async ({ page }) => {
     await page.goto('/');
     await createProfile(page, 'Alva');

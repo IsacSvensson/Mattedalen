@@ -61,7 +61,7 @@ export function valleyMap(
     const sign = h(
       'button',
       {
-        class: `place-name map-sign${p.id === opts.nudge ? ' nudge' : ''}`,
+        class: 'place-name map-sign',
         id: `map-${p.id}`,
         type: 'button',
         'aria-label': `${p.name}. ${sc.moodText}`,
@@ -73,7 +73,9 @@ export function valleyMap(
       p.name,
     );
     const art = h('div', { class: 'map-art', 'aria-hidden': 'true', onclick: go(p) }, sc.art);
-    const signRow = h('div', { class: 'map-sign-row' }, p.id === opts.start ? h('span', { class: 'map-guide', 'aria-hidden': 'true' }, opts.guide) : null, sign);
+    // Today's sign sways in a wrapper of its own: turning the sign itself would draw its posts on top of it.
+    const sway = h('span', { class: `map-sway${p.id === opts.nudge ? ' nudge' : ''}` }, sign);
+    const signRow = h('div', { class: 'map-sign-row' }, p.id === opts.start ? h('span', { class: 'map-guide', 'aria-hidden': 'true' }, opts.guide) : null, sway);
     const notes = h('div', { class: 'map-notes' }, h('p', { class: 'place-status map-pill' }, sc.moodIcon, h('span', null, sc.moodText)), sc.line);
     place(art, spot.art.x, spot.art.y);
     if (spot.art.w) art.style.width = `${spot.art.w}px`;
@@ -139,8 +141,11 @@ export function valleyMap(
   };
   // While the map moves by itself (to a place, or after a resize), the place it passes is not where the child is.
   let byItself = false;
+  // Where the child last dragged the map to (its top left in the valley), until the map goes to a place by itself.
+  let dragTo: { x: number; y: number } | null = null;
   const show = (id: string, smooth: boolean) => {
     at = id;
+    dragTo = null;
     if (fits) return;
     byItself = true;
     view.scrollTo({ ...viewFor(id), behavior: smooth && !prefersReducedMotion() ? 'smooth' : 'auto' });
@@ -226,6 +231,7 @@ export function valleyMap(
     glideTo(1, { x: b.x + b.w / 2, y: b.y + b.h / 2 }, () => show(at, true));
   }
 
+  let laidOnce = false;
   function layout() {
     const vw = view.clientWidth;
     const vh = view.clientHeight;
@@ -239,7 +245,15 @@ export function valleyMap(
     const tallest = Math.max(MAP_H, vh / least);
     if (tallest !== landH) drawLand(land, (landH = tallest));
     render(fits ? least : wasOut ? least : clamp(scale, least, 1));
-    show(at, false);
+    // Laid out again (the browser's bar came or went, a bar in the app, a turned
+    // phone): where the child dragged the map, it stays; where the map went to a
+    // place by itself, it goes there again.
+    if (!laidOnce || fits || !dragTo) show(at, false);
+    else {
+      view.scrollLeft = (offset() + dragTo.x) * scale;
+      view.scrollTop = (offsetY() + dragTo.y) * scale;
+    }
+    laidOnce = true;
     updatePointers();
   }
 
@@ -297,7 +311,7 @@ export function valleyMap(
   let hand: HTMLElement | null = null;
   let moved = false;
   const calm = () => {
-    el.querySelector('.map-sign.nudge')?.classList.remove('nudge');
+    el.querySelector('.map-sway.nudge')?.classList.remove('nudge');
     hand?.remove();
     hand = null;
   };
@@ -305,6 +319,8 @@ export function valleyMap(
 
   let frame = 0;
   const onScroll = () => {
+    // At once, not in the next frame: a new layout in this frame keeps it.
+    if (!byItself) dragTo = { x: view.scrollLeft / scale - offset(), y: view.scrollTop / scale - offsetY() };
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => {
       updatePointers();

@@ -70,22 +70,24 @@ test('without a voice: no row about reading aloud, and no speakers', async ({ pa
   await expect(todoRow(page)).toHaveCount(0);
 });
 
-test("today's sign sways until the child touches the map", async ({ page }) => {
+test("today's sign sways until the child touches the map, and its posts stay behind it", async ({ page }) => {
   await toValley(page);
-  const sign = page.locator('.map-sign.nudge');
-  await expect(sign).toHaveCount(1);
-  await expect(sign).toHaveText(/Bäcken/);
+  const sway = page.locator('.map-sway.nudge');
+  await expect(sway).toHaveCount(1);
+  await expect(sway).toHaveText(/Bäcken/);
+  // The wrapper turns, never the sign: a transform on the sign would draw its posts on top of it.
+  expect(await sway.locator('.map-sign').evaluate((e) => getComputedStyle(e).transform)).toBe('none');
   await page.locator('.map-view').dispatchEvent('pointerdown');
-  await expect(page.locator('.map-sign.nudge')).toHaveCount(0);
+  await expect(page.locator('.map-sway.nudge')).toHaveCount(0);
 });
 
 test('with reduced motion the sign does not sway but has a yellow edge', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await toValley(page);
-  const sign = page.locator('.map-sign.nudge');
-  await expect(sign).toHaveCount(1);
-  expect(await sign.evaluate((e) => getComputedStyle(e).animationName)).toBe('none');
-  expect(await sign.evaluate((e) => getComputedStyle(e).outlineStyle)).toBe('solid');
+  const sway = page.locator('.map-sway.nudge');
+  await expect(sway).toHaveCount(1);
+  expect(await sway.evaluate((e) => getComputedStyle(e).animationName)).toBe('none');
+  expect(await sway.locator('.map-sign').evaluate((e) => getComputedStyle(e).outlineStyle)).toBe('solid');
 });
 
 test.describe('the hand on the map', () => {

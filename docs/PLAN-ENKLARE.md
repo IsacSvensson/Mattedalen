@@ -435,7 +435,13 @@ och en tankebubbla.*
 - **Handen** visas bara när kartan är större än skärmen. På surfplattan i testerna
   syns hela dalen, och där kommer ingen hand.
 - **Skylten** gungar vid den plats som står först i ”I dag”, med en kort gungning
-  ungefär var tredje sekund.
+  ungefär var tredje sekund. Efter släppet syntes skyltens ben ovanpå skylten:
+  när skylten själv vreds ritades benen i fel lager. Nu gungar en ram runt
+  skylten, och ett test kräver att skylten själv aldrig vrids.
+- **Kartan hoppade** till närmaste plats när den ritades om, till exempel när
+  webbläsarens adressfält kom och gick. Nu står den kvar där barnet senast drog
+  den. Har kartan själv gått till en plats, går den dit igen, som när telefonen
+  vrids. Ett test visar att lite lägre höjd inte flyttar kartan.
 - **Raden i ”Att göra”** väntar inte på enhetens röster. Den ser bara de röster
   som redan är laddade, och annars kommer den nästa gång ”För vuxna” öppnas. En
   första version väntade en stund på rösterna; då hann sidan ritas om ovanpå

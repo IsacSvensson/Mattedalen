@@ -1392,8 +1392,16 @@ h1:focus {
   filter: saturate(0.75) brightness(0.92);
 }
 
-/* Today's place: its sign sways a little, until the child taps or moves the map (docs/PLAN-ENKLARE.md, E3). */
-.map-sign.nudge {
+/*
+ * Today's place: its sign sways a little, until the child taps or moves the map
+ * (docs/PLAN-ENKLARE.md, E3). The wrapper turns, not the sign: a transform on the
+ * sign would draw its posts on top of it.
+ */
+.map-sway {
+  display: inline-block;
+}
+
+.map-sway.nudge {
   animation: sign-sway 2.8s ease-in-out infinite;
   transform-origin: 50% 100%;
 }
@@ -1454,8 +1462,11 @@ h1:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .map-sign.nudge {
+  .map-sway.nudge {
     animation: none;
+  }
+
+  .map-sway.nudge .map-sign {
     outline: 4px solid var(--sun);
     outline-offset: 3px;
   }
