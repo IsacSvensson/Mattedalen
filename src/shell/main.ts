@@ -33,8 +33,9 @@ async function start(): Promise<void> {
   const { store, kind } = await createProgressStore();
   // A device without children shows no old news, also when children come from Gångerträdgården below.
   const newDevice = (await store.listProfiles()).length === 0;
-  // Children who played Gångerträdgården on this device come along on the first start.
-  if (kind === 'indexeddb') await importLegacyData(store);
+  // Children who played Gångerträdgården on this device come along on the first start,
+  // to the real app only: the test version starts without children (docs/PLAN-TESTVERSION.md).
+  if (kind === 'indexeddb' && !STAGING) await importLegacyData(store);
   const persist = await requestPersistence();
   const ctx: AppContext = {
     root,

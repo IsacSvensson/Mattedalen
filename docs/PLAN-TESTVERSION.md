@@ -89,7 +89,14 @@ spelar?”. Inget sticker ut åt sidan.*
   den vanliga appens offlinedel. När testversionens egen tog över trodde appen
   att det var en uppdatering och laddade om sidan, mitt i när barnet skrev sitt
   namn. Nu räknar appen bara sin egen offlinedel.
+- **Barnen från Gångerträdgården** följde först med till testversionen. Appen
+  hämtar dem vid första starten, och testversionen gjorde likadant i sin egen
+  databas. Det såg ut som samma databas, men var en kopia av Gångerträdgårdens
+  gamla data. Nu hämtar bara den vanliga appen dem, och testversionen börjar utan
+  barn. Barn som redan kopierats till testversionen tas bort där, under barnets
+  inställningar. Det påverkar inte den vanliga appen.
 - **E2e** (`e2e/staging.spec.ts`): testversionen syns och heter rätt, barnen hålls
   isär i båda riktningarna, den vanliga appens offlinedel lämnar `/test/` i fred,
-  båda har sina egna sparade filer, och båda fungerar utan nät. Testservern
+  båda har sina egna sparade filer, båda fungerar utan nät, och barnen från
+  Gångerträdgården följer bara med till den vanliga appen. Testservern
   serverar båda, som på GitHub Pages.

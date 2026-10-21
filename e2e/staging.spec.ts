@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createProfile } from './helpers';
+import { seedGangertradgarden } from './legacyData';
 
 /** The test version in /test/, on the same origin as the real app (docs/PLAN-TESTVERSION.md). */
 
@@ -53,3 +54,15 @@ test("the real app's worker leaves the test version alone, and each keeps its ow
   await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
   await page.context().setOffline(false);
 });
+
+test('children from Gångerträdgården come along to the real app only, never to the test version', async ({ page }) => {
+  // A page on the same origin that does not start the app.
+  await page.goto('/manifest.webmanifest');
+  await seedGangertradgarden(page);
+  await page.goto('/test/');
+  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(page.getByText('Alva')).toHaveCount(0);
+  await page.goto('/');
+  await expect(page.locator('.profile-tile:not(.add)')).toHaveText(['Alva']);
+});
+
