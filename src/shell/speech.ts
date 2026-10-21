@@ -39,9 +39,13 @@ export async function hasSwedishVoice(): Promise<boolean> {
   return swedishVoice() !== undefined;
 }
 
-/** "3 × 7 = ?" → "3 gånger 7", as a child would say it. */
+/**
+ * "3 × 7 = ?" → "3 gånger 7", as a child would say it. A colon before the
+ * answer ("talet efter 2: 3") is a pause: a voice reads "2: 3" as "2 till 3".
+ */
 export function spokenText(text: string): string {
   return text
+    .replace(/:\s+/g, '. ')
     .replace(/×/g, ' gånger ')
     .replace(/÷/g, ' delat med ')
     .replace(/−/g, ' minus ')

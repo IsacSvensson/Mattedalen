@@ -21,6 +21,8 @@ describe('read-aloud text', () => {
     expect(spokenText('3 × 7 = 21')).toBe('3 gånger 7 är 21');
     expect(spokenText('9 × 6 = 10 × 6 − 6')).toBe('9 gånger 6 är 10 gånger 6 minus 6');
     expect(spokenText('13 − 5 = __')).toBe('13 minus 5 är hur mycket');
+    // A colon before the answer is a pause, not "2 till 3".
+    expect(spokenText('2 + 1 är talet efter 2: 3.')).toBe('2 plus 1 är talet efter 2. 3.');
     expect(spokenText('5 + __ = 13')).toBe('5 plus hur mycket är 13');
   });
 });
