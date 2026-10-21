@@ -9,6 +9,7 @@ import { h } from '../../dom';
 import { formatDay, minutesPerDay, slowFacts, weekdayShort } from '../../stats';
 import { showProfiles } from '../profiles';
 import { showDevice } from './device';
+import { showAbout } from './about';
 import { showFeedback } from './feedback';
 import { showNews } from './news';
 import { askIsDue, askNow } from '../../ask';
@@ -62,6 +63,7 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
         pageRow({ icon: icon('lock'), title: 'Den här enheten', text: 'Lagring, version, hemskärmen, integritet och vuxenkod', onclick: () => void showDevice(ctx, selected?.id) }),
         pageRow({ icon: icon('refresh'), title: 'Nytt i appen', text: 'Det som har ändrats, det senaste först', onclick: () => showNews(ctx, selected?.id) }),
         pageRow({ icon: icon('mail'), title: 'Tyck till', text: 'Mejla oss, eller hjälp till på GitHub', onclick: () => showFeedback(ctx, selected?.id) }),
+        pageRow({ icon: icon('grownup'), title: 'Så fungerar Mattedalen', text: 'Vad appen tränar, hur länge och var det sparas', onclick: () => showAbout(ctx, selected?.id) }),
       ),
     ),
   );

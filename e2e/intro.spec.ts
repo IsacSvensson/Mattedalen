@@ -1,96 +1,205 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answer, createProfile, enterGarden, GROUPS_KNOWN, nextStep, seedStates, untilIntro } from './helpers';
+import { introHeading, openParent, parentLink } from './helpers';
 
-test.beforeEach(async ({ page }) => {
-  await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
-  await page.goto('/');
-  // A child who has done "Lika stora grupper": the tables start with ×2.
-  await createProfile(page, 'Alva', 'garden-times');
-});
+/** The grown-ups' first start on a device without children (docs/PLAN-ENKLARE.md, E2). */
 
-/** Drags on the 10 × 10 board from the top-left dot to the dot at (rows, cols). */
-async function drag(page: Page, rows: number, cols: number) {
-  const board = page.locator('.builder-board');
-  const box = (await board.boundingBox())!;
-  const at = (r: number, c: number) => ({ x: box.x + ((3 + 5 + (c - 1) * 10) / 106) * box.width, y: box.y + ((3 + 5 + (r - 1) * 10) / 106) * box.height });
-  const start = at(1, 1);
-  const end = at(rows, cols);
-  await page.mouse.move(start.x, start.y);
-  await page.mouse.down();
-  await page.mouse.move((start.x + end.x) / 2, (start.y + end.y) / 2, { steps: 4 });
-  await page.mouse.move(end.x, end.y, { steps: 4 });
-  await page.mouse.up();
+const skip = (page: Page) => page.getByRole('button', { name: 'Hoppa över' });
+const childScreen = (page: Page) => page.getByRole('heading', { name: 'Vad heter du?' });
+
+async function readDb(page: Page): Promise<{ profiles: { name: string; avatar: string; settings: Record<string, unknown> }[]; settings: Record<string, unknown> }> {
+  return page.evaluate(async () => {
+    const db: IDBDatabase = await new Promise((r) => {
+      const q = indexedDB.open('mattedalen');
+      q.onsuccess = () => r(q.result);
+    });
+    const all = <T>(store: string): Promise<T[]> =>
+      new Promise((r) => {
+        const q = db.transaction(store).objectStore(store).getAll();
+        q.onsuccess = () => r(q.result as T[]);
+      });
+    const keys: string[] = await new Promise((r) => {
+      const q = db.transaction('settings').objectStore('settings').getAllKeys();
+      q.onsuccess = () => r(q.result as string[]);
+    });
+    const values = await all<unknown>('settings');
+    const profiles = await all<{ name: string; avatar: string; settings: Record<string, unknown> }>('profiles');
+    db.close();
+    return { profiles, settings: Object.fromEntries(keys.map((k, i) => [k, values[i]])) };
+  });
 }
 
-test('a new fact is built by dragging out its rectangle', async ({ page }) => {
-  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
-  await untilIntro(page);
-  const prompt = await page.locator('.intro-card .prompt').textContent();
-  const [a, b] = prompt!.match(/\d+/g)!.map(Number) as [number, number];
-  await expect(page.getByText(`Dra ut ${a} ${a === 1 ? 'rad' : 'rader'} med ${b} i varje`)).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Nu du!' })).toBeHidden();
+/** From the welcome to the questions about the child, choosing the code 2580. */
+async function toChildStep(page: Page): Promise<void> {
+  await page.goto('/');
+  await expect(introHeading(page)).toBeVisible();
+  await page.getByRole('button', { name: 'Kom igång' }).click();
+  await expect(page.getByRole('heading', { name: 'Lägg till appen på hemskärmen' })).toBeVisible();
+  await page.getByRole('button', { name: 'Fortsätt här' }).click();
+  await expect(page.getByRole('heading', { name: 'Välj en vuxenkod' })).toBeVisible();
+  await page.keyboard.type('2580');
+  await expect(page.getByRole('heading', { name: 'Skriv koden igen' })).toBeVisible();
+  await page.keyboard.type('2580');
+  await expect(page.getByRole('heading', { name: 'Om barnet' })).toBeVisible();
+}
 
-  // A wrong rectangle gives a hint and nothing else.
-  await drag(page, 2, 2);
-  await expect(page.locator('.builder-size')).toHaveText('2 × 2');
-  await expect(page.getByText('Vi söker', { exact: false })).toBeVisible();
+test('a new device: what the app is, the home screen, the code and the child, then the child chooses an animal and the start check begins', async ({ page }) => {
+  await page.goto('/');
+  await expect(introHeading(page)).toBeVisible();
+  await expect(page.locator('.about-facts li')).toHaveCount(4);
+  await expect(page.locator('.about-facts')).toContainText('Inget skickas, och inget spåras.');
+  await expect(page.getByRole('img', { name: 'Steg 1 av 4' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Hämta det här/ })).toBeVisible();
 
-  // The mirrored rectangle can be turned around.
-  await drag(page, b, a);
-  if (a !== b) {
-    await expect(page.getByText('Nästan!', { exact: false })).toBeVisible();
-    await page.getByRole('button', { name: 'Vrid' }).click();
-  }
-  await expect(page.getByText(`Där är ${a} × ${b}!`)).toBeVisible();
-  await expect(page.locator('.intro-card .array-view')).toBeVisible();
-  await page.getByRole('button', { name: 'Nu du!' }).click();
-  await expect(page.locator('.choice')).toHaveCount(4);
+  await toChildStep(page);
+  await expect(page.getByRole('img', { name: 'Steg 4 av 4' })).toBeVisible();
+  const handOver = page.getByRole('button', { name: /^Lämna över/ });
+  await expect(handOver).toBeDisabled();
+  await page.getByRole('textbox', { name: 'Namn' }).fill('Bosse');
+  await expect(handOver).toHaveText('Lämna över till Bosse');
+  // Not before the question about the start check is answered.
+  await expect(handOver).toBeDisabled();
+  await page.getByRole('button', { name: 'Ja eller kanske' }).click();
+  await page.getByRole('combobox', { name: 'Tid per dag' }).selectOption('15');
+  await handOver.click();
+
+  // The child's turn: an animal, and the start check right away, without the question.
+  await expect(page.getByRole('heading', { name: 'Hej Bosse!' })).toBeVisible();
+  await page.getByRole('button', { name: 'Välj groda' }).click();
+  await page.getByRole('button', { name: 'Klar' }).click();
+  await expect(page.locator('.placement-run')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Kan du redan lite plus och minus?' })).toHaveCount(0);
+
+  const db = await readDb(page);
+  expect(db.profiles).toHaveLength(1);
+  expect(db.profiles[0]).toMatchObject({ name: 'Bosse', avatar: '🐸', settings: { sessionMinutes: 15, readAloud: false } });
+  expect(db.settings).toMatchObject({ grownUpIntro: 'done', parentPin: '2580' });
 });
 
-test('a fact whose twin is known starts from the twin and is turned around', async ({ page }) => {
-  await seedStates(page, { ...GROUPS_KNOWN, '1x2': { status: 'fluent', box: 2, dueDay: '2026-02-09' } }, { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
-  await enterGarden(page, 'Alva');
-  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
-  // Warm-up first, then the twin 2 × 1 is the preferred new fact.
-  for (let i = 0; i < 6; i++) {
-    await expect(nextStep(page)).toBeVisible();
-    if (await page.locator('.intro-card').isVisible()) break;
-    await answer(page);
-  }
-  await expect(page.locator('.intro-card .prompt')).toHaveText('2 × 1');
-  await expect(page.getByText('Du kan redan 1 × 2. Vrid den!')).toBeVisible();
-  await page.getByRole('button', { name: 'Vrid' }).click();
-  await expect(page.getByText('2 × 1 är lika mycket som 1 × 2', { exact: false })).toBeVisible();
+test('"Nej" about plus and minus: the brook from the beginning, without asking the child', async ({ page }) => {
+  await toChildStep(page);
+  await page.getByRole('textbox', { name: 'Namn' }).fill('Bosse');
+  await page.getByRole('button', { name: 'Nej' }).click();
+  await page.getByRole('button', { name: 'Lämna över till Bosse' }).click();
+  await page.getByRole('button', { name: 'Klar' }).click();
+  await expect(page.getByRole('heading', { name: 'Bosses bäck' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Hoppa på stenarna' })).toBeVisible();
 });
 
-test('fluent facts are answered freely on a number pad', async ({ page }) => {
-  const fluent: Record<string, { status: string; box: number }> = {};
-  for (let n = 1; n <= 10; n++) {
-    fluent[`10x${n}`] = { status: 'fluent', box: 2 };
-    fluent[`${n}x10`] = { status: 'fluent', box: 2 };
-  }
-  await seedStates(page, fluent);
-  await enterGarden(page, 'Alva');
-  await page.getByRole('button', { name: 'Vattna trädgården' }).click();
-  await expect(page.locator('.numpad')).toBeVisible();
-  const text = (await page.locator('.question .prompt').textContent())!;
-  const [a, b] = text.match(/\d+/g)!.map(Number) as [number, number];
-
-  // Typing, erasing and the keyboard all work.
-  await page.keyboard.type('9');
-  await page.getByRole('button', { name: 'Sudda' }).click();
-  await expect(page.getByRole('button', { name: 'Svara' })).toBeDisabled();
-  await page.keyboard.type(String(a * b + 1));
-  await page.keyboard.press('Enter');
-  await expect(page.locator('.help-answer')).toHaveText(`${a} × ${b} = ${a * b}`);
-  await expect(page.locator('.numpad-display.wrong')).toBeHidden(); // replaced by the help card
-  await page.getByRole('button', { name: 'Fortsätt' }).click();
-
-  await answer(page);
-  await expect(page.locator('.numpad-display.correct')).toBeVisible();
+test('"Hoppa över" on every step leads to the child\'s own screen, and the first start does not come back', async ({ page }) => {
+  // On the welcome.
+  await page.goto('/');
+  await skip(page).click();
+  await expect(childScreen(page)).toBeVisible();
+  await expect(page.getByText('Välkommen till Mattedalen!')).toBeVisible();
+  await page.reload();
+  await expect(childScreen(page)).toBeVisible();
+  await expect(introHeading(page)).toHaveCount(0);
 });
 
-test('the whole table is in the garden', async ({ page }) => {
-  await expect(page.locator('.grid-cell.stage-locked')).toHaveCount(81);
-  await expect(page.locator('.grid-cell.stage-soil')).toHaveCount(19);
+for (const step of ['home', 'pin', 'child'] as const) {
+  test(`"Hoppa över" on the step "${step}"`, async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Kom igång' }).click();
+    if (step !== 'home') await page.getByRole('button', { name: 'Fortsätt här' }).click();
+    if (step === 'child') await page.getByRole('button', { name: 'Senare' }).click();
+    await skip(page).click();
+    await expect(childScreen(page)).toBeVisible();
+    expect((await readDb(page)).settings).toMatchObject({ grownUpIntro: 'skipped' });
+  });
+}
+
+test('"Senare" leaves the code for later: it is chosen the first time "För vuxna" opens, as before', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Kom igång' }).click();
+  await page.getByRole('button', { name: 'Fortsätt här' }).click();
+  await page.getByRole('button', { name: 'Senare' }).click();
+  await page.getByRole('textbox', { name: 'Namn' }).fill('Bosse');
+  await page.getByRole('button', { name: 'Nej' }).click();
+  await page.getByRole('button', { name: 'Lämna över till Bosse' }).click();
+  await page.getByRole('button', { name: 'Klar' }).click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await page.getByRole('button', { name: 'För vuxna' }).click();
+  await expect(page.getByRole('heading', { name: 'Välj en vuxenkod' })).toBeVisible();
+});
+
+test('no home-screen step when the app is already on the home screen', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = window.matchMedia.bind(window);
+    window.matchMedia = (q: string) => (q.includes('display-mode: standalone') ? ({ matches: true, media: q, addEventListener() {}, removeEventListener() {} } as unknown as MediaQueryList) : original(q));
+  });
+  await page.goto('/');
+  await expect(page.getByRole('img', { name: 'Steg 1 av 3' })).toBeVisible();
+  await page.getByRole('button', { name: 'Kom igång' }).click();
+  await expect(page.getByRole('heading', { name: 'Välj en vuxenkod' })).toBeVisible();
+});
+
+test.describe('on an iPhone', () => {
+  test.use({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' });
+  test('the home screen first, and why', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Kom igång' }).click();
+    await expect(page.getByText(/På iPhone och iPad har den egen lagring/)).toBeVisible();
+  });
+});
+
+test('with a Swedish voice on the device: "Läser barnet själv?", and "Inte än" turns reading aloud on', async ({ page }) => {
+  await page.addInitScript(() => {
+    class FakeUtterance {
+      lang = '';
+      rate = 1;
+      voice: unknown = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(public text: string) {}
+    }
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: FakeUtterance });
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: {
+        getVoices: () => [{ lang: 'sv-SE', name: 'Alva', localService: true }],
+        speak: (u: FakeUtterance) => setTimeout(() => u.onend?.(), 10),
+        cancel: () => undefined,
+        addEventListener: () => undefined,
+      },
+    });
+  });
+  await toChildStep(page);
+  await page.getByRole('textbox', { name: 'Namn' }).fill('Bosse');
+  await page.getByRole('button', { name: 'Nej' }).click();
+  const handOver = page.getByRole('button', { name: 'Lämna över till Bosse' });
+  await expect(handOver).toBeDisabled();
+  await page.getByRole('group', { name: 'Läser barnet själv?' }).getByRole('button', { name: 'Inte än' }).click();
+  await handOver.click();
+  await page.getByRole('button', { name: 'Klar' }).click();
+  await expect(page.getByRole('heading', { name: 'Bosses bäck' })).toBeVisible();
+  expect((await readDb(page)).profiles[0]?.settings).toMatchObject({ readAloud: true });
+});
+
+test('without a voice the question is not asked, and the page says why', async ({ page }) => {
+  await toChildStep(page);
+  await expect(page.getByRole('group', { name: 'Läser barnet själv?' })).toHaveCount(0);
+  await expect(page.getByText(/Den här enheten har ingen svensk röst/)).toBeVisible();
+});
+
+test('a child from another device: "Hämta det här" on the welcome', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Hämta det här/ }).click();
+  await expect(page.getByRole('heading', { name: 'Välj en vuxenkod' })).toBeVisible();
+  await page.keyboard.type('2580');
+  await expect(page.getByRole('heading', { name: 'Skriv koden igen' })).toBeVisible();
+  await page.keyboard.type('2580');
+  await expect(page.getByRole('heading', { name: 'Hämta ett barn', level: 1 })).toBeVisible();
+});
+
+test('"Så fungerar Mattedalen" in "För vuxna": the same four lines', async ({ page }) => {
+  await toChildStep(page);
+  await page.getByRole('textbox', { name: 'Namn' }).fill('Bosse');
+  await page.getByRole('button', { name: 'Nej' }).click();
+  await page.getByRole('button', { name: 'Lämna över till Bosse' }).click();
+  await page.getByRole('button', { name: 'Klar' }).click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await openParent(page);
+  await parentLink(page, 'Så fungerar Mattedalen');
+  await expect(page.locator('.about-facts li')).toHaveCount(4);
 });

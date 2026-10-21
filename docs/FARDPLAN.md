@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **E2–E4. Enklare att förstå** | Första starten för den vuxna, mindre läsning för barnet och förklaringar vid behov. | [PLAN-ENKLARE](PLAN-ENKLARE.md#e2-första-starten-för-den-vuxna) | E1 klar, plan för E2 skriven |
+| 1 | **E3–E4. Enklare att förstå** | Mindre läsning för barnet och förklaringar vid behov. | [PLAN-ENKLARE](PLAN-ENKLARE.md) | E1 och E2 klara, E3 planeras |
 | 2 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
 | 3 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
@@ -70,3 +70,4 @@ Avstämningen mot Lgr22 är gjord mot Skolverkets PDF av kursplanen
 | F (F1–F3) | För vuxna: en kort översikt med Att göra och en rad per plats, och egna sidor för platserna, barnets inställningar, enheten och att hämta ett barn. | [PLAN-FORALDRAVYN](PLAN-FORALDRAVYN.md) |
 | Test | En testversion på `/test/` från main, och den vanliga appen från `release`. Egna barn och egna sparade filer. | [PLAN-TESTVERSION](PLAN-TESTVERSION.md) |
 | E1 | Snabba rättelser: diagrammet visar senaste 7 dagarna, ”I dag” på solen, ”Tid per dag” och enklare ord i inställningarna. | [PLAN-ENKLARE](PLAN-ENKLARE.md#fynd-från-e1) |
+| E2 | Första starten för den vuxna: vad appen är, hemskärmen, vuxenkoden och frågor om barnet, sedan väljer barnet djur. ”Så fungerar Mattedalen” i ”För vuxna”. | [PLAN-ENKLARE](PLAN-ENKLARE.md#fynd-från-e2) |

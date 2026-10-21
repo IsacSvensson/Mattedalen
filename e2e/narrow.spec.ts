@@ -71,7 +71,7 @@ for (const width of [320, 360]) {
       await expectNoSidewaysScroll(page);
       await page.getByRole('button', { name: 'Tillbaka' }).click();
       await parentBack(page);
-      for (const title of ['Den här enheten', 'Hämta ett barn', 'Tyck till', 'Nytt i appen'] as const) {
+      for (const title of ['Den här enheten', 'Hämta ett barn', 'Tyck till', 'Nytt i appen', 'Så fungerar Mattedalen'] as const) {
         await parentLink(page, title);
         await expectNoSidewaysScroll(page);
         await parentBack(page);

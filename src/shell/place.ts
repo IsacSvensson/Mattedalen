@@ -72,6 +72,12 @@ export interface Place {
   open(ctx: AppContext, profile: Profile): Promise<void>;
   /** Starts the day's session there, with the start check or the check first when it is time ("I dag"). */
   start(ctx: AppContext, profile: Profile): Promise<void>;
+  /**
+   * A new child's first visit, when a grown-up has already answered whether to
+   * do the start check (docs/PLAN-ENKLARE.md, E2): the check right away, or from
+   * the beginning, without asking the child. Without it the place opens as usual.
+   */
+  firstStart?(ctx: AppContext, profile: Profile, check: boolean): Promise<void>;
   /** The place's scene in the valley. */
   scene(ctx: AppContext, profile: Profile): Promise<PlaceScene>;
   /**

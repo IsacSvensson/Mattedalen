@@ -13,6 +13,7 @@ import { icon } from '../components/icons';
 import { plantIcon } from '../components/plant';
 import { scene } from '../components/scene';
 import { setWhere } from '../resume';
+import { introDue, showIntro } from './intro';
 
 /** The animals a player can be (stored as emoji, drawn as pictures). */
 export const AVATARS = AVATAR_KEYS;
@@ -20,7 +21,8 @@ export const AVATARS = AVATAR_KEYS;
 export async function showProfiles(ctx: AppContext): Promise<void> {
   setWhere(null);
   const profiles = await ctx.store.listProfiles();
-  if (profiles.length === 0) return showNewProfile(ctx, true);
+  // No children yet: the grown-ups' first start, once (docs/PLAN-ENKLARE.md, E2), then the child's own screen.
+  if (profiles.length === 0) return (await introDue(ctx)) ? showIntro(ctx) : showNewProfile(ctx, true);
 
   const view = h(
     'main',
@@ -83,7 +85,7 @@ async function installBanner(ctx: AppContext): Promise<HTMLElement | null> {
   return banner;
 }
 
-function parentLink(ctx: AppContext, text = 'För vuxna', then?: () => Promise<void>): HTMLElement {
+export function parentLink(ctx: AppContext, text = 'För vuxna', then?: () => Promise<void>): HTMLElement {
   return h('button', { class: 'link-button parent-link', type: 'button', onclick: () => void showPinGate(ctx, then) }, icon('lock'), text);
 }
 
@@ -92,8 +94,56 @@ async function openProfile(ctx: AppContext, profile: Profile): Promise<void> {
   await showValley(ctx, profile);
 }
 
-function showNewProfile(ctx: AppContext, first: boolean): void {
-  let avatar = AVATARS[0] as string;
+/** The animals to choose from, the chosen one marked; `onPick` gets each new choice. */
+export function avatarGrid(initial: string, onPick: (avatar: string) => void): HTMLElement {
+  const buttons = AVATARS.map((a) =>
+    h(
+      'button',
+      {
+        class: `avatar-choice${a === initial ? ' selected' : ''}`,
+        type: 'button',
+        'aria-label': `Välj ${avatarName(a) ?? a}`,
+        'aria-pressed': String(a === initial),
+        dataset: { avatar: a },
+        onclick: () => {
+          onPick(a);
+          for (const b of buttons) {
+            const on = b.dataset.avatar === a;
+            b.classList.toggle('selected', on);
+            b.setAttribute('aria-pressed', String(on));
+          }
+        },
+      },
+      avatarIcon(a),
+    ),
+  );
+  return h('div', { class: 'avatar-grid', role: 'group', 'aria-label': 'Välj djur' }, buttons);
+}
+
+/**
+ * A new child, saved, and off to the first place open to them (the brook: the
+ * garden opens later). The day's plan is made first, as the valley would, so
+ * that place gets the whole day's time and not an even share with a place that
+ * is not open. `check` is a grown-up's answer about the start check, when there
+ * is one; otherwise the place asks the child.
+ */
+export async function startNewChild(ctx: AppContext, profile: Profile, check?: boolean): Promise<void> {
+  await ctx.store.saveProfile(profile);
+  await ctx.store.setSetting('lastProfileId', profile.id);
+  await prepareDayPlan(ctx, profile);
+  for (const place of ctx.places) {
+    if (!(await placeIsOpen(place, ctx, profile))) continue;
+    if (check !== undefined && place.firstStart) return place.firstStart(ctx, profile, check);
+    return place.open(ctx, profile);
+  }
+  await showValley(ctx, profile);
+}
+
+/** A first avatar for a new child: the first one. */
+export const FIRST_AVATAR = AVATARS[0] as string;
+
+export function showNewProfile(ctx: AppContext, first: boolean): void {
+  let avatar = FIRST_AVATAR;
   const input = h('input', {
     class: 'name-input',
     type: 'text',
@@ -106,51 +156,20 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
     oninput: () => update(),
   });
   const done = h('button', { class: 'big-button', type: 'button', disabled: true, onclick: () => void create() }, 'Klar');
-  const avatarButtons = AVATARS.map((a) =>
-    h(
-      'button',
-      {
-        class: `avatar-choice${a === avatar ? ' selected' : ''}`,
-        type: 'button',
-        'aria-label': `Välj ${avatarName(a) ?? a}`,
-        'aria-pressed': String(a === avatar),
-        dataset: { avatar: a },
-        onclick: () => {
-          avatar = a;
-          for (const b of avatarButtons) {
-            const on = b.dataset.avatar === a;
-            b.classList.toggle('selected', on);
-            b.setAttribute('aria-pressed', String(on));
-          }
-        },
-      },
-      avatarIcon(a),
-    ),
-  );
+  const avatars = avatarGrid(avatar, (a) => (avatar = a));
 
   function update() {
     done.disabled = input.value.trim().length === 0;
   }
 
   async function create() {
-    const profile: Profile = {
+    await startNewChild(ctx, {
       id: crypto.randomUUID(),
       name: input.value.trim().slice(0, 20),
       avatar,
       createdAt: Date.now(),
       settings: { ...DEFAULT_SETTINGS },
-    };
-    await ctx.store.saveProfile(profile);
-    await ctx.store.setSetting('lastProfileId', profile.id);
-    // A new child starts at the first place that is open to them (the brook:
-    // the garden opens later), where the place's start check is offered. The
-    // day's plan is made first, as the valley would, so that place gets the
-    // whole day's time and not an even share with a place that is not open.
-    await prepareDayPlan(ctx, profile);
-    for (const place of ctx.places) {
-      if (await placeIsOpen(place, ctx, profile)) return place.open(ctx, profile);
-    }
-    await showValley(ctx, profile);
+    });
   }
 
   const view = h(
@@ -170,7 +189,7 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
         },
       },
       input,
-      h('div', { class: 'avatar-grid', role: 'group', 'aria-label': 'Välj djur' }, avatarButtons),
+      avatars,
       done,
     ),
     first
@@ -181,7 +200,7 @@ function showNewProfile(ctx: AppContext, first: boolean): void {
 }
 
 /** In the test version: its children are its own, apart from the real app's. */
-function stagingNotice(): HTMLElement | null {
+export function stagingNotice(): HTMLElement | null {
   return STAGING ? h('p', { class: 'notice staging-notice' }, 'Testversion. Barnen här är skilda från den vanliga appen.') : null;
 }
 

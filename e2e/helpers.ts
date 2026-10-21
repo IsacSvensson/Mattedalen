@@ -7,6 +7,7 @@ import { expect, type Page } from '@playwright/test';
  * default) opens it, goes there, and starts from scratch.
  */
 export async function createProfile(page: Page, name: string, start: 'garden' | 'garden-times' | 'garden-check' | 'brook' = 'garden'): Promise<void> {
+  await skipIntro(page);
   await page.getByRole('textbox', { name: 'Namn' }).fill(name);
   await page.getByRole('button', { name: 'Välj sköldpadda' }).click();
   await page.getByRole('button', { name: 'Klar' }).click();
@@ -24,6 +25,17 @@ export async function createProfile(page: Page, name: string, start: 'garden' | 
   // As a child who has done "Lika stora grupper": the tables start, with ×2.
   await seedStates(page, GROUPS_KNOWN, { packId: 'multiplication', unlockedUnitIds: ['lika', 'u2'] });
   await enterGarden(page, name);
+}
+
+/** The grown-ups' first start on a device without children (docs/PLAN-ENKLARE.md, E2). */
+export const introHeading = (page: Page) => page.getByRole('heading', { name: 'Hej! Det här är för dig som vuxen.' });
+
+/** Past the grown-ups' first start, when it is there, to the child's own screen as before. */
+export async function skipIntro(page: Page): Promise<void> {
+  const name = page.getByRole('textbox', { name: 'Namn' });
+  await expect(introHeading(page).or(name)).toBeVisible();
+  if (await introHeading(page).isVisible()) await page.getByRole('button', { name: 'Hoppa över' }).click();
+  await expect(name).toBeVisible();
 }
 
 /** Every "Lika stora grupper" task known (docs/PLAN-HUNDRA.md). */
@@ -350,7 +362,7 @@ export async function parentSettings(page: Page): Promise<void> {
 }
 
 /** In "För vuxna": from the overview to "Hämta ett barn", "Den här enheten" or "Tyck till". */
-export async function parentLink(page: Page, title: 'Hämta ett barn' | 'Den här enheten' | 'Tyck till' | 'Nytt i appen'): Promise<void> {
+export async function parentLink(page: Page, title: 'Hämta ett barn' | 'Den här enheten' | 'Tyck till' | 'Nytt i appen' | 'Så fungerar Mattedalen'): Promise<void> {
   await page.getByRole('button', { name: new RegExp(`^${title}`) }).click();
   await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible();
 }

@@ -9,6 +9,7 @@ import { brookDeps, pack } from './pack';
 import { BROOK_ABOUT, brookParentPage, brookParentSummary } from './parent';
 import { archBridge } from './components/bridge';
 import { brookPicture, showBrook, startBrook } from './screens/brook';
+import { offeredKey, runBrookPlacement } from './screens/placement';
 
 /** Bäcken: addition and subtraction within 20 on the stones over the brook, and the equal sign. */
 export const backen: Place = {
@@ -17,6 +18,11 @@ export const backen: Place = {
   pack,
   open: (ctx, profile) => showBrook(ctx, profile),
   start: (ctx, profile) => startBrook(ctx, profile),
+  firstStart: async (ctx, profile, check) => {
+    if (check) return runBrookPlacement(ctx, profile, () => showBrook(ctx, profile));
+    await ctx.store.setSetting(offeredKey(profile), true);
+    return showBrook(ctx, profile);
+  },
   scene: brookScene,
   icon: () => icon('steps'),
   about: BROOK_ABOUT,

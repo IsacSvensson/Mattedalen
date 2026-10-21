@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { answer, createProfile, enterGarden, nextStep, passIntro, solve, switchPlayer, untilIntro } from './helpers';
+import { answer, createProfile, enterGarden, introHeading, nextStep, passIntro, solve, switchPlayer, untilIntro } from './helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('a first daily session: new profile, intro, questions, soft ending', async ({ page }) => {
-  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(introHeading(page)).toBeVisible();
   await createProfile(page, 'Alva');
   await expect(page.locator('.grid-cell')).toHaveCount(100);
   await page.getByRole('button', { name: 'Vattna trädgården' }).click();

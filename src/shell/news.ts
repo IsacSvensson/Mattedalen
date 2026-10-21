@@ -17,6 +17,15 @@ export interface NewsItem {
 
 export const NEWS: readonly NewsItem[] = [
   {
+    id: '2026-10-21-start',
+    day: '2026-10-21',
+    title: 'En start för vuxna',
+    points: [
+      'På en ny enhet börjar appen med en kort start för den vuxna: vad appen tränar, hemskärmen, vuxenkoden och några frågor om barnet. Sedan väljer barnet sitt djur.',
+      '”Så fungerar Mattedalen” finns under ”För vuxna”.',
+    ],
+  },
+  {
     id: '2026-10-20-enklare',
     day: '2026-10-20',
     title: 'Enklare ord för vuxna',

@@ -29,19 +29,31 @@ export async function showPinGate(ctx: AppContext, then: () => Promise<void> = (
   }, true);
 }
 
-export function choosePin(ctx: AppContext, afterSave: () => Promise<void> = () => showParent(ctx)): void {
-  pinScreen(ctx, 'Välj en vuxenkod', 'Fyra siffror som barnen inte känner till.', (first) => {
+/** The grown-ups' first start (docs/PLAN-ENKLARE.md, E2) asks for the code as one of its steps: its own text, where it is, and a way past. */
+export interface PinStep {
+  text: string;
+  head: HTMLElement;
+  later: HTMLElement;
+}
+
+export function choosePin(ctx: AppContext, afterSave: () => Promise<void> = () => showParent(ctx), step?: PinStep): void {
+  pinScreen(ctx, 'Välj en vuxenkod', step?.text ?? 'Fyra siffror som barnen inte känner till.', (first) => {
     pinScreen(ctx, 'Skriv koden igen', 'För att vara säker på att den blev rätt.', async (second, retry) => {
-      if (second !== first) return retry('Koderna var olika. Börja om.', () => choosePin(ctx, afterSave));
+      if (second !== first) return retry('Koderna var olika. Börja om.', () => choosePin(ctx, afterSave, step));
       await ctx.store.setSetting(PIN_KEY, first);
       await afterSave();
-    });
-  });
+    }, false, step);
+  }, false, step);
+}
+
+/** Whether a grown-ups' code is chosen on this device. */
+export async function hasPin(ctx: AppContext): Promise<boolean> {
+  return !!(await ctx.store.getSetting<string>(PIN_KEY));
 }
 
 type Retry = (message: string, then?: () => void) => void;
 
-function pinScreen(ctx: AppContext, title: string, text: string, onPin: (pin: string, retry: Retry) => void | Promise<void>, canReset = false): void {
+function pinScreen(ctx: AppContext, title: string, text: string, onPin: (pin: string, retry: Retry) => void | Promise<void>, canReset = false, step?: PinStep): void {
   let value = '';
   const dots = h('div', { class: 'pin-dots', 'aria-live': 'polite', 'aria-label': 'Inmatade siffror' });
   const message = h('p', { class: 'pin-message', role: 'alert' });
@@ -86,7 +98,7 @@ function pinScreen(ctx: AppContext, title: string, text: string, onPin: (pin: st
   const view = h(
     'main',
     { class: 'screen pin-screen' },
-    h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka', onclick: () => void showProfiles(ctx) }, icon('back'))),
+    step ? step.head.cloneNode(true) : h('header', { class: 'top-bar' }, h('button', { class: 'icon-button', type: 'button', 'aria-label': 'Tillbaka', onclick: () => void showProfiles(ctx) }, icon('back'))),
     h('div', { class: 'end-icon', 'aria-hidden': 'true' }, icon('lock')),
     h('h1', null, title),
     h('p', null, text),
@@ -94,6 +106,7 @@ function pinScreen(ctx: AppContext, title: string, text: string, onPin: (pin: st
     message,
     keys,
     canReset ? h('button', { class: 'link-button', type: 'button', onclick: () => forgotPin(ctx) }, 'Glömt koden?') : null,
+    step?.later ?? null,
   );
   renderDots();
   document.addEventListener('keydown', onKey);

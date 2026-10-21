@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { createProfile } from './helpers';
+import { createProfile, introHeading } from './helpers';
 import { seedGangertradgarden } from './legacyData';
 
 /** The test version in /test/, on the same origin as the real app (docs/PLAN-TESTVERSION.md). */
@@ -15,7 +15,7 @@ test('the test version says so, and is named apart from the real app', async ({ 
   expect(manifest).toMatchObject({ name: 'Mattedalen test', short_name: 'Mattedalen test' });
 
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(introHeading(page)).toBeVisible();
   await expect(page.locator('html.staging')).toHaveCount(0);
   await expect(page.getByText(/Testversion/)).toHaveCount(0);
   await expect(page).toHaveTitle('Mattedalen');
@@ -25,7 +25,7 @@ test('the children in the test version are apart from the real ones', async ({ p
   await page.goto('/');
   await createProfile(page, 'Alva', 'brook');
   await page.goto('/test/');
-  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(introHeading(page)).toBeVisible();
   await createProfile(page, 'Bo', 'brook');
   await page.goto('/test/');
   await expect(page.locator('.profile-tile:not(.add)')).toHaveText(['Bo']);
@@ -51,7 +51,7 @@ test("the real app's worker leaves the test version alone, and each keeps its ow
   await page.goto('/test/');
   await expect(page.locator('html.staging')).toHaveCount(1);
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(introHeading(page)).toBeVisible();
   await page.context().setOffline(false);
 });
 
@@ -60,7 +60,7 @@ test('children from Gångerträdgården come along to the real app only, never t
   await page.goto('/manifest.webmanifest');
   await seedGangertradgarden(page);
   await page.goto('/test/');
-  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(introHeading(page)).toBeVisible();
   await expect(page.getByText('Alva')).toHaveCount(0);
   await page.goto('/');
   await expect(page.locator('.profile-tile:not(.add)')).toHaveText(['Alva']);
@@ -73,7 +73,7 @@ test("the test version's address without the last slash opens the test version, 
   await page.goto('/test');
   await expect(page).toHaveURL(/\/test\/$/);
   await expect(page.locator('html.staging')).toHaveCount(1);
-  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(introHeading(page)).toBeVisible();
   await expect(page.getByText('Alva')).toHaveCount(0);
 });
 

@@ -7,7 +7,7 @@
  */
 import { STAGING } from '../staging';
 
-export type ParentPage = 'overview' | 'place' | 'settings' | 'device' | 'import' | 'feedback' | 'news' | 'pilot';
+export type ParentPage = 'overview' | 'place' | 'settings' | 'device' | 'import' | 'feedback' | 'news' | 'about' | 'pilot';
 
 export type Where =
   | { kind: 'valley'; profileId: string }
@@ -19,7 +19,7 @@ const KEY = STAGING ? 'mattedalen-test:resume' : 'mattedalen:resume';
 /** A reload later than this after the mark starts over: it was not the update's. */
 export const RESUME_WITHIN_MS = 5 * 60_000;
 
-const PARENT_PAGES: readonly string[] = ['overview', 'place', 'settings', 'device', 'import', 'feedback', 'news', 'pilot'];
+const PARENT_PAGES: readonly string[] = ['overview', 'place', 'settings', 'device', 'import', 'feedback', 'news', 'about', 'pilot'];
 
 let where: Where | null = null;
 

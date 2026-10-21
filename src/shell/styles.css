@@ -518,6 +518,123 @@ h1:focus {
   height: 40px;
 }
 
+/* The grown-ups' first start (docs/PLAN-ENKLARE.md, E2). */
+.intro h1 {
+  margin: 0;
+  text-align: center;
+}
+
+.intro-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.intro-dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+
+.intro-dot.done {
+  background: var(--ink-soft);
+  border-color: var(--ink-soft);
+}
+
+.intro-dot.on {
+  background: var(--ink);
+}
+
+.about-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(100%, 34em);
+}
+
+.about-facts li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.about-facts .icon,
+.about-facts .plant {
+  flex: none;
+  width: 28px;
+  height: 28px;
+}
+
+.intro-label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: min(100%, 360px);
+  font-weight: 700;
+}
+
+.intro-label.inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.intro-question {
+  width: min(100%, 360px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.intro-question legend {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.intro-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.intro-choice {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 8px;
+}
+
+.intro-choice[aria-pressed='true'] {
+  background: var(--selected);
+}
+
+.intro-hint {
+  width: min(100%, 360px);
+  margin: -8px 0 0;
+  font-size: 0.9rem;
+}
+
+.intro-install {
+  width: min(100%, 34em);
+}
+
+.intro-later {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.intro-turn {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
 .new-profile-form {
   display: flex;
   flex-direction: column;
@@ -3211,7 +3328,8 @@ h1:focus {
 }
 
 .settings input[type='text'],
-.settings select {
+.settings select,
+.intro select {
   min-height: 44px;
   font: inherit;
   font-size: 1rem;

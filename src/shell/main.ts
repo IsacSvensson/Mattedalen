@@ -11,6 +11,7 @@ import { showNewsIfAny } from './news';
 import { placeIsOpen } from './place';
 import { takeResume, type ParentPage, type Where } from './resume';
 import { showDevice } from './screens/parent/device';
+import { showAbout } from './screens/parent/about';
 import { showFeedback } from './screens/parent/feedback';
 import { showNews } from './screens/parent/news';
 import { showImport } from './screens/parent/importPage';
@@ -79,6 +80,7 @@ function parentPage(ctx: AppContext, page: ParentPage, profileId?: string, place
     if (page === 'import') return showImport(ctx);
     if (page === 'feedback') return Promise.resolve(showFeedback(ctx));
     if (page === 'news') return Promise.resolve(showNews(ctx));
+    if (page === 'about') return Promise.resolve(showAbout(ctx));
     return showParent(ctx);
   }
   switch (page) {
@@ -97,6 +99,9 @@ function parentPage(ctx: AppContext, page: ParentPage, profileId?: string, place
       return Promise.resolve();
     case 'news':
       showNews(ctx, profileId);
+      return Promise.resolve();
+    case 'about':
+      showAbout(ctx, profileId);
       return Promise.resolve();
     default:
       return showParent(ctx, profileId);

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { closeParent, enterGarden, openParent, parentLink, switchPlayer } from './helpers';
+import { closeParent, enterGarden, introHeading, openParent, parentLink, switchPlayer } from './helpers';
 import { LEGACY, seedGangertradgarden } from './legacyData';
 
 /*
@@ -68,12 +68,12 @@ test('children from Gångerträdgården come along, and the old app keeps its da
     db.close();
   });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(introHeading(page)).toBeVisible();
 });
 
 test('a device that never had Gångerträdgården gets no database of it', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Vad heter du?' })).toBeVisible();
+  await expect(introHeading(page)).toBeVisible();
   await expect.poll(() => databaseNames(page)).toContain('mattedalen');
   expect(await databaseNames(page)).not.toContain('gangertradgarden');
   expect(await readGangertradgarden(page)).toBeNull();

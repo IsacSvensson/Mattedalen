@@ -41,7 +41,7 @@ test('shows heatmap, confusions and practised minutes; settings can be changed',
   expect(new Set(weekdays).size).toBe(7);
   for (const d of weekdays) expect(['mån', 'tis', 'ons', 'tor', 'fre', 'lör', 'sön']).toContain(d);
   await expect(page.getByText(/^1[23] minuter, 1 dag med spel\.$/)).toBeVisible();
-  await expect(page.locator('.parent-overview .parent-row strong')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Barnets inställningar', 'Hämta ett barn', 'Den här enheten', 'Nytt i appen', 'Tyck till']);
+  await expect(page.locator('.parent-overview .parent-row strong')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Barnets inställningar', 'Hämta ett barn', 'Den här enheten', 'Nytt i appen', 'Tyck till', 'Så fungerar Mattedalen']);
   await parentPlace(page, 'Trädgården');
   const garden = page.getByRole('region', { name: /^Trädgården/ });
   await expect(garden.getByRole('heading', { name: 'Trädgården', exact: true })).toBeVisible();

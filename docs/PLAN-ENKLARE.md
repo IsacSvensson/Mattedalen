@@ -11,11 +11,11 @@ blir tydligare vad man ska göra, hur man hittar och vad framstegen betyder.
 | Fas | Innehåll | Storlek |
 |---|---|---|
 | E1. Snabba rättelser **(klar)** | Diagrammet visar 7 dagar, ”I dag” får text, ”Passlängd” blir ”Tid per dag”, och inställningarna får enklare ord. | Liten |
-| E2. Första starten för den vuxna | En kort introduktion som går att hoppa över: vad appen tränar, tid per dag, uppläsning, var ”För vuxna” finns och var datan sparas. Den vuxna väljer startkollen. Sedan ”Lämna över till barnet”. | Mellan |
+| E2. Första starten för den vuxna **(klar)** | En kort introduktion som går att hoppa över: vad appen tränar, tid per dag, uppläsning, var ”För vuxna” finns och var datan sparas. Den vuxna väljer startkollen. Sedan ”Lämna över till barnet”. | Mellan |
 | E3. Mindre läsning för barnet | Högtalarknapp på hjälpkorten och första skärmen, kortare hjälptext, en hand som visar draget på kartan, och skylten för dagens plats som rör sig. | Mellan |
 | E4. Förklaringar vid behov | ”Vad betyder växterna?” (och stenarna och lyktorna) med bilder, vad ”sitter” betyder, en mening per barn och ”Så kan du hjälpa till”, säkerhetskopian efter vad man vill göra, och en påminnelse varje månad. | Mellan |
 
-E2 är planerad nedan. E3 och E4 planeras i detalj när E2 är klar. Varje fas kommer först i testversionen
+E3 och E4 planeras i detalj när E2 är provad. Varje fas kommer först i testversionen
 ([PLAN-TESTVERSION](PLAN-TESTVERSION.md)) och släpps när den är provad.
 
 ## E1. Snabba rättelser
@@ -220,9 +220,9 @@ vuxna, och ”Så fungerar Mattedalen” finns i ”För vuxna”.
 - **Skärmbilder** i 320 och 360 px och på surfplatta, för varje steg. Inget får
   sticka ut åt sidan, och knapparna ska synas utan att man scrollar på 320 × 640.
 
-### Beslut som behövs för E2
+### Beslut för E2 (tagna)
 
-Jag går på förslagen om du inte säger annat.
+Förslagen nedan gäller.
 
 1. **Den vuxna skriver namnet, barnet väljer djur** (förslag). Annars gör barnet
    båda som i dag, och den vuxnas frågor kommer efteråt.
@@ -249,4 +249,33 @@ Jag går på förslagen om du inte säger annat.
   den öppnas på en enhet. Det är rätt, och ett bra sätt att prova starten.
 - **Barnets skärm i dag** har ”Vad heter du?” och djuren. Med beslut 1 delas den
   i två: namnet hos den vuxna och djuret hos barnet. ”Ny spelare” behåller båda.
+
+## Fynd från E2
+
+![Telefon, 320 px: välkommen, vuxenkoden, om barnet och djuret](img/start-vuxen.png)
+
+*Telefon, 320 px. Från vänster: välkommen med de fyra raderna, vuxenkoden som
+ett steg, om barnet och barnets tur att välja djur.*
+
+- **Starten** (`src/shell/screens/intro.ts`) kommer bara på en enhet utan barn,
+  en gång. Den räknas som gjord när den är klar eller överhoppad.
+- **Stegen** är fyra, eller tre när appen redan ligger på hemskärmen. Prickarna
+  överst visar var man är, också för skärmläsare (”Steg 2 av 4”).
+- **Vuxenkoden** är samma knappsats som förut, med ”Senare” och ”Hoppa över”
+  under. ”Senare” betyder att koden väljs första gången ”För vuxna” öppnas.
+- **Om barnet:** knappen ”Lämna över till Bosse” går att trycka först när namnet
+  finns och frågan om startkollen är besvarad, och frågan om läsning när
+  enheten har en svensk röst. Utan röst säger sidan det i en rad.
+- **Startkollen:** platserna har fått `firstStart`. Bäcken gör startkollen
+  direkt eller börjar från början, och barnet får inte frågan.
+- **Barnets skärm** och ”Ny spelare” är som förut. Djuren och starten av ett nytt
+  barn delas nu mellan barnets skärm och starten för vuxna.
+- **”Så fungerar Mattedalen”** är en sida i ”För vuxna” med samma fyra rader.
+- **På 320 × 640** syns huvudknappen i varje steg utan att man scrollar. Steget
+  ”Om barnet” blev tätare för det: svarsknapparna står bredvid varandra, och
+  texten om rösten är kortare.
+- **Tester:** `e2e/intro.spec.ts` med hela vägen, ”Nej”, ”Hoppa över” på varje
+  steg, ”Senare”, appen på hemskärmen, iPhone-texten, med och utan svensk röst,
+  ”Hämta det här” och sidan i ”För vuxna”. Hjälpfunktionen `createProfile`
+  hoppar över starten, så de andra testerna är som förut.
 

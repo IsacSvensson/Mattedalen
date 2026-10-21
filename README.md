@@ -84,6 +84,18 @@ text. All grafik är ritad SVG och typsnitten följer med appen. Reglerna står 
 `src/shell/styles.css`, och hur de används i trädgården beskrivs i
 [TRADGARDEN.md](docs/TRADGARDEN.md#designregler).
 
+## Första starten (`src/shell/screens/intro.ts`)
+
+På en enhet utan barn börjar appen med en kort start för den vuxna
+([PLAN-ENKLARE](docs/PLAN-ENKLARE.md#e2-första-starten-för-den-vuxna)): vad appen
+tränar, hur länge, var man följer barnet och var datan sparas; hemskärmen, om
+appen inte redan är tillagd (på iPhone och iPad har den egen lagring, så den
+kommer före barnet); vuxenkoden; och om barnet: namn, ”Läser barnet själv?”
+(uppläsningen, om enheten har en svensk röst), om startkollen ska göras och tid
+per dag. Sedan väljer barnet sitt djur, och bäcken börjar med startkollen eller
+från början, utan att barnet får frågan (`Place.firstStart`). Varje steg har
+”Hoppa över”, som går till barnets egen skärm som förut. Starten kommer en gång.
+
 ## Dalen (`src/shell/screens/valley.ts`)
 
 Dalen är barnets startsida. Barnet väljer sig själv under ”Vem spelar?” och
@@ -327,7 +339,7 @@ steg tillbaka, från en sida till översikten.
   minuter per veckodag och hur många dagar barnet spelat), en rad per plats med vad barnet är på, det som är svårast och en
   stapel för hur mycket som sitter (`Place.parentSummary`), och raden **Barnets
   inställningar**. Längst ner finns **Hämta ett barn**, **Den här enheten**,
-  **Nytt i appen** och **Tyck till**.
+  **Nytt i appen**, **Tyck till** och **Så fungerar Mattedalen**.
 - **En plats** har alltid samma ordning: läget, svåra just nu (högst fem, med
   ”Visa alla”), de vanligaste förväxlingarna, platsens koll, alla fakta som
   värmekartor (ihopfällda) och sist startkollen (`Place.parentPage`).
