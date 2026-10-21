@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **E3–E4. Enklare att förstå** | Mindre läsning för barnet och förklaringar vid behov. | [PLAN-ENKLARE](PLAN-ENKLARE.md) | E1 och E2 klara, E3 planeras |
+| 1 | **E3–E4. Enklare att förstå** | Mindre läsning för barnet och förklaringar vid behov. | [PLAN-ENKLARE](PLAN-ENKLARE.md#e3-mindre-läsning-för-barnet) | E1 och E2 klara, plan för E3 skriven |
 | 2 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
 | 3 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 

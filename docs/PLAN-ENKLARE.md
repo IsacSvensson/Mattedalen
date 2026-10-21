@@ -15,7 +15,7 @@ blir tydligare vad man ska göra, hur man hittar och vad framstegen betyder.
 | E3. Mindre läsning för barnet | Högtalarknapp på hjälpkorten och första skärmen, kortare hjälptext, en hand som visar draget på kartan, och skylten för dagens plats som rör sig. | Mellan |
 | E4. Förklaringar vid behov | ”Vad betyder växterna?” (och stenarna och lyktorna) med bilder, vad ”sitter” betyder, en mening per barn och ”Så kan du hjälpa till”, säkerhetskopian efter vad man vill göra, och en påminnelse varje månad. | Mellan |
 
-E3 och E4 planeras i detalj när E2 är provad. Varje fas kommer först i testversionen
+E3 är planerad nedan. E4 planeras i detalj när E3 är klar. Varje fas kommer först i testversionen
 ([PLAN-TESTVERSION](PLAN-TESTVERSION.md)) och släpps när den är provad.
 
 ## E1. Snabba rättelser
@@ -278,4 +278,132 @@ ett steg, om barnet och barnets tur att välja djur.*
   steg, ”Senare”, appen på hemskärmen, iPhone-texten, med och utan svensk röst,
   ”Hämta det här” och sidan i ”För vuxna”. Hjälpfunktionen `createProfile`
   hoppar över starten, så de andra testerna är som förut.
+
+## E3. Mindre läsning för barnet
+
+Barnet ska klara appen utan att läsa mycket. Det blir mindre text på skärmen,
+fler saker läses upp, och kartan visar själv vad man gör.
+
+### Varför
+
+- **Hjälpkortet vid fel svar** har fyra rader text: ”Du svarade 4. Så här kan du
+  tänka:”, svaret, en mening om svaret (”4 är ett för mycket – nära!”) och
+  tankesättet. En sexåring läser inte allt det mitt i ett pass.
+- **Uppläsningen läser bara svaret** på hjälpkortet, inte meningen om svaret
+  eller tankesättet. Ändskärmen och frågan om startkollen läses inte upp alls.
+- **Frågan om startkollen** (”Kan du redan lite gånger?”) får barnet fortfarande
+  vid Stigen och i trädgården, och vid bäcken för ett syskon som läggs till med
+  ”Ny spelare”.
+- **Kartan** ska dras runt, och skylten är knappen. Det vet inte ett barn som är
+  där första gången.
+- **Barn som redan finns** har uppläsningen avstängd, om inte en vuxen har hittat
+  den i inställningarna.
+
+### Hur
+
+#### 1. Hjälpkortet
+
+- **Färre rader:**
+  - ”Du svarade 4.” stryks när meningen om svaret redan nämner 4, som i ”4 är
+    ett för mycket – nära!”. Annars står den kvar.
+  - ”Så här kan du tänka:” blir en liten tankebubbla framför tankesättet, utan
+    ord.
+  - Kvar blir svaret, högst en mening om svaret, och tankesättet med sin bild.
+- **Kortare tankesätt:** först mäts alla tankesätt och meningar i alla tre
+  platserna. De längsta skrivs om när bilden redan visar samma sak. Ett
+  enhetstest håller dem under en gräns som sätts efter mätningen.
+- **Uppläsning av hela kortet:** svaret, meningen och tankesättet läses upp i
+  den ordningen när kortet visas. En högtalarknapp på kortet läser upp det igen.
+
+#### 2. Uppläsning där den saknas
+
+Bara när uppläsningen är på och enheten har en svensk röst, som i dag.
+
+- **Ändskärmen:** ”Bra jobbat! Bäcken vilar nu. Kom tillbaka i morgon!” och det
+  som hände i passet.
+- **Frågan om startkollen**, och skärmen efter startkollen.
+- **Kortet ”Nytt: minus”** vid bäcken.
+- **Platsens skärm:** vad barnet gör nu (”Nu: Ett mer, ett mindre”) och den stora
+  knappen.
+- Varje skärm som läser upp något har en högtalarknapp, så att barnet kan höra
+  det igen.
+
+#### 3. Frågan om startkollen till barnet
+
+Den står kvar där ingen vuxen har svarat, men blir lättare för ett barn:
+”Vill du visa vad du redan kan?” med knapparna ”Ja!” och ”Börja från början”.
+Den långa förklaringen stryks, och frågan läses upp.
+
+#### 4. Kartan visar draget
+
+- **En hand** glider över kartan och visar draget, utan ord. Den kommer de första
+  gångerna barnet är på kartan, tills barnet själv har dragit kartan, och högst
+  tre gånger.
+- **Bara när kartan är större än skärmen.** På en surfplatta som visar hela dalen
+  behövs ingen hand.
+- **Med minskade rörelser** (enhetens inställning) står handen stilla en stund
+  med en pil, och försvinner sedan.
+
+#### 5. Skylten för dagens plats
+
+- **Skylten gungar lite** vid den plats som står först i ”I dag”, så att barnet
+  ser vart det ska. Den slutar när barnet trycker eller drar på kartan.
+- **Ingenting gungar** när dagen är klar.
+- **Med minskade rörelser** får skylten en lugn gul kant i stället.
+
+#### 6. Uppläsning för barn som redan finns
+
+En rad i ”Att göra för dig”, en gång per barn, när enheten har en svensk röst och
+uppläsningen är av: ”Läser Bosse själv? Appen kan läsa upp frågorna.” Knapparna
+blir ”Slå på uppläsning” och ”Bosse läser själv”. Raden försvinner efter ett
+val. Det kräver att en rad i ”Att göra” kan ha två knappar.
+
+### Nytt i appen
+
+En post: ”Mindre att läsa för barnen”, med de viktigaste ändringarna.
+
+### Tester och kontroll
+
+- **E2e:**
+  - hjälpkortet har färre rader, och ”Du svarade” står bara när meningen inte
+    redan nämner svaret;
+  - med en svensk röst läses hela kortet upp, ändskärmen och frågan om
+    startkollen också, och högtalarknapparna fungerar;
+  - frågan om startkollen har de nya orden;
+  - handen kommer på telefon men inte när hela dalen syns, och slutar när barnet
+    har dragit kartan;
+  - skylten gungar vid dagens plats och inte när dagen är klar;
+  - med minskade rörelser gungar ingenting;
+  - raden i ”Att göra” slår på uppläsningen och försvinner;
+  - befintliga tester som läser hjälpkortets text uppdateras.
+- **Enhetstest** för längden på tankesätten och meningarna.
+- **Skärmbilder** i 320 och 360 px och på surfplatta: hjälpkortet före och efter,
+  handen på kartan, och den gungande skylten. Inget får sticka ut åt sidan.
+
+### Beslut som behövs för E3
+
+Jag går på förslagen om du inte säger annat.
+
+1. **”Du svarade 4.” stryks när meningen redan nämner 4** (förslag). Att barnet
+   ser sitt eget svar är viktigt, och då står det fortfarande på kortet.
+2. **Hela hjälpkortet läses upp direkt** (förslag), eller bara svaret direkt och
+   resten med högtalarknappen.
+3. **Handen högst tre gånger** (förslag), tills barnet har dragit kartan.
+4. **Skylten gungar** (förslag). Ett alternativ är att djuret hoppar vid
+   platsen.
+5. **Raden om uppläsning i ”Att göra”** för barn som redan finns (förslag), eller
+   ingen rad.
+
+### Fallgropar i E3
+
+- **Utan svensk röst** läses ingenting upp. Kortare text är därför det viktigaste
+  i E3, inte uppläsningen.
+- **Tal på iPhone** startar bara efter ett tryck. Hjälpkortet och ändskärmen
+  kommer alltid efter ett tryck, så det fungerar.
+- **Rörelser kan störa.** Handen och skylten rör sig bara på kartan, aldrig i ett
+  pass, och följer enhetens inställning för minskade rörelser.
+- **Tankesätten kommer från innehållet** i varje plats. Att korta dem kan ändra
+  vad testerna förväntar sig. Det görs i samma ändring.
+- **Uppläsning som pratar för mycket** blir tjatig. Det som läses upp är kortet
+  som syns, inget mer, och det avbryts när barnet trycker vidare.
 
