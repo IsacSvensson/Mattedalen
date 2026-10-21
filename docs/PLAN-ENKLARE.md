@@ -13,9 +13,9 @@ blir tydligare vad man ska göra, hur man hittar och vad framstegen betyder.
 | E1. Snabba rättelser **(klar)** | Diagrammet visar 7 dagar, ”I dag” får text, ”Passlängd” blir ”Tid per dag”, och inställningarna får enklare ord. | Liten |
 | E2. Första starten för den vuxna **(klar)** | En kort introduktion som går att hoppa över: vad appen tränar, tid per dag, uppläsning, var ”För vuxna” finns och var datan sparas. Den vuxna väljer startkollen. Sedan ”Lämna över till barnet”. | Mellan |
 | E3. Mindre läsning för barnet **(klar)** | Högtalarknapp på hjälpkorten och första skärmen, kortare hjälptext, en hand som visar draget på kartan, och skylten för dagens plats som rör sig. | Mellan |
-| E4. Förklaringar vid behov | ”Vad betyder växterna?” (och stenarna och lyktorna) med bilder, vad ”sitter” betyder, en mening per barn och ”Så kan du hjälpa till”, säkerhetskopian efter vad man vill göra, och en påminnelse varje månad. | Mellan |
+| E4. Förklaringar vid behov **(klar)** | ”Vad betyder växterna?” (och stenarna och lyktorna) med bilder, vad ”sitter” betyder, en mening per barn och ”Så kan du hjälpa till”, säkerhetskopian efter vad man vill göra, och en påminnelse varje månad. | Mellan |
 
-E4 är planerad nedan. Varje fas kommer först i testversionen
+Alla fyra faserna är klara. Varje fas kommer först i testversionen
 ([PLAN-TESTVERSION](PLAN-TESTVERSION.md)) och släpps när den är provad.
 
 ## E1. Snabba rättelser
@@ -560,9 +560,9 @@ mening och tips per barn, och den nya säkerhetskopian.
   översikten med meningen och tipsen, och säkerhetskopian. Inget får sticka ut åt
   sidan.
 
-### Beslut som behövs för E4
+### Beslut för E4 (tagna)
 
-Jag går på förslagen om du inte säger annat.
+Förslagen nedan gäller.
 
 1. **Inget omdöme i meningen per barn** (förslag), bara det som går att räkna.
 2. **Jag skriver de ungefär 30 tipsen** (förslag), och du läser dem i
@@ -582,4 +582,35 @@ Jag går på förslagen om du inte säger annat.
   säger var den brukar hamna och hur den hämtas tillbaka, utan att lova mer.
 - **Fler rader i ”Att göra”** kan bli många. Påminnelsen kommer högst en gång i
   månaden och försvinner när kopian är sparad.
+
+## Fynd från E4
+
+![Telefon, 320 px: kortet i trädgården, översikten, ”sitter” och säkerhetskopian](img/forklaringar.png)
+
+*Telefon, 320 px. Från vänster: ”Vad betyder bilderna?” i trädgården, översikten
+med meningen och ”Så kan du hjälpa till”, avsnittet om växterna och ”sitter”,
+och säkerhetskopian efter vad man vill göra.*
+
+- **Frågetecknet** sitter nere till höger i platsens bild, över kullarna, med
+  högtalaren bredvid. Bredvid namnet trängde det ihop namnet på 320 px, och ett
+  långt namn som ”Alexandra-Charlottes bäck” hamnade under knapparna.
+- **Kortet** visar platsens egna bilder: bron med tomma, halva och fulla stenar,
+  lyktan, och växterna med blommor. Inga siffror; ett test kräver det.
+- **”Sitter”** förklaras på ”Så fungerar Mattedalen”, med jord, frö, planta,
+  buske och träd. Reglerna läses ur motorns inställningar, och ett test kräver
+  att texten och motorn säger samma sak, också för stenarna och lyktorna (fyra
+  av fem fakta i delen). Länken finns under platserna i översikten och längst ner
+  på varje plats sida.
+- **Meningen per barn** räknar speldagar och minuter ur passen, utan omdöme, och
+  nämner delen barnet är på i varje öppen plats.
+- **Tipsen** finns för alla 10 delar vid bäcken, 9 på Stigen och 11 tabeller i
+  trädgården; delat med delar tips med sin tabell. Ett test kräver ett tips för
+  varje del. Läs gärna igenom dem i `tips.ts` i varje plats.
+- **Säkerhetskopian:** ”Flytta till en annan enhet” förklarar QR-koden och filen
+  i en dialog. ”Spara en kopia” sparar filen, säger ”Kopian är sparad” och
+  minns dagen.
+- **Påminnelsen** kommer efter fem speldagar utan kopia och sedan 30 dagar efter
+  den senaste, om barnet har spelat sedan dess. Efter fem speldagar kommer också
+  frågan hur det går, så de kan komma samma dag.
+- **Tester:** `e2e/explain.spec.ts` och `tests/game/explanations.test.ts`.
 

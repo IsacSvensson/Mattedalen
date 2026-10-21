@@ -26,6 +26,7 @@ export const backen: Place = {
   scene: brookScene,
   icon: () => icon('steps'),
   about: BROOK_ABOUT,
+  where: 'vid bäcken',
   parentPage: (ctx, profile) => brookParentPage(ctx, profile),
   parentSummary: (ctx, profile) => brookParentSummary(ctx, profile),
 };

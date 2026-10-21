@@ -28,7 +28,7 @@ import { heatmapView } from '../../shell/components/heatmap';
 import { h } from '../../shell/dom';
 import type { PlaceSummary, SaveProfile } from '../../shell/place';
 import { engineFor, loadProgress } from '../../shell/play';
-import { factStats, factStatsText, formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, type FactStats, bestTimes, slowButRight } from '../../shell/stats';
+import { factStats, factStatsText, formatDay, knownOf, partNow, partNowUnit, STATUS_TEXT, topConfusions, type FactStats, bestTimes, slowButRight } from '../../shell/stats';
 import { limitedList } from '../../shell/components/limitedList';
 import { gardenDeps, pack } from './pack';
 import { gardenIsOpen } from './isOpen';
@@ -36,6 +36,8 @@ import { gardenWaits, saveTableReady, tableReady } from './held';
 import { OPENED_BY_ADULT, tableName, WAIT_PLAY_DAYS, waitExample, waitText } from './waits';
 import { showPlacementOffer } from './screens/placement';
 import { wayFor } from '../../shell/words';
+import { gardenTip } from './tips';
+import { helpTip } from '../../shell/components/helpTip';
 
 /** How delat med is written for this child; only once the garden has delat med. */
 function divisionSignSetting(profile: Profile, save: SaveProfile): HTMLElement | null {
@@ -114,6 +116,7 @@ export async function gardenParentPage(ctx: AppContext, profile: Profile, save: 
     shareSummary(states),
     h('h3', null, 'Svåra just nu'),
     hardList(states, engine, today, sign),
+    open ? helpTip(gardenTip(partNowUnit(pack, states, new Set(engine.unlockedUnits(states, meta, undefined, waits.held)))?.id ?? '')) : null,
     h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states, sign),
     h('h3', null, 'Trädgårdens koll'),
@@ -309,6 +312,7 @@ export async function gardenParentSummary(ctx: AppContext, profile: Profile, sav
     });
   return {
     now: open ? partNow(pack, states, new Set(engine.unlockedUnits(states, meta, undefined, waits.held))) : null,
+    tip: open ? gardenTip(partNowUnit(pack, states, new Set(engine.unlockedUnits(states, meta, undefined, waits.held)))?.id ?? '') : null,
     // Written as on the page, with the child's sign for delat med.
     hardest: hardest ? mathNodes(hardest.text, sign) : null,
     ...knownOf(pack, states),

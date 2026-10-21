@@ -89,7 +89,7 @@ test('a JSON backup restores everything on another device', async ({ page, brows
   await seedStates(page, { '2x3': { status: 'fluent', box: 3 }, '10x4': { status: 'automatic', box: 5 } });
   await openParent(page);
   await parentSettings(page);
-  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Spara säkerhetskopia (JSON)' }).click()]);
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Spara en kopia' }).click()]);
   expect(download.suggestedFilename()).toBe('mattedalen-alva-2026-02-02.json');
   const file = await download.path();
 
@@ -120,6 +120,7 @@ test('a QR code moves a child to another device', async ({ page, browser }) => {
   );
   await openParent(page);
   await parentSettings(page);
+  await page.getByRole('button', { name: 'Flytta till en annan enhet' }).click();
   await page.getByRole('button', { name: 'Visa QR-kod' }).click();
   const qrImage = await page.locator('.qr-code svg').screenshot();
 

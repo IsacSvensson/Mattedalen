@@ -17,6 +17,7 @@ import { offeredKey, showBrookPlacementOffer } from './placement';
 import { showBrookSession } from './session';
 import { setWhere } from '../../../shell/resume';
 import { readShown } from '../../../shell/components/readAloud';
+import { explainButton } from '../../../shell/components/explain';
 
 /**
  * Bäcken: the bridge the child builds, one block per part, and what sits of
@@ -62,13 +63,15 @@ export async function showBrook(ctx: AppContext, profile: Profile): Promise<void
         h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile, { at: 'backen' }) }, avatarIcon(profile.avatar)),
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} bäck`),
       ),
+      // Top right, over the sky: what the pictures mean, and read-aloud beside it (docs/PLAN-ENKLARE.md, E4).
+      h('div', { class: 'place-corner' }, explainButton(profile, BROOK_PICTURES())),
     ),
     picture.art,
     h('p', { class: 'sr-only' }, picture.artText),
     h('div', { class: 'garden-side' }, picture.line, actions),
   );
   show(ctx, view);
-  void readShown(ctx, profile, { into: '.scene-title' });
+  void readShown(ctx, profile, { into: '.place-corner' });
 }
 
 /**
@@ -105,3 +108,12 @@ export function brookPicture(states: Record<ItemId, ItemState>, unlocked: Readon
     line: now ? h('p', { class: 'place-now' }, icon('steps'), h('span', null, 'Nu: ', h('strong', null, now.understanding ? `${now.title} (vågen)` : now.title))) : null,
   };
 }
+
+/** What the bridge means, for the child (docs/PLAN-ENKLARE.md, E4). */
+const BROOK_PICTURES = () => {
+  const stone = (known: number) => ({ title: '', open: true, known });
+  return [
+    { picture: bridge([stone(0), stone(0.5), stone(1)]), words: 'En sten för varje del. Den fylls när du kan delen.' },
+    { picture: bridge([stone(1), stone(1), stone(1)]), words: 'När alla stenar ligger når bron över bäcken.' },
+  ];
+};

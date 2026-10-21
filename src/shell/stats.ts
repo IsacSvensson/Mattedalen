@@ -109,10 +109,34 @@ export function formatDay(day: DayKey): string {
  * pack's order) where less than about 80 % sits, or the last open part.
  */
 export function partNow(pack: ContentPack, states: Record<ItemId, ItemState>, open: ReadonlySet<string>): string | null {
+  return partNowUnit(pack, states, open)?.title ?? null;
+}
+
+/** The part itself (`partNow`), e.g. for its tip in "Så kan du hjälpa till". */
+export function partNowUnit(pack: ContentPack, states: Record<ItemId, ItemState>, open: ReadonlySet<string>): ContentPack['units'][number] | null {
   const parts = [...pack.units].sort((a, b) => a.order - b.order).filter((u) => open.has(u.id));
   const sits = (id: ItemId) => atLeast(states[id]?.status ?? 'new', 'fluent');
-  const now = parts.find((u) => u.itemIds.filter(sits).length < 0.8 * u.itemIds.length) ?? parts.at(-1);
-  return now?.title ?? null;
+  return parts.find((u) => u.itemIds.filter(sits).length < 0.8 * u.itemIds.length) ?? parts.at(-1) ?? null;
+}
+
+/**
+ * One sentence about a child for the top of their part of "För vuxna"
+ * (docs/PLAN-ENKLARE.md, E4): what can be counted, no judgement. `nows`: what
+ * the child is on in each open place, e.g. "Tiokamrater vid bäcken".
+ */
+export function childSentence(name: string, week: { minutes: number }[], nows: string[]): string {
+  const played = week.filter((d) => d.minutes > 0);
+  const minutes = played.reduce((sum, d) => sum + d.minutes, 0);
+  const days = played.length;
+  const first = days
+    ? `${name} spelade ${days} av de senaste ${week.length} dagarna, i snitt ${Math.round(minutes / days)} minuter.`
+    : `${name} har inte spelat de senaste ${week.length} dagarna.`;
+  return nows.length ? `${first} Nu: ${listSv(nows)}.` : first;
+}
+
+/** "a", "a och b", "a, b och c". */
+export function listSv(items: string[]): string {
+  return items.length <= 1 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} och ${items.at(-1)}`;
 }
 
 /**

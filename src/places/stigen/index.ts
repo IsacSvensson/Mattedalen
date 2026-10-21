@@ -22,6 +22,7 @@ export const stigen: Place = {
   scene: pathScene,
   icon: () => icon('lantern'),
   about: PATH_ABOUT,
+  where: 'på stigen',
   parentPage: (ctx, profile, save) => pathParentPage(ctx, profile, save),
   parentSummary: (ctx, profile, save) => pathParentSummary(ctx, profile, save),
 };

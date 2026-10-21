@@ -10,12 +10,14 @@ import type { AppContext } from '../../shell/app';
 import { icon } from '../../shell/components/icons';
 import { h } from '../../shell/dom';
 import { engineFor, loadProgress } from '../../shell/play';
-import { formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, bestTimes, slowButRight } from '../../shell/stats';
+import { formatDay, knownOf, partNow, partNowUnit, STATUS_TEXT, topConfusions, bestTimes, slowButRight } from '../../shell/stats';
 import { limitedList } from '../../shell/components/limitedList';
 import type { PlaceSummary } from '../../shell/place';
 import { partProgress } from './logic';
 import { pack, pathDeps, pathHeld } from './pack';
 import { wayFor } from '../../shell/words';
+import { PATH_TIPS } from './tips';
+import { helpTip } from '../../shell/components/helpTip';
 
 /** What Stigen covers, for grown-ups. */
 export const PATH_ABOUT = 'Talen till 100: tiotal och ental, över tiotalet, dubbla och halvera.';
@@ -72,6 +74,7 @@ export async function pathParentPage(ctx: AppContext, profile: Profile, save: Sa
     ),
     h('h3', null, 'Svåra just nu'),
     hardList(states, engine),
+    open ? helpTip(PATH_TIPS[partNowUnit(pack, states, unlocked)?.id ?? '']) : null,
     h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states),
     h('h3', null, 'Stigens koll'),
@@ -140,8 +143,10 @@ export async function pathParentSummary(ctx: AppContext, profile: Profile, save:
   const { states, meta } = await loadProgress(profile, deps, engine);
   const hardest = hardTasks(states, engine)[0];
   const open = await pathIsOpen(ctx, profile);
+  const unlocked = new Set(engine.unlockedUnits(states, meta, undefined, await pathHeld(ctx, profile)));
   return {
-    now: open ? partNow(pack, states, new Set(engine.unlockedUnits(states, meta, undefined, await pathHeld(ctx, profile)))) : null,
+    now: open ? partNow(pack, states, unlocked) : null,
+    tip: open ? (PATH_TIPS[partNowUnit(pack, states, unlocked)?.id ?? ''] ?? null) : null,
     hardest: hardest ? [hardest.text] : null,
     ...knownOf(pack, states),
     slow: slowButRight(engine, states),

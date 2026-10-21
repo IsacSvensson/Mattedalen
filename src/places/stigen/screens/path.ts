@@ -18,6 +18,7 @@ import { systemClock, type ItemId, type ItemState } from '../../../engine';
 import { showPathSession } from './session';
 import { setWhere } from '../../../shell/resume';
 import { readShown } from '../../../shell/components/readAloud';
+import { explainButton } from '../../../shell/components/explain';
 
 /**
  * Stigen: the path with a post at every ten and a lantern for every part, and
@@ -66,13 +67,15 @@ export async function showPath(ctx: AppContext, profile: Profile): Promise<void>
         h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile, { at: 'stigen' }) }, avatarIcon(profile.avatar)),
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} stig`),
       ),
+      // Top right, over the sky: what the pictures mean, and read-aloud beside it (docs/PLAN-ENKLARE.md, E4).
+      h('div', { class: 'place-corner' }, explainButton(profile, PATH_PICTURES())),
     ),
     picture.art,
     h('p', { class: 'sr-only' }, picture.artText),
     h('div', { class: 'garden-side' }, picture.line, actions),
   );
   show(ctx, view);
-  void readShown(ctx, profile, { into: '.scene-title' });
+  void readShown(ctx, profile, { into: '.place-corner' });
 }
 
 /**
@@ -112,3 +115,8 @@ export function pathPicture(
     line: now ? h('p', { class: 'place-now' }, icon('lantern'), h('span', null, 'Nu: ', h('strong', null, now.title))) : null,
   };
 }
+
+/** What the lanterns mean, for the child (docs/PLAN-ENKLARE.md, E4). */
+const PATH_PICTURES = () => [
+  { picture: icon('lantern'), words: 'En lykta för varje del. Den lyser när du kan delen. Till slut lyser stigen hela vägen till 100.' },
+];

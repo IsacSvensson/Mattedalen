@@ -18,7 +18,7 @@ import { heatmapView } from '../../shell/components/heatmap';
 import { icon } from '../../shell/components/icons';
 import { h } from '../../shell/dom';
 import { engineFor, loadProgress } from '../../shell/play';
-import { factStats, factStatsText, formatDay, knownOf, partNow, STATUS_TEXT, topConfusions, type FactStats, bestTimes, slowButRight } from '../../shell/stats';
+import { factStats, factStatsText, formatDay, knownOf, partNow, partNowUnit, STATUS_TEXT, topConfusions, type FactStats, bestTimes, slowButRight } from '../../shell/stats';
 import { limitedList } from '../../shell/components/limitedList';
 import type { PlaceSummary } from '../../shell/place';
 import { partProgress } from './logic';
@@ -26,6 +26,8 @@ import { brookDeps, pack } from './pack';
 import { showBrook } from './screens/brook';
 import { runBrookPlacement } from './screens/placement';
 import { wayFor } from '../../shell/words';
+import { BROOK_TIPS } from './tips';
+import { helpTip } from '../../shell/components/helpTip';
 
 /** What the brook covers, for grown-ups. */
 export const BROOK_ABOUT = 'Addition och subtraktion inom 20, och likhetstecknet.';
@@ -103,6 +105,7 @@ export async function brookParentPage(ctx: AppContext, profile: Profile): Promis
     scaleSummary(states),
     h('h3', null, 'Svåra just nu'),
     hardList(states, engine, minus, profile.name),
+    helpTip(BROOK_TIPS[partNowUnit(pack, states, new Set(engine.unlockedUnits(states, meta)))?.id ?? '']),
     h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states),
     h('h3', null, 'Bäckens koll'),
@@ -238,6 +241,7 @@ export async function brookParentSummary(ctx: AppContext, profile: Profile): Pro
     todo.push({ text: `${profile.name} verkar räkna plus när det står minus (${minus[0]!.text}).`, seePlace: 'Visa Bäcken' });
   return {
     now: partNow(pack, states, new Set(engine.unlockedUnits(states, meta))),
+    tip: BROOK_TIPS[partNowUnit(pack, states, new Set(engine.unlockedUnits(states, meta)))?.id ?? ''] ?? null,
     hardest: hardest ? [hardest.text] : null,
     ...knownOf(pack, states),
     slow: slowButRight(engine, states),

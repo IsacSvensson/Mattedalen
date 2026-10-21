@@ -23,6 +23,7 @@ export const tradgarden: Place = {
   closedText: CLOSED_TEXT,
   icon: () => plantIcon('tree'),
   about: GARDEN_ABOUT,
+  where: 'i trädgården',
   parentPage: gardenParentPage,
   parentSummary: gardenParentSummary,
   parentSettings: gardenParentSettings,

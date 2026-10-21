@@ -32,6 +32,7 @@ test('works fully offline after the first visit, without any outside traffic', a
   await switchPlayer(page);
   await openParent(page);
   await parentSettings(page);
+  await page.getByRole('button', { name: 'Flytta till en annan enhet' }).click();
   await page.getByRole('button', { name: 'Visa QR-kod' }).click();
   const qr = await page.locator('.qr-code svg').screenshot();
   await page.getByRole('button', { name: 'Klar' }).click();

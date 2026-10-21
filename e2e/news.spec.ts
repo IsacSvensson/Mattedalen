@@ -35,10 +35,10 @@ test('a new device sees no old news', async ({ page }) => {
 
 test('after an update, the posts the device has not seen, once', async ({ page }) => {
   await createProfile(page, 'Alva', 'brook');
-  await seenNews(page, '2026-10-20-enklare');
+  await seenNews(page, '2026-10-21-start');
   await page.reload();
   await expect(box(page)).toBeVisible();
-  await expect(box(page).locator('.news-item > strong')).toHaveText(['Mindre att läsa för barnen', 'En start för vuxna']);
+  await expect(box(page).locator('.news-item > strong')).toHaveText(['Förklaringar', 'Mindre att läsa för barnen']);
   await box(page).getByRole('button', { name: 'Okej' }).click();
   await expect(box(page)).toHaveCount(0);
   await page.reload();
@@ -51,10 +51,10 @@ test('a device with children from before the news: the two newest, and where the
   await seenNews(page, null);
   await page.reload();
   await expect(box(page).locator('.news-item > strong')).toHaveCount(2);
-  await expect(box(page)).toContainText('Och 6 till under ”Nytt i appen” i ”För vuxna”.');
+  await expect(box(page)).toContainText('Och 7 till under ”Nytt i appen” i ”För vuxna”.');
   await box(page).getByRole('button', { name: 'Okej' }).click();
   await openParent(page);
   await parentLink(page, 'Nytt i appen');
-  await expect(page.locator('.news-item > strong')).toHaveText(['Mindre att läsa för barnen', 'En start för vuxna', 'Enklare ord för vuxna', 'Appen frågar ibland hur det går', 'Tillbaka dit du var', 'Plus först vid bäcken', 'Mer hjälp med minus', 'Tyck till']);
+  await expect(page.locator('.news-item > strong')).toHaveText(['Förklaringar', 'Mindre att läsa för barnen', 'En start för vuxna', 'Enklare ord för vuxna', 'Appen frågar ibland hur det går', 'Tillbaka dit du var', 'Plus först vid bäcken', 'Mer hjälp med minus', 'Tyck till']);
   await expect(page.getByRole('heading', { name: '18 okt' })).toBeVisible();
 });

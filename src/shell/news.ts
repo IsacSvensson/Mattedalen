@@ -17,6 +17,16 @@ export interface NewsItem {
 
 export const NEWS: readonly NewsItem[] = [
   {
+    id: '2026-10-22-forklaringar',
+    day: '2026-10-22',
+    title: 'Förklaringar',
+    points: [
+      'Ett frågetecken vid varje plats visar barnet vad bilderna betyder. ”Så fungerar Mattedalen” förklarar vad ”sitter” betyder.',
+      '”För vuxna” har en mening om varje barn och tips under ”Så kan du hjälpa till”.',
+      'Säkerhetskopian heter ”Spara en kopia”, och ”Att göra” påminner om den.',
+    ],
+  },
+  {
     id: '2026-10-21-lasa',
     day: '2026-10-21',
     title: 'Mindre att läsa för barnen',

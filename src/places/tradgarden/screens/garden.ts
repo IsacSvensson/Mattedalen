@@ -6,7 +6,7 @@ import { harvestTables } from '../division';
 import type { Profile } from '../../../storage';
 import { show, type AppContext } from '../../../shell/app';
 import { gardenGrid, type GridOptions } from '../components/grid';
-import { BLOOM_LABEL, bloomFor, bloomIcon, stageFor, type Bloom, type Stage } from '../../../shell/components/plant';
+import { BLOOM_LABEL, bloomFor, bloomIcon, plantIcon, stageFor, type Bloom, type Stage } from '../../../shell/components/plant';
 import { DEFAULT_DIVISION_SIGN, mathNodes } from '../../../shell/divisionSign';
 import { avatarIcon } from '../../../shell/components/avatars';
 import { icon } from '../../../shell/components/icons';
@@ -26,6 +26,7 @@ import { gardenDeps, pack } from '../pack';
 import { gardenOfferedKey, showPlacementOffer } from './placement';
 import { setWhere } from '../../../shell/resume';
 import { readShown } from '../../../shell/components/readAloud';
+import { explainButton } from '../../../shell/components/explain';
 
 const STAGE_PLURAL: Record<'seed' | 'sprout' | 'bush' | 'tree', string> = {
   seed: 'frön',
@@ -105,6 +106,8 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
         h('button', { class: 'avatar-badge avatar-button', type: 'button', 'aria-label': 'Till dalen', onclick: () => void showValley(ctx, profile, { at: 'tradgarden' }) }, avatarIcon(profile.avatar)),
         h('h1', { class: profile.name.length > 10 ? 'long-name' : undefined }, `${genitive(profile.name)} trädgård`),
       ),
+      // Top right, over the sky: what the pictures mean, and read-aloud beside it (docs/PLAN-ENKLARE.md, E4).
+      h('div', { class: 'place-corner' }, explainButton(profile, GARDEN_PICTURES())),
     ),
     await bloomNews(ctx, profile, states),
     picture.art,
@@ -123,7 +126,7 @@ export async function showGarden(ctx: AppContext, profile: Profile, highlight?: 
     ),
   );
   show(ctx, view);
-  void readShown(ctx, profile, { into: '.scene-title' });
+  void readShown(ctx, profile, { into: '.place-corner' });
 }
 
 /**
@@ -234,3 +237,12 @@ export function knownTables(pack: ContentPack, states: Record<ItemId, ItemState>
 }
 
 export { genitive } from '../../../shell/words';
+
+/** What the plants mean, for the child (docs/PLAN-ENKLARE.md, E4): no times and no numbers. */
+const GARDEN_PICTURES = () => [
+  { picture: plantIcon('seed'), words: 'Ett frö: nytt.' },
+  { picture: plantIcon('sprout'), words: 'En planta: du övar.' },
+  { picture: plantIcon('bush'), words: 'En buske: du kan det.' },
+  { picture: plantIcon('tree'), words: 'Ett träd: du kan det snabbt.' },
+  { picture: bloomIcon('blossom'), words: 'Blommor, kart och frukt är delat med, på samma sätt.' },
+];

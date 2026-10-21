@@ -27,7 +27,7 @@ test('with a Swedish voice: a row in "Att göra" turns reading aloud on, and the
   // The brook's page: a speaker beside its name.
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: /^Bäcken\./ }).click();
-  await page.locator('.scene-title').getByRole('button', { name: 'Läs upp' }).click();
+  await page.locator('.place-corner').getByRole('button', { name: 'Läs upp' }).click();
   await expect.poll(() => spoken(page)).toContain('Alvas bäck.');
 
   // The help card after a wrong answer: read as a whole, with a thought before the way to think.

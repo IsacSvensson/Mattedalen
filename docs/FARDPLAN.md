@@ -17,9 +17,8 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **E4. Förklaringar vid behov** | Vad växterna och ”sitter” betyder, en mening per barn, ”Så kan du hjälpa till” och säkerhetskopian. | [PLAN-ENKLARE](PLAN-ENKLARE.md#e4-förklaringar-vid-behov) | E1–E3 klara, plan för E4 skriven |
-| 2 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
-| 3 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
+| 1 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
+| 2 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
 ## Efter piloten
 
@@ -72,3 +71,4 @@ Avstämningen mot Lgr22 är gjord mot Skolverkets PDF av kursplanen
 | E1 | Snabba rättelser: diagrammet visar senaste 7 dagarna, ”I dag” på solen, ”Tid per dag” och enklare ord i inställningarna. | [PLAN-ENKLARE](PLAN-ENKLARE.md#fynd-från-e1) |
 | E2 | Första starten för den vuxna: vad appen är, hemskärmen, vuxenkoden och frågor om barnet, sedan väljer barnet djur. ”Så fungerar Mattedalen” i ”För vuxna”. | [PLAN-ENKLARE](PLAN-ENKLARE.md#fynd-från-e2) |
 | E3 | Mindre läsning för barnet: kortare hjälpkort som läses upp, uppläsning på fler skärmar, frågan om startkollen med barnets ord, handen och skylten på kartan. | [PLAN-ENKLARE](PLAN-ENKLARE.md#fynd-från-e3) |
+| E4 | Förklaringar vid behov: frågetecknet vid platserna, vad ”sitter” betyder, en mening och tips per barn, säkerhetskopian efter vad man vill göra och en påminnelse. | [PLAN-ENKLARE](PLAN-ENKLARE.md#fynd-från-e4) |

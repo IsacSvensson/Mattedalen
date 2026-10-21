@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG } from '../../../engine';
+import { DEFAULT_CONFIG, systemClock } from '../../../engine';
 import { encodeTransfer, exportFileName, type Profile } from '../../../storage';
 import type { AppContext } from '../../app';
 import { AVATAR_KEYS, avatarName } from '../../components/avatars';
@@ -42,14 +42,16 @@ export async function showChildSettings(ctx: AppContext, profileId: string): Pro
       'section',
       { class: 'parent-section', 'aria-labelledby': 'move-heading' },
       h('h2', { id: 'move-heading' }, 'Flytta eller spara'),
-      h('p', { class: 'muted' }, 'QR-koden flyttar barnets status (vad som sitter). Säkerhetskopian (JSON) flyttar allt, även historiken.'),
+      // After what the grown-up wants to do; QR and file come in the next step (docs/PLAN-ENKLARE.md, E4).
+      h('p', { class: 'muted' }, `Allt om ${profile.name} finns bara på den här enheten.`),
       h(
         'div',
         { class: 'button-row' },
-        h('button', { class: 'soft-button', type: 'button', onclick: () => void showQr(ctx, profile) }, 'Visa QR-kod'),
-        h('button', { class: 'soft-button', type: 'button', onclick: () => void downloadBackup(ctx, profile) }, 'Spara säkerhetskopia (JSON)'),
-        h('button', { class: 'soft-button', type: 'button', onclick: () => void showPilotExport(ctx, profile.id) }, 'Fil till piloten…'),
+        h('button', { class: 'soft-button', type: 'button', onclick: () => void moveToDevice(ctx, profile) }, 'Flytta till en annan enhet'),
+        h('button', { class: 'soft-button', type: 'button', onclick: () => void saveBackup(ctx, profile) }, 'Spara en kopia'),
       ),
+      h('p', { class: 'muted' }, 'Kopian är en fil som oftast hamnar bland hämtade filer. Hämta tillbaka den under ”För vuxna”, ”Hämta ett barn” och ”Säkerhetskopia”.'),
+      h('button', { class: 'soft-button', type: 'button', onclick: () => void showPilotExport(ctx, profile.id) }, 'Fil till piloten…'),
       h('button', { class: 'link-button danger', type: 'button', onclick: () => void deleteProfile(ctx, profile) }, `Ta bort ${profile.name}…`),
     ),
   );
@@ -145,6 +147,35 @@ async function showQr(ctx: AppContext, profile: Profile): Promise<void> {
     [{ value: 'ok', label: 'Klar', primary: true }],
     { cancel: false },
   );
+}
+
+/** Moving to another device: the quick QR code, or the file with everything. */
+async function moveToDevice(ctx: AppContext, profile: Profile): Promise<void> {
+  const way = await choose(
+    'Flytta till en annan enhet',
+    h(
+      'div',
+      { class: 'move-ways' },
+      h('p', null, h('strong', null, 'QR-koden'), ' går snabbt och tar med vad som sitter. Skanna den med den andra enheten.'),
+      h('p', null, h('strong', null, 'Filen'), ' tar med allt, också historiken. Skicka den till den andra enheten och hämta den där.'),
+    ),
+    [
+      { value: 'qr', label: 'Visa QR-kod', primary: true },
+      { value: 'file', label: 'Spara en fil' },
+    ],
+  );
+  if (way === 'qr') await showQr(ctx, profile);
+  if (way === 'file') await saveBackup(ctx, profile);
+}
+
+/** The day a copy of the child was last saved, for the reminder in "Att göra" (docs/PLAN-ENKLARE.md, E4). */
+export const backupDayKey = (profileId: string) => `backupDay:${profileId}`;
+
+/** A copy of everything about the child, as a file; the day is kept for the reminder. */
+export async function saveBackup(ctx: AppContext, profile: Profile): Promise<void> {
+  await downloadBackup(ctx, profile);
+  await ctx.store.setSetting(backupDayKey(profile.id), systemClock.today());
+  toast('Kopian är sparad');
 }
 
 async function downloadBackup(ctx: AppContext, profile: Profile): Promise<void> {

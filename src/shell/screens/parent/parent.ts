@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG, systemClock } from '../../../engine';
+import { DEFAULT_CONFIG, diffDays, systemClock } from '../../../engine';
 import { moreTime } from '../../play';
 import { persistenceStatus, requestPersistence, type Profile } from '../../../storage';
 import { show, type AppContext } from '../../app';
@@ -6,7 +6,7 @@ import { avatarIcon } from '../../components/avatars';
 import { toast } from '../../components/modal';
 import { icon } from '../../components/icons';
 import { h } from '../../dom';
-import { formatDay, minutesPerDay, slowFacts, weekdayShort } from '../../stats';
+import { childSentence, formatDay, minutesPerDay, slowFacts, weekdayShort } from '../../stats';
 import { showProfiles } from '../profiles';
 import { showDevice } from './device';
 import { showAbout } from './about';
@@ -14,10 +14,11 @@ import { showFeedback } from './feedback';
 import { showNews } from './news';
 import { askIsDue, askNow } from '../../ask';
 import { pageRow, profileSaver, showParentPage } from './frame';
-import type { ParentTodo, Place, PlaceSummary } from '../../place';
+import { placeIsOpen, type ParentTodo, type Place, type PlaceSummary } from '../../place';
 import { showImport } from './importPage';
-import { showChildSettings } from './settings';
+import { backupDayKey, saveBackup, showChildSettings } from './settings';
 import { setWhere } from '../../resume';
+import { genitive } from '../../words';
 import { readsSelfKey } from '../../components/readAloud';
 import { speechSupported, swedishVoiceLoaded } from '../../speech';
 
@@ -72,17 +73,33 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
   show(ctx, view);
 }
 
-/** One child: the last seven days, a row per place, and the child's settings. */
+/** One child: a sentence about them, tips, the last seven days, a row per place, and the child's settings. */
 async function childOverview(ctx: AppContext, profile: Profile): Promise<HTMLElement> {
   const sessions = await ctx.store.listSessions(profile.id);
   const today = systemClock.today();
   const week = minutesPerDay(sessions, today, 7);
   const played = week.filter((d) => d.minutes > 0).length;
+  const places = await Promise.all(
+    ctx.places.map(async (place) => ({ place, open: await placeIsOpen(place, ctx, profile), summary: await place.parentSummary(ctx, profile, noSave) })),
+  );
+  const open = places.filter((p) => p.open);
+  // What the child is on, and a tip for each (docs/PLAN-ENKLARE.md, E4).
+  const nows = open.filter((p) => p.summary.now).map((p) => `${p.summary.now} ${p.place.where}`);
+  const tips = open.filter((p) => p.summary.tip);
 
   return h(
     'section',
     { class: 'parent-section', 'aria-labelledby': 'child-heading' },
     h('h2', { id: 'child-heading', class: 'child-heading' }, h('span', { class: 'avatar-badge small' }, avatarIcon(profile.avatar)), profile.name),
+    h('p', { class: 'child-sentence' }, childSentence(profile.name, week, nows)),
+    tips.length
+      ? h(
+          'div',
+          { class: 'help-tips' },
+          h('h3', null, 'Så kan du hjälpa till'),
+          h('ul', null, tips.map((p) => h('li', null, h('strong', null, `${p.summary.now}: `), p.summary.tip!))),
+        )
+      : null,
     h('h3', null, 'Senaste 7 dagarna'),
     minutesChart(week),
     h('p', { class: 'muted' }, `${week.reduce((s, d) => s + d.minutes, 0)} minuter, ${played} ${played === 1 ? 'dag' : 'dagar'} med spel.`),
@@ -90,8 +107,9 @@ async function childOverview(ctx: AppContext, profile: Profile): Promise<HTMLEle
     h(
       'ul',
       { class: 'parent-rows' },
-      await Promise.all(ctx.places.map(async (place) => placeRow(place, await place.parentSummary(ctx, profile, noSave), () => void showParentPlace(ctx, profile.id, place.id)))),
+      places.map(({ place, summary }) => placeRow(place, summary, () => void showParentPlace(ctx, profile.id, place.id))),
     ),
+    sitterLink(ctx, profile.id),
     h(
       'ul',
       { class: 'parent-rows' },
@@ -113,7 +131,24 @@ export async function showParentPlace(ctx: AppContext, profileId: string, placeI
   setWhere({ kind: 'parent', page: 'place', profileId, placeId });
   await ctx.store.setSetting(checksSeenKey(profileId, place.id), await checkCount(ctx, profileId, place));
   const save = profileSaver(ctx, profile, () => showParentPlace(ctx, profileId, placeId));
-  showParentPage(ctx, { title: place.name, subtitle: profile.name, back: () => void showParent(ctx, profileId) }, await place.parentPage(ctx, profile, save));
+  showParentPage(ctx, { title: place.name, subtitle: profile.name, back: () => void showParent(ctx, profileId) }, await place.parentPage(ctx, profile, save), sitterLink(ctx, profileId));
+}
+
+/** What "sitter" means, on "Så fungerar Mattedalen" (docs/PLAN-ENKLARE.md, E4). */
+function sitterLink(ctx: AppContext, profileId: string): HTMLElement {
+  return h('button', { class: 'link-button sitter-link', type: 'button', onclick: () => showAbout(ctx, profileId, 'sitter') }, 'Vad betyder ”sitter”?');
+}
+
+/** Play days before the first reminder to save a copy, and days between the reminders (docs/PLAN-ENKLARE.md, E4). */
+export const BACKUP_PLAY_DAYS = 5;
+export const BACKUP_EVERY_DAYS = 30;
+
+/** Whether to remind about a copy: after five play days without one, then a month after the last, if the child has played since. */
+async function backupDue(ctx: AppContext, profile: Profile): Promise<boolean> {
+  const days = new Set((await ctx.store.listSessions(profile.id)).filter((s) => s.answered > 0).map((s) => s.day));
+  const last = await ctx.store.getSetting<string>(backupDayKey(profile.id));
+  if (!last) return days.size >= BACKUP_PLAY_DAYS;
+  return diffDays(last, systemClock.today()) >= BACKUP_EVERY_DAYS && [...days].some((d) => d > last);
 }
 
 /** Rows only read in the overview; the things to do save through their own saver. */
@@ -171,6 +206,14 @@ async function todoSection(ctx: AppContext, profile: Profile | undefined): Promi
         text: `Läser ${profile.name} själv? Appen kan läsa upp frågorna med en svensk röst på enheten.`,
         action: { label: 'Slå på uppläsning', run: () => profileSaver(ctx, profile, again)({ settings: { readAloud: true } }) },
         also: { label: `${profile.name} läser själv`, run: () => ctx.store.setSetting(readsSelfKey(profile.id), true) },
+      },
+    });
+  if (profile && (await backupDue(ctx, profile)))
+    items.push({
+      place: null,
+      todo: {
+        text: `Spara en kopia av ${genitive(profile.name)} framsteg. Allt finns bara på den här enheten.`,
+        action: { label: 'Spara en kopia', run: () => saveBackup(ctx, profile) },
       },
     });
   const slow = slowFacts(speeds);

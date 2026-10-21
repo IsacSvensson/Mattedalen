@@ -532,6 +532,92 @@ h1:focus {
   margin-top: 2px;
 }
 
+/* For grown-ups (docs/PLAN-ENKLARE.md, E4): a sentence about the child, and how to help at home. */
+.child-sentence {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.help-tips ul {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.help-tips li + li {
+  margin-top: 6px;
+}
+
+.help-tip {
+  padding: 10px 14px;
+  border-radius: var(--r-tile);
+  background: var(--hint);
+}
+
+.sitter-link {
+  align-self: flex-start;
+}
+
+/* "Vad betyder bilderna?" beside a place's name, and its card (docs/PLAN-ENKLARE.md, E4). */
+.place-corner {
+  position: absolute;
+  /* Low on the right, over the hills: below the name, which may need two lines. */
+  bottom: 8px;
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+}
+
+.place-corner .icon-button {
+  width: 48px;
+  height: 48px;
+}
+
+.explain-button {
+  background: var(--card);
+}
+
+.explain-mark {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.explain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.explain-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.explain-picture {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 64px;
+}
+
+.explain-picture > svg,
+.explain-picture > .icon {
+  width: 52px;
+  height: 52px;
+}
+
+.explain-picture .bridge {
+  width: 64px;
+}
+
 /* A speaker in the top corner of a screen a child reads (docs/PLAN-ENKLARE.md, E3). */
 .screen-speak {
   position: fixed;

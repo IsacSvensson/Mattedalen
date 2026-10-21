@@ -22,6 +22,8 @@ export interface ParentTodo {
 export interface PlaceSummary {
   /** What the child is on now, e.g. "Tiokamrater". */
   now: string | null;
+  /** A tip for a grown-up for that part, with a question to ask at home ("Så kan du hjälpa till", docs/PLAN-ENKLARE.md, E4). */
+  tip?: string | null;
   /** What is hardest right now, e.g. "7 × 8 = 56" (as nodes, so delat med can be written with the child's sign). */
   hardest: (Node | string)[] | null;
   /** How much sits: facts at least fluent, of all the place's. */
@@ -94,6 +96,8 @@ export interface Place {
   icon(): Element;
   /** What the place covers, in one line for grown-ups. */
   about: string;
+  /** Where in the valley, in a sentence: "vid bäcken", "på stigen", "i trädgården". */
+  where: string;
   /**
    * The place's page in "För vuxna" for one child, always in the same order
    * (docs/PLAN-FORALDRAVYN.md): the state, what is hard right now and the mix-ups,

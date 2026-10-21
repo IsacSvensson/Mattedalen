@@ -201,5 +201,5 @@ test('"Så fungerar Mattedalen" in "För vuxna": the same four lines', async ({ 
   await page.getByRole('button', { name: 'Byt spelare' }).click();
   await openParent(page);
   await parentLink(page, 'Så fungerar Mattedalen');
-  await expect(page.locator('.about-facts li')).toHaveCount(4);
+  await expect(page.locator('.about-facts').first().locator('li')).toHaveCount(4);
 });

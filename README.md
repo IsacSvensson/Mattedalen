@@ -354,8 +354,14 @@ steg tillbaka, från en sida till översikten.
   10–15 minuter, **Ge mer tid** (dubbel tid för buske och träd, för ett barn som
   svarar rätt men långsamt) och uppläsning, sedan platsernas egna val
   (`Place.parentSettings`): fritt svar, hur delat med skrivs och om tabellerna
-  väntar på stigen. Längst ner flyttar man eller sparar barnet, eller tar bort
-  profilen.
+  väntar på stigen. Längst ner finns ”Flytta till en annan enhet” (QR-kod eller
+  fil) och ”Spara en kopia”, och att ta bort profilen. ”Att göra” påminner om en
+  kopia efter fem speldagar och sedan var 30:e dag
+  ([PLAN-ENKLARE](docs/PLAN-ENKLARE.md#e4-förklaringar-vid-behov)).
+- **Överst för varje barn** står en mening om de senaste 7 dagarna och vad barnet
+  är på, och ”Så kan du hjälpa till” med ett tips per plats (`tips.ts` i varje
+  plats). Samma tips står under ”Svåra just nu” på platsens sida. ”Vad betyder
+  ’sitter’?” leder till ”Så fungerar Mattedalen”, där reglerna läses ur motorn.
 - **Den här enheten**: lagring, version och uppdatering, hemskärmen, integritet
   och vuxenkoden.
 - **Hämta ett barn**: QR-kod, säkerhetskopia och Gångerträdgården.
