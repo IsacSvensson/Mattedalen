@@ -17,8 +17,11 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
-| 2 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
+| 1 | **ST1 och KL1–KL4. Klockans tabell och Klocktornet** | Klockan som stöd för femmans tabell, och en ny plats där barnet lär sig läsa klockan: steg 0–5 i trappan. | [PLAN-KLOCKAN](PLAN-KLOCKAN.md) | Plan klar |
+| 2 | **ST2–ST5. Fler stöd i trädgården** | Fingrarna för ×9, hopp på tallinjen, mönster i tabellen och pengar. | [PLAN-KLOCKAN](PLAN-KLOCKAN.md#del-1-stöden-i-trädgården) | |
+| 3 | **KL5–KL7. Mer av klockan** | De svenska fraserna, minuten, dygnet och hur lång tid. | [PLAN-KLOCKAN](PLAN-KLOCKAN.md#del-2-klocktornet) | |
+| 4 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |
+| 5 | **Pilot med 6–10 barn** | Prövar progressionen, växterna, kartan och föräldravyn. | Plan skrivs | |
 
 ## Efter piloten
 
@@ -40,6 +43,12 @@ Bäcken, Stigen, Trädgården, föräldravyn heter ”För vuxna”, och ”Att 
 försvinner när saken är gjord. Scenerna i R3a ersattes av en karta att dra runt
 i, med ”I dag” i hörnet i stället för en stor knapp (se
 [PLAN-DALEN](PLAN-DALEN.md#beslut)).
+
+I november 2026 valde upphovspersonen att bygga Klocktornet, en ny plats, före
+piloten. Det går emot regel 4 under ”Så prioriterar vi”. Klockan finns i
+kursplanen men inte i appen, och den hör ihop med femmans tabell. Planen bygger
+på ett underlag om hur barn lär sig klockan ([PLAN-KLOCKAN](PLAN-KLOCKAN.md),
+[KLOCKAN-UNDERLAG](KLOCKAN-UNDERLAG.md)).
 
 Avstämningen mot Lgr22 är gjord mot Skolverkets PDF av kursplanen
 ([LGR22](LGR22.md)). Den görs igen när den nya kursplanen kommer.
