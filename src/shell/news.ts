@@ -17,6 +17,15 @@ export interface NewsItem {
 
 export const NEWS: readonly NewsItem[] = [
   {
+    id: '2026-11-04-klockan',
+    day: '2026-11-04',
+    title: 'Klockan i trädgården',
+    points: [
+      'Efter ett fel svar i femmans tabell visar hjälpen ibland en klocka: minutvisaren på 7 är 35 minuter, alltså 7 × 5.',
+      'Klockan går att stänga av under barnets inställningar, i ”Bilder i hjälpen”.',
+    ],
+  },
+  {
     id: '2026-10-22-forklaringar',
     day: '2026-10-22',
     title: 'Förklaringar',

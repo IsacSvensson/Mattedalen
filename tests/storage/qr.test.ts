@@ -205,6 +205,13 @@ describe('a child with every place (MD1)', () => {
     expect(plain.tableReady).toBeUndefined();
   });
 
+  it('carries the pictures in the help that are turned off (docs/PLAN-KLOCKAN.md)', () => {
+    const off = decodeTransfer(encodeTransfer(transferOf({ ...profile, settings: { ...profile.settings, helpPicturesOff: ['clock'] } }, [{ pack: addition, states: mixed(addition) }])));
+    expect(off.helpPicturesOff).toEqual(['clock']);
+    const on = decodeTransfer(encodeTransfer(transferOf(profile, [{ pack: addition, states: mixed(addition) }])));
+    expect(on.helpPicturesOff).toBeUndefined();
+  });
+
   it('opens a started unit and what it builds on, not every earlier unit', () => {
     const unitOf = (id: string) => addition.units.find((u) => u.id === id)!;
     const states = Object.fromEntries(addition.items.map((it) => [it.id, emptyState(it.id)])) as Record<string, ItemState>;

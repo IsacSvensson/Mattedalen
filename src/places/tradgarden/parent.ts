@@ -21,7 +21,7 @@ import {
 } from '../../content/multiplication';
 import { DEFAULT_DIVISION_SIGN, DIVISION_SIGNS, mathNodes, type DivisionSign } from '../../shell/divisionSign';
 import { checkResultsView } from '../../shell/components/checkResults';
-import type { Profile } from '../../storage';
+import { HELP_PICTURES, type HelpPicture, type Profile } from '../../storage';
 import type { AppContext } from '../../shell/app';
 import { plantIcon } from '../../shell/components/plant';
 import { heatmapView } from '../../shell/components/heatmap';
@@ -161,6 +161,37 @@ export async function gardenParentSettings(ctx: AppContext, profile: Profile, sa
     ),
     divisionSignSetting(profile, save),
     waitSetting(ctx, profile, save),
+    helpPicturesSetting(profile, save),
+  );
+}
+
+/**
+ * "Bilder i hjälpen" (docs/PLAN-KLOCKAN.md): the pictures besides the rectangle
+ * on the help card, each on by default. A school that teaches one way turns the rest off.
+ */
+function helpPicturesSetting(profile: Profile, save: SaveProfile): HTMLElement {
+  const off = new Set(profile.settings.helpPicturesOff ?? []);
+  const box = (picture: HelpPicture, text: string) =>
+    h(
+      'label',
+      { class: 'check' },
+      h('input', {
+        type: 'checkbox',
+        checked: !off.has(picture),
+        onchange: (e: Event) => {
+          if ((e.target as HTMLInputElement).checked) off.delete(picture);
+          else off.add(picture);
+          void save({ settings: { helpPicturesOff: HELP_PICTURES.filter((p) => off.has(p)) } });
+        },
+      }),
+      h('span', null, text),
+    );
+  return h(
+    'fieldset',
+    { class: 'help-pictures' },
+    h('legend', null, 'Bilder i hjälpen'),
+    h('p', { class: 'muted' }, 'Efter ett fel svar visar hjälpen rektangeln och de här bilderna, en i taget.'),
+    box('clock', 'Klockan för femmans tabell: minutvisaren på 7 är 35 minuter'),
   );
 }
 

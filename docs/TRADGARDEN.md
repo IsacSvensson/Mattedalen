@@ -156,6 +156,12 @@ inget hämtas utifrån.
   bara ”fel” och aldrig rött. Är felsvaret en typisk förväxling får barnet en vänlig
   förklaring (”48 är 8 × 6 – nära!”, ”7 är 3 + 4. Här ska det vara 3 gånger 4.”).
   Felsvaret loggas som förväxling.
+- **Klockan för femmans tabell** ([PLAN-KLOCKAN](PLAN-KLOCKAN.md#st1-klockans-tabell)).
+  En fakta med 5 och delat med 5 får varannan gång en urtavla på hjälpkortet i
+  stället för rektangeln (`helpPictures.ts`). Urtavlan har bara minutvisaren och
+  minuterna runt kanten, och visaren hoppar från 12 fram till svaret: ”Minutvisaren
+  på 7 är 35 minuter. 7 × 5 = 35.” Under ”Bilder i hjälpen” i barnets
+  inställningar kan en vuxen stänga av den.
 - **Avbrutet pass.** Lämnar barnet passet i förtid och kommer tillbaka samma dag,
   fortsätter samma pass: övad tid och antal nya fakta räknas ihop över dagen
   (`meta.today`). Dropparna fortsätter där de var, dagen blir klar när summan når

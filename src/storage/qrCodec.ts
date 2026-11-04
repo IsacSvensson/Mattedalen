@@ -1,5 +1,6 @@
 import { addDays, diffDays, emptyState, hasBeenFluent, type DayKey, type ItemState } from '../engine';
 import { ImportError, tableReadyOf } from './backup';
+import type { HelpPicture } from './types';
 
 /**
  * Compact snapshot of a child's status for moving between devices with a QR
@@ -140,6 +141,8 @@ export interface QrTransfer {
   tablesWait?: boolean;
   /** A grown-up gives the child more time (bit 5 of the flags). */
   moreTime?: boolean;
+  /** Pictures in the help that are turned off: the clock is bit 6 of the flags (bit 7 is kept for more). */
+  helpPicturesOff?: HelpPicture[];
   /** The day each garden table could first open (`ProfileSettings.tableReady`). */
   tableReady?: Record<string, DayKey>;
   packs: QrPackLevels[];
@@ -156,7 +159,7 @@ export function encodeTransfer(t: QrTransfer): string {
   const bytes = [
     TRANSFER_VERSION,
     Math.max(0, Math.min(255, Math.round(t.sessionMinutes))),
-    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0) | (t.tablesWait === false ? 16 : 0) | (t.moreTime ? 32 : 0),
+    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0) | (t.tablesWait === false ? 16 : 0) | (t.moreTime ? 32 : 0) | (t.helpPicturesOff?.includes('clock') ? 64 : 0),
     name.length,
     ...name,
     avatar.length,
@@ -240,6 +243,7 @@ export function decodeTransfer(text: string): QrTransfer {
     ...(sign !== 'fraction' ? { divisionSign: sign } : {}),
     ...((flags & 16) === 16 ? { tablesWait: false } : {}),
     ...((flags & 32) === 32 ? { moreTime: true } : {}),
+    ...((flags & 64) === 64 ? { helpPicturesOff: ['clock'] as HelpPicture[] } : {}),
     ...(tableReady ? { tableReady } : {}),
     packs,
   };

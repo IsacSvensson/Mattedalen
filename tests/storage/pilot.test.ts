@@ -7,7 +7,7 @@ const backup: ProfileExport = {
   format: EXPORT_FORMAT,
   version: 1,
   exportedAt: 1,
-  profile: { id: 'p-123', name: 'Alva Andersson', avatar: '🦊', createdAt: 5, settings: { ...DEFAULT_SETTINGS, moreTime: true } },
+  profile: { id: 'p-123', name: 'Alva Andersson', avatar: '🦊', createdAt: 5, settings: { ...DEFAULT_SETTINGS, moreTime: true, helpPicturesOff: ['clock'] } },
   progress: [
     {
       profileId: 'p-123',
@@ -42,6 +42,7 @@ describe('the file for the pilot', () => {
     expect(file.places[0]!.items).toEqual({ '7x8': expect.objectContaining({ status: 'learning', seen: 4, correct: 2 }) });
     expect(file.places[0]!.meta.unlockedUnitIds).toEqual(['u2']);
     expect(file.settings.moreTime).toBe(true);
+    expect(file.settings.helpPicturesOff).toEqual(['clock']);
   });
 
   it('takes only what it lists: a new field in the profile does not slip in', () => {

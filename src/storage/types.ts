@@ -22,6 +22,19 @@ export interface ProfileSettings {
   tableReady?: Record<string, DayKey>;
   /** A grown-up gives the child more time: the time limits for a bush and a tree are doubled. */
   moreTime?: boolean;
+  /** Pictures in the help that a grown-up has turned off ("Bilder i hjälpen", docs/PLAN-KLOCKAN.md). All are on when left out. */
+  helpPicturesOff?: HelpPicture[];
+}
+
+/** The extra pictures in the garden's help, besides the rectangle (docs/PLAN-KLOCKAN.md, ST). */
+export const HELP_PICTURES = ['clock'] as const;
+export type HelpPicture = (typeof HELP_PICTURES)[number];
+
+/** Only names this version knows, each once; undefined when none is left. */
+export function helpPicturesOffOf(raw: unknown): HelpPicture[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out = HELP_PICTURES.filter((p) => raw.includes(p));
+  return out.length ? [...out] : undefined;
 }
 
 export const DEFAULT_SETTINGS: ProfileSettings = {

@@ -353,8 +353,8 @@ steg tillbaka, från en sida till översikten.
 - **Barnets inställningar** samlar allt barnet har: namn, djur, tid per dag
   10–15 minuter, **Ge mer tid** (dubbel tid för buske och träd, för ett barn som
   svarar rätt men långsamt) och uppläsning, sedan platsernas egna val
-  (`Place.parentSettings`): fritt svar, hur delat med skrivs och om tabellerna
-  väntar på stigen. Längst ner finns ”Flytta till en annan enhet” (QR-kod eller
+  (`Place.parentSettings`): fritt svar, hur delat med skrivs, om tabellerna
+  väntar på stigen och ”Bilder i hjälpen” (klockan för femmans tabell). Längst ner finns ”Flytta till en annan enhet” (QR-kod eller
   fil) och ”Spara en kopia”, och att ta bort profilen. ”Att göra” påminner om en
   kopia efter fem speldagar och sedan var 30:e dag
   ([PLAN-ENKLARE](docs/PLAN-ENKLARE.md#e4-förklaringar-vid-behov)).

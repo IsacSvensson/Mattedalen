@@ -12,6 +12,8 @@ import { divisionBuilder } from '../components/divisionBuilder';
 import { shareBuilder, shareTaskOf } from '../components/shareBuilder';
 import { groupsView, skipView } from '../components/groupsView';
 import { arrayView, partsOf } from '../components/arrayView';
+import { clockFace } from '../../../shell/components/clockFace';
+import { clockLine, clockPosition, pictureFor } from '../helpPictures';
 import { gardenDeps } from '../pack';
 import { showGarden } from './garden';
 import { showSessionEnd } from './sessionEnd';
@@ -153,11 +155,17 @@ function gardenSession(ctx: AppContext, profile: Profile): SessionPlace {
       const share = shareTaskOf(q.item.hints);
       if (share) return { strategy: strategyText(q), visual: shareBuilder({ task: share }) };
       const { a, b } = square(q.item.id);
-      return {
-        note: isDivisionId(q.item.id) ? divisionNote(a * b, b, fb.given) : confusionNote(a, b, fb.given),
-        strategy: strategyText(q),
-        visual: picture(q),
-      };
+      const note = isDivisionId(q.item.id) ? divisionNote(a * b, b, fb.given) : confusionNote(a, b, fb.given);
+      // The pictures take turns, one each time the child meets the item (docs/PLAN-KLOCKAN.md).
+      if (pictureFor(q.item.id, q.state?.seen ?? 0, profile.settings) === 'clock') {
+        const at = clockPosition(q.item.id)!;
+        return {
+          note,
+          strategy: clockLine(q.item.id) ?? undefined,
+          visual: clockFace({ minute: at * 5, minuteRing: true, hop: true, label: `En klocka. Minutvisaren står på ${at}.` }),
+        };
+      }
+      return { note, strategy: strategyText(q), visual: picture(q) };
     },
   };
 }

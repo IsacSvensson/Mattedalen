@@ -7,7 +7,7 @@ const TABLE_TIPS: Record<string, string> = {
   lika: 'Gånger är lika stora grupper, och dela lika är att fördela. Fråga: 3 tallrikar med 2 kakor på varje, hur många kakor?',
   u2: '×2 är dubbelt. Fråga: vad är dubbelt av 7? Och hälften av 14?',
   u10: '×10 sätter en nolla efter: 6 × 10 är 60. Fråga: hur många fingrar har 4 personer?',
-  u5: '×5 är hälften av ×10: 6 × 5 är hälften av 60. Fråga: hur mycket är 7 femkronor?',
+  u5: '×5 är hälften av ×10, eller minuterna på klockan: minutvisaren på 6 är 30 minuter. Fråga: hur många minuter är det när minutvisaren står på 4?',
   u1: '×1 ändrar ingenting: 8 × 1 är 8. Fråga: 9 korgar med 1 äpple i varje, hur många äpplen?',
   u4: '×4 är dubbelt av dubbelt. Fråga: vad är dubbelt av 6? Och dubbelt av det?',
   u3: '×3 är ×2 och en grupp till: 3 × 7 är 14 + 7. Fråga: hur många hjul har 5 trehjulingar?',

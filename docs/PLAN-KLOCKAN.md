@@ -24,7 +24,7 @@ Tornet ska ge barnet fyra förmågor:
 
 | Fas | Innehåll | Storlek |
 |---|---|---|
-| ST1. Klockans tabell | Urtavlan med minutvisaren som bild för ×5 och ÷5, regeln för fler bilder i hjälpen, och inställningen ”Bilder i hjälpen”. | Mellan |
+| ST1. Klockans tabell **(klar)** | Urtavlan med minutvisaren som bild för ×5 och ÷5, regeln för fler bilder i hjälpen, och inställningen ”Bilder i hjälpen”. | Mellan |
 | KL1. Urtavlan, visarna och svaren | Urtavlan, visare att ställa och en digital klocka. Skalet får egna svar i stället för knappsatsen, och svarsknappar som kan vara urtavlor. | Mellan |
 | KL2. Innehållet, steg 0–5 | Paketet för klockan: dagen, urtavlan, timvisaren, hel och halv, kvart och fem minuter. Felen och felsvaren. | Stor |
 | KL3. Passet och hjälpen | Platsens sida och passet. Hjälpen säger vilken visare som är fel. Stöden tas bort ett i taget. | Mellan |
@@ -165,6 +165,23 @@ testversionen och släpps när den är provad.
   - med rutan urkryssad visas bara rektangeln;
   - minskade rörelser.
 - **Skärmbilder:** hjälpkortet med klockan på 320 och 360 px och på surfplatta.
+
+#### Fynd från ST1
+
+![Telefon: hjälpkortet efter ett fel svar på en fakta med 5, med klockan](img/klockan.png)
+
+*Telefon, 360 px. Minutvisaren har hoppat från 12 fram till svaret, och minuterna den passerat är tända.*
+
+- **Bilden väljs av `seen` när frågan ställs.** Ett barn med jämnt antal möten
+  ser rektangeln och med udda antal klockan. Samma fel två gånger i rad visar
+  därför båda bilderna.
+- **2 × 5 och 10 × 5** har klockan som alla andra fakta med 5. I e2e-testerna
+  vilar de med tvåorna och tiorna, och testet letar bara efter de andra.
+- **Enhetstesterna har ingen DOM.** Urtavlans vinklar testas som rena
+  funktioner (`minuteAngle`, `hourAngle`) för alla 720 minuterna. Själva bilden,
+  hoppen och minskade rörelser testas i `e2e/helpPictures.spec.ts`.
+- **QR-koden:** klockan avstängd är bit 6 i flaggorna. Bit 7 är kvar till fler
+  bilder.
 
 ### ST2. Fingrarna för ×9
 

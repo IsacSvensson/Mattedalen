@@ -48,7 +48,7 @@ const pick = <T extends object, K extends keyof T>(from: T, keys: readonly K[]):
   return out;
 };
 
-const SETTINGS = ['sessionMinutes', 'readAloud', 'allowFree', 'moreTime', 'gardenOpen', 'pathOpen', 'tablesWait', 'tableReady', 'divisionSign'] as const;
+const SETTINGS = ['sessionMinutes', 'readAloud', 'allowFree', 'moreTime', 'gardenOpen', 'pathOpen', 'tablesWait', 'tableReady', 'divisionSign', 'helpPicturesOff'] as const;
 const ITEM = [
   'status',
   'box',

@@ -1,6 +1,6 @@
 import { emptyState, type ItemState, type LearnerMeta } from '../engine';
 import type { AttemptDaySummary, Profile, Progress, SessionRecord, StoredAttempt } from './types';
-import { DEFAULT_SETTINGS } from './types';
+import { DEFAULT_SETTINGS, helpPicturesOffOf } from './types';
 
 export const EXPORT_FORMAT = 'mattedalen-profil';
 /** Backups from Gångerträdgården: the same content, read as version 1. */
@@ -97,6 +97,7 @@ function sanitizeProfile(raw: unknown): Profile {
       ...(settings.tablesWait === false ? { tablesWait: false } : {}),
       ...(tableReadyOf(settings.tableReady) ? { tableReady: tableReadyOf(settings.tableReady) } : {}),
       ...(settings.moreTime === true ? { moreTime: true } : {}),
+      ...(helpPicturesOffOf(settings.helpPicturesOff) ? { helpPicturesOff: helpPicturesOffOf(settings.helpPicturesOff) } : {}),
     },
   };
 }
