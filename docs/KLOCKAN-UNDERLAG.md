@@ -3,6 +3,10 @@
 *Underlaget kommer från upphovspersonen och står här ordagrant. Planen som bygger
 på det är [PLAN-KLOCKAN](PLAN-KLOCKAN.md).*
 
+*Rättelse: det som står om Wang m.fl. (”Watching versus touching”), att fördelen
+med pekskärm bara syntes på surfplattan, stämmer inte. Se
+[jämförelsen sist](#jämförelse-med-det-andra-underlaget).*
+
 Bygg spelet efter samma ordning som skolan använder, alltså hel timme → halv → kvart → fem minuter → minut. Forskningen har bekräftat den ordningen för åk 1–3. Fyra saker bör dock skilja spelet från en traditionell kurs. Timvisaren ska behandlas som en *kontinuerlig* mätare från första början. Den digitala klockan ska vävas in tidigt i stället för att vänta till åk 3. Den svenska relativa språkformen ("fem i halv fyra") ska läggas som ett eget, sent lager. Förfluten tid ska tränas genom vardagssituationer och tidslinjer, inte genom procedurer.
 
 ## TL;DR
@@ -209,3 +213,39 @@ Steg 0 och tidskänsla (duration) bör löpa *parallellt* genom hela trappan, in
 - **Ofullständiga uppgifter om läromedel.** Uppgifterna om Singma bygger delvis på skolors planeringar, och Matte Direkt och Mattespanarna kunde inte verifieras för åk 1–3. Uppgifterna om Australien för Foundation/År 1 och År 5 kommer från sekundärkällor.
 - **Inga klockspecifika studier om spelmekanik.** Rekommendationerna om feedback och utspridd repetition bygger på generell lärandeforskning. Det saknas klockspecifika effektstudier.
 - **Lgr22 kan ändras.** Läroplanen kan revideras. Skolverket aviserar nya läroplaner och kursplaner, så stäm av mot gällande version vid lansering.
+
+## Jämförelse med det andra underlaget
+
+*Upphovspersonens jämförelse av de två underlagen, ordagrant. Det andra
+underlaget är [KLOCKAN-UNDERLAG-2](KLOCKAN-UNDERLAG-2.md).*
+
+De två rapporterna säger i stort sett samma sak, och den andra rättar ett fel i min.
+
+**Här är de överens**
+- Tid är mer än att läsa av klockan. Hur länge något tar, i vilken ordning saker händer och vardagssammanhang hör också till. Båda bygger på van Bommel & Walla (2025).
+- Ordningen är hel timme, halv, kvart, fem minuter och sist minut.
+- Det svåra är att timvisaren står *mellan* två siffror. Båda varnar för att barnet bara memorerar att "6 betyder halv".
+- Analog och digital klocka är olika färdigheter, och barnet behöver öva på att översätta mellan dem åt båda hållen.
+- Spelet bör mäta varje delfärdighet för sig, ge feedback som pekar på just felet och inte belöna snabbhet för tidigt.
+
+**Där jag hade fel**
+Jag skrev att fördelen med pekskärm (Wang m.fl.) bara syntes när barnen testades på surfplattan. Det stämmer inte enligt studiens sammanfattning. Barn som lärt sig på surfplattan förbättrades mer än de som tittade på video, och de kunde föra över det till andra klockor. Testgrupperna med surfplatta och leksaksklocka förbättrades mer än gruppen med papper. Rätt slutsats är alltså att det fungerar på riktiga klockor också, men sämre på papper. Den andra rapporten har rätt här.
+
+**Det som bara finns i den andra rapporten**
+- **NCM:s Diamantdiagnoser (MTi1–3).** De delar upp tid i tre nivåer: analog tid, tidsskillnad med analog klocka och översättning från analog till digital. Det är förmodligen den mest användbara svenska strukturen att bygga nivåerna på, och lärare känner igen den.
+- **Nilsson (2022).** Hon beskriver barnens tre strategier: matcha siffror, räkna intervall och se hur visarna hänger ihop. Spelet kan använda dem för att avgöra *hur* barnet tänker, inte bara om svaret är rätt.
+- **En studie om rörelsebaserat klockspel.** Den gav en medelstor effekt för barn i åk 1 med matematiksvårigheter.
+
+**Det som bara finns i min rapport**
+- **Vad som är svårt med svenskan.** Timnamnet byts redan vid :25 ("fem i halv fyra"), och barn blandar ofta ihop "fem i halv" och "kvart över". Den andra rapporten nämner svårigheten men går inte på djupet.
+- **Kamii & Russell om förfluten tid.** Barn räknar ofta fel när de blandar timmar och minuter, till exempel att 8.30 till 11.00 blir "3 timmar 30 minuter". Därför behövs tidslinjer.
+- **Takten skiljer sig mellan länder.** Kinesiska barn lär sig klockan ungefär två år tidigare än flamländska. Därför bör spelet anpassa sig efter vad barnet kan, inte efter ålder.
+
+**Där de skiljer sig**
+- **När den digitala klockan kommer in.** Den andra rapporten lägger den sent (steg 8), trots att den själv rekommenderar att visa kopplingen tidigt. Jag föreslår digital klocka parallellt från steg 3. Nilsson fann inget entydigt svar på vilket som är bäst, så det här är snarare ett designval än något forskningen avgör.
+
+**Förslag**
+Använd NCM:s MTi-struktur som ryggrad, min detaljerade trappa inom varje nivå och Nilssons strategier för att följa hur barnet tänker.
+
+Källa:
+- [Wang m.fl. (2021), Watching versus Touching – sammanfattning (X-MOL)](https://www.x-mol.com/paper/1307736993898401792)

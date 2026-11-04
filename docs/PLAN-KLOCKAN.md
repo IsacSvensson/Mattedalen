@@ -209,7 +209,9 @@ testversionen och släpps när den är provad.
   med, som på en klocka med kugghjul. Visare som rör sig var för sig kommer
   senare, som en utmaning.
 - **Digital och analog tid från steg 3**, och översättning åt båda hållen.
-  Digital tid väntar inte till åk 3.
+  Digital tid väntar inte till åk 3. Det är ett val i designen: det andra
+  underlaget lägger digital tid sent, och forskningen (Nilsson 2022) säger inte
+  vilket som är bäst.
 - **Mer än flerval.** Barnet ställer visarna, parar ihop analog, digital och
   ord, bygger fraser av brickor och ordnar saker på en tidslinje. Flerval ensamt
   går att gissa.
@@ -229,11 +231,21 @@ testversionen och släpps när den är provad.
   - ”Hur långt är det till 8:00?” vid 7:30;
   - ”Minutvisaren går ett halvt varv. Var står timvisaren nu?”;
   - ”Hur vet du att det är halv?”, med svar att välja bland.
-- **Hur barnet tänker, inte bara om svaret är rätt.** När visarna rör sig var
-  för sig sparas var barnet ställde båda. Då syns det om barnet matchar
-  siffrorna, till exempel ställer timvisaren på 4 vid 4:30.
+- **Hur barnet tänker, inte bara om svaret är rätt.** Nilsson (2022) beskriver
+  tre strategier när barn ställer visarna:
+  1. **Matcha siffrorna:** vid 4:30 timvisaren på 4 och minutvisaren på 6.
+  2. **Räkna intervall:** minutvisaren rätt genom att räkna 5, 10, 15 … från 12.
+  3. **Se hur visarna hänger ihop:** minutvisaren på 6, och därför timvisaren
+     halvvägs mellan 4 och 5.
+
+  När visarna rör sig var för sig sparas var barnet ställde båda, och svaret
+  får en av de tre strategierna. ”För vuxna” visar vilken strategi barnet
+  använder, och hjälpen riktar sig mot den. Samma barn kan använda olika
+  strategier för olika tider.
 - **Rörelse och gester.** Handen från kartan visar hur minutvisaren dras när en
-  ny tid kommer. Barnet drar själv, och hjälpen visar rätt rörelse.
+  ny tid kommer. Barnet drar själv, och hjälpen visar rätt rörelse. Att röra
+  visarna slog att titta på video, och ett klockspel med rörelse gav en
+  medelstor effekt för barn i åk 1 med matematiksvårigheter.
 - **Tidsenheterna.** 60 minuter är en timme, två kvartar är en halvtimme och
   fyra kvartar en timme. Sekunder, dygn och veckor kommer senare.
 - **Hjälpen säger vad som är fel.** Den känner igen de kända felen:
@@ -258,9 +270,9 @@ testversionen och släpps när den är provad.
   siffror. Då lär sig barnet läsa vilken klocka som helst.
 - **Ingen tid och ingen rekordjakt** i tornet. Att läsa klockan är att förstå.
   Det kommer tillbaka med mellanrum, som allt annat i appen.
-- **Ut i köket.** Underlagen är oense om det barnet lär sig på skärmen följer
-  med till en riktig klocka. En studie från 2020 såg det inte, en från 2021 såg
-  det. Tipsen till de vuxna handlar därför om riktiga klockor och barnets egen
+- **Ut i köket.** Barn som lärde sig klockan på en pekskärm förde över det
+  till en riktig klocka, men sämre till papper (Wang m.fl. 2021). Det första
+  underlaget sa fel om det, och upphovspersonen har rättat det. Tipsen till de vuxna handlar därför om riktiga klockor och barnets egen
   dag, till exempel ”Fråga vid frukosten: vad är klockan?” och ”Hur lång tid
   tar det att borsta tänderna?”. Pilotens test på papper visar hur det går.
 - **Ett sätt i taget.** 3:20 är både ”tjugo över tre” och ”tio i halv fyra”.
@@ -271,7 +283,19 @@ testversionen och släpps när den är provad.
 
 ### Trappan
 
-Delarna följer trappan i det första underlaget
+**Ryggraden är NCM:s Diamantdiagnoser för mätning av tid**
+([KLOCKAN-UNDERLAG-2](KLOCKAN-UNDERLAG-2.md#hur-arbetar-man-praktiskt-med-detta-i-svensk-skola)).
+Lärare känner igen dem. De har tre nivåer:
+
+| Nivå | Vad barnet kan | Steg i trappan |
+|---|---|---|
+| **MTi1. Analog tid** | Läsa urtavlan, ställa visarna och tidsenheterna (hur många minuter är en halvtimme?). Digital tid finns med som översättning. | 0–8 |
+| **MTi2. Tidsskillnad, analog tid** | Lägga till och dra bort tid på urtavlan: en och en halv timme, tre kvartar, 30 minuter. Hur lång tid mellan två klockslag. | 9, med urtavlan |
+| **MTi3. Från analog till digital tid** | Skriva digital tid, och räkna tidsskillnad med digital tid: 14:45 och 40 minuter till, från 15:15 till 16:00. | 9, med digital tid |
+
+MTi3 bygger på MTi1 och MTi2, och delarna i paketet följer samma ordning.
+
+**Inom varje nivå** följer delarna trappan i det första underlaget
 ([steg 0–9](KLOCKAN-UNDERLAG.md#5-föreslagen-kompetenstrappa)). Det andra
 underlagets trappa har samma ordning, med tidsenheterna och tillämpningen som
 egna steg ([steg 1–11](KLOCKAN-UNDERLAG-2.md#9-rekommenderad-progression-för-lärandet)).
@@ -402,9 +426,9 @@ Ordningen kan ändras. Varje fas rapporteras innan nästa börjar.
   stänga av dem.
 - **En ny inställning eller plats** måste följa med i QR-koden, i säkerhetskopian
   och i pilotfilen, eller lämnas utanför med avsikt.
-- **Underlagen är tunna för appar,** och oense om det barnet lär sig på
-  skärmen följer med till en riktig klocka. Därför finns tipsen om riktiga
-  klockor och pilotens test på papper.
+- **Underlagen är tunna för appar.** Det barnet lär sig på skärmen följer med
+  till en riktig klocka, men sämre till papper. Därför finns tipsen om riktiga
+  klockor, och pilotens test görs med en riktig klocka och på papper.
 - **Läsa klockan är inte att förstå tiden.** Ett barn som läser 07:45 vet inte
   säkert hur långt det är till 08:00. Därför finns frågorna om varför och om hur
   lång tid, redan i KL2.
