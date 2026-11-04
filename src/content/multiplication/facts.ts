@@ -291,6 +291,8 @@ export function confusionNote(a: number, b: number, given: string): string | und
     [a, b + 1],
   ];
   for (const [x, y] of neighbours) {
+    // Every number is something × 1, so "6 är 6 × 1 – nära!" says nothing.
+    if (x === 1 || y === 1) continue;
     if (x >= 1 && y >= 1 && x <= MAX_FACTOR && y <= MAX_FACTOR && x * y === g) return `${g} är ${formatFact(x, y)} – nära!`;
   }
   if (g === a + b) return `${g} är ${a} + ${b}. Här ska det vara ${a} gånger ${b}.`;

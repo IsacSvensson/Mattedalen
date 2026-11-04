@@ -158,6 +158,10 @@ describe('confusion notes', () => {
     expect(confusionNote(7, 8, '63')).toBe('63 är 7 × 9 – nära!');
     expect(confusionNote(3, 4, '7')).toBe('7 är 3 + 4. Här ska det vara 3 gånger 4.');
     expect(confusionNote(7, 8, '57')).toBeUndefined();
+    // No neighbour with a 1: every number is something × 1. The sum still gets its note.
+    expect(confusionNote(5, 1, '6')).toBe('6 är 5 + 1. Här ska det vara 5 gånger 1.');
+    expect(confusionNote(5, 1, '4')).toBeUndefined();
+    expect(confusionNote(2, 8, '8')).toBeUndefined();
     expect(confusionNote(7, 8, '56')).toBeUndefined();
   });
 });
