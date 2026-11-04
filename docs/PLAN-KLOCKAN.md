@@ -70,21 +70,101 @@ testversionen och släpps när den är provad.
   fingrarna, hopp och pengar. Alla är påslagna från början. En skola som lär ut
   ett enda sätt kan då stänga av resten.
 - **Inställningen följer med** i säkerhetskopian och i QR-koden, med ett
-  standardvärde när den saknas. Den kommer inte med i pilotfilen.
+  standardvärde när den saknas. Den kommer med i pilotfilen, eftersom den
+  ändrar hjälpen.
 
 ### ST1. Klockans tabell
 
-- **Urtavlan** (`src/shell/components/clockFace.ts`) ritas i SVG och delas med
-  Klocktornet.
-- **I trädgården** visar den bara minutvisaren, med minuterna 5–60 runt kanten.
-  Utan timvisare visar bilden ingen tid som kan läsas fel.
-- **Minutvisaren hoppar** 5, 10, 15 … fram till svaret, och uppläsningen räknar
-  med. Med minskade rörelser står visaren direkt på sin plats.
-- **×5:** ”Siffran 7 är 35 minuter. 7 × 5 = 35.” Bilden motverkar ett vanligt
-  fel: att läsa siffran under minutvisaren som minuter (”siffran 2 är 2
-  minuter”).
-- **÷5:** ”35 minuter: minutvisaren står på 7. 35 ÷ 5 = 7.”
-- **För vuxna:** tipset för ×5 nämner klockan.
+#### Vilka uppgifter
+
+- **Varje gångerfakta med faktorn 5**, från 1 × 5 till 10 × 5 och åt båda
+  hållen. Den andra faktorn o är där minutvisaren står. 2 × 5 och 10 × 5 är
+  också med, fast de hör till ×2 och ×10 i trädgården.
+- **Delat med 5** (35 ÷ 5): minutvisaren står på svaret.
+- **Inte** delat med där svaret är 5 (35 ÷ 7). Där visar klockan fel tal.
+- **Inte** ”Lika stora grupper” och ”Dela lika”. De har egna bilder.
+
+#### Var klockan syns
+
+- **På hjälpkortet efter ett fel svar,** varannan gång. Den andra gången visas
+  rektangeln som i dag.
+- **Bilden väljs av hur många gånger barnet har mött faktan** (`q.state.seen`).
+  Den är jämn eller udda, så samma fel två gånger i rad visar båda bilderna.
+- **Inte i ett nytt frö och inte i räknestigen.** Där bygger barnet rektangeln,
+  och räknestigen går via hälften av ×10. Det ändras inte.
+
+#### Bilden
+
+- **`src/shell/components/clockFace.ts`:** en urtavla i SVG med siffrorna 1–12,
+  ett streck för varje minut och en minutvisare. Klocktornet bygger senare
+  vidare på samma urtavla.
+- **I trädgården** finns ingen timvisare. Bilden visar då ingen tid som kan läsas
+  fel, och timvisaren står aldrig rakt på en siffra.
+- **Minuterna står runt kanten:** 5, 10, 15 … 60, utanför siffrorna. En båge går
+  från 12 till minutvisaren.
+- **Minutvisaren hoppar** från 12, ett steg i taget, och vid varje steg tänds
+  minuttalet. Den stannar på o. Med minskade rörelser står den där direkt.
+- **Hjälpkortets mått:** urtavlan är lika stor som rektangeln i dag, så kortet
+  inte blir högre. Det ska rymmas på 320 px utan att man behöver skrolla i sidled.
+- **I bildspråket:** en kontur på 2 px och papperstoner. Det är en teckning, inte
+  något man trycker på. Den har därför ingen tryckkant.
+
+#### Raden
+
+- **×5:** ”Minutvisaren på 7 är 35 minuter. 7 × 5 = 35.”
+- **÷5:** ”35 minuter: minutvisaren står på 7. 35 ÷ 5 = 7.” Delat med skrivs med
+  barnets tecken.
+- **Raden ersätter** ”hälften av 70”, som står när rektangeln visas.
+- **Uppläsningen** läser raden, som för de andra raderna. Den räknar inte
+  stegen högt: då skulle kortet ta för lång tid att läsa.
+- **Bilden har en text för skärmläsare:** ”En klocka. Minutvisaren står på 7.”
+
+#### Inställningen
+
+- **Ett nytt fält** i barnets inställningar: `helpPicturesOff`, en lista med de
+  bilder som är avstängda. Den saknas från början, och då är alla bilder på.
+  Senare faser lägger till fingrarna, hopp och pengar i samma lista.
+- **På trädgårdens del** av barnets inställningar, under rubriken ”Bilder i
+  hjälpen”: rutan ”Klockan för femmans tabell”, ikryssad från början.
+- **Säkerhetskopian** läser listan och tar bara med namn den känner till.
+- **QR-koden:** bit 6 i flaggorna betyder att klockan är avstängd. Bit 7 sparas
+  till senare faser, och en byte till kan läggas efter den.
+- **Pilotfilen** tar med listan, eftersom den ändrar hur hjälpen ser ut. Den
+  hör till de inställningar som påverkar övningen.
+
+#### För vuxna
+
+- **Tipset för ×5** blir: ”×5 är hälften av ×10, eller minuterna på klockan:
+  minutvisaren på 6 är 30 minuter. Fråga: hur många minuter är det när
+  minutvisaren står på 4?”
+- **En nyhet i ”Nytt i Mattedalen”:** ”Klockan i trädgården”, med en rad om att
+  den går att stänga av.
+
+#### Filer
+
+- `src/shell/components/clockFace.ts`, ny.
+- `src/places/tradgarden/helpPictures.ts`, ny: vilka bilder en uppgift har och
+  vilken som visas den här gången. En ren funktion, som testas för sig.
+- `src/places/tradgarden/screens/session.ts`: hjälpkortet frågar
+  `helpPictures.ts`.
+- `src/places/tradgarden/parent.ts` och `tips.ts`: inställningen och tipset.
+- `src/storage/types.ts`, `backup.ts`, `qrCodec.ts` och `pilot.ts`: fältet.
+- `src/shell/styles.css`: urtavlan.
+- `src/shell/screens/parent/news.ts`: nyheten.
+
+#### Tester
+
+- **Enhetstester:**
+  - vilka uppgifter som har klockan;
+  - att bilderna växlar med `seen`;
+  - att en avstängd klocka ger bara rektangeln;
+  - säkerhetskopian och QR-koden fram och tillbaka med och utan fältet;
+  - att pilotfilen tar med listan.
+- **E2e:**
+  - ett fel svar på 7 × 5 visar klockan ena gången och rektangeln andra gången;
+  - med rutan urkryssad visas bara rektangeln;
+  - minskade rörelser.
+- **Skärmbilder:** hjälpkortet med klockan på 320 och 360 px och på surfplatta.
 
 ### ST2. Fingrarna för ×9
 
