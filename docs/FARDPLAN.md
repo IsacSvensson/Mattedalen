@@ -47,8 +47,9 @@ i, med ”I dag” i hörnet i stället för en stor knapp (se
 I november 2026 valde upphovspersonen att bygga Klocktornet, en ny plats, före
 piloten. Det går emot regel 4 under ”Så prioriterar vi”. Klockan finns i
 kursplanen men inte i appen, och den hör ihop med femmans tabell. Planen bygger
-på ett underlag om hur barn lär sig klockan ([PLAN-KLOCKAN](PLAN-KLOCKAN.md),
-[KLOCKAN-UNDERLAG](KLOCKAN-UNDERLAG.md)).
+på två underlag om hur barn lär sig klockan ([PLAN-KLOCKAN](PLAN-KLOCKAN.md),
+[KLOCKAN-UNDERLAG](KLOCKAN-UNDERLAG.md),
+[KLOCKAN-UNDERLAG-2](KLOCKAN-UNDERLAG-2.md)).
 
 Avstämningen mot Lgr22 är gjord mot Skolverkets PDF av kursplanen
 ([LGR22](LGR22.md)). Den görs igen när den nya kursplanen kommer.

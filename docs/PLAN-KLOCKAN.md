@@ -7,8 +7,18 @@ Två saker i en plan:
 
 Klockan hör till båda. Minutvisaren på 7 är 35 minuter, och det är 7 × 5.
 
-Planen bygger på ett underlag om hur barn lär sig klockan i F–åk 3
-([KLOCKAN-UNDERLAG](KLOCKAN-UNDERLAG.md)).
+Planen bygger på två underlag om hur barn lär sig klockan i F–åk 3
+([KLOCKAN-UNDERLAG](KLOCKAN-UNDERLAG.md) och
+[KLOCKAN-UNDERLAG-2](KLOCKAN-UNDERLAG-2.md)). Båda säger samma sak i grunden:
+barnet ska inte bara lära sig vad klockan är, utan förstå vad som händer med
+tiden.
+
+Tornet ska ge barnet fyra förmågor:
+1. **Känna igen:** läsa en tid.
+2. **Förstå:** veta varför klockan visar den tiden.
+3. **Använda:** räkna ut hur mycket tid som har gått eller är kvar.
+4. **Överföra:** växla mellan urtavla, digital tid och ord, och läsa klockan
+   hemma.
 
 ## Faser
 
@@ -123,15 +133,40 @@ testversionen och släpps när den är provad.
 - **Mer än flerval.** Barnet ställer visarna, parar ihop analog, digital och
   ord, bygger fraser av brickor och ordnar saker på en tidslinje. Flerval ensamt
   går att gissa.
-- **En delfärdighet per del.** Ett barn kan kunna minutvisaren men inte
-  timvisaren, så motorn mäter dem för sig. Barnet går fram efter det det kan,
-  inte efter ålder.
+- **De rätta orden.** Appen säger alltid timvisaren och minutvisaren, inte den
+  lilla och den stora. Timvisaren visar vilken timme det är, och minutvisaren
+  hur många minuter som har gått.
+- **Varje tid i fyra former:** urtavlan, digital tid (07:30), ord (halv åtta)
+  och matematik (30 minuter, en halv timme). Barnet möter dem tillsammans från
+  början.
+- **Förmågorna mäts för sig.** Ett barn kan läsa klockan men inte ställa den,
+  eller kunna digital tid men inte urtavlan. Därför är läsa, ställa, digital tid
+  och ord olika uppgifter för samma tid, som spegelvända fakta i trädgården.
+  ”För vuxna” visar dem var för sig. Barnet går fram efter det det kan, inte
+  efter ålder.
+- **Sambanden, inte genvägarna.** ”6 betyder halv” får inte bli hela kunskapen.
+  Det finns frågor om varför:
+  - ”Hur långt är det till 8:00?” vid 7:30;
+  - ”Minutvisaren går ett halvt varv. Var står timvisaren nu?”;
+  - ”Hur vet du att det är halv?”, med svar att välja bland.
+- **Hur barnet tänker, inte bara om svaret är rätt.** När visarna rör sig var
+  för sig sparas var barnet ställde båda. Då syns det om barnet matchar
+  siffrorna, till exempel ställer timvisaren på 4 vid 4:30.
+- **Rörelse och gester.** Handen från kartan visar hur minutvisaren dras när en
+  ny tid kommer. Barnet drar själv, och hjälpen visar rätt rörelse.
+- **Tidsenheterna.** 60 minuter är en timme, två kvartar är en halvtimme och
+  fyra kvartar en timme. Sekunder, dygn och veckor kommer senare.
 - **Hjälpen säger vad som är fel.** Den känner igen de kända felen:
   - visarna förväxlade;
   - timvisaren mellan två tal läst som det närmaste talet;
   - siffran läst som minuter;
+  - timvisaren rakt på en siffra (”matcha siffrorna”), till exempel på 8 vid
+    7:30;
   - spegling kring halv, till exempel ”fem i halv” läst som ”kvart över”;
-  - fel timnamn efter :25.
+  - fel timnamn efter :25, eller halv åtta läst som 8:30.
+
+  Till exempel efter 07:06 när minutvisaren står på 6: ”Minutvisaren visar
+  minuter. Varje steg mellan siffrorna är fem minuter: fem, tio, femton …”
 
   Hjälpkortet säger vilken visare som är fel och visar rätt rörelse. Med
   minskade rörelser hoppar visaren i stället för att glida.
@@ -143,9 +178,11 @@ testversionen och släpps när den är provad.
   siffror. Då lär sig barnet läsa vilken klocka som helst.
 - **Ingen tid och ingen rekordjakt** i tornet. Att läsa klockan är att förstå.
   Det kommer tillbaka med mellanrum, som allt annat i appen.
-- **Ut i köket.** Det barnet lär sig på skärmen följer inte med till en riktig
-  klocka av sig självt. Tipsen till de vuxna handlar därför om riktiga klockor,
-  till exempel ”Fråga vid frukosten: vad är klockan?”.
+- **Ut i köket.** Underlagen är oense om det barnet lär sig på skärmen följer
+  med till en riktig klocka. En studie från 2020 såg det inte, en från 2021 såg
+  det. Tipsen till de vuxna handlar därför om riktiga klockor och barnets egen
+  dag, till exempel ”Fråga vid frukosten: vad är klockan?” och ”Hur lång tid
+  tar det att borsta tänderna?”. Pilotens test på papper visar hur det går.
 - **Ett sätt i taget.** 3:20 är både ”tjugo över tre” och ”tio i halv fyra”.
   Appen säger ”tjugo över” och ”tjugo i” först, och ”tio i halv” kommer sist.
   Båda räknas alltid som rätt, och det andra sättet blir aldrig ett felsvar.
@@ -154,21 +191,23 @@ testversionen och släpps när den är provad.
 
 ### Trappan
 
-Delarna följer trappan i underlaget
-([steg 0–9](KLOCKAN-UNDERLAG.md#5-föreslagen-kompetenstrappa)).
+Delarna följer trappan i det första underlaget
+([steg 0–9](KLOCKAN-UNDERLAG.md#5-föreslagen-kompetenstrappa)). Det andra
+underlagets trappa har samma ordning, med tidsenheterna och tillämpningen som
+egna steg ([steg 1–11](KLOCKAN-UNDERLAG-2.md#9-rekommenderad-progression-för-lärandet)).
 
 | Steg | Vad barnet lär sig | Del | Fas |
 |---|---|---|---|
-| 0 | Dagen: före och efter, morgon och kväll. Frukost, skola, middag och läggdags på en tidslinje. | `dagen`, i ett eget spår hela vägen | KL2 |
-| 1 | Urtavlan: den korta visaren är timmar. | `urtavlan` | KL2 |
+| 0 | Dagen: före och efter, morgon och kväll. Frukost, skola, middag och läggdags på en tidslinje. Hur lång tid saker tar: att borsta tänderna tar några minuter, en skoldag några timmar. Vad som är nära och långt bort: kommer födelsedagen eller sommarlovet först? | `dagen`, i ett eget spår hela vägen | KL2 |
+| 1 | Urtavlan: siffrorna 1–12, medurs, timvisaren och minutvisaren och vad de visar. | `urtavlan` | KL2 |
 | 2 | Timvisaren ensam: strax efter 3, mitt emellan 3 och 4, strax före 4. | `timvisaren`, i ett eget spår genom steg 3–5 | KL2 |
 | 3 | Hel och halv, analog och digital. Halv fyra är 3:30, och timvisaren är halvvägs till 4. | `hel`, `halv` | KL2 |
-| 4 | Kvart över och kvart i, som ¼ och ½ varv. | `kvart` | KL2 |
+| 4 | Kvart över och kvart i, som ¼ och ½ varv. En kvart är 15 minuter, två kvartar en halvtimme. | `kvart` | KL2 |
 | 5 | Fem minuter i taget, som minuter över. Minutvisaren på 5 är 25 minuter över 3, alltså 3:25. | `femmin` | KL2 |
 | 6 | Fem, tio och tjugo över och i. Sedan fem i och fem över halv, när timmen byter namn vid :25. Sist ”tio i halv”. | `fraser`, `halvfraser`, `tioihalv` | KL5 |
 | 7 | Minuten, analog och digital. | `minut` | KL6 |
-| 8 | 24 timmar, förmiddag och eftermiddag, med ett band för dag och natt. | `dygn` | KL6 |
-| 9 | Hur lång tid? Hopp på en tidslinje (+1 h, +30 min, +5 min), också över en hel timme. | `hurlange` | KL7 |
+| 8 | 24 timmar, förmiddag och eftermiddag, med ett band för dag och natt. 07:00 och 19:00 ser likadana ut på urtavlan. Sekunder, dygn och veckor. | `dygn`, `enheter` | KL6 |
+| 9 | Hur lång tid? Hopp på en tidslinje (+1 h, +30 min, +5 min), också över en hel timme. Vad är klockan om 30 minuter? Lägg till tre kvartar. Hur länge är träningen från 17:30 till 18:30? Med och utan urtavlan. | `hurlange` | KL7 |
 
 ### KL1. Urtavlan, visarna och svaren
 
@@ -185,11 +224,12 @@ Delarna följer trappan i underlaget
 ### KL2. Innehållet, steg 0–5
 
 - **Paketet** `src/content/clock`, med delarna i trappan.
-- **Formerna:**
+- **Formerna**, som egna uppgifter för samma tid:
   - läsa: från urtavlan till digital tid och till ord;
   - ställa: visarna till en tid;
   - para ihop åt båda hållen;
-  - ordna dagen.
+  - förstå: frågor om varför, och hur långt det är till nästa hel timme;
+  - ordna dagen och uppskatta hur lång tid saker tar.
 - **Läsa klockan är förståelse** (`kind: 'understanding'`): ingen tid räknas.
 - **Utseendet** väljs som en variant av uppgiften (`Presentation.variant`).
 - **Felen:** en funktion som känner igen dem, och felsvar som bygger på samma
@@ -219,8 +259,10 @@ Delarna följer trappan i underlaget
 - **För vuxna:** platsens sida, där timvisaren och minutvisaren står var för
   sig. Där finns förväxlingarna, tips om riktiga klockor och ”Vad betyder
   bilderna?” för tornet.
-- **Startkollen** hoppar över steg som barnet redan kan. **Kollen** följer över
-  tid.
+- **Startkollen** hoppar över steg som barnet redan kan. Barn börjar skolan med
+  olika kunskap om klockan, och inte alltid i samma ordning. **Kollen** följer
+  över tid. Båda byggs som NCM:s Diamantdiagnoser för mätning av tid: analog tid
+  (läsa, ställa, enheterna), tidsskillnad och från analog till digital tid.
 - **Dokumenten:**
   - README;
   - LGR22, där ”mätning av … tid” nu tränas delvis, och ½ och ¼ som delar av
@@ -280,9 +322,12 @@ Ordningen kan ändras. Varje fas rapporteras innan nästa börjar.
   stänga av dem.
 - **En ny inställning eller plats** måste följa med i QR-koden, i säkerhetskopian
   och i pilotfilen, eller lämnas utanför med avsikt.
-- **Underlaget är tunt för appar.** Det som syns på surfplattan följer inte med
-  till en riktig klocka av sig självt. Därför finns tipsen om riktiga klockor och
-  pilotens test på papper.
+- **Underlagen är tunna för appar,** och oense om det barnet lär sig på
+  skärmen följer med till en riktig klocka. Därför finns tipsen om riktiga
+  klockor och pilotens test på papper.
+- **Läsa klockan är inte att förstå tiden.** Ett barn som läser 07:45 vet inte
+  säkert hur långt det är till 08:00. Därför finns frågorna om varför och om hur
+  lång tid, redan i KL2.
 
 ## Verifiering
 
