@@ -6,6 +6,8 @@ import {
   clockNote,
   createClockPack,
   handWords,
+  handsNote,
+  supportsFor,
   mistakeOf,
   normalizeAnswer,
   parseClock,
@@ -136,5 +138,27 @@ describe('the pack', () => {
     expect(first('halv')).toBeLessThan(first('kvart'));
     expect(first('kvart')).toBeLessThan(first('femmin'));
     expect(first('femmin')).toBeLessThan(70);
+  });
+});
+
+describe('the hands the child set (KL3)', () => {
+  const t = { h: 3, m: 30 };
+  it('says which hand is wrong', () => {
+    expect(handsNote(t, '3:30')).toBeUndefined();
+    expect(handsNote(t, '4:30')).toBe('Minutvisaren står rätt. Timvisaren ska stå mellan 3 och 4.');
+    expect(handsNote(t, '3:15')).toBe('Timvisaren står rätt. Minutvisaren ska stå på 6, 30 minuter.');
+    expect(handsNote(t, '5:00')).toBe('Minutvisaren ska stå på 6, 30 minuter, och timvisaren mellan 3 och 4.');
+    expect(handsNote({ h: 8, m: 0 }, '8:30')).toBe('Timvisaren står rätt. Minutvisaren ska stå på 12, hel timme.');
+    expect(handsNote(t, 'halv fyra')).toBeUndefined();
+  });
+});
+
+describe('the supports on the face', () => {
+  it('are taken away one at a time', () => {
+    expect(supportsFor(undefined, 'kvart')).toEqual({ minuteRing: true, quarters: true, look: 'plain' });
+    expect(supportsFor({ status: 'learning', box: 0 }, 'halv')).toEqual({ minuteRing: true, quarters: false, look: 'plain' });
+    expect(supportsFor({ status: 'learning', box: 1 }, 'halv')).toEqual({ minuteRing: false, quarters: false, look: 'plain' });
+    expect(supportsFor({ status: 'fluent', box: 2 }, 'halv', 'station')).toEqual({ minuteRing: false, quarters: false, look: 'station' });
+    expect(supportsFor({ status: 'fluent', box: 2 }, 'halv', 'ord')).toEqual({ minuteRing: false, quarters: false, look: 'plain' });
   });
 });

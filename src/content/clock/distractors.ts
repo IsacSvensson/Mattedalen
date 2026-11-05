@@ -1,6 +1,6 @@
 import type { DistractorCandidate } from '../../engine';
 import { handWords, HAND_PLACES, taskAnswer, wordTask, type Task } from './tasks';
-import { formatClock, hourHandAt, hourName, nextHour, phrase, prevHour, type Time } from './time';
+import { formatClock, hourHandAt, hourName, nextHour, parseClock, phrase, prevHour, type Time } from './time';
 
 /**
  * The known mistakes with a clock (docs/PLAN-KLOCKAN.md, KLOCKAN-UNDERLAG):
@@ -124,4 +124,26 @@ export function clockNote(task: Task, given: string): string | undefined {
     default:
       return undefined;
   }
+}
+
+/** Where the hour hand should stand, in words: "på 3", or "mellan 3 och 4" when the minutes have moved it on. */
+function hourPlace(t: Time): string {
+  return t.m === 0 ? `på ${t.h}` : `mellan ${t.h} och ${nextHour(t.h)}`;
+}
+
+/**
+ * Which hand is wrong when the child has set the hands (docs/PLAN-KLOCKAN.md,
+ * KL3): "Minutvisaren står rätt. Timvisaren ska stå mellan 3 och 4." Undefined
+ * when the answer is no time, or the right one.
+ */
+export function handsNote(expected: Time, given: string): string | undefined {
+  const g = parseClock(given);
+  if (!g) return undefined;
+  const minuteRight = g.m === expected.m;
+  const hourRight = g.h === expected.h;
+  if (minuteRight && hourRight) return undefined;
+  const minute = `på ${handNumber(expected.m)}, ${expected.m === 0 ? 'hel timme' : `${expected.m} minuter`}`;
+  if (minuteRight) return `Minutvisaren står rätt. Timvisaren ska stå ${hourPlace(expected)}.`;
+  if (hourRight) return `Timvisaren står rätt. Minutvisaren ska stå ${minute}.`;
+  return `Minutvisaren ska stå ${minute}, och timvisaren ${hourPlace(expected)}.`;
 }

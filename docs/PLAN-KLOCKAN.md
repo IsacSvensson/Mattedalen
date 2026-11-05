@@ -27,7 +27,7 @@ Tornet ska ge barnet fyra förmågor:
 | ST1. Klockans tabell **(klar)** | Urtavlan med minutvisaren som bild för ×5 och ÷5, regeln för fler bilder i hjälpen, och inställningen ”Bilder i hjälpen”. | Mellan |
 | KL1. Urtavlan, visarna och svaren **(klar)** | Urtavlan, visare att ställa och en digital klocka. Skalet får egna svar i stället för knappsatsen, och svarsknappar som kan vara urtavlor. | Mellan |
 | KL2. Innehållet, steg 0–5 **(klar)** | Paketet för klockan: dagen, urtavlan, timvisaren, hel och halv, kvart och fem minuter. Felen och felsvaren. | Stor |
-| KL3. Passet och hjälpen | Platsens sida och passet. Hjälpen säger vilken visare som är fel. Stöden tas bort ett i taget. | Mellan |
+| KL3. Passet och hjälpen **(klar)** | Platsens sida och passet. Hjälpen säger vilken visare som är fel. Stöden tas bort ett i taget. | Mellan |
 | KL4. Dalen och För vuxna | Tornet på kartan, när det öppnar, sidan i ”För vuxna”, startkollen och kollen. Tornets första släpp. | Stor |
 | ST2. Fingrarna för ×9 | Två händer med ett finger nedvikt. | Liten |
 | ST3. Räkna i steg | Hopp på tallinjen för alla tabeller. | Liten |
@@ -453,6 +453,43 @@ egna steg ([steg 1–11](KLOCKAN-UNDERLAG-2.md#9-rekommenderad-progression-för-
 - **Hjälpkortet** säger vilken visare som är fel och visar rätt rörelse.
 - **Stöden** tas bort efter hur väl tiden sitter, och utseendet varierar.
 - **Uppläsningen** läser tiderna som tider.
+
+#### Fynd från KL3
+
+![Telefon: tornet med sina fönster, en fråga med urtavlan, och hjälpkortet efter 3:06](img/klocktornet.png)
+
+*Telefon, 360 px. Till vänster tornet för ett barn där allt sitter. I mitten
+en fråga om digital tid. Till höger hjälpen efter svaret 3:06.*
+
+- **Tornet** (`src/places/klocktornet`) har sju fönster, ett per del, från
+  dagen vid foten till fem minuter i taget högst upp. Ett fönster lyser när
+  delen sitter, med samma gräns som Stigens lyktor (`lanterns`,
+  `currentPart`).
+- **Urtavlan är själva frågan** och syns därför alltid. Stöden tas bort efter
+  status (`supportsFor`):
+  - en ny fråga har minuterna runt kanten;
+  - en fråga barnet lär sig har bara siffrorna;
+  - en fråga som sitter har dagens utseende.
+- **En ny tid visas som en rörelse:** minutvisaren går från 12, och timvisaren
+  följer med. Hjälpen visar rörelsen från barnets svar till rätt tid. Med
+  minskade rörelser står visarna rätt direkt.
+- **Att ställa visarna** har steg som följer delen (30, 15 eller 5 minuter),
+  och en knapp ”Svara”. Enter svarar också.
+- **Fel visare:** `handsNote` säger vilken, till exempel ”Minutvisaren står
+  rätt. Timvisaren ska stå mellan 3 och 4.”
+- **Tornet nås bara från provsidan** i testversionen: ”Prova tornet med …”.
+  Platsen (`Place`) med sidan i ”För vuxna” kommer i KL4.
+- **E2e-testerna** sår in tillstånd i testversionens egen databas.
+  `seedStates` tar nu databasens namn. Passet börjar med uppvärmning av det
+  barnet kan. Testerna svarar sig därför fram till frågan, och svarar rätt där
+  frågan i ord avgör svaret. Annars kommer nya uppgifter för långsamt.
+- **Ett gammalt slumpfel är rättat.** Testet där appen kommer tillbaka efter en
+  uppdatering till en plats som inte är öppen föll ungefär en gång på 50.
+  Märket från uppdateringen kastades när klockan gått bakåt sedan det sattes,
+  och i testet kan den falska klockan gå tillbaka någon sekund vid
+  omladdningen. Det kan också hända på riktigt när en enhet ställer sin klocka.
+  Nu tillåts fem sekunder bakåt (`CLOCK_BACK_MS` i `src/shell/resume.ts`), och
+  testet gick igenom 60 gånger av 60.
 
 ### KL4. Dalen och För vuxna
 

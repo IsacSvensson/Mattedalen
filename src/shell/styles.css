@@ -2878,6 +2878,89 @@ h1:focus {
   width: min(120px, 32vw, 16dvh);
 }
 
+/* Klocktornet (docs/PLAN-KLOCKAN.md, KL3): a drawing with a window for every part. */
+.tower-art {
+  display: grid;
+  place-items: center;
+}
+
+.tower-svg {
+  width: min(180px, 45vw, 34dvh);
+  height: auto;
+}
+
+.tw-roof {
+  fill: var(--primary);
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.tw-body {
+  fill: #e9dcc4;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.tw-door {
+  fill: var(--wood);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.tw-face {
+  fill: #fff;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.tw-hand {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.tw-window {
+  stroke: var(--ink);
+  stroke-width: 2;
+  fill: #6f5b4b;
+}
+
+.tw-window.open {
+  fill: #8a7663;
+}
+
+.tw-window.started {
+  fill: #e6c879;
+}
+
+.tw-window.lit {
+  fill: var(--sun);
+}
+
+.tower-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tower-intro .clock-view {
+  width: min(220px, 60vw, 30dvh);
+}
+
+.answer-area.set-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.question .prompt-card .clock-view {
+  width: min(200px, 55vw, 26dvh);
+  margin: 4px auto 0;
+}
+
 .clock-lab section {
   display: flex;
   flex-direction: column;

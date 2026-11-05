@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { markResume, RESUME_WITHIN_MS, setWhere, takeResume } from '../../src/shell/resume';
+import { CLOCK_BACK_MS, markResume, RESUME_WITHIN_MS, setWhere, takeResume } from '../../src/shell/resume';
 
 /** sessionStorage as the browser has it, for the node test run. */
 class MemoryStorage {
@@ -30,6 +30,14 @@ describe('back to the same screen after an update (docs/PLAN-UPPDATERING.md)', (
     expect(takeResume(2000)).toEqual({ kind: 'place', profileId: 'p1', placeId: 'backen' });
     // Once: the next start is an ordinary one.
     expect(takeResume(3000)).toBeNull();
+  });
+
+  it('comes back also when the clock stepped back a little, but not a lot', () => {
+    setWhere({ kind: 'place', profileId: 'p1', placeId: 'backen' });
+    markResume(10_000);
+    expect(takeResume(10_000 - CLOCK_BACK_MS)).toEqual({ kind: 'place', profileId: 'p1', placeId: 'backen' });
+    markResume(10_000);
+    expect(takeResume(10_000 - CLOCK_BACK_MS - 1)).toBeNull();
   });
 
   it('starts over after an ordinary start, a late reload or from the list of players', () => {

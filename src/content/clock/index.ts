@@ -8,8 +8,8 @@ import { normalizeAnswer } from './time';
 export * from './time';
 export * from './tasks';
 export { buildItems, strategyFor, type ClockShow } from './items';
-export { candidates, clockDistractors, clockNote, mistakeOf, type Mistake } from './distractors';
-export { presentClock } from './present';
+export { candidates, clockDistractors, clockNote, handsNote, mistakeOf, type Mistake } from './distractors';
+export { presentClock, supportsFor, type FaceSupports } from './present';
 
 /** A part opens when ~80 % of each part it builds on is at least "fluent". */
 export const UNLOCK_FRACTION = 0.8;

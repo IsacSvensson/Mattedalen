@@ -18,6 +18,8 @@ const KEY = STAGING ? 'mattedalen-test:resume' : 'mattedalen:resume';
 
 /** A reload later than this after the mark starts over: it was not the update's. */
 export const RESUME_WITHIN_MS = 5 * 60_000;
+/** A clock may step back a little between the mark and the reload (the device sets its time): a few seconds are allowed. */
+export const CLOCK_BACK_MS = 5_000;
 
 const PARENT_PAGES: readonly string[] = ['overview', 'place', 'settings', 'device', 'import', 'feedback', 'news', 'about', 'pilot'];
 
@@ -45,7 +47,7 @@ export function takeResume(now = Date.now()): Where | null {
     sessionStorage.removeItem(KEY);
     if (!raw) return null;
     const { where: w, at } = JSON.parse(raw) as { where?: unknown; at?: unknown };
-    if (typeof at !== 'number' || now < at || now - at > RESUME_WITHIN_MS) return null;
+    if (typeof at !== 'number' || now < at - CLOCK_BACK_MS || now - at > RESUME_WITHIN_MS) return null;
     return isWhere(w) ? w : null;
   } catch {
     return null;

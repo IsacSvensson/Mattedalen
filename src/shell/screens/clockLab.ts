@@ -4,6 +4,7 @@ import { clockSetter, type SetTime } from '../components/clockSetter';
 import { digitalClock } from '../components/digitalClock';
 import { h } from '../dom';
 import { showParentPage } from './parent/frame';
+import { showTower } from '../../places/klocktornet/screens/tower';
 
 /**
  * "Prova klockan", only in the test version (docs/PLAN-KLOCKAN.md, KL1): the
@@ -12,8 +13,21 @@ import { showParentPage } from './parent/frame';
  */
 const LOOK_NAMES: Record<ClockLook, string> = { plain: 'Vanlig', kitchen: 'Köksklocka', watch: 'Armbandsur', station: 'Stationsklocka' };
 
-export function showClockLab(ctx: AppContext, back: () => void): void {
-  showParentPage(ctx, { title: 'Prova klockan', subtitle: 'Bara i testversionen', back, className: 'clock-lab' }, looks(), setterSection(), choicesSection());
+export async function showClockLab(ctx: AppContext, back: () => void): Promise<void> {
+  showParentPage(ctx, { title: 'Prova klockan', subtitle: 'Bara i testversionen', back, className: 'clock-lab' }, await towerSection(ctx), looks(), setterSection(), choicesSection());
+}
+
+/** Klocktornet before it is in the valley (KL3): the tower and its session, for the first child on the device. */
+async function towerSection(ctx: AppContext): Promise<HTMLElement> {
+  const child = (await ctx.store.listProfiles())[0];
+  return h(
+    'section',
+    null,
+    h('h2', null, 'Klocktornet'),
+    child
+      ? h('button', { class: 'big-button', type: 'button', onclick: () => void showTower(ctx, child) }, `Prova tornet med ${child.name}`)
+      : h('p', { class: 'muted' }, 'Lägg till ett barn först.'),
+  );
 }
 
 function figure(el: Element, caption: string): HTMLElement {

@@ -267,10 +267,11 @@ export interface SeedPack {
 
 const GARDEN_SEED: SeedPack = { packId: 'multiplication', unlockedUnitIds: ['u10'] };
 
-export async function seedStates(page: Page, states: Record<string, SeedState>, pack: SeedPack = GARDEN_SEED): Promise<void> {
-  await page.evaluate(async ({ seed, pack }) => {
+/** `dbName`: the test version in /test/ keeps its own database. */
+export async function seedStates(page: Page, states: Record<string, SeedState>, pack: SeedPack = GARDEN_SEED, dbName = 'mattedalen'): Promise<void> {
+  await page.evaluate(async ({ seed, pack, dbName }) => {
     const db: IDBDatabase = await new Promise((r) => {
-      const q = indexedDB.open('mattedalen');
+      const q = indexedDB.open(dbName);
       q.onsuccess = () => r(q.result);
     });
     const profiles: { id: string }[] = await new Promise((r) => {
@@ -308,7 +309,7 @@ export async function seedStates(page: Page, states: Record<string, SeedState>, 
       tx.oncomplete = r;
     });
     db.close();
-  }, { seed: states, pack });
+  }, { seed: states, pack, dbName });
   await page.reload();
 }
 

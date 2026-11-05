@@ -1,6 +1,6 @@
-import { atLeast, type Item, type PresentContext, type Presentation } from '../../engine';
+import { atLeast, type Item, type ItemState, type PresentContext, type Presentation } from '../../engine';
 import { parseTaskId } from './tasks';
-import { CLOCK_LOOKS, formatClock, phrase } from './time';
+import { CLOCK_LOOKS, formatClock, phrase, type ClockLook } from './time';
 
 /**
  * How a clock question is shown (docs/PLAN-KLOCKAN.md): new questions with the
@@ -18,4 +18,25 @@ export function presentClock(item: Item, { state, kind, rng }: PresentContext): 
     return { variant: asWords ? 'ord' : 'dig', prompt: `Ställ klockan på ${asWords ? words : formatClock(task.t)}.` };
   }
   return { variant: look, prompt: item.prompt };
+}
+
+/** What the face beside a question has, as the question settles (docs/PLAN-KLOCKAN.md, KL3). */
+export interface FaceSupports {
+  minuteRing: boolean;
+  quarters: boolean;
+  look: ClockLook;
+}
+
+/**
+ * The supports are taken away one at a time: a new question has the minutes
+ * round the edge (and the quarters, for quarters); one being learnt only the
+ * numbers; one that sits the look of the day (`variant`), a station clock
+ * even without numbers.
+ */
+export function supportsFor(state: Pick<ItemState, 'status' | 'box'> | undefined, unitId: string, variant?: string): FaceSupports {
+  const fresh = !state || state.status === 'new' || (state.status === 'learning' && state.box === 0);
+  if (fresh) return { minuteRing: true, quarters: unitId === 'kvart', look: 'plain' };
+  if (!atLeast(state.status, 'fluent')) return { minuteRing: false, quarters: false, look: 'plain' };
+  const look = (CLOCK_LOOKS as readonly string[]).includes(variant ?? '') ? (variant as ClockLook) : 'plain';
+  return { minuteRing: false, quarters: false, look };
 }

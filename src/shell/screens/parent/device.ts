@@ -106,7 +106,7 @@ async function deviceSection(ctx: AppContext, backTo?: string): Promise<HTMLElem
           {
             class: 'soft-button',
             type: 'button',
-            onclick: async () => (await import('../clockLab')).showClockLab(ctx, () => void showDevice(ctx, backTo)),
+            onclick: async () => void (await import('../clockLab')).showClockLab(ctx, () => void showDevice(ctx, backTo)),
           },
           'Prova klockan (bara i testversionen)',
         )
