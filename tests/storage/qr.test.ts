@@ -212,6 +212,26 @@ describe('a child with every place (MD1)', () => {
     expect(on.helpPicturesOff).toBeUndefined();
   });
 
+  it('holds the clock tower too: four places in a code a phone camera reads', async () => {
+    const { createClockPack } = await import('../../src/content/clock');
+    const garden = createMultiplicationPack({ division: true });
+    const hundred = createHundredPack();
+    const clockPack = createClockPack();
+    const text = encodeTransfer(
+      transferOf({ ...profile, settings: { ...profile.settings, gardenOpen: true, pathOpen: true, towerOpen: true } }, [
+        { pack: garden, states: mixed(garden) },
+        { pack: addition, states: mixed(addition) },
+        { pack: hundred, states: mixed(hundred) },
+        { pack: clockPack, states: mixed(clockPack) },
+      ]),
+    );
+    expect(qrSvgMarkup(text).version).toBeLessThanOrEqual(17);
+    const { data, size } = render(text);
+    const t = decodeTransfer(jsQR(data, size, size)!.data);
+    expect(t).toMatchObject({ towerOpen: true });
+    expect(t.packs.map((b) => b.packId)).toEqual(['multiplication', 'addition', 'hundred', 'clock']);
+  });
+
   it('opens a started unit and what it builds on, not every earlier unit', () => {
     const unitOf = (id: string) => addition.units.find((u) => u.id === id)!;
     const states = Object.fromEntries(addition.items.map((it) => [it.id, emptyState(it.id)])) as Record<string, ItemState>;

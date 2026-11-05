@@ -42,6 +42,8 @@ export const SPOTS: Record<string, Spot> = {
   stigen: { art: { x: 610, y: 400, w: 460 }, sign: { x: 700, y: 560 }, notes: { x: 700, y: 614 }, box: { x: 600, y: 390, w: 470, h: 290 }, focusX: 780 },
   // The whole bed on this side of the brook.
   tradgarden: { art: { x: 40, y: 470 }, sign: { x: 40, y: 396, up: true }, notes: { x: 40, y: 965 }, box: { x: 30, y: 390, w: 520, h: 690 }, focusX: 180 },
+  // The clock tower by the pond, below Stigen (docs/PLAN-KLOCKAN.md, KL4).
+  klocktornet: { art: { x: 650, y: 716, w: 110 }, sign: { x: 780, y: 938 }, notes: { x: 780, y: 992 }, box: { x: 640, y: 706, w: 440, h: 374 }, focusX: 760 },
 };
 
 /**
@@ -62,8 +64,8 @@ export const POND = { cx: 900, cy: 860, rx: 120, ry: 60 };
 export const TREES: [number, number][] = [
   [960, 200],
   [1030, 260],
-  [760, 860],
-  [700, 960],
+  [1060, 760],
+  [690, 1060],
 ];
 export const TUFTS: [number, number][] = [
   [850, 240],

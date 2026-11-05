@@ -1,6 +1,7 @@
 import './styles.css';
 import { backen } from '../places/backen';
 import { stigen } from '../places/stigen';
+import { klocktornet } from '../places/klocktornet';
 import { tradgarden } from '../places/tradgarden';
 import { STAGING } from '../staging';
 import { createProgressStore, importLegacyData, requestPersistence } from '../storage';
@@ -43,7 +44,7 @@ async function start(): Promise<void> {
     store,
     // In map order: the garden first, as before; then the brook, and Stigen between them.
     // In the order the child meets them, which is also the valley's order (docs/PLAN-DALEN.md).
-    places: [backen, stigen, tradgarden],
+    places: [backen, stigen, tradgarden, klocktornet],
     storageKind: kind,
     persist,
   };

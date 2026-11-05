@@ -66,7 +66,7 @@ test('a new child starts at the brook; the garden rests until a grown-up opens i
   // The garden is on the map, resting, and says when it opens; the main button goes to the brook.
   const garden = page.getByRole('button', { name: `Trädgården. ${CLOSED}` });
   await expect(garden).toBeDisabled();
-  await expect(page.locator('.map-place.mood-closed')).toHaveCount(2);
+  await expect(page.locator('.map-place.mood-closed')).toHaveCount(3);
   await expect(page.getByText(CLOSED)).toBeVisible();
   await expect(page.locator('.map-place.here .map-sign')).toHaveText('Bäcken');
 

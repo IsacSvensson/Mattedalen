@@ -207,3 +207,23 @@ export function allTasks(): Task[] {
   for (const key of Object.keys(WHY_TASKS)) out.push({ kind: 'why', key });
   return out;
 }
+
+/** A task and its answer, for grown-ups: "3:30 i ord: halv fyra", "ställa visarna på 3:30". */
+export function taskWithAnswer(t: Task): string {
+  switch (t.kind) {
+    case 'read': {
+      const time = `${t.t.h}:${String(t.t.m).padStart(2, '0')}`;
+      if (t.form === 'ord') return `${time} i ord: ${taskAnswer(t)}`;
+      if (t.form === 'dig') return `urtavlan som digital tid: ${time}`;
+      return `ställa visarna på ${time}`;
+    }
+    case 'minutes':
+      return `minutvisaren på ${t.t.m / 5}: ${t.t.m} minuter`;
+    case 'hourHand':
+      return `timvisaren ${taskAnswer(t)}`;
+    default: {
+      const w = wordTask(t)!;
+      return `${w.prompt} ${w.answer}`;
+    }
+  }
+}

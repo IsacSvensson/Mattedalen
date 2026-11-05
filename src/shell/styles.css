@@ -1383,6 +1383,11 @@ h1:focus {
   overflow: visible;
 }
 
+/* The tower at its spot's width on the map. */
+.map-art .tower-svg {
+  width: 100%;
+}
+
 /* The bed at its own size on the map; the whole map scales on a wide screen. */
 .map-art .garden-grid {
   --cell: 40px;

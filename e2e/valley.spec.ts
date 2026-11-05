@@ -10,13 +10,15 @@ test('a child chooses their name and lands in the valley, and walks to the garde
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.getByRole('heading', { name: 'Mattedalen' })).toBeVisible();
   // Every place on the map, in the order the child meets them.
-  await expect(page.locator('.map-place')).toHaveCount(3);
-  await expect(page.locator('.map-sign')).toHaveText(['Bäcken', 'Stigen', 'Trädgården']);
+  await expect(page.locator('.map-place')).toHaveCount(4);
+  await expect(page.locator('.map-sign')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Klocktornet']);
   await expect(page.getByRole('button', { name: 'Trädgården. Nya frön väntar i trädgården.' })).toBeAttached();
   await expect(page.getByRole('button', { name: 'Bäcken. Nya stenar väntar vid bäcken.' })).toBeAttached();
   // Stigen rests until going over the ten sits at the brook.
   await expect(page.getByRole('button', { name: 'Stigen. Stigen öppnar när du kan gå över tiotalet vid bäcken.' })).toBeDisabled();
-  await expect(page.locator('.map-place.closed')).toHaveCount(1);
+  // Klocktornet rests until small sums sit at the brook.
+  await expect(page.getByRole('button', { name: 'Klocktornet. Klocktornet öppnar när du kan små summor vid bäcken.' })).toBeDisabled();
+  await expect(page.locator('.map-place.closed')).toHaveCount(2);
   // The child's animal stands by the sign of the place the day starts at.
   await expect(page.locator('.map-place.here .map-guide')).toHaveCount(1);
   await expect(page.locator('.map-guide')).toHaveCount(1);
@@ -38,7 +40,7 @@ test('a child chooses their name and lands in the valley, and walks to the garde
   await page.getByRole('button', { name: 'Börja från början' }).click();
   await expect(page.getByRole('heading', { name: 'Alvas bäck' })).toBeVisible();
   await page.getByRole('button', { name: 'Till dalen' }).click();
-  await expect(page.locator('.map-place')).toHaveCount(3);
+  await expect(page.locator('.map-place')).toHaveCount(4);
 
   // Opening the app again: choose the player, and the valley is the start page.
   await page.reload();
@@ -60,7 +62,7 @@ test('the valley shows what the child knows: plants in the bed and a sunflower p
 
   const thirsty = page.getByRole('button', { name: 'Trädgården. Trädgården är törstig.' });
   await expect(thirsty).toBeVisible();
-  await expect(page.locator('.place-status')).toHaveText(['Nya stenar väntar vid bäcken.', 'Stigen öppnar när du kan gå över tiotalet vid bäcken.', 'Trädgården är törstig.']);
+  await expect(page.locator('.place-status')).toHaveText(['Nya stenar väntar vid bäcken.', 'Stigen öppnar när du kan gå över tiotalet vid bäcken.', 'Trädgården är törstig.', 'Klocktornet öppnar när du kan små summor vid bäcken.']);
   // The bed as it is: the tree and the bushes in their own squares, and the seed.
   const bed = page.locator('.map-place .garden-grid.still');
   await expect(bed.locator('.grid-cell.stage-tree')).toHaveCount(1);
@@ -134,7 +136,7 @@ test('the valley can be read aloud', async ({ page }) => {
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: 'Läs upp' }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual([
-    'sv-SE: Nya stenar väntar vid bäcken. Stigen öppnar när du kan gå över tiotalet vid bäcken. Nya frön väntar i trädgården.',
+    'sv-SE: Nya stenar väntar vid bäcken. Stigen öppnar när du kan gå över tiotalet vid bäcken. Nya frön väntar i trädgården. Klocktornet öppnar när du kan små summor vid bäcken.',
   ]);
 });
 
@@ -208,7 +210,7 @@ test.describe('the map on a phone', () => {
     await page.goto('/');
     await createProfile(page, 'Alva');
     await page.getByRole('button', { name: 'Till dalen' }).click();
-    await expect(page.locator('.map-place')).toHaveCount(3);
+    await expect(page.locator('.map-place')).toHaveCount(4);
     const bad = await page.evaluate(async () => {
       const view = document.querySelector<HTMLElement>('.map-view')!;
       const out: string[] = [];
@@ -421,8 +423,8 @@ test.describe('the map for a screen reader and the keyboard', () => {
     await createProfile(page, 'Alva');
     await page.getByRole('button', { name: 'Till dalen' }).click();
     const list = page.getByRole('list', { name: 'Platserna i dalen' });
-    await expect(list.getByRole('listitem')).toHaveCount(3);
-    await expect(list.getByRole('button')).toHaveText(['Bäcken', 'Stigen', 'Trädgården']);
+    await expect(list.getByRole('listitem')).toHaveCount(4);
+    await expect(list.getByRole('button')).toHaveText(['Bäcken', 'Stigen', 'Trädgården', 'Klocktornet']);
     // Every picture is hidden from a screen reader and said in words instead.
     await expect(page.locator('.map-art:not([aria-hidden="true"])')).toHaveCount(0);
     await expect(list.getByText(/^Bron har \d+ av \d+ stenar på plats\.$/)).toBeAttached();

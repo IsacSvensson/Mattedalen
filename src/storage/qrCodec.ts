@@ -135,13 +135,15 @@ export interface QrTransfer {
   gardenOpen: boolean;
   /** Stigen is open (bit 3 of the flags; older codes leave it out). */
   pathOpen?: boolean;
+  /** Klocktornet is open (bit 7 of the flags). */
+  towerOpen?: boolean;
   /** How "delat med" is written; the fraction bar when left out. */
   divisionSign?: 'fraction' | 'obelus' | 'slash';
   /** False when the garden's tables do not wait for Stigen (bit 4 of the flags). */
   tablesWait?: boolean;
   /** A grown-up gives the child more time (bit 5 of the flags). */
   moreTime?: boolean;
-  /** Pictures in the help that are turned off: the clock is bit 6 of the flags (bit 7 is kept for more). */
+  /** Pictures in the help that are turned off: the clock is bit 6 of the flags. More pictures need a byte of their own. */
   helpPicturesOff?: HelpPicture[];
   /** The day each garden table could first open (`ProfileSettings.tableReady`). */
   tableReady?: Record<string, DayKey>;
@@ -159,7 +161,7 @@ export function encodeTransfer(t: QrTransfer): string {
   const bytes = [
     TRANSFER_VERSION,
     Math.max(0, Math.min(255, Math.round(t.sessionMinutes))),
-    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0) | (t.tablesWait === false ? 16 : 0) | (t.moreTime ? 32 : 0) | (t.helpPicturesOff?.includes('clock') ? 64 : 0),
+    (t.gardenOpen ? 1 : 0) | (Math.max(0, SIGNS.indexOf(t.divisionSign ?? 'fraction')) << 1) | (t.pathOpen ? 8 : 0) | (t.tablesWait === false ? 16 : 0) | (t.moreTime ? 32 : 0) | (t.helpPicturesOff?.includes('clock') ? 64 : 0) | (t.towerOpen ? 128 : 0),
     name.length,
     ...name,
     avatar.length,
@@ -240,6 +242,7 @@ export function decodeTransfer(text: string): QrTransfer {
     sessionMinutes,
     gardenOpen: (flags & 1) === 1,
     ...((flags & 8) === 8 ? { pathOpen: true } : {}),
+    ...((flags & 128) === 128 ? { towerOpen: true } : {}),
     ...(sign !== 'fraction' ? { divisionSign: sign } : {}),
     ...((flags & 16) === 16 ? { tablesWait: false } : {}),
     ...((flags & 32) === 32 ? { moreTime: true } : {}),

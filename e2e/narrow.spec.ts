@@ -35,7 +35,7 @@ for (const width of [320, 360]) {
       await page.goto('/');
       await createProfile(page, 'Alexandra-Charlotte');
       await page.getByRole('button', { name: 'Till dalen' }).click();
-      await expect(page.locator('.map-place')).toHaveCount(3);
+      await expect(page.locator('.map-place')).toHaveCount(4);
       await page.waitForTimeout(300);
       // The title and the child's animal at the top, inside the screen.
       await expectInside(page, '.map-head', 'main');

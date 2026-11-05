@@ -93,6 +93,7 @@ function sanitizeProfile(raw: unknown): Profile {
       allowFree: typeof settings.allowFree === 'boolean' ? settings.allowFree : DEFAULT_SETTINGS.allowFree,
       ...(settings.gardenOpen === true ? { gardenOpen: true } : {}),
       ...(settings.pathOpen === true ? { pathOpen: true } : {}),
+      ...(settings.towerOpen === true ? { towerOpen: true } : {}),
       ...(settings.divisionSign === 'obelus' || settings.divisionSign === 'slash' ? { divisionSign: settings.divisionSign } : {}),
       ...(settings.tablesWait === false ? { tablesWait: false } : {}),
       ...(tableReadyOf(settings.tableReady) ? { tableReady: tableReadyOf(settings.tableReady) } : {}),

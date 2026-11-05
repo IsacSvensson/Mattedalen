@@ -14,6 +14,8 @@ export interface ProfileSettings {
   gardenOpen?: boolean;
   /** A grown-up has opened Stigen. Otherwise it opens when going over ten sits at the brook. */
   pathOpen?: boolean;
+  /** Klocktornet is open: a grown-up opened it, or small sums sit at the brook (docs/PLAN-KLOCKAN.md, KL4). */
+  towerOpen?: boolean;
   /** How "delat med" is written: a fraction bar (default), `÷` or `/`. */
   divisionSign?: 'fraction' | 'obelus' | 'slash';
   /** False when a grown-up has turned off that the garden's tables wait for Stigen. */

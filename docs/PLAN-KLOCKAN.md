@@ -180,8 +180,8 @@ testversionen och släpps när den är provad.
 - **Enhetstesterna har ingen DOM.** Urtavlans vinklar testas som rena
   funktioner (`minuteAngle`, `hourAngle`) för alla 720 minuterna. Själva bilden,
   hoppen och minskade rörelser testas i `e2e/helpPictures.spec.ts`.
-- **QR-koden:** klockan avstängd är bit 6 i flaggorna. Bit 7 är kvar till fler
-  bilder.
+- **QR-koden:** klockan avstängd är bit 6 i flaggorna. Bit 7 blev sedan
+  Klocktornet öppet (KL4), så fler bilder behöver en egen byte i koden.
 
 ### ST2. Fingrarna för ×9
 
@@ -541,6 +541,33 @@ en fråga om digital tid. Till höger hjälpen efter svaret 3:06.*
     ett varv;
   - en nyhet i ”Nytt i Mattedalen”.
 - **Piloten** får ett test på papper och med en riktig klocka, före och efter.
+
+#### Fynd från KL4a
+
+![Surfplatta: hela dalen med Klocktornet vid dammen](img/dalen-med-tornet.png)
+
+*Surfplatta. Klocktornet står vid dammen nere till höger, med djuret vid
+skylten.*
+
+- **Tornet är en plats i dalen** (`src/places/klocktornet/index.ts`) och står
+  på kartan vid dammen. Två träd flyttades: ett stod där tornet står, och ett
+  hamnade först mitt i bäcken.
+- **Tornet öppnar** när små summor sitter vid bäcken (`TOWER_OPENS_AFTER`),
+  när barnet redan har börjat, eller när en vuxen öppnar det. Det står kvar
+  öppet (`towerOpen`). Fältet följer med i säkerhetskopian, QR-koden (bit 7)
+  och pilotfilen.
+- **Fem minuter i taget väntar** på Stigens hela tiotal, och tornets sida
+  säger det.
+- **Fyra paket ryms i en QR-kod,** och ett test läser koden med en kamera.
+- **Dagens plan** besöker fortfarande högst två platser. Ett nytt barn med bara
+  bäcken och tornet öppna får båda.
+- **”För vuxna”** har en rad och en sida för tornet, med delarna, ”Svåra just
+  nu”, förväxlingarna och ”Öppna Klocktornet nu”. Förmågorna var för sig,
+  startkollen och kollen kommer i KL4b.
+- **Provsidan** har inte längre knappen till tornet. Visarna och urtavlorna
+  finns kvar där.
+- **E2e-testerna** räknade tre platser på kartan och i ”För vuxna”. De räknar
+  nu fyra.
 
 ### KL5. De svenska fraserna
 

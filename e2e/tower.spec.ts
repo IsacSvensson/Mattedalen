@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createClockPack } from '../src/content/clock';
-import { createProfile, fakeSwedishVoice, openParent, parentLink, passIntro, seedStates, type SeedState } from './helpers';
+import { createAdditionPack } from '../src/content/addition';
+import { closeParent, createProfile, fakeSwedishVoice, openParent, passIntro, seedStates, type SeedState } from './helpers';
 
 /** Klocktornet before it is in the valley (docs/PLAN-KLOCKAN.md, KL3): from the clock lab in the test version. */
 
@@ -16,16 +17,21 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
 });
 
-/** To the tower page for Alva, in the test version; with `readAloud`, reading aloud is turned on first. */
+/** To the tower for Alva, through the valley; with `readAloud`, reading aloud is turned on first. Opens the tower if it is closed. */
 async function toTower(page: Page, readAloud = false): Promise<void> {
   await openParent(page);
   if (readAloud) {
     await page.getByRole('button', { name: 'Slå på uppläsning' }).click();
     await expect(page.getByRole('button', { name: 'Slå på uppläsning' })).toHaveCount(0);
   }
-  await parentLink(page, 'Den här enheten');
-  await page.getByRole('button', { name: 'Prova klockan (bara i testversionen)' }).click();
-  await page.getByRole('button', { name: 'Prova tornet med Alva' }).click();
+  const open = page.getByRole('button', { name: 'Öppna Klocktornet nu' });
+  if (await open.count()) {
+    await open.click();
+    await expect(open).toHaveCount(0);
+  }
+  await closeParent(page);
+  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await page.getByRole('button', { name: /^Klocktornet\./ }).click();
   await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
 }
 
@@ -62,7 +68,10 @@ async function until(page: Page, target: ReturnType<Page['locator']>): Promise<v
       await page.getByRole('button', { name: 'Svara' }).click();
     } else {
       // The right answer where the words decide it, so new things keep coming; otherwise any.
-      const answer = prompts.get((await page.locator('.prompt').getAttribute('data-prompt')) ?? '');
+      // The question may already have given way to the help card: then go round again.
+      const asked = await page.locator('.question .prompt').getAttribute('data-prompt', { timeout: 1000 }).catch(() => null);
+      if (asked === null) continue;
+      const answer = prompts.get(asked);
       const right = answer ? page.locator(`.choice[data-value="${answer}"]:not([disabled])`) : null;
       if (right && (await right.count())) await right.click();
       else await page.locator('.choice:not([disabled])').first().click();
@@ -183,3 +192,52 @@ test('the day has drawings on its answers', async ({ page }) => {
   await expect(page.locator('.choice[data-value="middag"] .day-icon')).toHaveCount(1);
 });
 
+
+const brookPack = createAdditionPack();
+/** Small sums sit at the brook: the tower opens by itself. */
+async function smallSumsSit(page: Page): Promise<void> {
+  const states: Record<string, SeedState> = {};
+  for (const u of brookPack.units.filter((x) => ['ettmer', 'noll', 'sma'].includes(x.id))) for (const id of u.itemIds) states[id] = { status: 'fluent', box: 3, dueDay: '2026-03-30' };
+  await seedStates(page, states, { packId: 'addition', unlockedUnitIds: ['ettmer', 'noll', 'sma', 'tio'] }, 'mattedalen-test');
+}
+
+test('in the valley the tower rests until small sums sit at the brook, then opens and stays open', async ({ page }) => {
+  await newChild(page);
+  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  const closed = page.getByRole('button', { name: 'Klocktornet. Klocktornet öppnar när du kan små summor vid bäcken.' });
+  await expect(closed).toBeDisabled();
+  await smallSumsSit(page);
+  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await page.getByRole('button', { name: /^Klocktornet\. Tornet väntar på dig\./ }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
+  // The animal walks back to the valley.
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await expect(page.locator('.valley-map')).toBeVisible();
+});
+
+test('"I dag" has the tower, and after an update the app comes back to it', async ({ page }) => {
+  await newChild(page);
+  await seed(page, ['kl:dig:3:30']);
+  await toTower(page);
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'I dag. Det här kan du göra i dag' }).click();
+  await expect(page.getByRole('dialog', { name: 'I dag' }).locator('.today-go strong')).toContainText(['Gå upp i tornet']);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /^Klocktornet\./ }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
+  // The mark an update leaves, then the reload: back in the tower.
+  await page.evaluate(async () => {
+    const db: IDBDatabase = await new Promise((r) => {
+      const q = indexedDB.open('mattedalen-test');
+      q.onsuccess = () => r(q.result);
+    });
+    const profiles: { id: string }[] = await new Promise((r) => {
+      const q = db.transaction('profiles').objectStore('profiles').getAll();
+      q.onsuccess = () => r(q.result);
+    });
+    db.close();
+    sessionStorage.setItem('mattedalen-test:resume', JSON.stringify({ where: { kind: 'place', profileId: profiles[0]!.id, placeId: 'klocktornet' }, at: Date.now() }));
+  });
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
+});

@@ -14,7 +14,7 @@ import { genitive } from '../../../shell/words';
 import { currentPart, litCount } from '../../stigen/components/trail';
 import { lanterns } from '../../stigen/logic';
 import { towerArt } from '../components/tower';
-import { pack, towerDeps } from '../pack';
+import { pack, towerDeps, towerHeld } from '../pack';
 import { TOWER_PICTURES } from '../tips';
 import { showTowerSession } from './session';
 
@@ -28,7 +28,10 @@ export async function showTower(ctx: AppContext, profile: Profile): Promise<void
   const deps = towerDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
-  const unlocked = new Set(engine.unlockedUnits(states, meta, undefined, []));
+  const held = await towerHeld(ctx, profile);
+  const unlocked = new Set(engine.unlockedUnits(states, meta, undefined, held));
+  // Five minutes at a time waits for whole tens on Stigen: say so, once the part before it sits.
+  const waits = held.includes('femmin') && engine.unlockedUnits(states, meta).includes('femmin');
   const asleep = engine.dailyDone(meta);
   const picture = towerPicture(states, unlocked);
 
@@ -58,11 +61,13 @@ export async function showTower(ctx: AppContext, profile: Profile): Promise<void
     ),
     picture.art,
     h('p', { class: 'sr-only' }, picture.artText),
-    h('div', { class: 'garden-side' }, picture.line, actions),
+    h('div', { class: 'garden-side' }, picture.line, waits ? h('p', { class: 'muted tower-waits' }, WAITS_TEXT) : null, actions),
   );
   show(ctx, view);
   void readShown(ctx, profile, { into: '.place-corner' });
 }
+
+export const WAITS_TEXT = 'Fem minuter i taget kommer när du kan hela tiotal på stigen.';
 
 /** Starts the day's session in the tower. The start check and the check come in KL4. */
 export function startTower(ctx: AppContext, profile: Profile): Promise<void> {
