@@ -130,6 +130,8 @@ const CORRECT_PAUSE_MS = 650;
 let voiceOn = false;
 /** The prompt on screen, for the "read again" button in the top band. */
 let currentPrompt = '';
+/** While a question with answers in words is on screen: reads it and the answers again (the "read again" button). */
+let readAgain: (() => void) | null = null;
 
 /** Drops in the top band: they fill up as the session's time passes (no clock, no count). */
 const DROPS = 12;
@@ -183,7 +185,7 @@ export async function runSession(
         h('button', { class: 'icon-button', type: 'button', 'aria-label': place.homeLabel, onclick: () => void finish(true) }, icon('home')),
         progress,
         voiceOn
-          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp igen', onclick: () => void speak(currentPrompt) }, icon('speaker'))
+          ? h('button', { class: 'icon-button speak-button', type: 'button', 'aria-label': 'Läs upp igen', onclick: () => (readAgain ? readAgain() : void speak(currentPrompt)) }, icon('speaker'))
           : null,
       ),
     ),
@@ -324,15 +326,34 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
     let answered = false;
     let shownAt = performance.now();
     currentPrompt = q.prompt;
-    if (voiceOn) {
-      // Time the answer from when the question has been heard, not while it is read.
-      void speak(q.prompt).then(() => {
+    // Answers in words are read too, one at a time, the button lit while it is read
+    // (a child who does not read hears which button is which). A new reading stops the old one.
+    let reading = 0;
+    let wordButtons: HTMLElement[] = [];
+    const readAll = async () => {
+      const mine = ++reading;
+      await speak(q.prompt);
+      for (const b of wordButtons) {
+        if (answered || mine !== reading) return;
+        b.classList.add('speaking');
+        await speak(b.dataset.spoken ?? '');
+        b.classList.remove('speaking');
+      }
+    };
+    /** Starts reading once the answers are on screen; the answer is timed from when it has all been heard. */
+    const startReading = () => {
+      if (!voiceOn) return;
+      readAgain = wordButtons.length ? () => void readAll() : null;
+      void readAll().then(() => {
         if (!answered) shownAt = performance.now();
       });
-    }
+    };
     const done = (value: string, firstDigitAt: number | null = null) => {
       if (answered) return false;
       answered = true;
+      readAgain = null;
+      if (wordButtons.some((b) => b.classList.contains('speaking'))) stopSpeaking();
+      wordButtons.forEach((b) => b.classList.remove('speaking'));
       const end = place.timeToFirstDigit && firstDigitAt !== null ? firstDigitAt : performance.now();
       resolve({ given: value, rtMs: Math.round(Math.max(0, end - shownAt)) });
       return true;
@@ -351,6 +372,7 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
     if (own) {
       stage.replaceChildren(h('div', { class: 'question own-input' }, prompt, own.el));
       setKeys(own.onKey ? (e) => own.onKey!(e) : undefined);
+      startReading();
       return;
     }
 
@@ -360,6 +382,7 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
       }, answerDigits(place.deps.pack));
       stage.replaceChildren(h('div', { class: 'question free' }, prompt, pad.el));
       setKeys((e) => pad.onKey(e));
+      startReading();
       return;
     }
 
@@ -372,13 +395,16 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
     const numeric = choices.every((c) => /^\d+$/.test(c));
     const views = choices.map((value) => place.choiceView?.(value) ?? null);
     const pictures = views.some(Boolean);
+    const labelOf = (value: string) => place.choiceLabel?.(value) ?? value;
+    // An answer in words (it has letters), not a number or a time.
+    const inWords = (value: string) => /\p{L}/u.test(labelOf(value));
     const buttons = choices.map((value, i) =>
       h(
         'button',
         {
-          class: 'choice',
+          class: `choice${inWords(value) ? ` words${labelOf(value).length > 6 ? ' long' : ''}` : ''}`,
           type: 'button',
-          dataset: { value },
+          dataset: { value, spoken: labelOf(value) },
           // The digit keys type a number answer; otherwise 1, 2, 3 … pick a choice.
           'aria-keyshortcuts': numeric ? undefined : String(i + 1),
           // A picture has its name for screen readers.
@@ -389,6 +415,8 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
       ),
     );
     stage.replaceChildren(h('div', { class: 'question' }, prompt, h('div', { class: `answer-area choices${pictures ? ' pictures' : ''}` }, buttons)));
+    wordButtons = buttons.filter((_, i) => inWords(choices[i]!));
+    startReading();
     const keys = choiceKeys(choices, (i) => choose(choices[i]!, buttons[i]!), {
       typed: (text) => buttons.forEach((b, i) => b.classList.toggle('keyed', text !== '' && choices[i]!.startsWith(text))),
     });

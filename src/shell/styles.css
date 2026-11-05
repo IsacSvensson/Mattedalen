@@ -2544,7 +2544,8 @@ h1:focus {
 
 .choices {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* A column is never wider than half: a long word wraps instead of widening the page. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   width: 100%;
 }
@@ -2602,6 +2603,24 @@ h1:focus {
 }
 
 /* A number typed on the keyboard that begins this choice (2 for 24): marked until it is chosen. */
+/* Answers in words: long words wrap, and a long one is smaller than a number. */
+.choice.words {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  padding: 8px 10px;
+  line-height: 1.15;
+}
+
+.choice.words.long {
+  font-size: clamp(1.2rem, 5.5vw, 1.8rem);
+}
+
+/* The answer being read aloud: a yellow ring, so the child hears which button is which. */
+.choice.speaking {
+  outline: 4px solid var(--sun);
+  outline-offset: 3px;
+}
+
 .choice.keyed {
   outline: 4px solid var(--i-blue);
   outline-offset: 3px;
@@ -2959,6 +2978,25 @@ h1:focus {
 .question .prompt-card .clock-view {
   width: min(200px, 55vw, 26dvh);
   margin: 4px auto 0;
+}
+
+/* A picture on an answer in words, with the word under it (Klocktornet). */
+.choice-picture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.choices .choice-picture .clock-view,
+.choices .choice-picture .day-icon {
+  width: min(84px, 22vw, 11dvh);
+  height: auto;
+}
+
+.clock-hand.named {
+  stroke: var(--primary);
+  stroke-width: 6;
 }
 
 .clock-lab section {

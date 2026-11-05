@@ -415,6 +415,11 @@ Förslagen nedan gäller.
 med handen och den gungande skylten vid Bäcken, och hjälpkortet med färre rader
 och en tankebubbla.*
 
+- **Svaren i ord läses också upp (november 2026).** Ett barn som inte läser
+  visste inte vilken knapp som var vilket svar. Nu läses svaren i ord upp efter
+  frågan, ett i taget, och knappen som läses har en gul ring. Långa ord får
+  plats på smala telefoner. Se fynden i
+  [PLAN-KLOCKAN](PLAN-KLOCKAN.md#fynd-efter-provet-på-telefonen).
 - **Tankesätten var redan korta.** Mätningen räknade orden bredvid talen: högst
   8 vid bäcken och Stigen. I trädgården hade korgarna i ”Dela lika” 9 och 13 ord.
   De skrevs om till ”Dela ut en i taget: 3 i varje korg.” och ”Fyll korgar med 4

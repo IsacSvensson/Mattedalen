@@ -491,6 +491,31 @@ en fråga om digital tid. Till höger hjälpen efter svaret 3:06.*
   Nu tillåts fem sekunder bakåt (`CLOCK_BACK_MS` i `src/shell/resume.ts`), och
   testet gick igenom 60 gånger av 60.
 
+#### Fynd efter provet på telefonen
+
+![Telefon 320 och 360 px: frågan om visarna, med urtavlor och ord på knapparna](img/svar-i-ord.png)
+
+*Frågan om visarna på 320 och 360 px, efter rättelsen.*
+
+- **Svar i ord gick inte att använda för ett barn som inte läser.**
+  Uppläsningen läste frågan men inte svaren. Nu läses svaren i ord upp efter
+  frågan, ett i taget, i knapparnas ordning, och knappen som läses har en gul
+  ring. ”Läs upp igen” läser allt igen. Det gäller alla platser. Svar i tal
+  och tider läses inte upp, eftersom barnet läser siffrorna själv.
+- **Långa ord gjorde knapparna bredare än skärmen,** och sidan zoomades ut.
+  Kolumnerna är nu högst halva ytan (`minmax(0, 1fr)`). Långa ord bryts och
+  får mindre text, medan korta ord som Ja och Nej behåller sin storlek.
+- **Bilder på svaren i tornet:**
+  - frågan om visarna har en urtavla där visaren som ordet gäller är tjock och
+    röd;
+  - dagens svar har små teckningar (frukost, middag, läggdags, skolan, morgon,
+    kväll och natt).
+
+  Tider i ord, timvisarens lägen, hur länge och nära eller långt bort har ingen
+  bild, eftersom en bild där skulle avslöja svaret.
+- **Inget test** visar att uppläsningen slutar när barnet svarar mitt i den.
+  Den falska rösten i testerna läser för fort för att hinna avbrytas.
+
 ### KL4. Dalen och För vuxna
 
 - **Kartan:** tornet står nere till höger under Stigen, där dammen och träden

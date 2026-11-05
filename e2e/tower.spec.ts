@@ -1,10 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createClockPack } from '../src/content/clock';
-import { createProfile, openParent, parentLink, passIntro, seedStates, type SeedState } from './helpers';
+import { createProfile, fakeSwedishVoice, openParent, parentLink, passIntro, seedStates, type SeedState } from './helpers';
 
 /** Klocktornet before it is in the valley (docs/PLAN-KLOCKAN.md, KL3): from the clock lab in the test version. */
 
 const pack = createClockPack();
+/** What the stand-in voice has said, one utterance each. */
+const spoken = (page: Page) => page.evaluate(() => [...(window as unknown as { spoken: string[] }).spoken]);
 const ALL_UNITS = pack.units.map((u) => u.id);
 /** The answer to a question in words that only one task has (the day, the face, why). */
 const prompts = new Map<string, string | null>();
@@ -14,9 +16,13 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-02-02T16:00:00') });
 });
 
-/** To the tower page for Alva, in the test version. */
-async function toTower(page: Page): Promise<void> {
+/** To the tower page for Alva, in the test version; with `readAloud`, reading aloud is turned on first. */
+async function toTower(page: Page, readAloud = false): Promise<void> {
   await openParent(page);
+  if (readAloud) {
+    await page.getByRole('button', { name: 'Slå på uppläsning' }).click();
+    await expect(page.getByRole('button', { name: 'Slå på uppläsning' })).toHaveCount(0);
+  }
   await parentLink(page, 'Den här enheten');
   await page.getByRole('button', { name: 'Prova klockan (bara i testversionen)' }).click();
   await page.getByRole('button', { name: 'Prova tornet med Alva' }).click();
@@ -134,3 +140,46 @@ test('a new time is shown as a movement, the hour hand going along', async ({ pa
   await expect(intro.locator('.clock-hand.hour')).toHaveAttribute('transform', 'rotate(30.00 70 70)');
   await expect(intro.locator('.strategy')).toContainText('timvisaren på 1');
 });
+
+test('answers in words are read after the question, in the order of the buttons; times are not', async ({ page }) => {
+  await fakeSwedishVoice(page);
+  await page.setViewportSize({ width: 320, height: 700 });
+  await newChild(page);
+  await seed(page, ['ur:tim', 'kl:dig:3:30']);
+  await toTower(page, true);
+  await page.getByRole('button', { name: 'Gå upp i tornet' }).click();
+  await until(page, page.locator('.choice[data-value="timvisaren"]'));
+  const order = await page.locator('.choice').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.value!));
+  await expect.poll(async () => (await spoken(page)).slice(-3)).toEqual(['Vilken visare visar vilken timme det är?', ...order]);
+  // The hands on the buttons: the named hand thick, the word under it, and the word as the name.
+  await expect(page.locator('.choice[data-value="timvisaren"] .clock-hand.hour.named')).toHaveCount(1);
+  await expect(page.locator('.choice[data-value="minutvisaren"] .clock-hand.minute.named')).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'minutvisaren' })).toBeVisible();
+  // Long words fit a narrow phone.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  for (const b of await page.locator('.choice').all()) {
+    const box = (await b.boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(320);
+  }
+  // "Läs upp igen": the question and the answers once more.
+  const before = (await spoken(page)).length;
+  await page.getByRole('button', { name: 'Läs upp igen' }).click();
+  await expect.poll(async () => (await spoken(page)).slice(before)).toEqual(['Vilken visare visar vilken timme det är?', ...order]);
+  await page.getByRole('button', { name: 'timvisaren' }).click();
+  // A question with times to choose: only the question is read.
+  await until(page, page.locator('.choice[data-value="3:06"]'));
+  await expect.poll(async () => (await spoken(page)).at(-1)).toBe('Vilken digital tid visar klockan?');
+  await page.waitForTimeout(200);
+  expect((await spoken(page)).filter((t) => /^\d+:\d\d$/.test(t))).toEqual([]);
+});
+
+test('the day has drawings on its answers', async ({ page }) => {
+  await newChild(page);
+  await seed(page, ['day:forst1']);
+  await toTower(page);
+  await page.getByRole('button', { name: 'Gå upp i tornet' }).click();
+  await until(page, page.locator('.choice[data-value="frukost"]'));
+  await expect(page.locator('.choice[data-value="frukost"] .day-icon')).toHaveCount(1);
+  await expect(page.locator('.choice[data-value="middag"] .day-icon')).toHaveCount(1);
+});
+

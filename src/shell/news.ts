@@ -17,6 +17,15 @@ export interface NewsItem {
 
 export const NEWS: readonly NewsItem[] = [
   {
+    id: '2026-11-06-svaren',
+    day: '2026-11-06',
+    title: 'Svaren läses upp',
+    points: [
+      'Med uppläsning läses svaren i ord upp efter frågan, ett i taget, och knappen lyser medan den läses. Ett barn som inte läser hör vilken knapp som är vilken.',
+      'Långa ord på knapparna får plats på smala telefoner.',
+    ],
+  },
+  {
     id: '2026-11-04-klockan',
     day: '2026-11-04',
     title: 'Klockan i trädgården',

@@ -10,6 +10,7 @@ import { runSession, type SessionPlace } from '../../../shell/screens/session';
 import { towerDeps } from '../pack';
 import { showTowerEnd } from './sessionEnd';
 import { showTower } from './tower';
+import { dayIcon } from '../components/dayIcons';
 
 /** A session in Klocktornet (docs/PLAN-KLOCKAN.md, KL3): climbing the tower is reading the clock. */
 export function showTowerSession(ctx: AppContext, profile: Profile, mode: SessionMode): Promise<void> {
@@ -63,6 +64,15 @@ export function movingClock(from: number, to: number, opts: Omit<ClockFaceOption
     else onDone?.();
   };
   requestAnimationFrame(step);
+  return svg;
+}
+
+/** A clock at three with one hand thick and coloured: the hand the answer names. */
+function handPicture(hand: 'hour' | 'minute'): SVGSVGElement {
+  const svg = clockFace({ minute: 0, hour: 3, label: '' });
+  svg.removeAttribute('role');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.querySelector(`.clock-hand.${hand}`)?.classList.add('named');
   return svg;
 }
 
@@ -132,6 +142,17 @@ function towerSession(ctx: AppContext, profile: Profile): SessionPlace {
           } else setter.onKey(e);
         },
       };
+    },
+
+    /**
+     * A picture on an answer in words, with the word under it, where the
+     * picture tells the buttons apart without giving the answer away: the
+     * hands (the child still has to know which is which), and the day.
+     */
+    choiceView(value) {
+      const hand = value === 'timvisaren' ? 'hour' : value === 'minutvisaren' ? 'minute' : null;
+      const picture = hand ? handPicture(hand) : dayIcon(value);
+      return picture ? h('span', { class: 'choice-picture' }, picture, h('span', { class: 'choice-word' }, value)) : null;
     },
 
     // Understanding has no derivation path.
