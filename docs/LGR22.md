@@ -21,7 +21,7 @@ och problemlösning. Sist står kriterierna för godtagbara kunskaper i slutet a
 |---|---|---|
 | Taluppfattning och tals användning | Det mesta om naturliga tal: talen till 100, positionssystemet, de fyra räknesätten och deras samband, och huvudräkning | Bråk (utom hälften), skriftlig beräkning, överslag, digitala verktyg, rimlighetsbedömning, symboler för tal i olika kulturer |
 | Algebra | Likhetstecknet, obekanta tal och mönster i talföljder | Geometriska mönster, stegvisa instruktioner (programmering) |
-| Geometri | – | Allt |
+| Geometri | Mätning av tid: klockan, analogt och digitalt (Klocktornet) | Lägesord, geometriska objekt, mätning av längd, massa och volym, skala och symmetri |
 | Sannolikhet och statistik | – | Allt |
 | Samband och förändring | Dubbelt och hälften | Andra proportionella samband |
 | Problemlösning | Lite: lika stora grupper och att dela lika, i ord | Strategier för att lösa problem, och att formulera frågor |
@@ -33,7 +33,7 @@ och problemlösning. Sist står kriterierna för godtagbara kunskaper i slutet a
 | ”Naturliga tal och deras egenskaper samt hur talen delas upp och används för att ange antal och ordning.” | Bäcken: tiokamrater, dubblor och talen till 20 på en numrerad tallinje. Stigen: talen till 100 på en tom tallinje, delade i tiotal och ental. |
 | ”Positionssystemet och hur det används för att beskriva naturliga tal.” | Stigen: hela tiotal, tiotal och ental med stavar och kuber, och växling av tio ental mot ett tiotal. |
 | ”Symboler för tal och symbolernas utveckling i några olika kulturer genom historien.” | Tränas inte. |
-| ”Tal i bråkform som del av helhet och del av antal samt hur delarna benämns och uttrycks som enkla bråk. Hur enkla bråk förhåller sig till naturliga tal.” | Bara hälften av ett antal: halvera på Stigen, delat med 2 i trädgården, och ×5 som hälften av ×10. Inga bråk skrivs eller benämns. |
+| ”Tal i bråkform som del av helhet och del av antal samt hur delarna benämns och uttrycks som enkla bråk. Hur enkla bråk förhåller sig till naturliga tal.” | Bara hälften av ett antal: halvera på Stigen, delat med 2 i trädgården, och ×5 som hälften av ×10. I Klocktornet är en halvtimme ett halvt varv och en kvart en fjärdedel av ett varv. Inga bråk skrivs. |
 | ”Hur naturliga tal och enkla tal i bråkform används i elevnära situationer.” | Lite: korgar med jordgubbar i trädgården (”3 korgar med 4 jordgubbar i varje”) och att dela lika. |
 | ”De fyra räknesättens egenskaper och samband samt användning i olika situationer.” | Alla fyra räknesätten. Bäcken: 8 + 5, 5 + 8, 13 − 5 och 13 − 8 hör till samma familj. Trädgården: en division byggs som samma rektangel som gånger, 7 × 8 är 8 × 7, och gånger är upprepad addition (6 × 6 = 5 × 6 + 6). |
 | ”Metoder för beräkningar med naturliga tal, vid huvudräkning, överslagsräkning och skriftlig beräkning. Användning av digitala verktyg vid beräkningar.” | Huvudräkning är kärnan i appen: räknestigar från kända fakta, över tiotalet, via tiotalet, ta bort tiotalen först och räkna upp. Överslag, skriftlig beräkning och digitala verktyg tränas inte. |
@@ -50,14 +50,16 @@ och problemlösning. Sist står kriterierna för godtagbara kunskaper i slutet a
 
 ## Geometri
 
-Inget av det här tränas i appen:
+| Kursplanen | I appen |
+|---|---|
+| ”Jämförelser och uppskattningar av storheter. Mätning av längd, massa, volym och tid med vanliga nutida och äldre måttenheter.” | Bara tid: Klocktornet tränar klockan, hela och halva timmar, kvart och fem minuter, analogt och digitalt, och minuter, kvartar och timmar som enheter. Dagen tränar före och efter och att uppskatta hur lång tid saker tar ([PLAN-KLOCKAN](PLAN-KLOCKAN.md)). Längd, massa och volym tränas inte. |
+
+Det här tränas inte i appen:
 
 - ”Vanliga lägesord för att beskriva föremåls och objekts läge i rummet.”
 - ”Grundläggande geometriska tvådimensionella objekt samt objekten klot, kon,
   cylinder och rätblock. Egenskaper hos dessa objekt och deras inbördes
   relationer. Konstruktion av geometriska objekt.”
-- ”Jämförelser och uppskattningar av storheter. Mätning av längd, massa, volym
-  och tid med vanliga nutida och äldre måttenheter.”
 - ”Skala vid enkel förminskning och förstoring.”
 - ”Symmetri i vardagen och hur symmetri kan konstrueras.”
 

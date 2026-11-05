@@ -27,6 +27,9 @@ import { speechSupported, swedishVoiceLoaded } from '../../speech';
  * the week and a row per place; the rest is a tap away, on pages of their own.
  */
 export async function showParent(ctx: AppContext, selectedId?: string): Promise<void> {
+  // The screen when asked: if the grown-up leaves while the overview loads (closes it
+  // right after a button in "Att göra"), the overview must not come back on top.
+  const asked = ctx.root.firstElementChild;
   const profiles = await ctx.store.listProfiles();
   const selected = profiles.find((p) => p.id === selectedId) ?? profiles[0];
   setWhere({ kind: 'parent', page: 'overview', profileId: selected?.id });
@@ -70,6 +73,7 @@ export async function showParent(ctx: AppContext, selectedId?: string): Promise<
       ),
     ),
   );
+  if (ctx.root.firstElementChild !== asked) return;
   show(ctx, view);
 }
 

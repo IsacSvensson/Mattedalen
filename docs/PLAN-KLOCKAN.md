@@ -516,7 +516,7 @@ en fråga om digital tid. Till höger hjälpen efter svaret 3:06.*
 - **Inget test** visar att uppläsningen slutar när barnet svarar mitt i den.
   Den falska rösten i testerna läser för fort för att hinna avbrytas.
 
-### KL4. Dalen och För vuxna
+### KL4. Dalen och För vuxna (klar)
 
 - **Kartan:** tornet står nere till höger under Stigen, där dammen och träden
   står i dag (`SPOTS` i `src/shell/valleyLayout.ts`).
@@ -568,6 +568,32 @@ skylten.*
   finns kvar där.
 - **E2e-testerna** räknade tre platser på kartan och i ”För vuxna”. De räknar
   nu fyra.
+
+#### Fynd från KL4b
+
+![Telefon: tornets sida i För vuxna](img/tornet-for-vuxna.png)
+
+*Telefon, 360 px. Tornets sida med delarna, förmågorna, hur barnet ställer
+visarna, kollen och startkollen.*
+
+- **Motorns startkoll hoppar över förståelsedelar,** och alla tornets delar är
+  förståelse. Tornet har därför en egen startkoll (`stairs.ts`). Den tar tre
+  frågor per del i trappans ordning och stannar vid första delen barnet inte
+  klarar. Två rätt av tre räcker. Dagen får två frågor vid sidan av.
+- **Startkollen kan bara flytta fram barnet.** Klarade delar sitter, och nästa
+  del öppnas. En vuxen kan göra om den från tornets sida.
+- **Kollen** har tio frågor som NCM:s MTi1: läsa, ställa visarna, timvisaren
+  och enheterna. Den erbjuds ungefär var sjunde speldag i tornet. Resultatet
+  syns över tid i ”För vuxna”.
+- **Förmågorna var för sig:** läsa i ord, läsa digitalt, ställa visarna och
+  minuterna. Ett barn kan kunna läsa klockan men inte ställa den.
+- **”Hur barnet ställer visarna”** räknar fel timme, fel minutvisare och båda
+  fel.
+- **Ett fel i appen:** stängde den vuxna sidan direkt efter en knapp under
+  ”Att göra”, kunde översikten ritas upp igen ovanpå. Nu ritas den bara om
+  sidan fortfarande är öppen.
+- **Svarsknapparna låses** när barnet har svarat i en koll. Ett snabbt andra
+  tryck räknas inte.
 
 ### KL5. De svenska fraserna
 

@@ -17,6 +17,10 @@ import { towerArt } from '../components/tower';
 import { pack, towerDeps, towerHeld } from '../pack';
 import { TOWER_PICTURES } from '../tips';
 import { showTowerSession } from './session';
+import { offeredKey, showTowerPlacementOffer } from './placement';
+import { showTowerCheckOffer, towerCheckLaterKey } from './check';
+import { checkDue } from '../../../shell/check';
+import { systemClock } from '../../../engine';
 
 /**
  * Klocktornet (docs/PLAN-KLOCKAN.md, KL3): the tower with a window for every
@@ -28,6 +32,11 @@ export async function showTower(ctx: AppContext, profile: Profile): Promise<void
   const deps = towerDeps(ctx);
   const engine = engineFor(profile, deps);
   const { states, meta } = await loadProgress(profile, deps, engine);
+  // The first time in the tower, with nothing practised yet: offer the start check (once).
+  const fresh = Object.values(states).every((s) => s.status === 'new');
+  if (fresh && !(await ctx.store.getSetting<boolean>(offeredKey(profile)))) {
+    return showTowerPlacementOffer(ctx, profile, () => showTower(ctx, profile));
+  }
   const held = await towerHeld(ctx, profile);
   const unlocked = new Set(engine.unlockedUnits(states, meta, undefined, held));
   // Five minutes at a time waits for whole tens on Stigen: say so, once the part before it sits.
@@ -69,9 +78,23 @@ export async function showTower(ctx: AppContext, profile: Profile): Promise<void
 
 export const WAITS_TEXT = 'Fem minuter i taget kommer när du kan hela tiotal på stigen.';
 
-/** Starts the day's session in the tower. The start check and the check come in KL4. */
-export function startTower(ctx: AppContext, profile: Profile): Promise<void> {
-  return showTowerSession(ctx, profile, 'daily');
+/**
+ * Starts the day's session in the tower, as its button and "I dag" do: the
+ * start check is offered the first time, and the koll comes first on the days
+ * it is due (about every seventh play day in the tower).
+ */
+export async function startTower(ctx: AppContext, profile: Profile): Promise<void> {
+  const deps = towerDeps(ctx);
+  const engine = engineFor(profile, deps);
+  const { states, meta } = await loadProgress(profile, deps, engine);
+  const fresh = Object.values(states).every((s) => s.status === 'new');
+  if (fresh && !(await ctx.store.getSetting<boolean>(offeredKey(profile)))) {
+    return showTowerPlacementOffer(ctx, profile, () => showTower(ctx, profile));
+  }
+  const play = () => showTowerSession(ctx, profile, 'daily');
+  const checkFirst =
+    !engine.dailyDone(meta) && checkDue(await ctx.store.listSessions(profile.id), pack.id, systemClock.today(), await ctx.store.getSetting<string>(towerCheckLaterKey(profile.id)));
+  return checkFirst ? showTowerCheckOffer(ctx, profile, play) : play();
 }
 
 /** The tower with its windows and what the child is on now, without counts. */

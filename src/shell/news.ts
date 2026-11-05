@@ -17,6 +17,16 @@ export interface NewsItem {
 
 export const NEWS: readonly NewsItem[] = [
   {
+    id: '2026-11-06-klocktornet',
+    day: '2026-11-06',
+    title: 'Klocktornet',
+    points: [
+      'Ett nytt ställe i dalen, vid dammen, där barnet lär sig klockan: hela och halva timmar, kvart och fem minuter, analogt och digitalt.',
+      'Tornet öppnar när små summor sitter vid bäcken. En vuxen kan öppna det tidigare i ”För vuxna”.',
+      '”För vuxna” visar om barnet kan läsa klockan, ställa den eller både och.',
+    ],
+  },
+  {
     id: '2026-11-06-svaren',
     day: '2026-11-06',
     title: 'Svaren läses upp',

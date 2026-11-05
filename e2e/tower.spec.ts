@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createClockPack } from '../src/content/clock';
 import { createAdditionPack } from '../src/content/addition';
-import { closeParent, createProfile, fakeSwedishVoice, openParent, passIntro, seedStates, type SeedState } from './helpers';
+import { closeParent, createProfile, fakeSwedishVoice, openParent, parentPlace, passIntro, playedAt, seedStates, type SeedState } from './helpers';
 
 /** Klocktornet before it is in the valley (docs/PLAN-KLOCKAN.md, KL3): from the clock lab in the test version. */
 
@@ -32,7 +32,16 @@ async function toTower(page: Page, readAloud = false): Promise<void> {
   await closeParent(page);
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: /^Klocktornet\./ }).click();
-  await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
+  await pastStartCheck(page);
+}
+
+/** The first time in the tower the start check is offered: begin from the beginning, to the tower. */
+async function pastStartCheck(page: Page): Promise<void> {
+  const tower = page.getByRole('heading', { name: 'Alvas torn' });
+  const offer = page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' });
+  await expect(tower.or(offer)).toBeVisible();
+  if (await offer.isVisible()) await page.getByRole('button', { name: 'Börja från början' }).click();
+  await expect(tower).toBeVisible();
 }
 
 async function newChild(page: Page): Promise<void> {
@@ -62,7 +71,10 @@ async function until(page: Page, target: ReturnType<Page['locator']>): Promise<v
     if (await target.isVisible()) return;
     if (await next.isVisible()) await next.click();
     else if (await page.locator('.intro-card').isVisible()) await passIntro(page);
-    else if (await page.locator('.clock-setter').isVisible()) await page.getByRole('button', { name: 'Svara' }).click();
+    else if (await page.locator('.clock-setter').isVisible()) {
+      // Just answered, the setter can stay a moment before the help card comes: then go round again.
+      await page.getByRole('button', { name: 'Svara' }).click({ timeout: 1000 }).catch(() => undefined);
+    }
     else if (await page.locator('.numpad').isVisible()) {
       await page.locator('.numpad-key', { hasText: /^1$/ }).click();
       await page.getByRole('button', { name: 'Svara' }).click();
@@ -176,8 +188,9 @@ test('answers in words are read after the question, in the order of the buttons;
   await expect.poll(async () => (await spoken(page)).slice(before)).toEqual(['Vilken visare visar vilken timme det är?', ...order]);
   await page.getByRole('button', { name: 'timvisaren' }).click();
   // A question with times to choose: only the question is read.
-  await until(page, page.locator('.choice[data-value="3:06"]'));
-  await expect.poll(async () => (await spoken(page)).at(-1)).toBe('Vilken digital tid visar klockan?');
+  await until(page, page.locator('.choice[data-value*=":"]:not([disabled])').first());
+  const question = await page.locator('.question .prompt').getAttribute('data-prompt');
+  await expect.poll(async () => (await spoken(page)).at(-1)).toBe(question);
   await page.waitForTimeout(200);
   expect((await spoken(page)).filter((t) => /^\d+:\d\d$/.test(t))).toEqual([]);
 });
@@ -209,7 +222,7 @@ test('in the valley the tower rests until small sums sit at the brook, then open
   await smallSumsSit(page);
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: /^Klocktornet\. Tornet väntar på dig\./ }).click();
-  await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
+  await pastStartCheck(page);
   // The animal walks back to the valley.
   await page.getByRole('button', { name: 'Till dalen' }).click();
   await expect(page.locator('.valley-map')).toBeVisible();
@@ -241,3 +254,64 @@ test('"I dag" has the tower, and after an update the app comes back to it', asyn
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
 });
+
+/** Answers every question of a start check or koll with whatever comes first, until `done` shows. */
+async function answerAll(page: Page, done: ReturnType<Page['locator']>): Promise<number> {
+  let asked = 0;
+  for (let i = 0; i < 30; i++) {
+    const choice = page.locator('.choice:not([disabled])');
+    const send = page.locator('.set-answer:not([disabled])');
+    await expect(done.or(choice).or(send).first()).toBeVisible();
+    if (await done.isVisible()) return asked;
+    if (await send.count()) await send.click();
+    else await choice.first().click();
+    asked++;
+  }
+  throw new Error('The check did not end');
+}
+
+test('the start check: offered the first time, up the stair of the clock, and not offered again', async ({ page }) => {
+  await newChild(page);
+  await openParent(page);
+  await page.getByRole('button', { name: 'Öppna Klocktornet nu' }).click();
+  await closeParent(page);
+  await page.locator('.profile-tile', { hasText: 'Alva' }).click();
+  await page.getByRole('button', { name: /^Klocktornet\./ }).click();
+  await expect(page.getByRole('heading', { name: 'Vill du visa vad du redan kan?' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ja!' }).click();
+  const asked = await answerAll(page, page.getByRole('button', { name: 'Till tornet' }));
+  // The day's two questions and at least the clock face's three.
+  expect(asked).toBeGreaterThanOrEqual(5);
+  await page.getByRole('button', { name: 'Till tornet' }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
+  // Once: the tower opens as usual the next time.
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: /^Klocktornet\./ }).click();
+  await expect(page.getByRole('heading', { name: 'Alvas torn' })).toBeVisible();
+});
+
+test('the koll comes on the second play day, and the grown-ups see it with the skills and the hands', async ({ page }) => {
+  await newChild(page);
+  await seed(page, ['kl:dig:3:30']);
+  await playedAt(page, 'clock', '2026-02-01', 'mattedalen-test');
+  await toTower(page);
+  await page.getByRole('button', { name: 'Gå upp i tornet' }).click();
+  await expect(page.getByRole('heading', { name: 'Tornets koll' })).toBeVisible();
+  await page.getByRole('button', { name: 'Börja kollen' }).click();
+  expect(await answerAll(page, page.getByRole('heading', { name: 'Tack!' }))).toBe(10);
+  await page.getByRole('button', { name: 'Till tornet' }).click();
+  await expect(page.locator('.clock-setter, .choice, .intro-card').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Tillbaka till tornet' }).click();
+  await page.getByRole('button', { name: 'Till dalen' }).click();
+  await page.getByRole('button', { name: 'Byt spelare' }).click();
+  await openParent(page);
+  await parentPlace(page, 'Klocktornet');
+  const section = page.getByRole('region', { name: /^Klocktornet/ });
+  await expect(section.getByRole('heading', { name: 'Förmågorna' })).toBeVisible();
+  await expect(section.locator('.tower-skills li')).toHaveCount(4);
+  await expect(section.getByRole('heading', { name: 'Hur barnet ställer visarna' })).toBeVisible();
+  await expect(section.getByRole('heading', { name: 'Tornets koll' })).toBeVisible();
+  await expect(section.getByText('Ingen koll än.')).toHaveCount(0);
+  await expect(section.getByRole('button', { name: 'Gör om startkollen i tornet' })).toBeVisible();
+});
+

@@ -1,5 +1,9 @@
 import { isStruggling, plausibleAnswer, systemClock, type Engine, type ItemId, type ItemState } from '../../engine';
-import { parseTaskId, taskWithAnswer } from '../../content/clock';
+import { CHECK_CATEGORIES, parseClock, parseTaskId, taskWithAnswer } from '../../content/clock';
+import { checkResultsView } from '../../shell/components/checkResults';
+import type { StoredAttempt } from '../../storage';
+import { runTowerPlacement } from './screens/placement';
+import { showTower } from './screens/tower';
 import type { Profile } from '../../storage';
 import type { AppContext } from '../../shell/app';
 import { helpTip } from '../../shell/components/helpTip';
@@ -62,11 +66,30 @@ export async function towerParentPage(ctx: AppContext, profile: Profile, save: S
         ),
       ),
     ),
+    h('h4', null, 'Förmågorna'),
+    h('p', { class: 'muted' }, 'Samma tid frågas på olika sätt. Ett barn kan kunna läsa klockan men inte ställa den, eller tvärtom.'),
+    h(
+      'ul',
+      { class: 'brook-parts parent tower-skills' },
+      skills(states).map((k) => h('li', null, h('span', { class: 'part-name' }, k.title), h('span', { class: 'part-count' }, `${k.known} av ${k.total} sitter`))),
+    ),
     h('h3', null, 'Svåra just nu'),
     hardList(states, engine),
     open ? helpTip(TOWER_TIPS[partNowUnit(pack, states, unlocked)?.id ?? '']) : null,
     h('h3', null, 'Vanligaste förväxlingarna'),
     confusionList(states),
+    h('h3', null, 'Hur barnet ställer visarna'),
+    handsView(await ctx.store.listAttempts(profile.id)),
+    h('h3', null, 'Tornets koll'),
+    checkResultsView(
+      sessions.filter((x) => x.mode === 'check'),
+      CHECK_CATEGORIES,
+      'Samma sorts frågor ungefär var sjunde speldag i tornet, utan anpassning, så att det går att jämföra över tid: läsa klockan, ställa visarna, timvisaren och minuter, kvartar och timmar. Tiderna dras från alla tider, också sådana barnet inte har övat.',
+      'Ingen koll än. Den första kommer andra dagen barnet är i tornet.',
+    ),
+    h('h3', null, 'Startkoll'),
+    h('p', { class: 'muted' }, 'En kort koll av vad barnet redan kan av klockan. Den kan bara flytta fram barnet, aldrig bakåt.'),
+    h('button', { class: 'soft-button', type: 'button', onclick: () => void runTowerPlacement(ctx, profile, () => showTower(ctx, profile)) }, 'Gör om startkollen i tornet'),
   );
 }
 
@@ -90,6 +113,59 @@ function openingNote(save: SaveProfile): HTMLElement {
     ),
   );
   return note;
+}
+
+const sits = (s: ItemState | undefined) => !!s && (s.status === 'fluent' || s.status === 'automatic');
+
+/** The same times asked in different forms (docs/PLAN-KLOCKAN.md): how much of each sits. */
+export function skills(states: Record<ItemId, ItemState>): { title: string; known: number; total: number }[] {
+  const of = (title: string, test: (id: string) => boolean) => {
+    const ids = pack.items.map((it) => it.id).filter(test);
+    return { title, known: ids.filter((id) => sits(states[id])).length, total: ids.length };
+  };
+  return [
+    of('Läsa klockan i ord', (id) => id.startsWith('kl:ord:')),
+    of('Läsa digitalt', (id) => id.startsWith('kl:dig:')),
+    of('Ställa visarna', (id) => id.startsWith('kl:stall:')),
+    of('Minuterna', (id) => id.startsWith('kl:min:')),
+  ];
+}
+
+/**
+ * How the child sets the hands when wrong (Nilsson 2022): the minute hand
+ * right but the wrong hour (often the hour hand read as standing on a
+ * number), the hour right but the minute hand wrong, or both.
+ */
+export function handsMistakes(attempts: readonly Pick<StoredAttempt, 'itemId' | 'given' | 'correct'>[]): { hour: number; minute: number; both: number } {
+  const out = { hour: 0, minute: 0, both: 0 };
+  for (const a of attempts) {
+    if (a.correct || !a.itemId.startsWith('kl:stall:')) continue;
+    const t = parseTaskId(a.itemId);
+    const g = parseClock(a.given);
+    if (t.kind !== 'read' || !g) continue;
+    if (g.m === t.t.m && g.h !== t.t.h) out.hour++;
+    else if (g.h === t.t.h && g.m !== t.t.m) out.minute++;
+    else if (g.h !== t.t.h) out.both++;
+  }
+  return out;
+}
+
+function handsView(attempts: readonly StoredAttempt[]): HTMLElement {
+  const m = handsMistakes(attempts);
+  if (m.hour + m.minute + m.both === 0) return h('p', { class: 'muted' }, 'Inga fel när barnet ställer visarna ännu.');
+  const times = (n: number) => `${n} ${n === 1 ? 'gång' : 'gånger'}`;
+  return h(
+    'div',
+    null,
+    h(
+      'ul',
+      { class: 'brook-parts parent tower-hands' },
+      h('li', null, h('span', { class: 'part-name' }, 'Minutvisaren rätt, fel timme'), h('span', { class: 'part-count' }, times(m.hour))),
+      h('li', null, h('span', { class: 'part-name' }, 'Timmen rätt, fel minutvisare'), h('span', { class: 'part-count' }, times(m.minute))),
+      h('li', null, h('span', { class: 'part-name' }, 'Båda fel'), h('span', { class: 'part-count' }, times(m.both))),
+    ),
+    h('p', { class: 'muted' }, 'Fel timme när minutvisaren står rätt är vanligt. Timvisaren rör sig mellan siffrorna: vid halv fyra står den mitt emellan 3 och 4.'),
+  );
 }
 
 function hardTasks(states: Record<ItemId, ItemState>, engine: Engine): { text: string; strategy: string | undefined }[] {

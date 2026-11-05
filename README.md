@@ -46,8 +46,10 @@ matematik för årskurs 1–3.
 - **Den tränar** taluppfattning och huvudräkning: addition och subtraktion
   inom 20, talen till 100 med tiotal och ental, multiplikation och division i
   tabellerna 1–10, likhetstecknet och dubbelt och hälften. Barnet lär sig fakta så
-  att de sitter, och vägar från det kända till det okända (räknestigar).
-- **Den tränar inte** geometri, mätning, sannolikhet och statistik,
+  att de sitter, och vägar från det kända till det okända (räknestigar). I
+  Klocktornet lär sig barnet klockan: hela och halva timmar, kvart och fem
+  minuter, analogt och digitalt.
+- **Den tränar inte** geometri, mätning utom klockan, sannolikhet och statistik,
   problemlösning, skriftliga metoder och överslagsräkning. Den ersätter inte
   samtalet om matematik, eller att räkna med konkret material tillsammans med
   någon.
@@ -163,6 +165,14 @@ full storlek (`src/shell/components/valleyMap.ts`, lägena i
   på kartan med texten ”Trädgården öppnar när du kan dubblorna vid
   bäcken.” Trädgårdens startkoll erbjuds första
   gången barnet kommer dit.
+- **Klocktornet** (`src/places/klocktornet`, [PLAN-KLOCKAN](docs/PLAN-KLOCKAN.md)).
+  Tornet står vid dammen och har ett fönster för varje del: dagen, urtavlan,
+  timvisaren, hela timmar, halvtimmar, kvart och fem minuter i taget. Ett
+  fönster tänds när delen sitter. Tornet öppnar när små summor sitter vid
+  bäcken, när barnet redan har börjat där, eller när en vuxen öppnar det. Fem
+  minuter i taget väntar på Stigens hela tiotal. Startkollen går uppför
+  trappan och stannar vid första delen barnet inte kan, och kollen kommer
+  ungefär var sjunde speldag i tornet.
 
 Dalen testas i `e2e/valley.spec.ts` och i testerna för smala telefoner och
 liggande telefon. Trädgårdens läge testas i `tests/game/valley.test.ts`.

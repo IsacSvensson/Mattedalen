@@ -314,11 +314,11 @@ export async function seedStates(page: Page, states: Record<string, SeedState>, 
 }
 
 /** A day on a place earlier on, as the session record a played day leaves. */
-export async function playedAt(page: Page, packId: string, day: string): Promise<void> {
+export async function playedAt(page: Page, packId: string, day: string, dbName = 'mattedalen'): Promise<void> {
   await page.evaluate(
-    async ({ packId, day }) => {
+    async ({ packId, day, dbName }) => {
       const db: IDBDatabase = await new Promise((r) => {
-        const q = indexedDB.open('mattedalen');
+        const q = indexedDB.open(dbName);
         q.onsuccess = () => r(q.result);
       });
       const profiles: { id: string }[] = await new Promise((r) => {
@@ -332,7 +332,7 @@ export async function playedAt(page: Page, packId: string, day: string): Promise
       });
       db.close();
     },
-    { packId, day },
+    { packId, day, dbName },
   );
 }
 
@@ -351,7 +351,7 @@ export async function openParent(page: Page, pin = '2580', link: RegExp = /För 
 }
 
 /** In "För vuxna": from the overview to a place's page for the child shown (docs/PLAN-FORALDRAVYN.md). */
-export async function parentPlace(page: Page, place: 'Bäcken' | 'Stigen' | 'Trädgården'): Promise<void> {
+export async function parentPlace(page: Page, place: 'Bäcken' | 'Stigen' | 'Trädgården' | 'Klocktornet'): Promise<void> {
   await page.locator('.parent-overview .parent-row').filter({ has: page.locator('strong', { hasText: new RegExp(`^${place}$`) }) }).click();
   await expect(page.getByRole('region', { name: new RegExp(`^${place}`) })).toBeVisible();
 }
