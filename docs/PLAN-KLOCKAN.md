@@ -25,7 +25,7 @@ Tornet ska ge barnet fyra förmågor:
 | Fas | Innehåll | Storlek |
 |---|---|---|
 | ST1. Klockans tabell **(klar)** | Urtavlan med minutvisaren som bild för ×5 och ÷5, regeln för fler bilder i hjälpen, och inställningen ”Bilder i hjälpen”. | Mellan |
-| KL1. Urtavlan, visarna och svaren | Urtavlan, visare att ställa och en digital klocka. Skalet får egna svar i stället för knappsatsen, och svarsknappar som kan vara urtavlor. | Mellan |
+| KL1. Urtavlan, visarna och svaren **(klar)** | Urtavlan, visare att ställa och en digital klocka. Skalet får egna svar i stället för knappsatsen, och svarsknappar som kan vara urtavlor. | Mellan |
 | KL2. Innehållet, steg 0–5 | Paketet för klockan: dagen, urtavlan, timvisaren, hel och halv, kvart och fem minuter. Felen och felsvaren. | Stor |
 | KL3. Passet och hjälpen | Platsens sida och passet. Hjälpen säger vilken visare som är fel. Stöden tas bort ett i taget. | Mellan |
 | KL4. Dalen och För vuxna | Tornet på kartan, när det öppnar, sidan i ”För vuxna”, startkollen och kollen. Tornets första släpp. | Stor |
@@ -341,6 +341,37 @@ egna steg ([steg 1–11](KLOCKAN-UNDERLAG-2.md#9-rekommenderad-progression-för-
   (`SessionPlace.input`). Svaret blir en sträng, till exempel ”3:30”, och
   motorn tar emot den som vilket svar som helst. Svarsknapparna kan vara
   urtavlor (`SessionPlace.choiceView`).
+
+#### Fynd från KL1
+
+![Telefon: provsidan med urtavlorna, visarna att ställa och svarsknappar med urtavlor](img/prova-klockan.png)
+
+*Telefon, 360 px. Provsidan ”Prova klockan” i testversionen.*
+
+- **Urtavlan** (`clockFace.ts`) har fyra utseenden: vanlig, köksklocka,
+  armbandsur och stationsklocka utan siffror. Den kan också ha fjärdedelar,
+  minuterna runt kanten, bara timvisaren eller inga siffror.
+- **Visarna att ställa** (`clockSetter.ts`): barnet drar var som helst på
+  urtavlan, och minutvisaren följer fingret och snäpper till sitt steg. När
+  visarna följer varandra blir 3:55 och ett steg framåt 4:00, och 4:00 och ett
+  steg bakåt 3:55. När de rör sig var för sig står timvisaren där barnet ställer
+  den, i åttondelar av en timme. Pilarna flyttar minutvisaren, och med Skift
+  flyttas timvisaren.
+- **Den digitala klockan** visar två siffror för timmen och två för minuterna:
+  07:30.
+- **Skalet** har två nya krokar: `SessionPlace.input`, ett eget svar i stället
+  för knappsatsen, och `SessionPlace.choiceView`, svarsknappar med bilder och
+  namnet för skärmläsare. De andra platserna använder inte krokarna, och hela
+  e2e-sviten går igenom.
+- **Provsidan ”Prova klockan”** finns bara i testversionen, under ”Den här
+  enheten”. Den laddas med en dynamisk import bakom `__STAGING__` själv. Med
+  `STAGING` från `staging.ts` blev sidan ändå en egen fil i den riktiga appens
+  bygge, fast den inte gick att nå. Ett e2e-test kontrollerar att raden saknas
+  i den riktiga appen.
+- **Enhetstesterna har ingen DOM.** Vinklar, snäpp och timmen förbi 12 testas
+  som rena funktioner. Att dra och tangenterna testas i `e2e/clockLab.spec.ts`.
+  Där måste urtavlan först skrollas fram, annars hamnar dragningen utanför
+  skärmen.
 
 ### KL2. Innehållet, steg 0–5
 

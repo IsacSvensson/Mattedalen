@@ -2803,6 +2803,114 @@ h1:focus {
   margin: 0;
 }
 
+/* The clock's looks (docs/PLAN-KLOCKAN.md, KL1): drawings in the same outline and paper tones. */
+.clock-rim {
+  fill: var(--wood);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.clock-strap {
+  fill: var(--ink-soft);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.look-station .clock-tick.five {
+  stroke-width: 3;
+}
+
+.clock-quarter {
+  stroke: none;
+}
+
+.clock-quarter.q0 {
+  fill: rgba(255, 207, 74, 0.35);
+}
+
+.clock-quarter.q1 {
+  fill: rgba(124, 196, 228, 0.3);
+}
+
+/* Hands to set: the whole face is the handle, and a drag never scrolls the page. */
+.clock-setter {
+  width: min(260px, 70vw, 38dvh);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.clock-setter:focus-visible {
+  outline: 3px solid var(--water-shade);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.clock-setter .clock-hand.minute {
+  stroke-width: 4;
+}
+
+.digital-clock {
+  display: inline-block;
+  padding: 6px 14px;
+  border: var(--outline);
+  border-radius: 10px;
+  background: var(--ink);
+  color: #f6f1e4;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* Answers as pictures: two by two, each with a clock in it. */
+.choices.pictures {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choices.pictures .choice {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
+
+.choices.pictures .clock-view {
+  width: min(120px, 32vw, 16dvh);
+}
+
+.clock-lab section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.lab-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.lab-figure .clock-view {
+  width: min(130px, 100%);
+}
+
+.lab-setter,
+.lab-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
 .array-frame {
   fill: #fff;
   stroke: var(--ink);

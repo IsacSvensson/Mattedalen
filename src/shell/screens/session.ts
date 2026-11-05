@@ -49,6 +49,12 @@ export interface HelpParts {
  * drops, questions, answers, read-aloud, the derivation path and the help
  * card) is the same in every place.
  */
+/** A place's own answer (`SessionPlace.input`): its element, and the keys while it is showing. */
+export interface PlaceInput {
+  el: HTMLElement;
+  onKey?(e: KeyboardEvent): void;
+}
+
 export interface SessionPlace {
   deps: GameDeps;
   /** Label of the button back to the place, e.g. "Tillbaka till trädgården". */
@@ -72,6 +78,14 @@ export interface SessionPlace {
   choiceOrder?(values: string[]): string[];
   /** A picture beside the question while the item is new to the child (faded out later). */
   askVisual?(q: Question): Element | null;
+  /**
+   * The place's own way to answer instead of the number pad, e.g. hands to set
+   * on a clock (docs/PLAN-KLOCKAN.md). It calls `submit` with the answer as
+   * text, and the engine takes it as any other answer. Null: the usual ways.
+   */
+  input?(q: Question, submit: (value: string) => void): PlaceInput | null;
+  /** A choice as a picture, e.g. a clock face; `choiceLabel` is then its name for screen readers. */
+  choiceView?(value: string): Node | null;
   /** Time a typed answer to its first digit (J5), so 13 is not slower than 8 just to type. */
   timeToFirstDigit?: boolean;
   /** What the keys and answer buttons are made of: light wood (the default) or smooth stones (the brook). */
@@ -333,6 +347,13 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
       place.askVisual?.(q) ?? null,
     );
 
+    const own = place.input?.(q, (value) => void done(value));
+    if (own) {
+      stage.replaceChildren(h('div', { class: 'question own-input' }, prompt, own.el));
+      setKeys(own.onKey ? (e) => own.onKey!(e) : undefined);
+      return;
+    }
+
     if (q.format === 'free') {
       const pad = numPad((value, firstDigitAt) => {
         if (done(value, firstDigitAt)) pad.disable();
@@ -349,6 +370,8 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
       for (const b of buttons) b.disabled = true;
     };
     const numeric = choices.every((c) => /^\d+$/.test(c));
+    const views = choices.map((value) => place.choiceView?.(value) ?? null);
+    const pictures = views.some(Boolean);
     const buttons = choices.map((value, i) =>
       h(
         'button',
@@ -358,12 +381,14 @@ function ask(stage: HTMLElement, q: Question, place: SessionPlace, setKeys: SetK
           dataset: { value },
           // The digit keys type a number answer; otherwise 1, 2, 3 … pick a choice.
           'aria-keyshortcuts': numeric ? undefined : String(i + 1),
+          // A picture has its name for screen readers.
+          'aria-label': views[i] ? (place.choiceLabel?.(value) ?? value) : undefined,
           onclick: (e: Event) => choose(value, e.currentTarget as HTMLButtonElement),
         },
-        place.choiceLabel?.(value) ?? value,
+        views[i] ?? place.choiceLabel?.(value) ?? value,
       ),
     );
-    stage.replaceChildren(h('div', { class: 'question' }, prompt, h('div', { class: 'answer-area choices' }, buttons)));
+    stage.replaceChildren(h('div', { class: 'question' }, prompt, h('div', { class: `answer-area choices${pictures ? ' pictures' : ''}` }, buttons)));
     const keys = choiceKeys(choices, (i) => choose(choices[i]!, buttons[i]!), {
       typed: (text) => buttons.forEach((b, i) => b.classList.toggle('keyed', text !== '' && choices[i]!.startsWith(text))),
     });

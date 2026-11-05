@@ -17,7 +17,7 @@ uppdateras i samma ändring som en fas blir klar.
 
 | # | Fas | Varför nu | Plan | Läge |
 |---|---|---|---|---|
-| 1 | **ST1 och KL1–KL4. Klockans tabell och Klocktornet** | Klockan som stöd för femmans tabell, och en ny plats där barnet lär sig läsa klockan: steg 0–5 i trappan. | [PLAN-KLOCKAN](PLAN-KLOCKAN.md) | ST1 klar |
+| 1 | **ST1 och KL1–KL4. Klockans tabell och Klocktornet** | Klockan som stöd för femmans tabell, och en ny plats där barnet lär sig läsa klockan: steg 0–5 i trappan. | [PLAN-KLOCKAN](PLAN-KLOCKAN.md) | ST1 och KL1 klara |
 | 2 | **ST2–ST5. Fler stöd i trädgården** | Fingrarna för ×9, hopp på tallinjen, mönster i tabellen och pengar. | [PLAN-KLOCKAN](PLAN-KLOCKAN.md#del-1-stöden-i-trädgården) | |
 | 3 | **KL5–KL7. Mer av klockan** | De svenska fraserna, minuten, dygnet och hur lång tid. | [PLAN-KLOCKAN](PLAN-KLOCKAN.md#del-2-klocktornet) | |
 | 4 | **R5 och S4. Inför piloten** | Loggexport som den vuxna väljer att skicka, frågor till barnen, appens syfte och avstämning mot Lgr22. | [PLAN-PILOT](PLAN-PILOT.md) | R5a och S4 klara, R5b kvar |

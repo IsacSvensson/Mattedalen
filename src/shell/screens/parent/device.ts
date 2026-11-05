@@ -98,6 +98,19 @@ async function deviceSection(ctx: AppContext, backTo?: string): Promise<HTMLElem
       h('li', null, 'Sidan ligger på GitHub Pages. Som alla webbservrar loggar GitHub besökares IP-adresser, enligt GitHubs integritetspolicy.'),
       h('li', null, 'Vill du radera allt? Ta bort barnen här ovanför, eller rensa webbplatsdata för sidan i webbläsarens inställningar.'),
     ),
+    // The clock's parts before Klocktornet is in the valley (docs/PLAN-KLOCKAN.md, KL1): the test version only.
+    // `__STAGING__` itself, a plain `false` in the real build, so the bundler leaves the page out altogether.
+    __STAGING__
+      ? h(
+          'button',
+          {
+            class: 'soft-button',
+            type: 'button',
+            onclick: async () => (await import('../clockLab')).showClockLab(ctx, () => void showDevice(ctx, backTo)),
+          },
+          'Prova klockan (bara i testversionen)',
+        )
+      : null,
     h('h3', null, 'Vuxenkod'),
     h('button', { class: 'soft-button', type: 'button', onclick: () => choosePin(ctx, async () => (toast('Ny kod sparad'), showDevice(ctx, backTo))) }, 'Byt vuxenkod'),
   );
