@@ -357,6 +357,11 @@ egna steg ([steg 1–11](KLOCKAN-UNDERLAG-2.md#9-rekommenderad-progression-för-
   steg bakåt 3:55. När de rör sig var för sig står timvisaren där barnet ställer
   den, i åttondelar av en timme. Pilarna flyttar minutvisaren, och med Skift
   flyttas timvisaren.
+- **Med steg på 30 minuter** kom visaren inte förbi timmen: minutvisaren stod
+  bara på 12 eller 6, och från 6 till 12 gick inte att säga åt vilket håll den
+  gått. Nu avgör fingrets egen rörelse när 12 passeras (`dragTo`), oavsett
+  steg. Ett helt varv är nästa timme vid varje steg, och testerna drar runt
+  med alla fyra stegen.
 - **Den digitala klockan** visar två siffror för timmen och två för minuterna:
   07:30.
 - **Skalet** har två nya krokar: `SessionPlace.input`, ett eget svar i stället

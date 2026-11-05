@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { advance, angleAt, formatTime, snapHour, snapMinute } from '../../src/shell/components/clockSetter';
+import { angleAt, dragTo, type Drag, formatTime, snapHour, snapMinute } from '../../src/shell/components/clockSetter';
 import { digitalText } from '../../src/shell/components/digitalClock';
 
 /** Hands to set on a clock (docs/PLAN-KLOCKAN.md, KL1). */
@@ -31,16 +31,36 @@ describe('snapping the minute hand', () => {
   });
 });
 
-describe('the hour follows the minute hand past 12', () => {
-  it('forwards to the next hour, backwards to the one before', () => {
-    // 3:55 → 4:00 and 4:00 → 3:55.
-    expect(advance(3 * 60 + 55, 0)).toBe(4 * 60);
-    expect(advance(4 * 60, 55)).toBe(3 * 60 + 55);
-    // Within the hour, the hour stays.
-    expect(advance(3 * 60 + 10, 30)).toBe(3 * 60 + 30);
-    // Round the clock: 11:55 → 12:00, and 12:00 → 11:55.
-    expect(advance(11 * 60 + 55, 0)).toBe(0);
-    expect(advance(0, 55)).toBe(11 * 60 + 55);
+describe('the hour follows the finger past 12', () => {
+  /** Drags round from 3:00 through these places (minutes round the face), returning the time at each. */
+  const dragRound = (raws: number[], step: number) => {
+    let drag: Drag = { hour: 3, raw: 0 };
+    return raws.map((raw) => {
+      const next = dragTo(drag, raw, step);
+      drag = next.drag;
+      return next.total;
+    });
+  };
+  const turn = (from: number, to: number, by: number) => Array.from({ length: Math.floor((to - from) / by) + 1 }, (_, i) => (from + i * by) % 60);
+
+  it('forwards to the next hour, backwards to the one before, at every step', () => {
+    for (const step of [30, 15, 5, 1]) {
+      // One whole turn forwards from 3:00 is 4:00, two are 5:00.
+      expect(dragRound(turn(0, 60, 2), step).at(-1)).toBe(4 * 60);
+      expect(dragRound(turn(0, 120, 2), step).at(-1)).toBe(5 * 60);
+      // One turn backwards is 2:00.
+      expect(dragRound(turn(0, 60, 2).map((m) => (60 - m) % 60), step).at(-1)).toBe(2 * 60);
+    }
+  });
+
+  it('with steps of 30 minutes: 3:00, 3:30, 4:00, 4:30', () => {
+    const times = dragRound(turn(0, 120, 2), 30);
+    expect([...new Set(times)]).toEqual([180, 210, 240, 270, 300]);
+  });
+
+  it('round the clock: 11:55 to 12:00, and back', () => {
+    expect(dragTo({ hour: 11, raw: 55 }, 0.5, 5).total).toBe(0);
+    expect(dragTo({ hour: 0, raw: 1 }, 55, 5).total).toBe(11 * 60 + 55);
   });
 });
 

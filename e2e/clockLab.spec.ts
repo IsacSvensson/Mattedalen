@@ -67,6 +67,21 @@ test('dragging the minute hand from 12 to 6 makes 3:30, and the hour hand goes a
   await expect(setter).toHaveAttribute('aria-valuetext', 'Klockan 4:05');
 });
 
+test('with steps of 30 minutes, a whole turn goes on to the next hour', async ({ page }) => {
+  await toLab(page);
+  await page.getByRole('combobox', { name: 'Minutvisaren snäpper' }).selectOption('30');
+  const setter = page.locator('.clock-setter');
+  await dragThrough(page, [0, 10, 20, 30]);
+  await expect(setter).toHaveAttribute('aria-valuetext', 'Klockan 3:30');
+  await dragThrough(page, [30, 40, 50, 0, 10]);
+  await expect(setter).toHaveAttribute('aria-valuetext', 'Klockan 4:00');
+  await dragThrough(page, [0, 10, 20, 30, 40, 50, 0, 10, 20, 30]);
+  await expect(setter).toHaveAttribute('aria-valuetext', 'Klockan 5:30');
+  // Backwards past 12: the hour before.
+  await dragThrough(page, [30, 20, 10, 0, 50, 40, 30]);
+  await expect(setter).toHaveAttribute('aria-valuetext', 'Klockan 4:30');
+});
+
 test('the arrow keys move the minute hand a step, and back past 12 is the hour before', async ({ page }) => {
   await toLab(page);
   const setter = page.locator('.clock-setter');

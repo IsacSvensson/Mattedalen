@@ -55,15 +55,26 @@ export function snapHour(angle: number): number {
 }
 
 /**
- * The new time (minutes after 12:00, 0–719) when the minute hand moves from
- * `prev` to `minute` the shortest way round: past 12 forwards is the next hour.
+ * A drag with the hands together: where the finger is (`raw`, minutes 0–60
+ * round the face, not snapped) decides when 12 is passed, so a coarse step
+ * (30 minutes: only 12 and 6) still goes on to the next hour.
  */
-export function advance(prev: number, minute: number): number {
-  const was = prev % 60;
-  let hour = Math.floor(prev / 60);
-  if (minute - was < -30) hour += 1;
-  else if (minute - was > 30) hour -= 1;
-  return (((hour * 60 + minute) % 720) + 720) % 720;
+export interface Drag {
+  /** The hour the finger is in, 0–11. */
+  hour: number;
+  /** Where the finger was, in minutes round the face. */
+  raw: number;
+}
+
+/** The drag after the finger moves to `raw`, and the time it shows (minutes after 12:00, 0–719). */
+export function dragTo(drag: Drag, raw: number, step: number): { drag: Drag; total: number } {
+  let hour = drag.hour;
+  if (raw - drag.raw < -30) hour += 1;
+  else if (raw - drag.raw > 30) hour -= 1;
+  hour = ((hour % 12) + 12) % 12;
+  // Snapped to the step; 60 is the next hour's 0.
+  const m = Math.round(raw / step) * step;
+  return { drag: { hour, raw }, total: (hour * 60 + m) % 720 };
 }
 
 /** "3:30" for 210 minutes after 12:00; the hour 0 is 12. With `h24`, the hour as given and two digits: "15:30". */
@@ -102,14 +113,14 @@ export function clockSetter(opts: ClockSetterOptions = {}): ClockSetter {
     el.dataset.hourAt = String(hourAt);
     onChange?.(v);
   };
-  const setMinute = (m: number) => {
-    if (linked) {
-      total = advance(total, m);
-      minute = total % 60;
-      hourAt = total / 60;
-    } else minute = m;
+  const setTotal = (t: number) => {
+    total = ((t % 720) + 720) % 720;
+    minute = total % 60;
+    hourAt = total / 60;
     draw();
   };
+  // Where the finger is in a drag with the hands together.
+  let drag: Drag = { hour: Math.floor(total / 60), raw: total % 60 };
 
   // Which hand a drag holds: always the minute hand when they go together.
   let holding: 'minute' | 'hour' | null = null;
@@ -122,12 +133,23 @@ export function clockSetter(opts: ClockSetterOptions = {}): ClockSetter {
     if (holding === 'hour') {
       hourAt = snapHour(a);
       draw();
-    } else setMinute(snapMinute(a, step));
+    } else if (linked) {
+      const next = dragTo(drag, a / 6, step);
+      drag = next.drag;
+      setTotal(next.total);
+    } else {
+      minute = snapMinute(a, step);
+      draw();
+    }
   };
   el.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     const a = angleOf(e);
-    if (linked) holding = 'minute';
+    if (linked) {
+      holding = 'minute';
+      // The finger lands: from where the minute hand is, the shortest way round.
+      drag = { hour: Math.floor(total / 60), raw: total % 60 };
+    }
     else {
       const off = (deg: number) => Math.min(Math.abs(a - deg), 360 - Math.abs(a - deg));
       holding = off(hourAngle(hourAt)) < off(minuteAngle(minute)) ? 'hour' : 'minute';
@@ -149,7 +171,11 @@ export function clockSetter(opts: ClockSetterOptions = {}): ClockSetter {
     if (e.shiftKey && !linked) {
       hourAt = (((hourAt + dir / 8) % 12) + 12) % 12;
       draw();
-    } else setMinute((((minute + dir * step) % 60) + 60) % 60);
+    } else if (linked) setTotal(total + dir * step);
+    else {
+      minute = (((minute + dir * step) % 60) + 60) % 60;
+      draw();
+    }
   };
 
   draw();
