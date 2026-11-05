@@ -26,8 +26,8 @@ export interface ClockFaceOptions {
   label: string;
 }
 
-export type ClockLook = 'plain' | 'kitchen' | 'watch' | 'station';
-export const CLOCK_LOOKS: readonly ClockLook[] = ['plain', 'kitchen', 'watch', 'station'];
+export { CLOCK_LOOKS, type ClockLook } from '../../content/clock/time';
+import type { ClockLook } from '../../content/clock/time';
 
 /** The face's centre and size, in the picture's own units (a 140 × 140 view). */
 export const C = 70;

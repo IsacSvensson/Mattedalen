@@ -26,7 +26,7 @@ Tornet ska ge barnet fyra förmågor:
 |---|---|---|
 | ST1. Klockans tabell **(klar)** | Urtavlan med minutvisaren som bild för ×5 och ÷5, regeln för fler bilder i hjälpen, och inställningen ”Bilder i hjälpen”. | Mellan |
 | KL1. Urtavlan, visarna och svaren **(klar)** | Urtavlan, visare att ställa och en digital klocka. Skalet får egna svar i stället för knappsatsen, och svarsknappar som kan vara urtavlor. | Mellan |
-| KL2. Innehållet, steg 0–5 | Paketet för klockan: dagen, urtavlan, timvisaren, hel och halv, kvart och fem minuter. Felen och felsvaren. | Stor |
+| KL2. Innehållet, steg 0–5 **(klar)** | Paketet för klockan: dagen, urtavlan, timvisaren, hel och halv, kvart och fem minuter. Felen och felsvaren. | Stor |
 | KL3. Passet och hjälpen | Platsens sida och passet. Hjälpen säger vilken visare som är fel. Stöden tas bort ett i taget. | Mellan |
 | KL4. Dalen och För vuxna | Tornet på kartan, när det öppnar, sidan i ”För vuxna”, startkollen och kollen. Tornets första släpp. | Stor |
 | ST2. Fingrarna för ×9 | Två händer med ett finger nedvikt. | Liten |
@@ -391,6 +391,59 @@ egna steg ([steg 1–11](KLOCKAN-UNDERLAG-2.md#9-rekommenderad-progression-för-
 - **Utseendet** väljs som en variant av uppgiften (`Presentation.variant`).
 - **Felen:** en funktion som känner igen dem, och felsvar som bygger på samma
   fel.
+
+#### Fynd från KL2
+
+- **Paketet** `src/content/clock` (id `clock`) har 117 uppgifter i sju delar:
+
+  | Del | Uppgifter |
+  |---|---|
+  | dagen | 12 |
+  | urtavlan | 4 |
+  | timvisaren | 8 |
+  | hel | 19 |
+  | halv | 21 |
+  | kvart | 28 |
+  | femmin | 25 |
+
+  Ingen plats använder paketet än.
+- **Varje tid har egna uppgifter** för orden (`kl:ord`), digital tid (`kl:dig`)
+  och att ställa visarna (`kl:stall`). Vid `femmin` finns i stället för orden
+  ”Hur många minuter över?” (`kl:min`). Orden för fem minuter i taget kommer i
+  KL5.
+- **Timmen efter tolv är ett:** 12:30 är halv ett, och 12:45 är kvart i ett.
+  En tabell i `tests/content/clock.test.ts` testar fraserna.
+- **Felsvaren** byggs av de kända felen (`candidates`). Varje felsvar har sitt
+  fel, och `mistakeOf` hittar det. Exempel för 3:30:
+
+  | Felsvar | Fel |
+  |---|---|
+  | ”halv tre” och 4:30 | fel timnamn |
+  | 3:06 | siffran läst som minuter |
+  | 6:15 | visarna förväxlade |
+
+  Raden till hjälpkortet (`clockNote`) säger vad som hände.
+- **Utseendena** finns i innehållet (`CLOCK_LOOKS` i `time.ts`), och urtavlan i
+  skalet hämtar dem därifrån. Innehållet beror inte på skalet.
+- **Simuleringen** (70 dagar, alla uppgifter lika svåra) ger dagen då varje del
+  börjar:
+
+  | Barn | Timvisaren och hel | Halv | Kvart | Fem minuter |
+  |---|---|---|---|---|
+  | Starkt | dag 2 | dag 7 | dag 11 | dag 17 |
+  | Genomsnittligt | dag 3 | dag 10 | dag 18 | dag 29 |
+  | Svagt | dag 5 | dag 18 | dag 33 | dag 49 |
+
+  Efter 70 dagar sitter allt för ett genomsnittligt barn. För ett svagt barn
+  sitter 72 % av ”fem minuter i taget”. Modellen behandlar förståelse som fakta
+  att minnas, så siffrorna är grova.
+
+- **Sex e2e-tester föll sedan ST1 utan att det märktes.** Sökningen efter
+  ”failed” i loggen missade raden, eftersom den började med terminalkoder.
+  Fyra var testerna för nyheterna, som inte räknade med inlägget om klockan.
+  Två var uppläsningen av förklaringskortet: testet stängde ”För vuxna” medan
+  sidan ritades om, och tryckningen gick förlorad. Testet väntar nu på att
+  raden försvinner. Nu läses kommandots slutkod och alla siffror i loggen.
 
 ### KL3. Passet och hjälpen
 

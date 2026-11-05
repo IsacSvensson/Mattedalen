@@ -49,7 +49,10 @@ test('with read-aloud the card is read', async ({ page }) => {
   await newChild(page);
   await openParent(page);
   await page.getByRole('button', { name: 'Slå på uppläsning' }).click();
+  // The page draws itself again without the row: close it after that, not before.
+  await expect(page.getByRole('button', { name: 'Slå på uppläsning' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Stäng föräldravyn' }).click();
+  await expect(page.getByRole('heading', { name: 'Vem spelar?' })).toBeVisible();
   await page.locator('.profile-tile', { hasText: 'Alva' }).click();
   await page.getByRole('button', { name: /^Bäcken\./ }).click();
   await explain(page).click();
